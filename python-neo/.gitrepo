@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:CINPLA/python-neo.git
+	branch = expipe
+	commit = ff9210b1e77a943e6475f8daa4e26dec9e1b0b83
+	parent = 692bb21cc5a6aaf81f825976785e5e57993e4949
+	cmdver = 0.3.1
