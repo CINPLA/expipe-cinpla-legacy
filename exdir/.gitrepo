@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:CINPLA/exdir.git
+	branch = dev
+	commit = d04565b2f7ef0c5dc12f1cc9cf440c99ad89d6f4
+	parent = d2919b22083eb8fc29dd079087eb61c47de56267
+	cmdver = 0.3.1
