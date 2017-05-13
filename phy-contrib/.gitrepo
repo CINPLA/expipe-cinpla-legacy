@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:CINPLA/phy-contrib.git
+	branch = NeoGUI
+	commit = 7e925249688b8cc3a2387c00dce42682d33b4e3f
+	parent = 20ab97499ff258c199424d883cc939fb4771e534
+	cmdver = 0.3.1
