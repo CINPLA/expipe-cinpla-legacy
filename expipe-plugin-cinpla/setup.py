@@ -17,7 +17,7 @@ setup(
     maintainer="Mikkel Elle Lepperød",
     maintainer_email="m.e.lepperod@medisin.uio.no",
     platforms=['Linux', "Windows"],
-    description="Plugins for the CINPLA lab"
+    description="Plugins for the CINPLA lab",
     long_description=long_description,
     entry_points={
         'console_scripts': [
