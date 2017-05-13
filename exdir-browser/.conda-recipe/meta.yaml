@@ -1,0 +1,44 @@
+package:
+  name: exdir-browser
+  version: {{ environ.get("GIT_DESCRIBE", "0.0.0_custom")|replace("v", "")|replace("-", "_") }}
+
+build:
+  # noarch: python  # TODO Add back noarch when it works properly on Windows,
+                    # we are converting packages manually now
+  script: python setup.py install
+  entry_points:
+    - exdir-browser = exdirbrowser.main:main
+                    
+
+source:
+  git_url: ..
+ 
+requirements:
+  build:
+    - python
+    - setuptools
+    - pip
+    - numpy
+    - quantities
+    - pyyaml
+    # - pyqt >=5
+
+  run:
+    - python
+    - setuptools
+    - pip
+    - numpy
+    - scipy
+    - quantities
+    - pyyaml
+    - exdir
+    - pyqt >=5
+
+test:
+  imports:
+    - exdirbrowser
+
+about:
+  home: https://github.com/CINPLA/exdir-browser/
+  license: GPLv3
+  license_file: LICENSE

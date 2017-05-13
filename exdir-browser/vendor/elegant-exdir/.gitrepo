@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:CINPLA/elegant-exdir.git
+	branch = dev
+	commit = d1e3e097536f93d5b1e8a5918c2ebcda365382ca
+	parent = 3057b0b4742245f7ab42abf5d52eb69c0a5f56ba
+	cmdver = 0.3.0

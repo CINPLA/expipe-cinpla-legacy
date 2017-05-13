@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/main.qml</file>
+        <file>qml/SaveQuestionDialog.qml</file>
+        <file>images/branch.png</file>
+        <file>images/branch.svg</file>
+    </qresource>
+</RCC>
