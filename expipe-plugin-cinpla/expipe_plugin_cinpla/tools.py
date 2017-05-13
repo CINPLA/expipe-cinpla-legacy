@@ -5,6 +5,7 @@ import os.path as op
 import numpy as np
 from datetime import datetime
 import quantities as pq
+from ._version import get_versions
 
 import sys
 sys.path.append(expipe.config.config_dir)
@@ -25,7 +26,7 @@ DTIME_FORMAT = expipe.io.core.datetime_format
 GIT_NOTE = {
     'registered': datetime.strftime(datetime.now(), DTIME_FORMAT),
     'note': 'Registered with the expipe cinpla plugin',
-    'expipe-plugin-cinpla-version': expipe_plugin_cinpla.__version__,
+    'expipe-plugin-cinpla-version': get_versions()['version'],
     'expipe-version': expipe.__version__
 }
 
