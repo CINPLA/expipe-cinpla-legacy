@@ -4,8 +4,8 @@
 ; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
 ;
 [subrepo]
-	remote = git@github.com:CINPLA/expipe-plugin-cinpla.git
+	remote = git@github.com:CINPLA/travis-conda-scripts.git
 	branch = master
-	commit = 3877977707c1caa60d111eacbf247012b25003ab
-	parent = b3a3321537b1d71b994ada77cb2381341285bef0
+	commit = dce9f96363d2d8f91fa7a01fafc124e71e2abd0d
+	parent = 1ddedf1005c999bf0133f244d1318d5ff862735c
 	cmdver = 0.3.1
