@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/kwikteam/phy.git
+	branch = master
+	commit = 40234615a93505b70329fe259d1788d1e3c6a0f5
+	parent = 299ab142c1e14012d69558d08d42aa370021c355
+	cmdver = 0.3.1

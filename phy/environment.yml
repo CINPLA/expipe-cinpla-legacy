@@ -1,0 +1,15 @@
+name: phy
+dependencies:
+  - python=3.5
+  - numpy
+  - matplotlib
+  - scipy
+  - h5py
+  - pyqt=4
+  - pip:
+    - vispy
+    - requests
+    - traitlets
+    - six
+    - joblib
+    - click
