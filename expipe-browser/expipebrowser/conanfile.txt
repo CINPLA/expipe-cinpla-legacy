@@ -1,0 +1,8 @@
+[requires]
+h5cpp/0.1@dragly/master
+Catch/1.3.2@dragly/master
+
+[generators]
+qmake
+cmake
+qbs

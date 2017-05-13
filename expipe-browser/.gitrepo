@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:CINPLA/expipe-browser.git
+	branch = dev
+	commit = f14b37a37c503293600e17813c83ba5a717d5355
+	parent = 2cb485f138d7494b0761e0616c8ea3f2a5cd9995
+	cmdver = 0.3.1

@@ -1,0 +1,37 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>hdf5_loader.py</file>
+        <file>FileParser.qml</file>
+        <file>BrowserMenuBar.qml</file>
+        <file>experiment_folder_reader.py</file>
+        <file>ExperimentLeftGridItem.qml</file>
+        <file>ExperimentRightGridItem.qml</file>
+        <file>ExperimentTitleItem.qml</file>
+        <file>md5.js</file>
+        <file>LeftMenu.qml</file>
+        <file>ExperimentsView.qml</file>
+        <file>Experiment.qml</file>
+        <file>ProjectsView.qml</file>
+        <file>ExperimentList.qml</file>
+        <file>firebase.js</file>
+        <file>main.css</file>
+        <file>index.html</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>ExperimentEdit.qml</file>
+        <file>eventsource.js</file>
+        <file>ExperimentListEdit.qml</file>
+        <file>dicthelper.js</file>
+        <file>ListComboEdit.qml</file>
+        <file>DictionaryEditor.qml</file>
+        <file>grid.png</file>
+        <file>SettingsView.qml</file>
+        <file>Identicon.qml</file>
+        <file>qmldir</file>
+        <file>Style.qml</file>
+        <file>Firebase.qml</file>
+        <file>TemplatesView.qml</file>
+        <file>BoundTextEdit.qml</file>
+        <file>TemplateDialog.qml</file>
+    </qresource>
+</RCC>

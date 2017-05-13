@@ -1,0 +1,48 @@
+package:
+    name: expipe-browser
+    version: {{ environ.get("GIT_TAG", "0.0.0_custom")|replace("v", "")|replace("-", "_") }}
+source:
+    path: .
+    git_url: ..
+build:
+    script: python setup.py install
+ # noarch: python  # TODO Add back noarch when it works properly on Windows,
+                   # we are converting packages manually now
+entry_points:
+  - expipe-browser = expipebrowser.main:main
+
+
+requirements:
+    build:
+      - python
+      - setuptools
+      - pip
+      - numpy
+      - quantities
+      - pyyaml
+      # - pyqt >=5 # TODO add this back when PyQt is delivered by conda-forge
+
+    run:
+      - python
+      - setuptools
+      - pip
+      - numpy
+      - scipy
+      - quantities
+      - pyyaml
+      - exdir
+      - expipe
+      - pyqt >=5
+
+test:
+    imports:
+      - expipebrowser
+about:
+    description: 'Experiment browser for expipe'
+    dev_url: https://github.com/CINPLA/expipe-browser
+    license: GNU GPLv3
+    license_family: GPL
+    license_file: LICENSE
+extra:
+    recipe-maintainers:
+        - dragly
