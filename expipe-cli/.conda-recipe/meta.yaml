@@ -1,0 +1,30 @@
+package:
+    name: expipe-cli
+    version: {{ environ.get("GIT_TAG", "0.0.0_custom")|replace("v", "")|replace("-", "_") }}
+source:
+    git_url: ..
+build:
+    script: python setup.py install
+    
+entry_points:
+  - expipe = expipecli.main:expipe
+    
+requirements:
+    build:
+        - future
+    run:
+        - future
+        - python
+        - expipe
+test:
+  script:
+    expipe --help
+about:
+    description: ''
+    dev_url: https://github.com/CINPLA/expipe-cli
+    license: GNU GPLv3
+    license_family: GPL
+    license_file: LICENSE
+extra:
+    recipe-maintainers:
+        - dragly
