@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/NeuralEnsemble/elephant.git
+	branch = master
+	commit = 020af8973c9262d9bf50db6e169f2459f3b0b790
+	parent = c32146a7986c71f03b38cb455aa0a651dd34d79e
+	cmdver = 0.3.1
