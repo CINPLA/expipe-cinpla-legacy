@@ -4,7 +4,7 @@ import os
 import os.path as op
 from expipecli.utils import IPlugin
 import click
-from .action_tools import (generate_templates, _get_temp_path, create_notebook,
+from .action_tools import (generate_templates, _get_local_path, create_notebook,
                            GIT_NOTE)
 import sys
 sys.path.append(expipe.config.config_dir)
@@ -45,7 +45,7 @@ class CinplaPlugin(IPlugin):
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_temp:
-                exdir_path = _get_temp_path(fr)
+                exdir_path = _get_local_path(fr)
             else:
                 exdir_path = fr.local_path
             fname = create_notebook(exdir_path)
@@ -207,7 +207,7 @@ class CinplaPlugin(IPlugin):
             serverpath = expipe.config.settings['server']['data_path']
             server_data = op.dirname(op.join(serverpath, fr.exdir_path))
             server_data = server_data.replace('\\', '/')
-            temp_data = op.dirname(_get_temp_path(fr))
+            temp_data = op.dirname(_get_local_path(fr))
             if to_temp:
                 if overwrite:
                     shutil.rmtree(temp_data)
@@ -314,10 +314,10 @@ class CinplaPlugin(IPlugin):
             fr = action.require_filerecord()
             if to_temp:
                 source = fr.local_path
-                dest = _get_temp_path(fr)
+                dest = _get_local_path(fr)
             elif from_temp:
                 dest = fr.local_path
-                source = _get_temp_path(fr)
+                source = _get_local_path(fr)
             else:
                 raise IOError('You must choose "to-temp" or "from-temp"')
             print('Copying "' + source + '" to "' + dest + '"')
@@ -368,7 +368,7 @@ class CinplaPlugin(IPlugin):
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_temp:
-                exdir_path = _get_temp_path(fr)
+                exdir_path = _get_local_path(fr)
             else:
                 exdir_path = fr.local_path
             print('Spikesorting ', exdir_path)
@@ -425,7 +425,7 @@ class CinplaPlugin(IPlugin):
 
             fr = action.require_filerecord()
             if not no_temp:
-                exdir_path = _get_temp_path(fr)
+                exdir_path = _get_local_path(fr)
             else:
                 exdir_path = fr.local_path
             print(exdir_path)

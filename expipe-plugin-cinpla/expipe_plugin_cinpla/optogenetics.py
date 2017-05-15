@@ -4,7 +4,7 @@ from expipecli.utils import IPlugin
 import click
 from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
 
-from .action_tools import generate_templates, _get_temp_path, GIT_NOTE
+from .action_tools import generate_templates, _get_local_path, GIT_NOTE
 from .opto_tools import (generate_epochs, generate_axona_opto, populate_modules,
                         extract_laser_pulse, read_pulse_pal_mat,
                         read_pulse_pal_xml, read_laser_intensity,
@@ -76,7 +76,7 @@ class OptoPlugin(IPlugin):
             action.tags = tags
             fr = action.require_filerecord()
             if not no_temp:
-                exdir_path = _get_temp_path(fr)
+                exdir_path = _get_local_path(fr)
             else:
                 exdir_path = fr.local_path
             exdir_object = exdir.File(exdir_path)
@@ -123,7 +123,7 @@ class OptoPlugin(IPlugin):
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_temp:
-                exdir_path = _get_temp_path(fr)
+                exdir_path = _get_local_path(fr)
             else:
                 exdir_path = fr.local_path
             exdir_object = exdir.File(exdir_path)

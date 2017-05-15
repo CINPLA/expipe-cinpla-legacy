@@ -2,7 +2,7 @@ import os
 import os.path as op
 import numpy as np
 import expipe.io
-from .signal_tools import _get_temp_path
+from .signal_tools import _get_local_path
 import expipe
 import sys
 sys.path.append(expipe.config.config_dir)
@@ -28,7 +28,7 @@ class Plotter:
         action = project.require_action(action_id)
         fr = action.require_filerecord()
         if not no_temp:
-            exdir_path = _get_temp_path(fr)
+            exdir_path = _get_local_path(fr)
         else:
             exdir_path = fr.local_path
         print('Initializing plotting for {}'.format(exdir_path))

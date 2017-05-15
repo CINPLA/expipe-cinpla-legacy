@@ -101,7 +101,7 @@ def register_depth(project, action, left=None, right=None):
                           overwrite=True)
 
 
-def _get_temp_path(file_record):
+def _get_local_path(file_record):
     '''
 
     :param file_record:
@@ -109,18 +109,11 @@ def _get_temp_path(file_record):
     '''
     import platform
     folder_name = 'expipe_temp_storage'
-    path = op.join(*file_record.local_path.split('/')[-2:])
-    if platform.system() == "Linux":
-        tmp_path = op.join(os.path.expanduser('~'), folder_name, path)
-    elif platform.system() == "Windows":
-        # tmp_path = op.join('C:' + os.sep + folder_name, path)
-        tmp_path = op.join(os.path.expanduser('~'), folder_name, path)
-    else:
-        raise NotImplementedError("OS not supported")
-    directory = op.split(tmp_path)[0]
-    if not op.exists(directory):
-        os.makedirs(directory)
-    return tmp_path
+    local_path = file_record.local_path or op.join(os.path.expanduser('~'),
+                                                   folder_name, path)
+    if not op.exists(local_path):
+        os.makedirs(local_path)
+    return local_path
 
 
 def generate_templates(action, action_templates, overwrite, git_note=None):

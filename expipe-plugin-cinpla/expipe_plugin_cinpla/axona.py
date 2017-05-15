@@ -4,7 +4,7 @@ import os
 import os.path as op
 from expipecli.utils import IPlugin
 import click
-from .action_tools import generate_templates, _get_temp_path, GIT_NOTE
+from .action_tools import generate_templates, _get_local_path, GIT_NOTE
 import sys
 sys.path.append(expipe.config.config_dir)
 if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
@@ -124,7 +124,7 @@ class AxonaPlugin(IPlugin):
                 register_depth(project, action, left, right)
             fr = action.require_filerecord()
             if not no_temp:
-                exdir_path = _get_temp_path(fr)
+                exdir_path = _get_local_path(fr)
             else:
                 exdir_path = fr.local_path
             if not no_files:
