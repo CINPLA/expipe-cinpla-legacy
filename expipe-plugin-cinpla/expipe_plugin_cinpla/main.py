@@ -281,7 +281,7 @@ class CinplaPlugin(IPlugin):
             # TODO send to trash
 
 
-        @cli.command('copy')
+        @cli.command('copy-action')
         @click.argument('action-id', type=click.STRING)
         @click.option('--overwrite',
                       is_flag=True,
@@ -305,7 +305,7 @@ class CinplaPlugin(IPlugin):
                       default='none',
                       help='Omit raw data, acquisition etc..',
                       )
-        def copy(action_id, to_local, from_local, overwrite, ignore, move):
+        def copy_action(action_id, to_local, from_local, overwrite, ignore, move):
             """Transfer a dataset related to an expipe action
             COMMAND: action-id: Provide action id to find exdir path"""
             import shutil
@@ -313,10 +313,10 @@ class CinplaPlugin(IPlugin):
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if to_local:
-                source = fr.local_path
+                source = fr.server_path
                 dest = _get_local_path(fr)
             elif from_local:
-                dest = fr.local_path
+                dest = fr.server_path
                 source = _get_local_path(fr)
             else:
                 raise IOError('You must choose "to-local" or "from-local"')
