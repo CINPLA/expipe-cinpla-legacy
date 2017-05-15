@@ -7,10 +7,10 @@ axona_templates = [
     '_inherit_hardware_axona_tracker',
     '_inherit_hardware_axona_daq',
     '_inherit_hardware_axona_camera_objective',
-    '_inherit_mikkel_tracking_environment',
-    '_inherit_mikkel_housing_environment',
-    '_inherit_mikkel_optic_fibre', '_inherit_mikkel_tetrode',
-    '_inherit_mikkel_drive_optetrode'
+    '_inherit_environment_open_field_tracking',
+    '_inherit_environment_rat_housing',
+    '_inherit_hardware_optic_fibre', '_inherit_hardware_tetrode',
+    '_inherit_hardware_microdrive_optetrode'
 ]
 
 openephys_templates = [
@@ -21,10 +21,10 @@ openephys_templates = [
     '_inherit_hardware_pointgrey_camera_objective',
     '_inherit_software_bonsai_gui',
     '_inherit_software_openephys_gui',
-    '_inherit_mikkel_tracking_environment',
-    '_inherit_mikkel_housing_environment',
-    '_inherit_mikkel_optic_fibre', '_inherit_mikkel_tetrode',
-    '_inherit_mikkel_drive_optetrode'
+    '_inherit_environment_open_field_tracking',
+    '_inherit_environment_rat_housing',
+    '_inherit_hardware_optic_fibre', '_inherit_hardware_tetrode',
+    '_inherit_hardware_microdrive_optetrode'
 ]
 
 opto_openephys_templates = [
@@ -61,8 +61,8 @@ surgery_implantation_templates = [
     'mikkel_analgesia_post', 'mikkel_anaesthesia_local',
     '_inherit_mikkel_optic_fibre', '_inherit_mikkel_tetrode',
     '_inherit_mikkel_drive_optetrode',
-    '_inherit_mikkel_housing_environment',
-    '_inherit_mikkel_surgery_station_environment'
+    '_inherit_environment_rat_housing',
+    '_inherit_environment_surgery_station'
 ]
 
 surgery_injection_templates = [
@@ -70,7 +70,7 @@ surgery_injection_templates = [
     'mikkel_analgesia_post', 'mikkel_anaesthesia_local',
     'mikkel_subject', 'mikkel_injection_1',
     'mikkel_injection_2',
-    '_inherit_mikkel_housing_environment',
+    '_inherit_environment_rat_housing',
     '_inherit_mikkel_surgery_station_environment'
 ]
 
@@ -125,8 +125,8 @@ analysis_params = {
 
 user_params = {
     'project_id': 'mikkel_septum_entorhinal',
-    'user_name': None,
-    'location': None,
+    'user_name': 'Mikkel Elle Lepperød',
+    'location': 'room2',
     'laser_device_id': None
 }
 templates = {

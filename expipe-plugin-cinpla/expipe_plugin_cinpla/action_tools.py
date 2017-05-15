@@ -131,17 +131,18 @@ def generate_templates(action, action_templates, overwrite, git_note=None):
                               overwrite=overwrite)
     for template in action_templates:
         try:
-            if name.startswith('_inherit'):
-                name = '_'.join(name.split('_')[1:])
+            if template.startswith('_inherit'):
+                name = '_'.join(template.split('_')[2:])
                 contents = {'_inherits': '/project_modules/' +
                                          user_params['project_id'] + '/' +
                                          name}
                 action.require_module(name=name, contents=contents,
                                       overwrite=overwrite)
+                print('Adding module ' + name)
             else:
-                action.require_module(template=template, name=name,
+                action.require_module(template=template,
                                       overwrite=overwrite)
-            print('Adding module ' + name)
+                print('Adding module ' + template)
         except Exception as e:
             print(template)
             raise e
