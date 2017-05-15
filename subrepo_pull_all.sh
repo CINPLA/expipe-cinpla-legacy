@@ -14,7 +14,6 @@ for D in python-neo \
          phy-contrib \
          pyxona; do
     if [ -d "$D" ]; then
-        cd "$D"
         git subrepo pull "$D"
     fi
 done
