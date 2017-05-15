@@ -10,7 +10,7 @@ subprocess.run(['pyrcc5', '-o', 'exdirbrowser/qml_qrc.py',
                 'exdirbrowser/qml.qrc'])
 
 setup(
-    name="Exdir Browser",
+    name="exdir-browser",
     packages=find_packages(),
     include_package_data=True,
     entry_points='''

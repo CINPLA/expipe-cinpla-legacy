@@ -7,7 +7,7 @@ import versioneer
 long_description = open("README.md").read()
 
 setup(
-    name="plugin-expipe-cinpla",
+    name="expipe-plugin-cinpla",
     packages=find_packages(),
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),

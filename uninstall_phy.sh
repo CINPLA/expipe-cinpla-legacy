@@ -1,20 +1,16 @@
 #!/bin/bash
-for D in python-neo \
+for D in neo \
          elephant \
          exdir \
          expipe \
-         expipe-browser \
          expipe-cli \
          exdir-cli \
          expipe-plugin-cinpla \
-         exdir-browser \
          expipe-io-neuro \
          exana \
          phy \
          phy-contrib \
+         expipe-dev \
          pyxona; do
-    if [ -d "$D" ]; then
-        cd "$D"
-        git subrepo pull "$D"
-    fi
+    pip uninstall "$D" -y
 done
