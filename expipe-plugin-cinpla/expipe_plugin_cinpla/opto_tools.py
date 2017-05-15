@@ -10,7 +10,7 @@ import argparse
 from datetime import datetime
 import expipe
 import platform
-from .tools import generate_templates
+from .action_tools import generate_templates
 from expipe_io_neuro import pyopenephys
 import glob
 import sys; sys.path.append(expipe.config.config_dir)

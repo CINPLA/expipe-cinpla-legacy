@@ -25,7 +25,7 @@ else:
 from neo.core.block import Block
 from neo.core.container import filterdata
 from neo.core import SpikeTrain, Unit
-from neo.test.tools import (assert_neo_object_is_compliant,
+from neo.test.signal_tools import (assert_neo_object_is_compliant,
                             assert_same_sub_schema)
 from neo.test.generate_datasets import (get_fake_value, get_fake_values,
                                         fake_neo, clone_object,

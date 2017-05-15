@@ -21,9 +21,9 @@ from neo.core import (AnalogSignal, Block,
                       ChannelIndex, Segment)
 from neo.io import BrainwareDamIO
 from neo.test.iotest.common_io_test import BaseTestIO
-from neo.test.tools import (assert_same_sub_schema,
+from neo.test.signal_tools import (assert_same_sub_schema,
                             assert_neo_object_is_compliant)
-from neo.test.iotest.tools import create_generic_reader
+from neo.test.iotest.signal_tools import create_generic_reader
 
 PY_VER = sys.version_info[0]
 

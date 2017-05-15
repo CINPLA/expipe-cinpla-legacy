@@ -44,7 +44,7 @@ from neo.io.baseio import BaseIO
 # to import from core
 from neo.core import (Segment, SpikeTrain, Unit, Epoch, AnalogSignal,
                       ChannelIndex, Block)
-import neo.io.tools
+import neo.io.signal_tools
 
 
 class KwikIO(BaseIO):

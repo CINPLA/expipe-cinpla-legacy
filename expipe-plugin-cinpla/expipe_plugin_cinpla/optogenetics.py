@@ -4,8 +4,8 @@ from expipecli.utils import IPlugin
 import click
 from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
 
-from .tools import generate_templates, _get_temp_path, GIT_NOTE
-from .optotools import (generate_epochs, generate_axona_opto, populate_modules,
+from .action_tools import generate_templates, _get_temp_path, GIT_NOTE
+from .opto_tools import (generate_epochs, generate_axona_opto, populate_modules,
                         extract_laser_pulse, read_pulse_pal_mat,
                         read_pulse_pal_xml, read_laser_intensity,
                         generate_openephys_opto)

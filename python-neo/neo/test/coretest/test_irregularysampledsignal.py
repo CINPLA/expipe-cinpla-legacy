@@ -23,7 +23,7 @@ else:
 
 from neo.core.irregularlysampledsignal import IrregularlySampledSignal
 from neo.core import Segment
-from neo.test.tools import (assert_arrays_almost_equal, assert_arrays_equal,
+from neo.test.signal_tools import (assert_arrays_almost_equal, assert_arrays_equal,
                             assert_neo_object_is_compliant,
                             assert_same_sub_schema)
 from neo.test.generate_datasets import (get_fake_value, get_fake_values,

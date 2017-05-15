@@ -23,7 +23,7 @@ else:
 
 from neo.core.event import Event
 from neo.core import Segment
-from neo.test.tools import (assert_neo_object_is_compliant,
+from neo.test.signal_tools import (assert_neo_object_is_compliant,
                             assert_arrays_equal,
                             assert_arrays_almost_equal,
                             assert_same_sub_schema)

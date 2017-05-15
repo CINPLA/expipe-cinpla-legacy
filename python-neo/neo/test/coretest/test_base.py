@@ -25,7 +25,7 @@ else:
 
 from neo.core.baseneo import (BaseNeo, _check_annotations,
                               merge_annotations, merge_annotation)
-from neo.test.tools import assert_arrays_equal
+from neo.test.signal_tools import assert_arrays_equal
 
 
 if sys.version_info[0] >= 3:

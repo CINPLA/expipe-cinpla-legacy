@@ -20,9 +20,9 @@ import quantities as pq
 from neo.core import Block, ChannelIndex, Segment, SpikeTrain, Unit
 from neo.io import BrainwareF32IO
 from neo.test.iotest.common_io_test import BaseTestIO
-from neo.test.tools import (assert_same_sub_schema,
+from neo.test.signal_tools import (assert_same_sub_schema,
                             assert_neo_object_is_compliant)
-from neo.test.iotest.tools import create_generic_reader
+from neo.test.iotest.signal_tools import create_generic_reader
 
 PY_VER = sys.version_info[0]
 

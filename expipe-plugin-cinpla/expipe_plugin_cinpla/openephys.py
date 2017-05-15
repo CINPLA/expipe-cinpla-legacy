@@ -5,10 +5,10 @@ import os.path as op
 from expipecli.utils import IPlugin
 import click
 from expipe_io_neuro import pyopenephys, openephys
-from .tools import (generate_templates, _get_temp_path, create_klusta_prm,
-                    save_binary_format, apply_CAR, filter_analog_signals,
-                    ground_bad_channels, _get_probe_file, GIT_NOTE)
-
+from .action_tools import generate_templates, _get_temp_path, GIT_NOTE
+from .signal_tools import (create_klusta_prm, save_binary_format, apply_CAR,
+                           filter_analog_signals, ground_bad_channels,
+                           _get_probe_file)
 import sys
 sys.path.append(expipe.config.config_dir)
 if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):

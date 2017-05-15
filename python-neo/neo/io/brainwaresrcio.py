@@ -1568,7 +1568,7 @@ if __name__ == '__main__':
     # run this when calling the file directly as a benchmark
     from neo.test.iotest.test_brainwaresrcio import FILES_TO_TEST
     from neo.test.iotest.common_io_test import url_for_tests
-    from neo.test.iotest.tools import (create_local_temp_dir,
+    from neo.test.iotest.signal_tools import (create_local_temp_dir,
                                        download_test_file,
                                        get_test_file_full_path,
                                        make_all_directories)

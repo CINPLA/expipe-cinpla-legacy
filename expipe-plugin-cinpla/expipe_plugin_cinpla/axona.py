@@ -4,7 +4,7 @@ import os
 import os.path as op
 from expipecli.utils import IPlugin
 import click
-from .tools import generate_templates, _get_temp_path, GIT_NOTE
+from .action_tools import generate_templates, _get_temp_path, GIT_NOTE
 import sys
 sys.path.append(expipe.config.config_dir)
 if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):

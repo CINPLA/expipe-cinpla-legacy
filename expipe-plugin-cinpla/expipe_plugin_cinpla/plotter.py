@@ -2,7 +2,7 @@ import os
 import os.path as op
 import numpy as np
 import expipe.io
-from .tools import _get_temp_path
+from .signal_tools import _get_temp_path
 import expipe
 import sys
 sys.path.append(expipe.config.config_dir)
@@ -300,7 +300,7 @@ class Plotter:
     def spike_lfp_coherence(self, xlim=[4, 16], color='b',
                             srch=[6, 10], show_max=False): # TODO plots everything twice
         from exana.time_frequency import plot_spike_psd, plot_psd
-        from exana.misc.tools import normalize
+        from exana.misc.signal_tools import normalize
         from matplotlib import gridspec
         import matplotlib.lines as mlines
         from matplotlib.ticker import MaxNLocator
@@ -310,7 +310,7 @@ class Plotter:
         import neo
         import matplotlib.pyplot as plt
         import warnings
-        # from .tools import downsample_250
+        # from .signal_tools import downsample_250
         raw_dir = self._analysis.require_raw('spike_lfp_coherence')
 
         starts = [self.blk.segments[0].t_start]

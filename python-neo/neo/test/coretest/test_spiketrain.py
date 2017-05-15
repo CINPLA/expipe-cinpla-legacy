@@ -27,7 +27,7 @@ else:
 from neo.core.spiketrain import (check_has_dimensions_time, SpikeTrain,
                                  _check_time_in_range, _new_spiketrain)
 from neo.core import Segment, Unit
-from neo.test.tools import  (assert_arrays_equal,
+from neo.test.signal_tools import  (assert_arrays_equal,
                              assert_arrays_almost_equal,
                              assert_neo_object_is_compliant)
 from neo.test.generate_datasets import (get_fake_value, get_fake_values,

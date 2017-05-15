@@ -30,7 +30,7 @@ import numpy as np
 from neo.io.baseio import BaseIO
 from neo.core import (Block, Segment, ChannelIndex, AnalogSignal,
                       IrregularlySampledSignal, Epoch, Event, SpikeTrain, Unit)
-from neo.io.tools import LazyList
+from neo.io.signal_tools import LazyList
 
 try:
     import nixio as nix

@@ -21,7 +21,7 @@ import sys
 from neo.io.baseio import BaseIO
 from neo.core import (Segment, SpikeTrain, Unit, Epoch, AnalogSignal,
                       ChannelIndex, Block, IrregularlySampledSignal)
-import neo.io.tools
+import neo.io.signal_tools
 import numpy as np
 import quantities as pq
 import os

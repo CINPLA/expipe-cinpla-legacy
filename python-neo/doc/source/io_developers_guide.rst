@@ -31,7 +31,7 @@ Miscellaneous
 
     * If your IO supports several version of a format (like ABF1, ABF2), upload to G-node test file repository all file version possible. (for utest coverage).
     * :py:func:`neo.core.Block.create_many_to_one_relationship` offers a utility to complete the hierachy when all one-to-many relationships have been created.
-    * :py:func:`neo.io.tools.populate_RecordingChannel` offers a utility to
+    * :py:func:`neo.io.signal_tools.populate_RecordingChannel` offers a utility to
       create inside a :class:`Block` all :class:`RecordingChannel` objects and links to :class:`AnalogSignal`, :class:`SpikeTrain`, ...
     * In the docstring, explain where you obtained the file format specification if it is a closed one.
     * If your IO is based on a database mapper, keep in mind that the returned object MUST be detached,
@@ -53,7 +53,7 @@ enable advanced lazy loading:
   see below).
 
   To implement lazy cascading, your read methods need to react when a user calls them with the ``cascade`` parameter set to ``lazy``.
-  In this case, you have to replace all the link lists of your loaded objects with instances of :class:`neo.io.tools.LazyList`. Instead
+  In this case, you have to replace all the link lists of your loaded objects with instances of :class:`neo.io.signal_tools.LazyList`. Instead
   of the actual objects that your IO would load at this point, fill the list with items that ``load_lazy_cascade`` needs to load the
   object.
 

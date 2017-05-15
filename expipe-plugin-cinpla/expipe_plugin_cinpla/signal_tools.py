@@ -5,30 +5,6 @@ import os.path as op
 import numpy as np
 from datetime import datetime
 import quantities as pq
-from ._version import get_versions
-
-import sys
-sys.path.append(expipe.config.config_dir)
-if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
-    print('No config params file found, use "expipe' +
-          'copy-to-config expipe_params.py"')
-else:
-    from expipe_params import user_params
-
-
-ROOT_DIR = op.dirname(op.dirname(op.abspath(__file__)))
-# repo = git.Repo(ROOT_DIR)
-# sha = repo.head.object.hexsha
-sha = 'none'
-
-DTIME_FORMAT = expipe.io.core.datetime_format
-
-GIT_NOTE = {
-    'registered': datetime.strftime(datetime.now(), DTIME_FORMAT),
-    'note': 'Registered with the expipe cinpla plugin',
-    'expipe-plugin-cinpla-version': get_versions()['version'],
-    'expipe-version': expipe.__version__
-}
 
 
 def _get_probe_file(system, nchan, spikesorter='klusta'):
@@ -223,6 +199,7 @@ def extract_sync_times(adc_signal, times):
                 rising.append(idx)
 
     return np.array(times[rising])
+
 
 def clip_anas(anas, times, clip_times):
     '''
@@ -485,28 +462,6 @@ def remove_stimulation_artifacts(anas, times, trigger, pre=3 * pq.ms, post=5 * p
     return anas
 
 
-def _get_temp_path(file_record):
-    '''
-
-    :param file_record:
-    :return:
-    '''
-    import platform
-    folder_name = 'expipe_temp_storage'
-    path = op.join(*file_record.local_path.split('/')[-2:])
-    if platform.system() == "Linux":
-        tmp_path = op.join(os.path.expanduser('~'), folder_name, path)
-    elif platform.system() == "Windows":
-        # tmp_path = op.join('C:' + os.sep + folder_name, path)
-        tmp_path = op.join(os.path.expanduser('~'), folder_name, path)
-    else:
-        raise NotImplementedError("OS not supported")
-    directory = op.split(tmp_path)[0]
-    if not op.exists(directory):
-        os.makedirs(directory)
-    return tmp_path
-
-
 def downsample_250(anas):
     import neo
     import quantities as pq
@@ -525,54 +480,3 @@ def downsample_250(anas):
         else:
             out.append(ana)
     return out
-
-
-def generate_templates(action, action_templates, overwrite, git_note=None):
-    '''
-
-    :param action:
-    :param action_templates:
-    :param overwrite:
-    :param git_note:
-    :return:
-    '''
-    if git_note is not None:
-        action.require_module(name='git-note', contents=git_note,
-                              overwrite=overwrite)
-    for template in action_templates:
-        try:
-            name = '_'.join(template.split('_')[1:])
-            if name.split('_')[0] == 'inherit':
-                name = '_'.join(name.split('_')[1:])
-                contents = {'_inherits': '/project_modules/' +
-                                         user_params['project_id'] + '/' +
-                                         name}
-                action.require_module(name=name, contents=contents,
-                                      overwrite=overwrite)
-            else:
-                action.require_module(template=template, name=name,
-                                      overwrite=overwrite)
-            print('Adding module ' + name)
-        except Exception as e:
-            print(template)
-            raise e
-
-
-def create_notebook(exdir_path, channel_group=0):
-    import exdir
-    exob = exdir.File(exdir_path)
-    analysis_path = exob.require_group('analysis').directory
-    import json
-    from pprint import pprint
-    currdir = op.dirname(op.abspath(__file__))
-    fname = op.join(currdir, 'template_notebook.ipynb')
-    with open(fname, 'r') as infile:
-        notebook = json.load(infile)
-    notebook['cells'][0]['source'] = ['exdir_path = r"{}"\n'.format(exdir_path),
-                                      'channel_group = {}'.format(channel_group)]
-    fnameout = op.join(analysis_path, 'analysis_notebook.ipynb')
-    print('Generating notebook "' + fnameout + '"')
-    with open(fnameout, 'w') as outfile:
-            json.dump(notebook, outfile,
-                      sort_keys=True, indent=4)
-    return fnameout

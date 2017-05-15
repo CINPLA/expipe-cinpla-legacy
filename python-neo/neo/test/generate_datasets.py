@@ -20,7 +20,7 @@ from neo.core import (AnalogSignal,
                       Segment, SpikeTrain,
                       Unit,
                       class_by_name)
-from neo.io.tools import iteritems
+from neo.io.signal_tools import iteritems
 from neo.core.baseneo import _container_name
 
 

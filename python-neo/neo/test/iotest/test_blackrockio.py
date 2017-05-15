@@ -24,7 +24,7 @@ import quantities as pq
 from neo.io.blackrockio import BlackrockIO
 
 from neo.test.iotest.common_io_test import BaseTestIO
-from neo.test.iotest.tools import get_test_file_full_path
+from neo.test.iotest.signal_tools import get_test_file_full_path
 
 # check scipy
 try:

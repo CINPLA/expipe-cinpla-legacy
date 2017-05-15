@@ -23,7 +23,7 @@ else:
 from neo.core.channelindex import ChannelIndex
 from neo.core.container import filterdata
 from neo.core import Block, Segment, SpikeTrain
-from neo.test.tools import (assert_neo_object_is_compliant,
+from neo.test.signal_tools import (assert_neo_object_is_compliant,
                             assert_arrays_equal,
                             assert_same_sub_schema)
 from neo.test.generate_datasets import (fake_neo, get_fake_value,
