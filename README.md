@@ -14,7 +14,7 @@ python setup.py develop/install --extra browser
 ```
 ## Installation without browsers and with phy
 ```
-cd utils/phy-environment && conda env create -n expipe && cd ../..
+cd utils/phy-environment && conda env create -n phy && cd ../..
 source activate phy
 python setup.py develop/install --extra phy
 ```
