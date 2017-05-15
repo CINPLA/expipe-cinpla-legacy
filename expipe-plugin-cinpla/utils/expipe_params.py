@@ -4,34 +4,34 @@ import quantities as pq
 axona_templates = [
     'mikkel_electrophysiology_L',
     'mikkel_electrophysiology_R', 'mikkel_notes',
-    'hardware_inherit_axona_tracker',
-    'hardware_inherit_axona_daq',
-    'hardware_inherit_axona_camera_objective',
-    'mikkel_inherit_tracking_environment',
-    'mikkel_inherit_housing_environment',
-    'mikkel_inherit_optic_fibre', 'mikkel_inherit_tetrode',
-    'mikkel_inherit_drive_optetrode'
+    '_inherit_hardware_axona_tracker',
+    '_inherit_hardware_axona_daq',
+    '_inherit_hardware_axona_camera_objective',
+    '_inherit_mikkel_tracking_environment',
+    '_inherit_mikkel_housing_environment',
+    '_inherit_mikkel_optic_fibre', '_inherit_mikkel_tetrode',
+    '_inherit_mikkel_drive_optetrode'
 ]
 
 openephys_templates = [
     'mikkel_electrophysiology_L',
     'mikkel_electrophysiology_R', 'mikkel_notes',
-    'hardware_inherit_openephys_daq',
-    'hardware_inherit_intan_headstage',
-    'hardware_inherit_pointgrey_camera_objective',
-    'software_inherit_bonsai_gui',
-    'software_inherit_openephys_gui',
-    'mikkel_inherit_tracking_environment',
-    'mikkel_inherit_housing_environment',
-    'mikkel_inherit_optic_fibre', 'mikkel_inherit_tetrode',
-    'mikkel_inherit_drive_optetrode'
+    '_inherit_hardware_openephys_daq',
+    '_inherit_hardware_intan_headstage',
+    '_inherit_hardware_pointgrey_camera_objective',
+    '_inherit_software_bonsai_gui',
+    '_inherit_software_openephys_gui',
+    '_inherit_mikkel_tracking_environment',
+    '_inherit_mikkel_housing_environment',
+    '_inherit_mikkel_optic_fibre', '_inherit_mikkel_tetrode',
+    '_inherit_mikkel_drive_optetrode'
 ]
 
 opto_openephys_templates = [
-    'hardware_inherit_openephys_optogenetics',
-    'hardware_inherit_pulse_pal',
-    'hardware_inherit_blue_laser',
-    'hardware_inherit_laser_measure_device',
+    '_inherit_hardware_openephys_optogenetics',
+    '_inherit_hardware_pulse_pal',
+    '_inherit_hardware_blue_laser',
+    '_inherit_hardware_laser_measure_device',
     'mikkel_laser_settings',
     'mikkel_pulse_pal_settings',
     'mikkel_optogenetics_paradigm',
@@ -39,10 +39,10 @@ opto_openephys_templates = [
 ]
 
 opto_axona_templates = [
-    'hardware_inherit_axona_optogenetics',
-    'hardware_inherit_pulse_pal',
-    'hardware_inherit_blue_laser',
-    'hardware_inherit_laser_measure_device',
+    '_inherit_hardware_axona_optogenetics',
+    '_inherit_hardware_pulse_pal',
+    '_inherit_hardware_blue_laser',
+    '_inherit_hardware_laser_measure_device',
     'mikkel_laser_settings',
     'mikkel_pulse_pal_settings',
     'mikkel_optogenetics_paradigm',
@@ -59,10 +59,10 @@ surgery_implantation_templates = [
     'mikkel_implant_fibre', 'mikkel_subject',
     'mikkel_notes', 'mikkel_anaesthesia', 'mikkel_analgesia',
     'mikkel_analgesia_post', 'mikkel_anaesthesia_local',
-    'mikkel_inherit_optic_fibre', 'mikkel_inherit_tetrode',
-    'mikkel_inherit_drive_optetrode',
-    'mikkel_inherit_housing_environment',
-    'mikkel_inherit_surgery_station_environment'
+    '_inherit_mikkel_optic_fibre', '_inherit_mikkel_tetrode',
+    '_inherit_mikkel_drive_optetrode',
+    '_inherit_mikkel_housing_environment',
+    '_inherit_mikkel_surgery_station_environment'
 ]
 
 surgery_injection_templates = [
@@ -70,8 +70,8 @@ surgery_injection_templates = [
     'mikkel_analgesia_post', 'mikkel_anaesthesia_local',
     'mikkel_subject', 'mikkel_injection_1',
     'mikkel_injection_2',
-    'mikkel_inherit_housing_environment',
-    'mikkel_inherit_surgery_station_environment'
+    '_inherit_mikkel_housing_environment',
+    '_inherit_mikkel_surgery_station_environment'
 ]
 
 unit_info = {

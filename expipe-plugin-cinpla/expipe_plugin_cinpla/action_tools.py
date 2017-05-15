@@ -137,8 +137,7 @@ def generate_templates(action, action_templates, overwrite, git_note=None):
                               overwrite=overwrite)
     for template in action_templates:
         try:
-            name = '_'.join(template.split('_')[1:])
-            if name.split('_')[0] == 'inherit':
+            if name.startswith('_inherit'):
                 name = '_'.join(name.split('_')[1:])
                 contents = {'_inherits': '/project_modules/' +
                                          user_params['project_id'] + '/' +
