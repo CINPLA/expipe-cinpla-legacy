@@ -1,5 +1,5 @@
 #!/bin/bash
-for D in python-neo \
+for D in neo \
          elephant \
          exdir \
          expipe \
@@ -10,10 +10,9 @@ for D in python-neo \
          exdir-browser \
          expipe-io-neuro \
          exana \
+         expipe-dev \
+         phy \
+         phycontrib \
          pyxona; do
-    if [ -d "$D" ]; then
-        cd "$D"
-        python setup.py $1
-        cd ..
-    fi
+    pip uninstall "$D" -y
 done
