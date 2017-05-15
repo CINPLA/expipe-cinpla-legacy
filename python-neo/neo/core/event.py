@@ -18,6 +18,15 @@ from neo.core.baseneo import BaseNeo, merge_annotations
 
 PY_VER = sys.version_info[0]
 
+def _new_event(cls, signal, times = None, labels=None, units=None, name=None, 
+               file_origin=None, description=None,
+               annotations=None):
+    '''
+    A function to map Event.__new__ to function that
+    does not do the unit checking. This is needed for pickle to work. 
+    '''
+    return Event(signal=signal, times=times, labels=labels, units=units, name=name, file_origin=file_origin,
+                 description=description, **annotations)
 
 class Event(BaseNeo, pq.Quantity):
     '''
@@ -84,7 +93,7 @@ class Event(BaseNeo, pq.Quantity):
             ValueError("Unit %s has dimensions %s, not [time]" %
                        (units, dim.simplified))
 
-        obj = pq.Quantity.__new__(cls, times, units=dim)
+        obj = pq.Quantity(times, units=dim).view(cls)
         obj.labels = labels
         obj.segment = None
         return obj
@@ -96,6 +105,14 @@ class Event(BaseNeo, pq.Quantity):
         '''
         BaseNeo.__init__(self, name=name, file_origin=file_origin,
                          description=description, **annotations)
+    def __reduce__(self):
+        '''
+        Map the __new__ function onto _new_BaseAnalogSignal, so that pickle
+        works
+        '''
+        return _new_event, (self.__class__, self.times, np.array(self), self.labels, self.units,
+                            self.name, self.file_origin, self.description,
+                            self.annotations)
 
     def __array_finalize__(self, obj):
         super(Event, self).__array_finalize__(obj)
@@ -166,3 +183,39 @@ class Event(BaseNeo, pq.Quantity):
         new = self.__class__(times=signal)
         new._copy_data_complement(self)
         return new
+
+    def time_slice(self, t_start, t_stop):
+        '''
+        Creates a new :class:`Event` corresponding to the time slice of
+        the original :class:`Event` between (and including) times
+        :attr:`t_start` and :attr:`t_stop`. Either parameter can also be None
+        to use infinite endpoints for the time interval.
+        '''
+        _t_start = t_start
+        _t_stop = t_stop
+        if t_start is None:
+            _t_start = -np.inf
+        if t_stop is None:
+            _t_stop = np.inf
+
+        indices = (self >= _t_start) & (self <= _t_stop)
+        new_evt = self[indices]
+
+        return new_evt
+
+    def as_array(self, units=None):
+        """
+        Return the event times as a plain NumPy array.
+
+        If `units` is specified, first rescale to those units.
+        """
+        if units:
+            return self.rescale(units).magnitude
+        else:
+            return self.magnitude
+
+    def as_quantity(self):
+        """
+        Return the event times as a quantities array.
+        """
+        return self.view(pq.Quantity)

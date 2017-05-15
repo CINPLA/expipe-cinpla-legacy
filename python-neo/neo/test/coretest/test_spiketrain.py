@@ -14,6 +14,7 @@ except ImportError:
     import unittest
 
 import numpy as np
+from numpy.testing import assert_array_equal
 import quantities as pq
 
 try:
@@ -41,10 +42,11 @@ class Test__generate_datasets(unittest.TestCase):
 
     def test__get_fake_values(self):
         self.annotations['seed'] = 0
-        times = get_fake_value('times', pq.Quantity, seed=0, dim=1)
+        waveforms = get_fake_value('waveforms', pq.Quantity, seed=3, dim=3)
+        shape = waveforms.shape[0]
+        times = get_fake_value('times', pq.Quantity, seed=0, dim=1, shape=waveforms.shape[0])
         t_start = get_fake_value('t_start', pq.Quantity, seed=1, dim=0)
         t_stop = get_fake_value('t_stop', pq.Quantity, seed=2, dim=0)
-        waveforms = get_fake_value('waveforms', pq.Quantity, seed=3, dim=3)
         left_sweep = get_fake_value('left_sweep', pq.Quantity, seed=4, dim=0)
         sampling_rate = get_fake_value('sampling_rate', pq.Quantity,
                                        seed=5, dim=0)
@@ -745,6 +747,11 @@ class TestConstructor(unittest.TestCase):
                           np.arange(t_start, t_stop+5), units='ms',
                           t_start=t_start, t_stop=t_stop)
 
+    def test__create_with_len_times_different_size_than_waveform_shape1_ValueError(self):
+        self.assertRaises(ValueError, SpikeTrain,
+                          times=np.arange(10), units='s',
+                          t_stop=4, waveforms=np.ones((10,6,50)))
+
     def test_defaults(self):
         # default recommended attributes
         train1 = SpikeTrain([3, 4, 5], units='sec', t_stop=10.0)
@@ -1359,6 +1366,20 @@ class TestChanging(unittest.TestCase):
             self.assertRaises(ValueError, train.__setslice__,
                               0, 3, [0, 4, 5] * pq.ms)
 
+    def test__adding_time(self):
+        data = [3, 4, 5] * pq.ms
+        train = SpikeTrain(data, copy=False, t_start=0.5, t_stop=10.0)
+        assert_neo_object_is_compliant(train)
+        self.assertRaises(ValueError, train.__add__, 10 * pq.ms)
+        assert_arrays_equal(train + 1 * pq.ms, data + 1 * pq.ms)
+
+    def test__subtracting_time(self):
+        data = [3, 4, 5] * pq.ms
+        train = SpikeTrain(data, copy=False, t_start=0.5, t_stop=10.0)
+        assert_neo_object_is_compliant(train)
+        self.assertRaises(ValueError, train.__sub__, 10 * pq.ms)
+        assert_arrays_equal(train - 1 * pq.ms, data - 1 * pq.ms)
+
     def test__rescale(self):
         data = [3, 4, 5] * pq.ms
         train = SpikeTrain(data, t_start=0.5, t_stop=10.0)
@@ -1738,6 +1759,20 @@ class TestMiscellaneous(unittest.TestCase):
                            t_start=t_start64, t_stop=t_stop64,
                            dtype=np.float64)
         assert_neo_object_is_compliant(train)
+
+    def test_as_array(self):
+        data = np.arange(10.0)
+        st = SpikeTrain(data, t_stop=10.0, units='ms')
+        st_as_arr = st.as_array()
+        self.assertIsInstance(st_as_arr, np.ndarray)
+        assert_array_equal(data, st_as_arr)
+
+    def test_as_quantity(self):
+        data = np.arange(10.0)
+        st = SpikeTrain(data, t_stop=10.0, units='ms')
+        st_as_q = st.as_quantity()
+        self.assertIsInstance(st_as_q, pq.Quantity)
+        assert_array_equal(data * pq.ms, st_as_q)
 
 
 if __name__ == "__main__":

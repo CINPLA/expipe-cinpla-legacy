@@ -25,7 +25,6 @@ except ImportError:
     import mock
 import string
 import itertools
-from six import string_types
 
 import numpy as np
 import quantities as pq
@@ -35,13 +34,13 @@ from neo.core import (Block, Segment, ChannelIndex, AnalogSignal,
 from neo.test.iotest.common_io_test import BaseTestIO
 
 try:
-    import nixio
+    import nixio as nix
     HAVE_NIX = True
 except ImportError:
     HAVE_NIX = False
 
 from neo.io.nixio import NixIO
-from neo.io.nixio import nixtypes
+from neo.io.nixio import string_types
 
 
 @unittest.skipUnless(HAVE_NIX, "Requires NIX")
@@ -79,7 +78,7 @@ class NixIOTest(unittest.TestCase):
             if len(neochx.channel_names):
                 neochanname = neochx.channel_names[neochanpos]
                 if ((not isinstance(neochanname, str)) and
-                         isinstance(neochanname, bytes)):
+                        isinstance(neochanname, bytes)):
                     neochanname = neochanname.decode()
                 nixchanname = nixchan.name
                 self.assertEqual(neochanname, nixchanname)
@@ -112,10 +111,13 @@ class NixIOTest(unittest.TestCase):
             self.assertEqual(len(neoasigs), len(nixasigs))
 
             # IrregularlySampledSignals referencing CHX
-            neoisigs = list(sig.name for sig in neochx.irregularlysampledsignals)
-            nixisigs = list(set(da.metadata.name for da in nixblock.data_arrays
-                                if da.type == "neo.irregularlysampledsignal" and
-                                nixchx in da.sources))
+            neoisigs = list(sig.name for sig in
+                            neochx.irregularlysampledsignals)
+            nixisigs = list(
+                set(da.metadata.name for da in nixblock.data_arrays
+                    if da.type == "neo.irregularlysampledsignal" and
+                    nixchx in da.sources)
+            )
             self.assertEqual(len(neoisigs), len(nixisigs))
             # SpikeTrains referencing CHX and Units
             for sidx, neounit in enumerate(neochx.units):
@@ -186,9 +188,8 @@ class NixIOTest(unittest.TestCase):
             np.testing.assert_almost_equal(sig.magnitude, da)
             self.assertEqual(neounit, da.unit)
             timedim = da.dimensions[0]
-            chandim = da.dimensions[1]
             if isinstance(neosig, AnalogSignal):
-                self.assertIsInstance(timedim, nixtypes["SampledDimension"])
+                self.assertIsInstance(timedim, nix.pycore.SampledDimension)
                 self.assertEqual(
                     pq.Quantity(timedim.sampling_interval, timedim.unit),
                     neosig.sampling_period
@@ -198,12 +199,11 @@ class NixIOTest(unittest.TestCase):
                     self.assertEqual(da.metadata["t_start.units"],
                                      str(neosig.t_start.dimensionality))
             elif isinstance(neosig, IrregularlySampledSignal):
-                self.assertIsInstance(timedim, nixtypes["RangeDimension"])
+                self.assertIsInstance(timedim, nix.pycore.RangeDimension)
                 np.testing.assert_almost_equal(neosig.times.magnitude,
                                                timedim.ticks)
                 self.assertEqual(timedim.unit,
                                  str(neosig.times.dimensionality))
-            self.assertIsInstance(chandim, nixtypes["SetDimension"])
 
     def compare_eests_mtags(self, eestlist, mtaglist):
         self.assertEqual(len(eestlist), len(mtaglist))
@@ -263,10 +263,10 @@ class NixIOTest(unittest.TestCase):
             self.assertEqual(np.shape(neowf), np.shape(nixwf))
             self.assertEqual(nixwf.unit, str(neowf.units.dimensionality))
             np.testing.assert_almost_equal(neowf.magnitude, nixwf)
-            self.assertIsInstance(nixwf.dimensions[0], nixtypes["SetDimension"])
-            self.assertIsInstance(nixwf.dimensions[1], nixtypes["SetDimension"])
+            self.assertIsInstance(nixwf.dimensions[0], nix.pycore.SetDimension)
+            self.assertIsInstance(nixwf.dimensions[1], nix.pycore.SetDimension)
             self.assertIsInstance(nixwf.dimensions[2],
-                                  nixtypes["SampledDimension"])
+                                  nix.pycore.SampledDimension)
 
     def compare_attr(self, neoobj, nixobj):
         if neoobj.name:
@@ -286,11 +286,18 @@ class NixIOTest(unittest.TestCase):
         if neoobj.annotations:
             nixmd = nixobj.metadata
             for k, v, in neoobj.annotations.items():
-                self.assertEqual(nixmd[str(k)], v)
+                if isinstance(v, pq.Quantity):
+                    self.assertEqual(nixmd.props[str(k)].unit,
+                                     str(v.dimensionality))
+                    np.testing.assert_almost_equal(nixmd[str(k)],
+                                                   v.magnitude)
+                else:
+                    self.assertEqual(nixmd[str(k)], v)
 
     @classmethod
     def create_full_nix_file(cls, filename):
-        nixfile = nixio.File.open(filename, nixio.FileMode.Overwrite)
+        nixfile = nix.File.open(filename, nix.FileMode.Overwrite,
+                                backend="h5py")
 
         nix_block_a = nixfile.create_block(cls.rword(10), "neo.block")
         nix_block_a.definition = cls.rsentence(5, 10)
@@ -395,7 +402,7 @@ class NixIOTest(unittest.TestCase):
             )
             mtag_st.metadata = mtag_st_md
             mtag_st_md.create_property(
-                "t_stop", nixio.Value(max(times_da).item()+1)
+                "t_stop", nix.Value(max(times_da).item()+1)
             )
 
             waveforms = cls.rquant((10, 8, 5), 1)
@@ -403,7 +410,7 @@ class NixIOTest(unittest.TestCase):
             wfda = blk.create_data_array(wfname, "neo.waveforms",
                                          data=waveforms)
             wfda.unit = "mV"
-            mtag_st.create_feature(wfda, nixio.LinkType.Indexed)
+            mtag_st.create_feature(wfda, nix.LinkType.Indexed)
             wfda.append_set_dimension()  # spike dimension
             wfda.append_set_dimension()  # channel dimension
             wftimedim = wfda.append_sampled_dimension(0.1)
@@ -413,7 +420,7 @@ class NixIOTest(unittest.TestCase):
                 wfname, "neo.waveforms.metadata"
             )
             wfda.metadata.create_property("left_sweep",
-                                          [nixio.Value(20)]*5)
+                                          [nix.Value(20)]*5)
             allspiketrains.append(mtag_st)
 
         # Epochs
@@ -469,7 +476,6 @@ class NixIOTest(unittest.TestCase):
             for siggroup in allsignalgroups:
                 mtag_ev.references.extend(siggroup)
 
-
         # CHX
         nixchx = blk.create_source(cls.rword(10),
                                    "neo.channelindex")
@@ -485,11 +491,11 @@ class NixIOTest(unittest.TestCase):
             nixrc.metadata = nixchx.metadata.create_section(
                 nixrc.name, "neo.channelindex.metadata"
             )
-            nixrc.metadata.create_property("index", nixio.Value(idx))
-            dims = tuple(map(nixio.Value, cls.rquant(3, 1)))
+            nixrc.metadata.create_property("index", nix.Value(idx))
+            dims = tuple(map(nix.Value, cls.rquant(3, 1)))
             nixrc.metadata.create_property("coordinates", dims)
             nixrc.metadata.create_property("coordinates.units",
-                                           nixio.Value("um"))
+                                           nix.Value("um"))
 
         nunits = 1
         stsperunit = np.array_split(allspiketrains, nunits)
@@ -583,7 +589,10 @@ class NixIOTest(unittest.TestCase):
         seg.events.append(event)
 
         spiketrain = SpikeTrain(times=times, t_stop=pq.s, units=pq.s)
-        spiketrain.annotate(**cls.rdict(6))
+        d = cls.rdict(6)
+        d["quantity"] = pq.Quantity(10, "mV")
+        d["qarray"] = pq.Quantity(range(10), "mA")
+        spiketrain.annotate(**d)
         seg.spiketrains.append(spiketrain)
 
         chx = ChannelIndex(name="achx", index=[1, 2])
@@ -603,11 +612,12 @@ class NixIOWriteTest(NixIOTest):
         self.filename = "nixio_testfile_write.h5"
         self.writer = NixIO(self.filename, "ow")
         self.io = self.writer
-        self.reader = nixio.File.open(self.filename,
-                                      nixio.FileMode.ReadOnly)
+        self.reader = nix.File.open(self.filename,
+                                    nix.FileMode.ReadOnly,
+                                    backend="h5py")
 
     def tearDown(self):
-        del self.writer
+        self.writer.close()
         self.reader.close()
         os.remove(self.filename)
 
@@ -717,7 +727,7 @@ class NixIOWriteTest(NixIOTest):
         seg.spiketrains.append(spiketrain)
         self.write_and_compare([block])
 
-        waveforms = self.rquant((20, 5, 10), pq.mV)
+        waveforms = self.rquant((3, 5, 10), pq.mV)
         spiketrain = SpikeTrain(times=[1, 1.1, 1.2]*pq.ms, t_stop=1.5*pq.s,
                                 name="spikes with wf",
                                 description="spikes for waveform test",
@@ -752,6 +762,8 @@ class NixIOWriteTest(NixIOTest):
 
         for srcunit in blk.sources:  # units
             self.assertIn(srcunit.name, blkmd.sections)
+
+        self.write_and_compare([neoblk])
 
     def test_anonymous_objects_write(self):
         nblocks = 2
@@ -800,55 +812,48 @@ class NixIOWriteTest(NixIOTest):
         self.compare_blocks(blocks, self.reader.blocks)
 
     def test_to_value(self):
-        section = self.io.nix_file.create_section("Metadata value test", "Test")
-        tovalue = self.io._to_value
+        section = self.io.nix_file.create_section("Metadata value test",
+                                                  "Test")
+        writeprop = self.io._write_property
 
         # quantity
-        # qvalue = pq.Quantity(10, "mV")
-        # section["qvalue"] = tovalue(qvalue)
-        # self.assertEqual(section["qvalue"], 10)
+        qvalue = pq.Quantity(10, "mV")
+        writeprop(section, "qvalue", qvalue)
+        self.assertEqual(section["qvalue"], 10)
+        self.assertEqual(section.props["qvalue"].unit, "mV")
 
         # datetime
         dt = self.rdate()
-        section["dt"] = tovalue(dt)
+        writeprop(section, "dt", dt)
         self.assertEqual(datetime.fromtimestamp(section["dt"]), dt)
 
         # string
         randstr = self.rsentence()
-        section["randstr"] = tovalue(randstr)
+        writeprop(section, "randstr", randstr)
         self.assertEqual(section["randstr"], randstr)
 
         # bytes
         bytestring = b"bytestring"
-        section["randbytes"] = tovalue(bytestring)
+        writeprop(section, "randbytes", bytestring)
         self.assertEqual(section["randbytes"], bytestring.decode())
 
         # iterables
-        # mdlist = [[1, 2, 3], [4, 5, 6]]
-        # self.assertIs(tovalue(mdlist), None)
-        #
-        # mdarray = np.random.random((10, 3))
-        # self.assertIs(tovalue(mdarray), None)
-
         randlist = np.random.random(10).tolist()
-        section["randlist"] = tovalue(randlist)
+        writeprop(section, "randlist", randlist)
         self.assertEqual(randlist, section["randlist"])
 
         randarray = np.random.random(10)
-        section["randarray"] = tovalue(randarray)
+        writeprop(section, "randarray", randarray)
         np.testing.assert_almost_equal(randarray, section["randarray"])
-
-        empty = []
-        self.assertIs(tovalue(empty), None)
 
         # numpy item
         npval = np.float64(2398)
-        section["npval"] = tovalue(npval)
+        writeprop(section, "npval", npval)
         self.assertEqual(npval, section["npval"])
 
         # number
         val = 42
-        section["val"] = tovalue(val)
+        writeprop(section, "val", val)
         self.assertEqual(val, section["val"])
 
 
@@ -875,7 +880,7 @@ class NixIOReadTest(NixIOTest):
             cls.nixfile.close()
 
     def tearDown(self):
-        del self.io
+        self.io.close()
 
     def test_all_read(self):
         neo_blocks = self.io.read_all_blocks(cascade=True, lazy=False)
@@ -1082,7 +1087,7 @@ class NixIOPartialWriteTest(NixIOTest):
 
     def tearDown(self):
         self.restore_methods()
-        del self.io
+        self.io.close()
 
     def restore_methods(self):
         for name, method in self.original_methods.items():
@@ -1148,8 +1153,46 @@ class NixIOPartialWriteTest(NixIOTest):
         self.compare_blocks(self.neo_blocks, self.io.nix_file.blocks)
 
 
+class NixIOContextTests(NixIOTest):
+
+    filename = "context_test.h5"
+
+    def test_context_write(self):
+        neoblock = Block(name=self.rword(), description=self.rsentence())
+        with NixIO(self.filename, "ow") as iofile:
+            iofile.write_block(neoblock)
+
+        nixfile = nix.File.open(self.filename, nix.FileMode.ReadOnly,
+                                backend="h5py")
+        self.compare_blocks([neoblock], nixfile.blocks)
+        nixfile.close()
+
+        neoblock.annotate(**self.rdict(5))
+        with NixIO(self.filename, "rw") as iofile:
+            iofile.write_block(neoblock)
+        nixfile = nix.File.open(self.filename, nix.FileMode.ReadOnly,
+                                backend="h5py")
+        self.compare_blocks([neoblock], nixfile.blocks)
+        nixfile.close()
+
+    def test_context_read(self):
+        nixfile = nix.File.open(self.filename, nix.FileMode.Overwrite,
+                                backend="h5py")
+        name_one = self.rword()
+        name_two = self.rword()
+        nixfile.create_block(name_one, "neo.block")
+        nixfile.create_block(name_two, "neo.block")
+        nixfile.close()
+
+        with NixIO(self.filename, "ro") as iofile:
+            blocks = iofile.read_all_blocks()
+
+        self.assertEqual(blocks[0].name, name_one)
+        self.assertEqual(blocks[1].name, name_two)
+
+
 @unittest.skipUnless(HAVE_NIX, "Requires NIX")
 class CommonTests(BaseTestIO, unittest.TestCase):
 
     ioclass = NixIO
-
+    read_and_write_is_bijective = False

@@ -302,7 +302,7 @@ class AxonIO(BaseIO):
 
                     anaSig = AnalogSignal(signal, sampling_rate=sampling_rate,
                                           t_start=t_start,
-                                          name=str(name),
+                                          name=name.decode("utf-8"),
                                           channel_index=int(num))
                     if lazy:
                         anaSig.lazy_shape = length / nbchannel
@@ -420,11 +420,11 @@ class AxonIO(BaseIO):
             fid.seek(sections['StringsSection']['uBlockIndex'] * BLOCKSIZE)
             big_string = fid.read(sections['StringsSection']['uBytes'])
             goodstart=-1
-            for key in [b'AXENGN', b'clampex', b'Clampex', b'axoscope']:
+            for key in [b'AXENGN', b'clampex', b'Clampex', b'CLAMPEX', b'axoscope']:
                 #goodstart = big_string.lower().find(key)
                 goodstart = big_string.find(key)
                 if goodstart!=-1: break
-            assert goodstart!=-1, 'This file do not contain clampex, axoscope or clampfit in the header'
+            assert goodstart!=-1, 'This file does not contain clampex, axoscope or clampfit in the header'
             big_string = big_string[goodstart:]
             strings = big_string.split(b'\x00')
 
@@ -455,6 +455,7 @@ class AxonIO(BaseIO):
                 else:
                     protocol[key] = np.array(val)
             header['protocol'] = protocol
+            header['sProtocolPath'] = strings[header['uProtocolPathIndex']-1]
 
             # tags
             listTag = []
@@ -544,8 +545,8 @@ class AxonIO(BaseIO):
             'llNumEntries']  # Number of ADC channels
         nDAC = header['sections']['DACSection'][
             'llNumEntries']  # Number of DAC channels
-        nSam = header['protocol'][
-            'lNumSamplesPerEpisode'] / nADC  # Number of samples per episode
+        nSam = int(header['protocol'][
+            'lNumSamplesPerEpisode'] / nADC)  # Number of samples per episode
         nEpi = header['lActualEpisodes']  # Actual number of episodes
         sampling_rate = 1.e6 / header['protocol'][
             'fADCSequenceInterval'] * pq.Hz
@@ -565,7 +566,7 @@ class AxonIO(BaseIO):
                     header['listDACInfo'][DACNum]['fDACHoldingLevel'] *\
                     pq.Quantity(1, unit)
                 ana_sig = AnalogSignal(signal, sampling_rate=sampling_rate,
-                                       t_start=t_start, name=str(name),
+                                       t_start=t_start, name=name.decode("utf-8"),
                                        channel_index=DACNum)
                 # If there are epoch infos for this DAC
                 if DACNum in header['dictEpochInfoPerDAC']:

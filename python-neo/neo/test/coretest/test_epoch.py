@@ -10,6 +10,9 @@ except ImportError:
 
 import numpy as np
 import quantities as pq
+import pickle
+import os
+from numpy.testing import assert_array_equal
 
 try:
     from IPython.lib.pretty import pretty
@@ -229,6 +232,276 @@ class TestEpoch(unittest.TestCase):
 
         self.assertEqual(prepr, targ)
 
+    def test__time_slice(self):
+        epc = Epoch(times=[10, 20, 30] * pq.s, durations=[10, 5, 7] * pq.ms,
+                    labels=np.array(['btn0', 'btn1', 'btn2'], dtype='S'),
+                    foo='bar')
+
+        epc2 = epc.time_slice(10 * pq.s, 20 * pq.s)
+        assert_arrays_equal(epc2.times, [10, 20] * pq.s)
+        assert_arrays_equal(epc2.durations, [10, 5] * pq.ms)
+        assert_arrays_equal(epc2.labels, np.array(['btn0','btn1'], dtype='S'))
+        self.assertEqual(epc.annotations, epc2.annotations)
+
+    def test_time_slice2(self):
+        params = {'test2': 'y1', 'test3': True}
+        epc = Epoch([1.1, 1.5, 1.7]*pq.ms, durations=[20, 40, 60]*pq.ns,
+                    labels=np.array(['test epoch 1',
+                                     'test epoch 2',
+                                     'test epoch 3'], dtype='S'),
+                    name='test', description='tester',
+                    file_origin='test.file',
+                    test1=1, **params)
+        epc.annotate(test1=1.1, test0=[1, 2])
+        assert_neo_object_is_compliant(epc)
+
+        targ = Epoch([1.5]*pq.ms, durations=[40]*pq.ns,
+                    labels=np.array(['test epoch 2'], dtype='S'),
+                    name='test', description='tester',
+                    file_origin='test.file',
+                    test1=1, **params)
+        targ.annotate(test1=1.1, test0=[1, 2])
+        assert_neo_object_is_compliant(targ)
+        
+        t_start = 1.2
+        t_stop = 1.6
+        result = epc.time_slice(t_start, t_stop)
+
+        assert_arrays_equal(result.times, targ.times)
+        assert_arrays_equal(result.durations, targ.durations)
+        assert_arrays_equal(result.labels, targ.labels)
+        self.assertEqual(result.name, targ.name)
+        self.assertEqual(result.description, targ.description)
+        self.assertEqual(result.file_origin, targ.file_origin)
+        self.assertEqual(result.annotations['test0'], targ.annotations['test0'])
+        self.assertEqual(result.annotations['test1'], targ.annotations['test1'])
+        self.assertEqual(result.annotations['test2'], targ.annotations['test2'])
+
+    def test_time_slice_out_of_boundries(self):
+        params = {'test2': 'y1', 'test3': True}
+        epc = Epoch([1.1, 1.5, 1.7]*pq.ms, durations=[20, 40, 60]*pq.ns,
+                    labels=np.array(['test epoch 1',
+                                     'test epoch 2',
+                                     'test epoch 3'], dtype='S'),
+                    name='test', description='tester',
+                    file_origin='test.file',
+                    test1=1, **params)
+        epc.annotate(test1=1.1, test0=[1, 2])
+        assert_neo_object_is_compliant(epc)
+
+        targ = Epoch([1.1, 1.5, 1.7]*pq.ms, durations=[20, 40, 60]*pq.ns,
+                    labels=np.array(['test epoch 1',
+                                     'test epoch 2',
+                                     'test epoch 3'], dtype='S'),
+                    name='test', description='tester',
+                    file_origin='test.file',
+                    test1=1, **params)
+        targ.annotate(test1=1.1, test0=[1, 2])
+        assert_neo_object_is_compliant(targ)
+        
+        t_start = 0.0001
+        t_stop = 30
+        result = epc.time_slice(t_start, t_stop)
+
+        assert_arrays_equal(result.times, targ.times)
+        assert_arrays_equal(result.durations, targ.durations)
+        assert_arrays_equal(result.labels, targ.labels)
+        self.assertEqual(result.name, targ.name)
+        self.assertEqual(result.description, targ.description)
+        self.assertEqual(result.file_origin, targ.file_origin)
+        self.assertEqual(result.annotations['test0'], targ.annotations['test0'])
+        self.assertEqual(result.annotations['test1'], targ.annotations['test1'])
+        self.assertEqual(result.annotations['test2'], targ.annotations['test2'])
+
+
+    def test_time_slice_empty(self):
+        params = {'test2': 'y1', 'test3': True}
+        epc = Epoch([]*pq.ms, durations=[]*pq.ns,
+                    labels=np.array([], dtype='S'),
+                    name='test', description='tester',
+                    file_origin='test.file',
+                    test1=1, **params)
+        epc.annotate(test1=1.1, test0=[1, 2])
+        assert_neo_object_is_compliant(epc)
+
+        targ = Epoch([]*pq.ms, durations=[]*pq.ns,
+                    labels=np.array([], dtype='S'),
+                    name='test', description='tester',
+                    file_origin='test.file',
+                    test1=1, **params)
+        targ.annotate(test1=1.1, test0=[1, 2])
+        assert_neo_object_is_compliant(targ)
+        
+        t_start = 1.2
+        t_stop = 1.6
+        result = epc.time_slice(t_start, t_stop)
+
+        assert_arrays_equal(result.times, targ.times)
+        assert_arrays_equal(result.durations, targ.durations)
+        assert_arrays_equal(result.labels, targ.labels)
+        self.assertEqual(result.name, targ.name)
+        self.assertEqual(result.description, targ.description)
+        self.assertEqual(result.file_origin, targ.file_origin)
+        self.assertEqual(result.annotations['test0'], targ.annotations['test0'])
+        self.assertEqual(result.annotations['test1'], targ.annotations['test1'])
+        self.assertEqual(result.annotations['test2'], targ.annotations['test2'])
+
+    def test_time_slice_none_stop(self):
+        params = {'test2': 'y1', 'test3': True}
+        epc = Epoch([1.1, 1.5, 1.7]*pq.ms, durations=[20, 40, 60]*pq.ns,
+                    labels=np.array(['test epoch 1',
+                                     'test epoch 2',
+                                     'test epoch 3'], dtype='S'),
+                    name='test', description='tester',
+                    file_origin='test.file',
+                    test1=1, **params)
+        epc.annotate(test1=1.1, test0=[1, 2])
+        assert_neo_object_is_compliant(epc)
+
+        targ = Epoch([1.5, 1.7]*pq.ms, durations=[40, 60]*pq.ns,
+                    labels=np.array(['test epoch 2',
+                                     'test epoch 3'], dtype='S'),
+                    name='test', description='tester',
+                    file_origin='test.file',
+                    test1=1, **params)
+        targ.annotate(test1=1.1, test0=[1, 2])
+        assert_neo_object_is_compliant(targ)
+        
+        t_start = 1.2
+        t_stop = None
+        result = epc.time_slice(t_start, t_stop)
+
+        assert_arrays_equal(result.times, targ.times)
+        assert_arrays_equal(result.durations, targ.durations)
+        assert_arrays_equal(result.labels, targ.labels)
+        self.assertEqual(result.name, targ.name)
+        self.assertEqual(result.description, targ.description)
+        self.assertEqual(result.file_origin, targ.file_origin)
+        self.assertEqual(result.annotations['test0'], targ.annotations['test0'])
+        self.assertEqual(result.annotations['test1'], targ.annotations['test1'])
+        self.assertEqual(result.annotations['test2'], targ.annotations['test2'])
+        
+    def test_time_slice_none_start(self):
+        params = {'test2': 'y1', 'test3': True}
+        epc = Epoch([1.1, 1.5, 1.7]*pq.ms, durations=[20, 40, 60]*pq.ns,
+                    labels=np.array(['test epoch 1',
+                                     'test epoch 2',
+                                     'test epoch 3'], dtype='S'),
+                    name='test', description='tester',
+                    file_origin='test.file',
+                    test1=1, **params)
+        epc.annotate(test1=1.1, test0=[1, 2])
+        assert_neo_object_is_compliant(epc)
+
+        targ = Epoch([1.1, 1.5]*pq.ms, durations=[20, 40]*pq.ns,
+                    labels=np.array(['test epoch 1', 'test epoch 2'], dtype='S'),
+                    name='test', description='tester',
+                    file_origin='test.file',
+                    test1=1, **params)
+        targ.annotate(test1=1.1, test0=[1, 2])
+        assert_neo_object_is_compliant(targ)
+        
+        t_start = None
+        t_stop = 1.6
+        result = epc.time_slice(t_start, t_stop)
+
+        assert_arrays_equal(result.times, targ.times)
+        assert_arrays_equal(result.durations, targ.durations)
+        assert_arrays_equal(result.labels, targ.labels)
+        self.assertEqual(result.name, targ.name)
+        self.assertEqual(result.description, targ.description)
+        self.assertEqual(result.file_origin, targ.file_origin)
+        self.assertEqual(result.annotations['test0'], targ.annotations['test0'])
+        self.assertEqual(result.annotations['test1'], targ.annotations['test1'])
+        self.assertEqual(result.annotations['test2'], targ.annotations['test2'])
+        
+    def test_time_slice_none_both(self):
+        params = {'test2': 'y1', 'test3': True}
+        epc = Epoch([1.1, 1.5, 1.7]*pq.ms, durations=[20, 40, 60]*pq.ns,
+                    labels=np.array(['test epoch 1',
+                                     'test epoch 2',
+                                     'test epoch 3'], dtype='S'),
+                    name='test', description='tester',
+                    file_origin='test.file',
+                    test1=1, **params)
+        epc.annotate(test1=1.1, test0=[1, 2])
+        assert_neo_object_is_compliant(epc)
+
+        targ = Epoch([1.1, 1.5, 1.7]*pq.ms, durations=[20, 40, 60]*pq.ns,
+                    labels=np.array(['test epoch 1',
+                                     'test epoch 2',
+                                     'test epoch 3'], dtype='S'),
+                    name='test', description='tester',
+                    file_origin='test.file',
+                    test1=1, **params)
+        targ.annotate(test1=1.1, test0=[1, 2])
+        assert_neo_object_is_compliant(targ)
+        
+        t_start = None
+        t_stop = None
+        result = epc.time_slice(t_start, t_stop)
+
+        assert_arrays_equal(result.times, targ.times)
+        assert_arrays_equal(result.durations, targ.durations)
+        assert_arrays_equal(result.labels, targ.labels)
+        self.assertEqual(result.name, targ.name)
+        self.assertEqual(result.description, targ.description)
+        self.assertEqual(result.file_origin, targ.file_origin)
+        self.assertEqual(result.annotations['test0'], targ.annotations['test0'])
+        self.assertEqual(result.annotations['test1'], targ.annotations['test1'])
+        self.assertEqual(result.annotations['test2'], targ.annotations['test2'])
+       
+    def test_time_slice_differnt_units(self):
+        params = {'test2': 'y1', 'test3': True}
+        epc = Epoch([1.1, 1.5, 1.7]*pq.ms, durations=[20, 40, 60]*pq.ns,
+                    labels=np.array(['test epoch 1',
+                                     'test epoch 2',
+                                     'test epoch 3'], dtype='S'),
+                    name='test', description='tester',
+                    file_origin='test.file',
+                    test1=1, **params)
+        epc.annotate(test1=1.1, test0=[1, 2])
+        assert_neo_object_is_compliant(epc)
+
+        targ = Epoch([1.5]*pq.ms, durations=[40]*pq.ns,
+                    labels=np.array(['test epoch 2'], dtype='S'),
+                    name='test', description='tester',
+                    file_origin='test.file',
+                    test1=1, **params)
+        targ.annotate(test1=1.1, test0=[1, 2])
+        assert_neo_object_is_compliant(targ)
+        
+        t_start = 0.0012  * pq.s
+        t_stop = 0.0016 * pq.s
+        result = epc.time_slice(t_start, t_stop)
+
+        assert_arrays_equal(result.times, targ.times)
+        assert_arrays_equal(result.durations, targ.durations)
+        assert_arrays_equal(result.labels, targ.labels)
+        self.assertEqual(result.name, targ.name)
+        self.assertEqual(result.description, targ.description)
+        self.assertEqual(result.file_origin, targ.file_origin)
+        self.assertEqual(result.annotations['test0'], targ.annotations['test0'])
+        self.assertEqual(result.annotations['test1'], targ.annotations['test1'])
+        self.assertEqual(result.annotations['test2'], targ.annotations['test2'])
+    
+    def test_as_array(self):
+        times = [2, 3, 4, 5]
+        durations = [0.1, 0.2, 0.3, 0.4]
+        epc = Epoch(times * pq.ms, durations=durations * pq.ms)
+        epc_as_arr = epc.as_array(units='ms')
+        self.assertIsInstance(epc_as_arr, np.ndarray)
+        assert_array_equal(times, epc_as_arr)
+
+    def test_as_quantity(self):
+        times = [2, 3, 4, 5]
+        durations = [0.1, 0.2, 0.3, 0.4]
+        epc = Epoch(times * pq.ms, durations=durations * pq.ms)
+        epc_as_q = epc.as_quantity()
+        self.assertIsInstance(epc_as_q, pq.Quantity)
+        assert_array_equal(times * pq.ms, epc_as_q)
+
+
 class TestDuplicateWithNewData(unittest.TestCase):
     def setUp(self):
         self.data = np.array([0.1, 0.5, 1.2, 3.3, 6.4, 7])
@@ -239,13 +512,32 @@ class TestDuplicateWithNewData(unittest.TestCase):
 
     def test_duplicate_with_new_data(self):
         signal1 = self.epoch
-        new_data = np.sort(np.random.uniform(0, 100, (self.epoch))) * pq.ms
+        new_data = np.sort(np.random.uniform(0, 100, self.epoch.size)) * pq.ms
         signal1b = signal1.duplicate_with_new_data(new_data)
         assert_arrays_almost_equal(np.asarray(signal1b),
                                    np.asarray(new_data), 1e-12)
         assert_arrays_almost_equal(np.asarray(signal1b.durations),
                                    np.asarray(signal1.durations), 1e-12)
 
+class TestEventFunctions(unittest.TestCase):
+
+    def test__pickle(self):
+
+        epoch1 = Epoch(np.arange(0, 30, 10)*pq.s, labels=np.array(['t0', 't1', 't2'], dtype='S'),
+                       units='s')
+        fobj = open('./pickle', 'wb')
+        pickle.dump(epoch1, fobj)
+        fobj.close()
+
+        fobj = open('./pickle', 'rb')
+        try:
+            epoch2 = pickle.load(fobj)
+        except ValueError:
+            epoch2 = None
+
+        fobj.close()
+        assert_array_equal(epoch1.times, epoch2.times)
+        os.remove('./pickle')
 
 if __name__ == "__main__":
     unittest.main()

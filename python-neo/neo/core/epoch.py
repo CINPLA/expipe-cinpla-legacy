@@ -18,6 +18,14 @@ from neo.core.baseneo import BaseNeo, merge_annotations
 
 PY_VER = sys.version_info[0]
 
+def _new_epoch(cls, times=None, durations=None, labels=None, units=None,
+                name=None, description=None, file_origin=None, annotations = None):
+    '''
+    A function to map Event.__new__ to function that
+    does not do the unit checking. This is needed for pickle to work. 
+    '''
+    return Epoch( times=times, durations=durations, labels=labels, units=units, name=name, file_origin=file_origin,
+                 description=description, **annotations)
 
 class Epoch(BaseNeo, pq.Quantity):
     '''
@@ -104,6 +112,14 @@ class Epoch(BaseNeo, pq.Quantity):
         '''
         BaseNeo.__init__(self, name=name, file_origin=file_origin,
                          description=description, **annotations)
+    def __reduce__(self):
+        '''
+        Map the __new__ function onto _new_BaseAnalogSignal, so that pickle
+        works
+        '''
+        return _new_epoch, (self.__class__, self.times, self.durations, self.labels, self.units,
+                            self.name, self.file_origin, self.description,
+                            self.annotations)      
 
     def __array_finalize__(self, obj):
         super(Epoch, self).__array_finalize__(obj)
@@ -179,3 +195,41 @@ class Epoch(BaseNeo, pq.Quantity):
         new = self.__class__(times=signal)
         new._copy_data_complement(self)
         return new
+
+    def time_slice(self, t_start, t_stop):
+        '''
+        Creates a new :class:`Epoch` corresponding to the time slice of
+        the original :class:`Epoch` between (and including) times
+        :attr:`t_start` and :attr:`t_stop`. Either parameter can also be None
+        to use infinite endpoints for the time interval.
+        '''
+        _t_start = t_start
+        _t_stop = t_stop
+        if t_start is None:
+            _t_start = -np.inf
+        if t_stop is None:
+            _t_stop = np.inf
+
+        indices = (self >= _t_start) & (self <= _t_stop)
+
+        new_epc = self[indices]
+        new_epc.durations = self.durations[indices]
+        new_epc.labels = self.labels[indices]
+        return new_epc
+
+    def as_array(self, units=None):
+        """
+        Return the epoch start times as a plain NumPy array.
+
+        If `units` is specified, first rescale to those units.
+        """
+        if units:
+            return self.rescale(units).magnitude
+        else:
+            return self.magnitude
+
+    def as_quantity(self):
+        """
+        Return the epoch start times as a quantities array.
+        """
+        return self.view(pq.Quantity)

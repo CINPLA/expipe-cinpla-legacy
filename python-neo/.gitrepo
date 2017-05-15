@@ -6,6 +6,6 @@
 [subrepo]
 	remote = git@github.com:CINPLA/python-neo.git
 	branch = expipe
-	commit = ff9210b1e77a943e6475f8daa4e26dec9e1b0b83
-	parent = 692bb21cc5a6aaf81f825976785e5e57993e4949
+	commit = acd431c8155ea011b46147d4aa1013801a0e47cd
+	parent = e23a32fad7654b325b8d9ea179773371f2f9e0f6
 	cmdver = 0.3.1
