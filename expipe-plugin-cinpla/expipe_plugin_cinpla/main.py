@@ -23,7 +23,7 @@ class CinplaPlugin(IPlugin):
     def attach_to_cli(self, cli):
         @cli.command('generate-notebook')
         @click.argument('action-id', type=click.STRING)
-        @click.option('--no_temp',
+        @click.option('--no_local',
                       is_flag=True,
                       help='Store temporary on local drive.',
                       )
@@ -35,7 +35,7 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Store temporary on local drive.',
                       )
-        def generate_notebook(action_id, channel_group, no_temp, run):
+        def generate_notebook(action_id, channel_group, no_local, run):
             """
             Provide action id to find exdir path
 
@@ -44,10 +44,10 @@ class CinplaPlugin(IPlugin):
             project = expipe.io.get_project(user_params['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
-            if not no_temp:
+            if not no_local:
                 exdir_path = _get_local_path(fr)
             else:
-                exdir_path = fr.local_path
+                exdir_path = fr.server_path
             fname = create_notebook(exdir_path)
             if run:
                 import subprocess
@@ -129,11 +129,11 @@ class CinplaPlugin(IPlugin):
 
         @cli.command('transfer')
         @click.argument('action-id', type=click.STRING)
-        @click.option('--to-temp',
+        @click.option('--to-local',
                       is_flag=True,
                       help='Transfer action data from server to local directory.',
                       )
-        @click.option('--from-temp',
+        @click.option('--from-local',
                       is_flag=True,
                       help='Transfer action data from local directory to server.',
                       )
@@ -143,7 +143,7 @@ class CinplaPlugin(IPlugin):
                       )
         @click.option('--no-trash',
                       is_flag=True,
-                      help='Do not send temp data to trash after transfer.',
+                      help='Do not send local data to trash after transfer.',
                       )
         @click.option('--overwrite',
                       is_flag=True,
@@ -210,34 +210,34 @@ class CinplaPlugin(IPlugin):
             temp_data = op.dirname(_get_local_path(fr))
             if to_temp:
                 if overwrite:
-                    shutil.rmtree(temp_data)
-                    os.mkdir(temp_data)
+                    shutil.rmtree(local_data)
+                    os.mkdir(local_data)
                 print('Initializing transfer of "' + server_data + '" to "' +
-                      temp_data + '"')
+                      local_data + '"')
                 print('Packing tar archive')
                 ignore_statement = " "
                 for ig in ignore:
                     ignore_statement += '--exclude=' + ig + ' '
                 ssh_execute(ssh, "tar" + ignore_statement + "-cf " +
                             server_data + '.tar ' + server_data)
-                scp_client.get(server_data + '.tar', temp_data + '.tar',
+                scp_client.get(server_data + '.tar', local_data + '.tar',
                                recursive=False)
                 try:
                     pbar[0].close()
                 except Exception:
                     pass
                 print('Unpacking tar archive')
-                untar(temp_data + '.tar', server_data) # TODO merge with existing
+                untar(local_data + '.tar', server_data) # TODO merge with existing
                 print('Deleting tar archives')
-                os.remove(temp_data + '.tar')
+                os.remove(local_data + '.tar')
                 sftp_client.remove(server_data + '.tar')
-            elif from_temp:
+            elif from_local:
                 if not raw:
                     tags = action.tags or {}
                     if len(obligatory_tags) > 0:
                         if sum([tag in tags for tag in obligatory_tags]) != 1:
                             raise ValueError('Tags are not approved, please revise')
-                print('Initializing transfer of "' + temp_data + '" to "' +
+                print('Initializing transfer of "' + local_data + '" to "' +
                       server_data + '"')
                 try: # make directory for untaring
                     sftp_client.mkdir(server_data)
@@ -246,8 +246,8 @@ class CinplaPlugin(IPlugin):
                 if len(ignore) > 0:
                     raise NotImplementedError
                 print('Packing tar archive')
-                shutil.make_archive(temp_data, 'tar', temp_data)
-                scp_client.put(temp_data + '.tar', server_data + '.tar',
+                shutil.make_archive(local_data, 'tar', local_data)
+                scp_client.put(local_data + '.tar', server_data + '.tar',
                                recursive=False)
                 try:
                     pbar[0].close()
@@ -262,19 +262,19 @@ class CinplaPlugin(IPlugin):
                 ssh_execute(ssh, cmd)
                 print('Deleting tar archives')
                 sftp_client.remove(server_data + '.tar')
-                os.remove(temp_data + '.tar')
+                os.remove(local_data + '.tar')
                 if not no_trash:
                     try:
                         from send2trash import send2trash
-                        send2trash(temp_data)
-                        print('Temp data "' + temp_data +
+                        send2trash(local_data)
+                        print('local data "' + local_data +
                               '" sent to trash.')
                     except Exception:
                         import warnings
-                        warnings.warn('Unable to send temporay data to trash')
+                        warnings.warn('Unable to send local data to trash')
 
             else:
-                raise IOError('You must choose "to-temp" or "from-temp"')
+                raise IOError('You must choose "to-local" or "from-local"')
             ssh.close()
             sftp_client.close()
             scp_client.close()
@@ -287,11 +287,11 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Overwrite modules or not.',
                       )
-        @click.option('--to-temp',
+        @click.option('--to-local',
                       is_flag=True,
                       help='',
                       )
-        @click.option('--from-temp',
+        @click.option('--from-local',
                       is_flag=True,
                       help='Transfer action data from local directory to server.',
                       )
@@ -305,21 +305,21 @@ class CinplaPlugin(IPlugin):
                       default='none',
                       help='Omit raw data, acquisition etc..',
                       )
-        def copy(action_id, to_temp, from_temp, overwrite, ignore, move):
+        def copy(action_id, to_local, from_local, overwrite, ignore, move):
             """Transfer a dataset related to an expipe action
             COMMAND: action-id: Provide action id to find exdir path"""
             import shutil
             project = expipe.io.get_project(user_params['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
-            if to_temp:
+            if to_local:
                 source = fr.local_path
                 dest = _get_local_path(fr)
-            elif from_temp:
+            elif from_local:
                 dest = fr.local_path
                 source = _get_local_path(fr)
             else:
-                raise IOError('You must choose "to-temp" or "from-temp"')
+                raise IOError('You must choose "to-local" or "from-local"')
             print('Copying "' + source + '" to "' + dest + '"')
             if not op.exists(source):
                 raise FileExistsError('Source file does not exist')
@@ -347,15 +347,15 @@ class CinplaPlugin(IPlugin):
         @click.argument('action-id',
                         type=click.STRING,
                         )
-        @click.option('--no-temp',
+        @click.option('--no-local',
                       is_flag=True,
                       help='Store temporary on local drive.',
                       )
         @click.option('--debug',
                       is_flag=True,
-                      help='Store temporary on local drive.',
+                      help='Debug mode in klusta.',
                       )
-        def spikesort(action_id, no_temp, debug):
+        def spikesort(action_id, no_local, debug):
             """Spikesort with klustakwik
 
             COMMAND: action-id: Provide action id to find exdir path"""
@@ -367,10 +367,10 @@ class CinplaPlugin(IPlugin):
             project = expipe.io.get_project(user_params['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
-            if not no_temp:
+            if not no_local:
                 exdir_path = _get_local_path(fr)
             else:
-                exdir_path = fr.local_path
+                exdir_path = fr.server_path
             print('Spikesorting ', exdir_path)
             model = NeoModel(exdir_path)
             channel_groups = model.channel_groups
@@ -383,9 +383,9 @@ class CinplaPlugin(IPlugin):
 
         @cli.command('register-units')
         @click.argument('action-id', type=click.STRING)
-        @click.option('--no-temp',
+        @click.option('--no-local',
                       is_flag=True,
-                      help='Store temporary on local drive.',
+                      help='Store on local drive.',
                       )
         @click.option('--overwrite',
                       is_flag=True,
@@ -405,7 +405,7 @@ class CinplaPlugin(IPlugin):
                       type=click.STRING,
                       help='Add note, use "text here" for sentences.',
                       )
-        def register_units(action_id, no_temp, channel_group, overwrite, tag,
+        def register_units(action_id, no_local, channel_group, overwrite, tag,
                            note):
             """Parse info about recorded units
 
@@ -424,10 +424,10 @@ class CinplaPlugin(IPlugin):
             action.tags = tags
 
             fr = action.require_filerecord()
-            if not no_temp:
+            if not no_local:
                 exdir_path = _get_local_path(fr)
             else:
-                exdir_path = fr.local_path
+                exdir_path = fr.server_path
             print(exdir_path)
             io = neo.io.ExdirIO(exdir_path)
             blk = io.read_block()
@@ -568,7 +568,7 @@ class CinplaPlugin(IPlugin):
                       type=click.INT,
                       help='Which channel-group to plot.',
                       )
-        @click.option('--no-temp',
+        @click.option('--no-local',
                       is_flag=True,
                       help='Store temporary on local drive.',
                       )
@@ -620,7 +620,7 @@ class CinplaPlugin(IPlugin):
             action = project.require_action(kwargs['action_id'])
             plot = Plotter(kwargs['action_id'],
                            channel_group=kwargs['channel_group'],
-                           no_temp=kwargs['no_temp'],
+                           no_local=kwargs['no_local'],
                            overwrite=kwargs['overwrite'],
                            skip=kwargs['skip'])
             if kwargs['stim_stat'] or kwargs['all']:

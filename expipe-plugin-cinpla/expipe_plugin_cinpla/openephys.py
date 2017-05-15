@@ -80,7 +80,7 @@ class OpenEphysPlugin(IPlugin):
                       is_flag=True,
                       help='Not convert to exdir.',
                       )
-        @click.option('--no-temp',
+        @click.option('--no-local',
                       is_flag=True,
                       help='Store temporary on local drive.',
                       )
@@ -96,7 +96,7 @@ class OpenEphysPlugin(IPlugin):
         def process_openephys(action_id, prb_path, pre_filter,
                                klusta_filter, filter_low,
                                filter_high, nchan, common_ref, ground,
-                               split_probe, no_temp, openephys_path,
+                               split_probe, no_local, openephys_path,
                                exdir_path, no_klusta, no_convert, shutter_channel,
                                no_preprocess):
             """Generate a klusta .dat and .prm files from openephys directory.
@@ -110,10 +110,10 @@ class OpenEphysPlugin(IPlugin):
                 project = expipe.io.get_project(user_params['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
-                if not no_temp:
+                if not no_local:
                     exdir_path = _get_local_path(fr)
                 else:
-                    exdir_path = fr.local_path
+                    exdir_path = fr.server_path
                 exdir_file = exdir.File(exdir_path)
             if openephys_path is None:
                 acquisition = exdir_file["acquisition"]
@@ -234,7 +234,7 @@ class OpenEphysPlugin(IPlugin):
                       default='none',
                       help='Generate spiketrains from "source". Default is none'
                       )
-        @click.option('--no-temp',
+        @click.option('--no-local',
                       is_flag=True,
                       help='Store temporary on local drive.',
                       )
@@ -271,7 +271,7 @@ class OpenEphysPlugin(IPlugin):
                       is_flag=True,
                       help='Do not delete open ephys directory after copying.',
                       )
-        def generate_openephys_action(action_id, openephys_path, no_temp, left,
+        def generate_openephys_action(action_id, openephys_path, no_local, left,
                                       right, overwrite, no_files, no_modules,
                                       rat_id, user, prb_path, session, nchan,
                                       location, spikes_source,
@@ -355,10 +355,10 @@ class OpenEphysPlugin(IPlugin):
 
             if not no_files:
                 fr = action.require_filerecord()
-                if not no_temp:
+                if not no_local:
                     exdir_path = _get_local_path(fr)
                 else:
-                    exdir_path = fr.local_path
+                    exdir_path = fr.server_path
                 if op.exists(exdir_path):
                     if overwrite:
                         shutil.rmtree(exdir_path)
@@ -393,7 +393,7 @@ class OpenEphysPlugin(IPlugin):
                       type=click.STRING,
                       help='Path to desired exdir directory, if none it is deduced from action id.',
                       )
-        @click.option('--no-temp',
+        @click.option('--no-local',
                       is_flag=True,
                       help='Store temporary on local drive.',
                       )
@@ -402,7 +402,7 @@ class OpenEphysPlugin(IPlugin):
                 default=32,
                 help='Number of channels. Default = 32',
                 )
-        def generate_klusta_oe(action_id, prb_path, no_temp, openephys_path,
+        def generate_klusta_oe(action_id, prb_path, no_local, openephys_path,
                                exdir_path, nchan):
             """Convert klusta spikes to exdir.
 
@@ -413,10 +413,10 @@ class OpenEphysPlugin(IPlugin):
                 project = expipe.io.get_project(user_params['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
-                if not no_temp:
+                if not no_local:
                     exdir_path = _get_local_path(fr)
                 else:
-                    exdir_path = fr.local_path
+                    exdir_path = fr.server_path
                 exdir_file = exdir.File(exdir_path)
                 acquisition = exdir_file["acquisition"]
                 if acquisition.attrs['acquisition_system'] != 'OpenEphys':

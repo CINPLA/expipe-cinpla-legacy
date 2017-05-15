@@ -47,7 +47,7 @@ class OptoPlugin(IPlugin):
                       type=click.INT,
                       help='TTL input channel.',
                       )
-        @click.option('--no-temp',
+        @click.option('--no-local',
                       is_flag=True,
                       help='Store temporary on local drive.',
                       )
@@ -59,7 +59,7 @@ class OptoPlugin(IPlugin):
                       type=click.STRING,
                       help='A unique identifier of the laser.',
                       )
-        def parse_optogenetics(action_id, brain_area, no_temp, overwrite,
+        def parse_optogenetics(action_id, brain_area, no_local, overwrite,
                                io_channel, tag, note, laser_id):
             """Parse optogenetics info to an action.
 
@@ -75,10 +75,10 @@ class OptoPlugin(IPlugin):
             tags.update({tag: 'true', 'opto-' + brain_area: 'true'})
             action.tags = tags
             fr = action.require_filerecord()
-            if not no_temp:
+            if not no_local:
                 exdir_path = _get_local_path(fr)
             else:
-                exdir_path = fr.local_path
+                exdir_path = fr.server_path
             exdir_object = exdir.File(exdir_path)
             if exdir_object['acquisition'].attrs['acquisition_system'] == 'Axona':
                 aq_sys = 'axona'
@@ -105,7 +105,7 @@ class OptoPlugin(IPlugin):
 
         @cli.command('register-opto-files')
         @click.argument('action-id', type=click.STRING)
-        @click.option('--no-temp',
+        @click.option('--no-local',
                 is_flag=True,
                 help='Store temporary on local drive.',
                 )
@@ -114,7 +114,7 @@ class OptoPlugin(IPlugin):
                 type=click.INT,
                 help='TTL input channel.',
                 )
-        def parse_optogenetics_files(action_id, no_temp, io_channel):
+        def parse_optogenetics_files(action_id, no_local, io_channel):
             """Parse optogenetics info to an action.
 
             COMMAND: action-id: Provide action id to find exdir path"""
@@ -122,10 +122,10 @@ class OptoPlugin(IPlugin):
             project = expipe.io.get_project(user_params['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
-            if not no_temp:
+            if not no_local:
                 exdir_path = _get_local_path(fr)
             else:
-                exdir_path = fr.local_path
+                exdir_path = fr.server_path
             exdir_object = exdir.File(exdir_path)
             if exdir_object['acquisition'].attrs['acquisition_system'] == 'Axona':
                 aq_sys = 'axona'

@@ -42,7 +42,7 @@ class AxonaPlugin(IPlugin):
                       help=('Desired action id for this action, if none' +
                              ', it is generated from axona-path.'),
                       )
-        @click.option('--no-temp',
+        @click.option('--no-local',
                       is_flag=True,
                       help='Store temporary on local drive.',
                       )
@@ -67,7 +67,7 @@ class AxonaPlugin(IPlugin):
                       help='Add note, use "text here" for sentences.',
                       )
         def generate_axona_action(action_id, axona_filename, left, right, user,
-                                  no_temp, overwrite, no_files, no_modules,
+                                  no_local, overwrite, no_files, no_modules,
                                   rat_id, location, note):
             """Generate an axona recording-action to database.
 
@@ -123,10 +123,10 @@ class AxonaPlugin(IPlugin):
                                    git_note=GIT_NOTE)
                 register_depth(project, action, left, right)
             fr = action.require_filerecord()
-            if not no_temp:
+            if not no_local:
                 exdir_path = _get_local_path(fr)
             else:
-                exdir_path = fr.local_path
+                exdir_path = fr.server_path
             if not no_files:
                 if op.exists(exdir_path):
                     if overwrite:

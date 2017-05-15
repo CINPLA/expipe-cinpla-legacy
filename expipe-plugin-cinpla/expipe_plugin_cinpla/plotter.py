@@ -18,7 +18,7 @@ else:
 
 class Plotter:
     def __init__(self, action_id, ext='.png', save_figs=True,
-                 close_fig=True, channel_group=None, no_temp=False,
+                 close_fig=True, channel_group=None, no_local=False,
                  overwrite=False, skip=False):
         import exdir
         import exana.tracking as tr
@@ -27,10 +27,10 @@ class Plotter:
         project = expipe.io.get_project(user_params['project_id'])
         action = project.require_action(action_id)
         fr = action.require_filerecord()
-        if not no_temp:
+        if not no_local:
             exdir_path = _get_local_path(fr)
         else:
-            exdir_path = fr.local_path
+            exdir_path = fr.server_path
         print('Initializing plotting for {}'.format(exdir_path))
         if ext[0] != '.':
             ext = '.' + ext
