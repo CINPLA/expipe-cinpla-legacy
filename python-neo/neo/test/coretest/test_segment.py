@@ -27,7 +27,7 @@ from neo.core.segment import Segment
 from neo.core import (AnalogSignal, Block,
                       Epoch, ChannelIndex, SpikeTrain, Unit)
 from neo.core.container import filterdata
-from neo.test.signal_tools import (assert_neo_object_is_compliant,
+from neo.test.tools import (assert_neo_object_is_compliant,
                             assert_same_sub_schema)
 from neo.test.generate_datasets import (fake_neo, get_fake_value,
                                         get_fake_values, get_annotations,

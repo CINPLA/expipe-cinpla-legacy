@@ -24,7 +24,7 @@ import quantities as pq
 
 from neo.io.baseio import BaseIO
 from neo.core import Segment, AnalogSignal, SpikeTrain, Event
-from neo.io.signal_tools import iteritems
+from neo.io.tools import iteritems
 
 
 class PlexonIO(BaseIO):

@@ -53,7 +53,7 @@ from neo.io.baseio import BaseIO
 # to import from core
 from neo.core import (Segment, SpikeTrain, Unit, Epoch, AnalogSignal, Block,
                       Event, IrregularlySampledSignal)
-import neo.io.signal_tools
+import neo.io.tools
 
 
 class OpenEphysIO(BaseIO):
@@ -201,7 +201,7 @@ class OpenEphysIO(BaseIO):
                         epo = self._get_stim(channel=stim_ttl_chan)
                         seg.epochs += [epo]
 
-            # neo.signal_tools.populate_RecordingChannel(blk)
+            # neo.tools.populate_RecordingChannel(blk)
         blk.create_many_to_one_relationship()
         return blk
 

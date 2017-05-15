@@ -19,7 +19,7 @@ except ImportError:
     HAVE_H5PY = False
 from neo.io.hdf5io import NeoHdf5IO
 from neo.test.iotest.common_io_test import BaseTestIO
-from neo.test.iotest.signal_tools import get_test_file_full_path
+from neo.test.iotest.tools import get_test_file_full_path
 
 
 @unittest.skipUnless(HAVE_H5PY, "requires h5py")

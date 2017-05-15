@@ -27,7 +27,7 @@ from datetime import datetime
 import locale
 import struct
 import platform
-from .signal_tools import (_read_python, _cut_to_same_len, _zeros_to_nan, clip_anas,
+from .tools import (_read_python, _cut_to_same_len, _zeros_to_nan, clip_anas,
                     readHeader, loadSpikes, clip_digs, clip_times,
                     clip_tracking, find_nearest, get_number_of_records,
                     read_analog_continuous_signal, read_analog_binary_signals,

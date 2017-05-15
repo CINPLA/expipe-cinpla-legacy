@@ -26,7 +26,7 @@ from neo.test.generate_datasets import (generate_one_simple_block,
                                         generate_from_supported_objects,
                                         get_fake_value, get_fake_values,
                                         fake_neo, TEST_ANNOTATIONS)
-from neo.test.signal_tools import assert_arrays_equal, assert_neo_object_is_compliant
+from neo.test.tools import assert_arrays_equal, assert_neo_object_is_compliant
 
 
 class Test__generate_one_simple_segment(unittest.TestCase):

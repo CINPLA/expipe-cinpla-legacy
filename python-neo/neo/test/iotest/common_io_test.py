@@ -30,12 +30,12 @@ except ImportError:
     import unittest
 
 from neo.core import Block, Segment
-from neo.test.signal_tools import (assert_same_sub_schema,
+from neo.test.tools import (assert_same_sub_schema,
                             assert_neo_object_is_compliant,
                             assert_sub_schema_is_lazy_loaded,
                             assert_lazy_sub_schema_can_be_loaded,
                             assert_children_empty)
-from neo.test.iotest.signal_tools import (can_use_network, cleanup_test_file,
+from neo.test.iotest.tools import (can_use_network, cleanup_test_file,
                                    close_object_safe, create_generic_io_object,
                                    create_generic_reader,
                                    create_generic_writer,
@@ -489,7 +489,7 @@ class BaseTestIO(object):
         '''
         Reading %s files in `files_to_test` produces compliant objects.
 
-        Compliance test: neo.test.signal_tools.assert_neo_object_is_compliant for
+        Compliance test: neo.test.tools.assert_neo_object_is_compliant for
         all cascade and lazy modes
         ''' % self.ioclass.__name__
         # This is for files presents at G-Node or generated

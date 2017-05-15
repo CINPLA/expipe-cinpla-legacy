@@ -46,7 +46,7 @@ import quantities as pq
 
 from neo.io.baseio import BaseIO
 from neo.core import Block, Segment, AnalogSignal, Event
-from neo.io.signal_tools import iteritems
+from neo.io.tools import iteritems
 
 
 class StructFile(BufferedReader):

@@ -300,7 +300,7 @@ class Plotter:
     def spike_lfp_coherence(self, xlim=[4, 16], color='b',
                             srch=[6, 10], show_max=False): # TODO plots everything twice
         from exana.time_frequency import plot_spike_psd, plot_psd
-        from exana.misc.signal_tools import normalize
+        from exana.misc.tools import normalize
         from matplotlib import gridspec
         import matplotlib.lines as mlines
         from matplotlib.ticker import MaxNLocator

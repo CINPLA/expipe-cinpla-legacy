@@ -19,7 +19,7 @@ import quantities as pq
 from neo.core import Segment, AnalogSignal, SpikeTrain
 from neo.io import PyNNNumpyIO, PyNNTextIO
 from numpy.testing import assert_array_equal
-from neo.test.signal_tools import assert_arrays_equal, assert_file_contents_equal
+from neo.test.tools import assert_arrays_equal, assert_file_contents_equal
 from neo.test.iotest.common_io_test import BaseTestIO
 
 #class CommonTestPyNNNumpyIO(BaseTestIO, unittest.TestCase):
