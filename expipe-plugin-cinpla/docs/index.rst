@@ -1,5 +1,5 @@
 Welcome to expipe-plugin CINPLA's documentation!
-==========================================
+================================================
 
 Expipe is a python module for neuroscientific data analysis.
 
@@ -8,6 +8,7 @@ Expipe is a python module for neuroscientific data analysis.
    :hidden:
 
    installation
+   developers_guide
    authors
 
 .. testsetup:
@@ -51,6 +52,7 @@ Save with ctrl-s
 *Plotting with notebook*::
 
   $ expipe generate-notebook ROTTE-DATO-SESSION --run
+
 ``kernel -> restart and run all``
 
 *Make png figurer*::
