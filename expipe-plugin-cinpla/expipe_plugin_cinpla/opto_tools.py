@@ -63,18 +63,22 @@ def generate_openephys_opto(exdir_path, io_channel, **attrs):
 
 
 def populate_modules(action, params):
-    pulse_mod = action.require_module(name='pulse_pal_settings')
-    pulse_dict = pulse_mod.to_dict()
+    name = [n for n in action.modules.keys() if 'pulse_pal_settings' in n]
+    assert len(name) == 1
+    name = name[0]
+    pulse_dict = action.require_module(name=name).to_dict()
     pulse_dict['stimulus_file_url']['value'] = '/'.join(params['pulse_url'].split('/')[4:])
     pulse_dict['pulse_period'] = params['pulse_period']
     pulse_dict['pulse_phase_duration'] = params['pulse_phasedur']
     pulse_dict['pulse_frequency'] = params['pulse_freq']
     pulse_dict['trigger_software']['value'] = params['trigger_software']
-    action.require_module(name='pulse_pal_settings', contents=pulse_dict,
+    action.require_module(name=name, contents=pulse_dict,
                           overwrite=True)
 
-    laser_mod = action.require_module(name='laser_settings')
-    laser_dict = laser_mod.to_dict()
+    name = [n for n in action.modules.keys() if 'laser_settings' in n]
+    assert len(name) == 1
+    name = name[0]
+    laser_dict = action.require_module(name=name).to_dict()
     laser_dict['intensity_file_url']['value'] = '/'.join(params['laser_url'].split('/')[4:])
     laser_mask = params['laser_intensity'] > .1 * pq.mW
     avg = params['laser_intensity'][laser_mask].mean().rescale('mW')
@@ -84,23 +88,26 @@ def populate_modules(action, params):
                                    expipe.io.core.datetime_format)
     laser_dict['intensity_date_time']['value'] = timestring
     laser_dict['intensity_info']['value'] = params['laser_info']
-    laser_mod = action.require_module(name='laser_settings',
-                                      contents=laser_dict,
-                                      overwrite=True)
+    action.require_module(name=name, contents=laser_dict, overwrite=True)
 
-    loc_mod = action.require_module(name='optogenetics_anatomical_location')
+    name = [n for n in action.modules.keys()
+            if 'optogenetics_anatomical_location' in n]
+    assert len(name) == 1
+    name = name[0]
+    loc_mod = action.require_module(name=name)
     loc_dict = loc_mod.to_dict()
     loc_dict['location']['value'] = params['location']
-    action.require_module(name='optogenetics_anatomical_location',
-                          contents=loc_dict, overwrite=True)
+    action.require_module(name=name, contents=loc_dict, overwrite=True)
 
-    paradigm = action.require_module(name='optogenetics_paradigm').to_dict()
-    if params['trigger_software'].lower() == 'openephys':
+    name = [n for n in action.modules.keys() if 'optogenetics_paradigm' in n]
+    assert len(name) == 1
+    name = name[0]
+    paradigm = action.require_module(name=name).to_dict()
+    if params['trigger_software'].lower() == 'openephys': # TODO what if we start using other stim in oe
         paradigm['stimulus_type']['value'] = 'positional'
     if params['trigger_software'].lower() == 'matlab':
         paradigm['stimulus_type']['value'] = 'train'
-    action.require_module(name='optogenetics_paradigm',
-                          contents=paradigm, overwrite=True)
+    action.require_module(name=name, contents=paradigm, overwrite=True)
 
 
 def extract_laser_pulse(acquisition_directory):

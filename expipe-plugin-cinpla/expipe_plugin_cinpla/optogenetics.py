@@ -92,11 +92,14 @@ class OptoPlugin(IPlugin):
             generate_templates(action, templates['opto_' + aq_sys],
                                overwrite, git_note=None)
             populate_modules(action, params)
-            laser = action.require_module(name='blue_laser').to_dict()
-            laser_id = laser_id or user_params['laser_device_id']
+            laser_id = laser_id or user_params['laser_device'].get('id')
+            laser_name = user_params['laser_device'].get('name')
             assert laser_id is not None
+            assert laser_name is not None
+            laser = action.require_module(name=laser_name).to_dict()
             laser['device_id'] = {'value': laser_id}
-            action.require_module(name='blue_laser', contents=laser)
+            action.require_module(name=laser_name, contents=laser,
+                                  overwrite=True)
             if note is not None:
                 notes = action.require_module(name='notes').to_dict()
                 notes['opto_note'] = {'value': note}

@@ -4,6 +4,7 @@ import expipe.io
 import os.path as op
 from distutils.util import strtobool
 import sys
+import os
 from ._version import get_versions
 
 sys.path.append(expipe.config.config_dir)
@@ -90,16 +91,19 @@ def register_depth(project, action, left=None, right=None):
     if answer == False:
         print('Aborting depth registration')
         return
-    L = action.require_module('electrophysiology_L').to_dict()
-    L['depth'] = pq.Quantity(left, 'mm')
-    print('Registering depth left = ', L['depth'])
-    action.require_module('electrophysiology_L', contents=L,
-                          overwrite=True)
-    R = action.require_module('electrophysiology_R').to_dict()
-    R['depth'] = pq.Quantity(right, 'mm')
-    print('Registering depth right = ', R['depth'])
-    action.require_module('electrophysiology_R', contents=R,
-                          overwrite=True)
+    for desc, inp in zip(['left', 'right'], [left, right]):
+        mod, name, cnt = None, None, 0
+        for key, val in action.modules.items():
+            if 'electrophysiology' in key:
+                hem = val.get('hemisphere')
+                if hem['value'] == desc[0].capitalize() or hem['value'] == desc:
+                    cnt += 1
+                    name, mod = key, val
+        if cnt != 1:
+            raise IOError('Failed to acquire electrophysiology module')
+        mod['depth'] = pq.Quantity(inp, 'mm')
+        print('Registering depth ', desc, ' = ', mod['depth'])
+        action.require_module(name=name, contents=mod, overwrite=True)
 
 
 def _get_local_path(file_record):

@@ -335,10 +335,11 @@ class OpenEphysPlugin(IPlugin):
                                      '{}"'.format(templates.keys()))
                 generate_templates(action, templates['openephys'], overwrite,
                                    git_note=GIT_NOTE)
-                headstage = action.require_module(name='intan_headstage').to_dict()
+                headstage = action.require_module(
+                    name='hardware_intan_headstage').to_dict()
                 headstage['model']['value'] = 'RHD2132'
-                action.require_module(name='intan_headstage', contents=headstage,
-                                      overwrite=True)
+                action.require_module(name='hardware_intan_headstage',
+                                      contents=headstage, overwrite=True)
                 register_depth(project, action, left, right)
 
                 if len(openephys_file.messages) != 0:

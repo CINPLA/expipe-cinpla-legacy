@@ -3,7 +3,7 @@ import quantities as pq
 
 axona_templates = [
     'mikkel_electrophysiology_L',
-    'mikkel_electrophysiology_R', 'mikkel_notes',
+    'mikkel_electrophysiology_R',
     '_inherit_hardware_axona_tracker',
     '_inherit_hardware_axona_daq',
     '_inherit_hardware_axona_camera_objective',
@@ -15,7 +15,7 @@ axona_templates = [
 
 openephys_templates = [
     'mikkel_electrophysiology_L',
-    'mikkel_electrophysiology_R', 'mikkel_notes',
+    'mikkel_electrophysiology_R',
     '_inherit_hardware_openephys_daq',
     '_inherit_hardware_intan_headstage',
     '_inherit_hardware_pointgrey_camera_objective',
@@ -57,7 +57,7 @@ possible_tags = ['GC', 'PC', 'BC', 'SC', 'HD', 'TC', 'theta'] + obligatory_tags
 surgery_implantation_templates = [
     'mikkel_implant_drive_L', 'mikkel_implant_drive_R',
     'mikkel_implant_fibre', 'mikkel_subject',
-    'mikkel_notes', 'mikkel_anaesthesia', 'mikkel_analgesia',
+    'mikkel_anaesthesia', 'mikkel_analgesia',
     'mikkel_analgesia_post', 'mikkel_anaesthesia_local',
     '_inherit_mikkel_optic_fibre', '_inherit_mikkel_tetrode',
     '_inherit_mikkel_drive_optetrode',
@@ -66,7 +66,7 @@ surgery_implantation_templates = [
 ]
 
 surgery_injection_templates = [
-    'mikkel_notes', 'mikkel_anaesthesia', 'mikkel_analgesia',
+    'mikkel_anaesthesia', 'mikkel_analgesia',
     'mikkel_analgesia_post', 'mikkel_anaesthesia_local',
     'mikkel_subject', 'mikkel_injection_1',
     'mikkel_injection_2',
@@ -127,7 +127,7 @@ user_params = {
     'project_id': 'mikkel_septum_entorhinal',
     'user_name': 'Mikkel Elle Lepperød',
     'location': 'room2',
-    'laser_device_id': None
+    'laser_device': {'name': 'hardware_blue_laser', 'id': 4}
 }
 templates = {
     'axona': axona_templates,
