@@ -2,7 +2,7 @@ import os
 import os.path as op
 import numpy as np
 import expipe.io
-from .signal_tools import _get_local_path
+from .action_tools import _get_local_path
 import expipe
 import sys
 sys.path.append(expipe.config.config_dir)
