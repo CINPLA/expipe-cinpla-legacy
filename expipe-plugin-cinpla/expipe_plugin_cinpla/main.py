@@ -5,7 +5,7 @@ import os.path as op
 from expipecli.utils import IPlugin
 import click
 from .action_tools import (generate_templates, _get_local_path, create_notebook,
-                           GIT_NOTE)
+                           GIT_NOTE, nwb_main_groups)
 import sys
 sys.path.append(expipe.config.config_dir)
 if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
@@ -137,10 +137,6 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Transfer action data from local directory to server.',
                       )
-        @click.option('--no-tar',
-                      is_flag=True,
-                      help='Compress before transfer.',
-                      )
         @click.option('--no-trash',
                       is_flag=True,
                       help='Do not send local data to trash after transfer.',
@@ -157,15 +153,19 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Merge with existing, overwriting equal files.',
                       )
-        @click.option('--note',
+        @click.option('-n', '--note',
                       type=click.STRING,
                       help='Add note, use "text here" for sentences.',
                       )
-        @click.option('-i', '--ignore',
+        @click.option('-e', '--exclude',
                       multiple=True,
-                      type=click.Choice(['acquisition', 'analysis', 'processing',
-                                         'epochs', 'none']),
+                      type=click.Choice(nwb_main_groups),
                       help='Omit raw data, acquisition etc..',
+                      )
+        @click.option('-i', '--include',
+                      multiple=True,
+                      type=click.Choice(nwb_main_groups),
+                      help='Only select which folders to include.',
                       )
         @click.option('--port',
                       default=22,
@@ -180,15 +180,16 @@ class CinplaPlugin(IPlugin):
                       type=click.STRING,
                       help='SSH username.',
                       )
-        def transfer(action_id, to_temp, from_temp, no_tar, overwrite, no_trash,
-                     note, raw, ignore, merge, port, username, hostname):
+        def transfer(action_id, to_local, from_local, overwrite, no_trash,
+                     note, raw, exclude, include, merge, port, username, hostname):
             """Transfer a dataset related to an expipe action
 
             COMMAND: action-id: Provide action id to find exdir path"""
+            if len(exclude) > 0 and len(include) > 0:
+                raise IOError('You can only use exlude or include')
             from .ssh_tools import get_login, login, ssh_execute, untar
-            if not no_tar:
-                import tarfile
-                import shutil
+            import tarfile
+            import shutil
             project = expipe.io.get_project(user_params['project_id'])
             action = project.require_action(action_id)
             if note is not None:
@@ -207,18 +208,21 @@ class CinplaPlugin(IPlugin):
             serverpath = expipe.config.settings['server']['data_path']
             server_data = op.dirname(op.join(serverpath, fr.exdir_path))
             server_data = server_data.replace('\\', '/')
-            temp_data = op.dirname(_get_local_path(fr))
-            if to_temp:
+            local_data = op.dirname(_get_local_path(fr))
+            if to_local:
                 if overwrite:
                     shutil.rmtree(local_data)
                     os.mkdir(local_data)
                 print('Initializing transfer of "' + server_data + '" to "' +
                       local_data + '"')
                 print('Packing tar archive')
-                ignore_statement = " "
-                for ig in ignore:
-                    ignore_statement += '--exclude=' + ig + ' '
-                ssh_execute(ssh, "tar" + ignore_statement + "-cf " +
+                exclude_statement = " "
+                for ex in exclude:
+                    exclude_statement += '--exclude=' + ex + ' '
+                for ex in nwb_main_groups:
+                    if not ex in include:
+                        exclude_statement += '--exclude=' + ex + ' '
+                ssh_execute(ssh, "tar" + exclude_statement + "-cf " +
                             server_data + '.tar ' + server_data)
                 scp_client.get(server_data + '.tar', local_data + '.tar',
                                recursive=False)
@@ -243,7 +247,7 @@ class CinplaPlugin(IPlugin):
                     sftp_client.mkdir(server_data)
                 except IOError:
                     pass
-                if len(ignore) > 0:
+                if len(exclude) > 0 or len(include) > 0:
                     raise NotImplementedError
                 print('Packing tar archive')
                 shutil.make_archive(local_data, 'tar', local_data)
@@ -299,13 +303,13 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Delete source.',
                       )
-        @click.option('--ignore',
+        @click.option('--exclude',
                       type=click.Choice(['acquisition', 'analysis', 'processing',
                                          'epochs', 'none']),
                       default='none',
                       help='Omit raw data, acquisition etc..',
                       )
-        def copy_action(action_id, to_local, from_local, overwrite, ignore, move):
+        def copy_action(action_id, to_local, from_local, overwrite, exclude, move):
             """Transfer a dataset related to an expipe action
             COMMAND: action-id: Provide action id to find exdir path"""
             import shutil
@@ -329,46 +333,46 @@ class CinplaPlugin(IPlugin):
                 else:
                     raise FileExistsError('Destination "' + dest +
                                           '" exist, use overwrite flag')
-            if ignore != 'none':
-                print('Ignoring "' + ignore + '"')
+            if exclude != 'none':
+                print('Ignoring "' + exclude + '"')
 
-            def ignore_dir(src, names):
-                if src.endswith('main.exdir') and ignore != 'none':
-                    return [ignore]
+            def exclude_dir(src, names):
+                if src.endswith('main.exdir') and exclude != 'none':
+                    return [exclude]
                 else:
                     return set()
 
-            shutil.copytree(source, dest, ignore=ignore_dir)  # TODO write progress
+            shutil.copytree(source, dest, ignore=exclude_dir)  # TODO write progress
             if move:
                 shutil.rmtree(source)
 
 
         @cli.command('spikesort')
-        @click.argument('action-id',
-                        type=click.STRING,
-                        )
+        @click.argument('action-id', type=click.STRING)
         @click.option('--no-local',
                       is_flag=True,
                       help='Store temporary on local drive.',
                       )
-        @click.option('--debug',
-                      is_flag=True,
-                      help='Debug mode in klusta.',
-                      )
-        def spikesort(action_id, no_local, debug):
+        def spikesort(action_id, no_local):
             """Spikesort with klustakwik
 
             COMMAND: action-id: Provide action id to find exdir path"""
             import numpy as np
-            if debug:
-                import logging.config
-                logging.basicConfig(level=logging.DEBUG)
             from phycontrib.neo.model import NeoModel
+            import logging
+            import sys
+            # anoying!!!!
+            logger = logging.getLogger('phy')
+            logger.setLevel(logging.DEBUG)
+            ch = logging.StreamHandler(sys.stdout)
+            ch.setLevel(logging.DEBUG)
+            logger.addHandler(ch)
+
             project = expipe.io.get_project(user_params['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_local:
-                exdir_path = _get_local_path(fr)
+                exdir_path = _get_local_path(fr, assert_exists=True)
             else:
                 exdir_path = fr.server_path
             print('Spikesorting ', exdir_path)

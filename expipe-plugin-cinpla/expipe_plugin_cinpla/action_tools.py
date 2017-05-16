@@ -23,6 +23,9 @@ GIT_NOTE = {
     'expipe-version': expipe.__version__
 }
 
+nwb_main_groups = ['acquisition', 'analysis', 'processing', 'epochs',
+                   'general']
+
 
 def query_yes_no(question, default="yes"):
     """Ask a yes/no question via raw_input() and return their answer.
@@ -82,6 +85,8 @@ def register_depth(project, action, left=None, right=None):
         adleft = adjustment['depth'][0]
         adright = adjustment['depth'][1]
         assert adjustment['location'].lower() == 'left, right'
+    else:
+        adjustdate, adleft, adright = None, None, None
     left = left or adleft
     right = right or adright
     answer = query_yes_no(
@@ -106,7 +111,7 @@ def register_depth(project, action, left=None, right=None):
         action.require_module(name=name, contents=mod, overwrite=True)
 
 
-def _get_local_path(file_record):
+def _get_local_path(file_record, assert_exists=False):
     '''
 
     :param file_record:
@@ -116,8 +121,10 @@ def _get_local_path(file_record):
     folder_name = 'expipe_temp_storage'
     local_path = file_record.local_path or op.join(os.path.expanduser('~'),
                                                    folder_name, path)
-    if not op.exists(local_path):
+    if not op.exists(local_path) and not assert_exists:
         os.makedirs(local_path)
+    elif not op.exists(local_path) and assert_exists:
+        raise IOError('Path does not exist.')
     return local_path
 
 

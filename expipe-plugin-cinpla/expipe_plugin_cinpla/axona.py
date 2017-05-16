@@ -101,6 +101,7 @@ class AxonaPlugin(IPlugin):
             action.type = 'Recording'
             action.datetime = axona_file._start_datetime
             action.tags = {'axona': 'true'}
+            print('Registering action id ' + action_id)
             print('Registering rat id ' + rat_id)
             action.subjects = {rat_id: 'true'}
             user = user or user_params['user_name']
