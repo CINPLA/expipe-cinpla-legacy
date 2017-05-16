@@ -219,9 +219,10 @@ class CinplaPlugin(IPlugin):
                 exclude_statement = " "
                 for ex in exclude:
                     exclude_statement += '--exclude=' + ex + ' '
-                for ex in nwb_main_groups:
-                    if not ex in include:
-                        exclude_statement += '--exclude=' + ex + ' '
+                if len(include) > 0:
+                    for ex in nwb_main_groups:
+                        if ex not in include:
+                            exclude_statement += '--exclude=' + ex + ' '
                 ssh_execute(ssh, "tar" + exclude_statement + "-cf " +
                             server_data + '.tar ' + server_data)
                 scp_client.get(server_data + '.tar', local_data + '.tar',
