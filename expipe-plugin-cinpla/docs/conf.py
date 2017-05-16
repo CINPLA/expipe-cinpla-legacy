@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# expipe documentation build configuration file, created by
+# expipe-plugin-cinpla documentation build configuration file, created by
 # sphinx-quickstart on Fri Feb  3 09:52:17 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -23,7 +23,7 @@
 
 import os
 import re
-import expipe
+import expipe_plugin_cinpla
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if not on_rtd:  # only import and set the theme if we're building docs locally
@@ -66,16 +66,16 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'expipe'
-copyright = '2017, Svenn-Arne Dragly, Milad H. Mobarhan, Mikkel E. Lepperød'
-author = 'Svenn-Arne Dragly, Milad H. Mobarhan, Mikkel E. Lepperød'
+project = 'expipe-plugin-cinpla'
+copyright = '2017, Mikkel E. Lepperød, Alessio Buccino'
+author = 'Mikkel E. Lepperød, Alessio Buccino'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
-release = expipe.__version__.replace("v", "")
+release = expipe_plugin_cinpla.__version__.replace("v", "")
 print("Release", release)
 # The short X.Y version.
 version = release
@@ -125,7 +125,7 @@ todo_include_todos = True
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'expipedoc'
+htmlhelp_basename = 'expipe-plugin-cinpladoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -152,8 +152,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'expipe.tex', 'expipe Documentation',
-     'Svenn-Arne Dragly, Milad H. Mobarhan, Mikkel E. Lepperød', 'manual'),
+    (master_doc, 'expipe-plugin-cinpla.tex', 'expipe-plugin-cinpla Documentation',
+     'Mikkel E. Lepperød, Alessio Buccino', 'manual'),
 ]
 
 
@@ -162,7 +162,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'expipe', 'expipe Documentation',
+    (master_doc, 'expipe-plugin-cinpla', 'expipe-plugin-cinpla Documentation',
      [author], 1)
 ]
 
@@ -173,7 +173,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'expipe', 'expipe Documentation',
-     author, 'expipe', 'One line description of project.',
+    (master_doc, 'expipe-plugin-cinpla', 'expipe-plugin-cinpla Documentation',
+     author, 'expipe-plugin-cinpla', 'One line description of project.',
      'Miscellaneous'),
 ]
