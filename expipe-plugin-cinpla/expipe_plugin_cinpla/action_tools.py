@@ -93,7 +93,7 @@ def register_depth(project, action, left=None, right=None):
         'Are the following values correct:' +
         ' left = {}, right = {}, '. format(left, right) +
         'adjust date time = {}'.format(adjustdate))
-    if answer == False:
+    if answer is False:
         print('Aborting depth registration')
         return
     for desc, inp in zip(['left', 'right'], [left, right]):
