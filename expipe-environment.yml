@@ -1,0 +1,27 @@
+name: expipe
+dependencies:
+  - numpy
+  - matplotlib
+  - scipy
+  - cython
+  - pandas
+  - seaborn
+  - pyyaml
+  - pytest
+  - nose
+  - jupyter
+  - astropy
+  - click
+  - h5py
+  - paramiko
+  - tqdm
+  - pip:
+    - pycircstat
+    - quantities
+    - pyrebase
+    - pyqt5==5.7.1
+    - sip==4.19
+    - pycodestyle
+    - xmljson
+    - klusta
+    - scp

@@ -1,0 +1,32 @@
+name: phy
+dependencies:
+  - python=3.5
+  - numpy
+  - matplotlib
+  - scipy
+  - h5py
+  - cython
+  - pyqt=4
+  - pandas
+  - seaborn
+  - pyyaml
+  - pytest
+  - nose
+  - jupyter
+  - astropy
+  - paramiko
+  - pip:
+    - klusta
+    - klustakwik2
+    - vispy
+    - requests
+    - traitlets
+    - six
+    - joblib
+    - click
+    - tqdm
+    - pycircstat
+    - quantities
+    - pyrebase
+    - xmljson
+    - scp
