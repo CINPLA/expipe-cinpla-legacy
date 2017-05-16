@@ -68,7 +68,7 @@ def discover_plugins():
     else:
         ext = ''
     for path in paths:
-        exs.extend(glob.glob(op.join(path, 'plugin-expipe-*' + ext)))
+        exs.extend(glob.glob(op.join(path, 'plugin-expipe*' + ext)))
     if len(exs) == 0:
         return IPluginRegistry.plugins
     # TODO reveal plugin module in a non ugly way
