@@ -413,7 +413,9 @@ def create_klusta_prm(pathname, prb_path, nchan=32, fs=30000,
     :param filter_high:
     :return:
     '''
+    assert pathname is not None
     abspath = op.abspath(pathname)
+    assert prb_path is not None
     prb_path = op.abspath(prb_path)
     full_filename = abspath + '.prm'
     print('Saving ', full_filename)
