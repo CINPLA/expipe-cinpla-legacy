@@ -1,6 +1,17 @@
 import quantities as pq
 
+'''
+This is an example parameter file to use with expipe-plugin-cinpla.
 
+If you add _inherit_ before the name of a template it is asumed that you
+want to "inherit" this module from the project. This is for modules
+that are general and which you dont want to repeat in every action.
+Note that you can modify these modules afterwords, then the modification
+will be overloaded for that particular action.
+'''
+
+
+#  these are templates you want to add to each recording perfomed with axona
 axona_templates = [
     'mikkel_electrophysiology_L',
     'mikkel_electrophysiology_R',
@@ -13,6 +24,9 @@ axona_templates = [
     '_inherit_hardware_microdrive_optetrode'
 ]
 
+
+#  these are templates you want to add to each recording perfomed with
+#  open ephys
 openephys_templates = [
     'mikkel_electrophysiology_L',
     'mikkel_electrophysiology_R',
@@ -27,6 +41,9 @@ openephys_templates = [
     '_inherit_hardware_microdrive_optetrode'
 ]
 
+
+#  these are templates you want to add to each optogenetics session perfomed
+#  with openephys
 opto_openephys_templates = [
     '_inherit_hardware_openephys_optogenetics',
     '_inherit_hardware_pulse_pal',
@@ -38,6 +55,8 @@ opto_openephys_templates = [
     'mikkel_optogenetics_anatomical_location'
 ]
 
+#  these are templates you want to add to each optogenetics session perfomed
+#  with axona
 opto_axona_templates = [
     '_inherit_hardware_axona_optogenetics',
     '_inherit_hardware_pulse_pal',
@@ -49,11 +68,18 @@ opto_axona_templates = [
     'mikkel_optogenetics_anatomical_location'
 ]
 
+#  thse are e.g. the brain areas you investigate, this ensures that you
+#  register with with the same nomenclature for every recording
 possible_brain_areas = ['MECR', 'MECL', 'MS']
 possible_locations = ['room2', 'room1']
+
+#  obligatory tags will be enforced uppon transfer, this is to ensure you
+#  have a minimum of tags for each action
 obligatory_tags = ['no', 'yes', 'maybe']
 possible_tags = ['GC', 'PC', 'BC', 'SC', 'HD', 'TC', 'theta'] + obligatory_tags
 
+#  thse are the templates you want to load to each suregery implantation
+#  procedure
 surgery_implantation_templates = [
     'mikkel_implant_drive_L', 'mikkel_implant_drive_R',
     'mikkel_implant_fibre', 'mikkel_subject',
@@ -65,6 +91,7 @@ surgery_implantation_templates = [
     '_inherit_environment_surgery_station'
 ]
 
+# thse are the templates you want to load to each suregery injection procedure
 surgery_injection_templates = [
     'mikkel_anaesthesia', 'mikkel_analgesia',
     'mikkel_analgesia_post', 'mikkel_anaesthesia_local',
@@ -74,6 +101,7 @@ surgery_injection_templates = [
     '_inherit_mikkel_surgery_station_environment'
 ]
 
+# this is how you represent each unit when you use expipe register-units
 unit_info = {
     'info_waveform': {
         'alternatives': {
@@ -105,6 +133,7 @@ unit_info = {
     }
 }
 
+# these are the analysis parameters you pass to exana
 analysis_params = {
     'speed_filter': 5 * pq.m / pq.s,
     'pos_fs': 100 * pq.Hz,
@@ -123,12 +152,15 @@ analysis_params = {
     'isi_time_limit': 100 * pq.ms,
 }
 
+# this is personal user parameters
 user_params = {
     'project_id': 'mikkel_septum_entorhinal',
     'user_name': 'Mikkel Elle Lepperød',
     'location': 'room2',
     'laser_device': {'name': 'hardware_blue_laser', 'id': 4}
 }
+
+# this is a placeholder for all your templates
 templates = {
     'axona': axona_templates,
     'opto_axona': opto_axona_templates,
