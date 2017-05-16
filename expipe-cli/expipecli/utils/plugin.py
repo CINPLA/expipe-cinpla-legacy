@@ -74,22 +74,22 @@ def discover_plugins():
     # TODO reveal plugin module in a non ugly way
     for executable in exs:
         process = subprocess.check_output(executable, shell=True)
-    text = str(process)
-    if text.startswith("b'"):
-        text = text[2:]
-    for output in text.split('\\n'):
-        output = output.strip('\\r')
-        if output.endswith('.py') and op.exists(output):
-            directory, modname = op.split(output)
-            modname, _ = op.splitext(modname)
-            file, path, descr = imp.find_module(modname, [directory])
-            if file:
-                # Loading the module registers the plugin in
-                # IPluginRegistry.
-                try:
-                    mod = imp.load_module(modname, file, path, descr)  # noqa
-                except Exception as e:  # pragma: no cover
-                    raise e
-                finally:
-                    file.close()
+        text = str(process)
+        if text.startswith("b'"):
+            text = text[2:]
+        for output in text.split('\\n'):
+            output = output.strip('\\r')
+            if output.endswith('.py') and op.exists(output):
+                directory, modname = op.split(output)
+                modname, _ = op.splitext(modname)
+                file, path, descr = imp.find_module(modname, [directory])
+                if file:
+                    # Loading the module registers the plugin in
+                    # IPluginRegistry.
+                    try:
+                        mod = imp.load_module(modname, file, path, descr)  # noqa
+                    except Exception as e:  # pragma: no cover
+                        raise e
+                    finally:
+                        file.close()
     return IPluginRegistry.plugins
