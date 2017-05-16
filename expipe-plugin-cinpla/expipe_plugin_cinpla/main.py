@@ -153,6 +153,10 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Merge with existing, overwriting equal files.',
                       )
+        @click.option('-r', '--recursive',
+                      is_flag=True,
+                      help='Recursive directory transfer.',
+                      )
         @click.option('-n', '--note',
                       type=click.STRING,
                       help='Add note, use "text here" for sentences.',
@@ -181,7 +185,8 @@ class CinplaPlugin(IPlugin):
                       help='SSH username.',
                       )
         def transfer(action_id, to_local, from_local, overwrite, no_trash,
-                     note, raw, exclude, include, merge, port, username, hostname):
+                     note, raw, exclude, include, merge, port, username,
+                     hostname, recursive):
             """Transfer a dataset related to an expipe action
 
             COMMAND: action-id: Provide action id to find exdir path"""
@@ -210,64 +215,78 @@ class CinplaPlugin(IPlugin):
             server_data = server_data.replace('\\', '/')
             local_data = op.dirname(_get_local_path(fr))
             if to_local:
-                if overwrite:
-                    shutil.rmtree(local_data)
-                    os.mkdir(local_data)
-                print('Initializing transfer of "' + server_data + '" to "' +
-                      local_data + '"')
-                print('Packing tar archive')
-                exclude_statement = " "
-                for ex in exclude:
-                    exclude_statement += '--exclude=' + ex + ' '
-                if len(include) > 0:
-                    for ex in nwb_main_groups:
-                        if ex not in include:
-                            exclude_statement += '--exclude=' + ex + ' '
-                ssh_execute(ssh, "tar" + exclude_statement + "-cf " +
-                            server_data + '.tar ' + server_data)
-                scp_client.get(server_data + '.tar', local_data + '.tar',
-                               recursive=False)
-                try:
-                    pbar[0].close()
-                except Exception:
-                    pass
-                print('Unpacking tar archive')
-                untar(local_data + '.tar', server_data) # TODO merge with existing
-                print('Deleting tar archives')
-                os.remove(local_data + '.tar')
-                sftp_client.remove(server_data + '.tar')
+                if recursive:
+                    scp_client.get(server_data, local_data, recursive=True)
+                    try:
+                        pbar[0].close()
+                    except Exception:
+                        pass
+                else:
+                    if overwrite:
+                        shutil.rmtree(local_data)
+                        os.mkdir(local_data)
+                    print('Initializing transfer of "' + server_data + '" to "' +
+                          local_data + '"')
+                    print('Packing tar archive')
+                    exclude_statement = " "
+                    for ex in exclude:
+                        exclude_statement += '--exclude=' + ex + ' '
+                    if len(include) > 0:
+                        for ex in nwb_main_groups:
+                            if ex not in include:
+                                exclude_statement += '--exclude=' + ex + ' '
+                    ssh_execute(ssh, "tar" + exclude_statement + "-cf " +
+                                server_data + '.tar ' + server_data)
+                    scp_client.get(server_data + '.tar', local_data + '.tar',
+                                   recursive=False)
+                    try:
+                        pbar[0].close()
+                    except Exception:
+                        pass
+                    print('Unpacking tar archive')
+                    untar(local_data + '.tar', server_data) # TODO merge with existing
+                    print('Deleting tar archives')
+                    os.remove(local_data + '.tar')
+                    sftp_client.remove(server_data + '.tar')
             elif from_local:
                 if not raw:
                     tags = action.tags or {}
                     if len(obligatory_tags) > 0:
                         if sum([tag in tags for tag in obligatory_tags]) != 1:
                             raise ValueError('Tags are not approved, please revise')
-                print('Initializing transfer of "' + local_data + '" to "' +
-                      server_data + '"')
-                try: # make directory for untaring
-                    sftp_client.mkdir(server_data)
-                except IOError:
-                    pass
-                if len(exclude) > 0 or len(include) > 0:
-                    raise NotImplementedError
-                print('Packing tar archive')
-                shutil.make_archive(local_data, 'tar', local_data)
-                scp_client.put(local_data + '.tar', server_data + '.tar',
-                               recursive=False)
-                try:
-                    pbar[0].close()
-                except Exception:
-                    pass
-                print('Unpacking tar archive')
-                cmd = "tar -C " + server_data + " -xf " + server_data + '.tar'
-                if not overwrite:
-                    cmd += " -k --skip-old-files"
+                if recursive:
+                    scp_client.get(server_data, local_data, recursive=True)
+                    try:
+                        pbar[0].close()
+                    except Exception:
+                        pass
                 else:
-                    cmd += " -k --overwrite"
-                ssh_execute(ssh, cmd)
-                print('Deleting tar archives')
-                sftp_client.remove(server_data + '.tar')
-                os.remove(local_data + '.tar')
+                    print('Initializing transfer of "' + local_data + '" to "' +
+                          server_data + '"')
+                    try: # make directory for untaring
+                        sftp_client.mkdir(server_data)
+                    except IOError:
+                        pass
+                    if len(exclude) > 0 or len(include) > 0:
+                        raise NotImplementedError
+                    print('Packing tar archive')
+                    shutil.make_archive(local_data, 'tar', local_data)
+                    scp_client.put(local_data + '.tar', server_data + '.tar',
+                                   recursive=False)
+                    try:
+                        pbar[0].close()
+                    except Exception:
+                        pass
+                    print('Unpacking tar archive')
+                    cmd = "tar -C " + server_data + " -xf " + server_data + '.tar'
+                    if not overwrite:
+                        cmd += " -k --skip-old-files"
+                    else:
+                        cmd += " -k --overwrite"
+                    ssh_execute(ssh, cmd)
+                    print('Deleting tar archives')
+                    sftp_client.remove(server_data + '.tar')
+                    os.remove(local_data + '.tar')
                 if not no_trash:
                     try:
                         from send2trash import send2trash
