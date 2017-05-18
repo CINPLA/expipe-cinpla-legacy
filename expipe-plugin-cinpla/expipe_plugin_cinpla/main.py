@@ -184,12 +184,18 @@ class CinplaPlugin(IPlugin):
                       type=click.STRING,
                       help='SSH username.',
                       )
+        @click.option('--server',
+                      default='norstore',
+                      type=click.STRING,
+                      help='Name of server as named in config.yaml. Default is "norstore"',
+                      )
         def transfer(action_id, to_local, from_local, overwrite, no_trash,
                      note, raw, exclude, include, merge, port, username,
-                     hostname, recursive):
+                     hostname, recursive, server):
             """Transfer a dataset related to an expipe action
 
             COMMAND: action-id: Provide action id to find exdir path"""
+            assert server in expipe.config.settings
             if len(exclude) > 0 and len(include) > 0:
                 raise IOError('You can only use exlude or include')
             from .ssh_tools import get_login, login, ssh_execute, untar
@@ -210,7 +216,7 @@ class CinplaPlugin(IPlugin):
             ssh, scp_client, sftp_client, pbar = login(hostname=host,
                                                        username=user,
                                                        password=pas, port=port)
-            serverpath = expipe.config.settings['server']['data_path']
+            serverpath = expipe.config.settings[server]['data_path']
             server_data = op.dirname(op.join(serverpath, fr.exdir_path))
             server_data = server_data.replace('\\', '/')
             local_data = op.dirname(_get_local_path(fr))
