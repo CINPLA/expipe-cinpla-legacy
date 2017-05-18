@@ -1,8 +1,8 @@
 .. _installation_page:
 
-****************
+============
 Installation
-****************
+============
 
 We recommend installing the expipe dev package found at https://github.com/CINPLA/expipe-dev::
 
@@ -24,6 +24,13 @@ for spikesoting:
   conda env create -f phy-environment.yml
   activate phy
   python setup.py develop --extra phy
+
+Following the instructions you should be be able to::
+
+  expipe --help
+
+Configuring expipe
+------------------
 
 Now that you have the enviroments installed you need to configure expipe. In
 ``expipe-plugin-cinpla/utils`` you will find example configuration files.
@@ -53,6 +60,3 @@ Open ``config.yaml`` which looks like:
 Here we have defined two servers, one for `norstore` and one for a `processing`
 server e.g. your office computer; see [usage](address to usage).
 Note that you can add arbitrary names for servers.
-Following the instructions you should be be able to::
-
-  expipe --help

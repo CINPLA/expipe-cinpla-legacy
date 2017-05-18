@@ -41,7 +41,7 @@ Transfer data to and from server
 Currently we support two means of transferring data: SCP (SSH), and copy.
 To maximize transfer speed we recomend using SCP (expecially on Windows). The
 SCP protocoll in `expipe-plugin-cinpla` is governed by the command ``transfer``.
-In the ``config.yaml`` file (see Installation) you will find:
+In the ``config.yaml`` file (see :ref:`installation page <installation_page>`) you will find:
 
 .. code-block:: yaml
 
