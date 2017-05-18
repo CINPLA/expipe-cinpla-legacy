@@ -196,6 +196,7 @@ class CinplaPlugin(IPlugin):
 
             COMMAND: action-id: Provide action id to find exdir path"""
             assert server in expipe.config.settings
+            server_dict = expipe.config.settings[server]
             if len(exclude) > 0 and len(include) > 0:
                 raise IOError('You can only use exlude or include')
             from .ssh_tools import get_login, login, ssh_execute, untar
@@ -212,11 +213,12 @@ class CinplaPlugin(IPlugin):
 
             host, user, pas, port = get_login(hostname=hostname,
                                               username=username,
-                                              port=port)
+                                              port=port,
+                                              server=server_dict)
             ssh, scp_client, sftp_client, pbar = login(hostname=host,
                                                        username=user,
                                                        password=pas, port=port)
-            serverpath = expipe.config.settings[server]['data_path']
+            serverpath = server_dict['data_path']
             server_data = op.dirname(op.join(serverpath, fr.exdir_path))
             server_data = server_data.replace('\\', '/')
             local_data = op.dirname(_get_local_path(fr))

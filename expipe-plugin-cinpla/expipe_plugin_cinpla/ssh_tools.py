@@ -36,10 +36,7 @@ def untar(fname, prefix):
     tar.close()
 
 
-def get_login(port=22, username=None, password=None, hostname=None):
-    import expipe
-    config = expipe.config.settings
-    server = config.get('server')
+def get_login(port=22, username=None, password=None, hostname=None, server=None):
     if server is not None:
         hostname = server.get('hostname')
         username = server.get('username')
