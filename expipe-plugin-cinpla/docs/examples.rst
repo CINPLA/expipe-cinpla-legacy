@@ -148,13 +148,13 @@ To overwrite existing data use ``--overwrite``::
 Now modules are loaded to the firebase server and depth registration
 is promted to the user.
 
-.. todo: probefile etc.
+.. todo:: probefile etc.
 
 **Data processing**::
 
   $ expipe process-openephys ACTION-ID
 
-.. todo: Detail the processing: ground channels, cmr vs car, filtering, probe
+.. todo:: Detail the processing: ground channels, cmr vs car, filtering, probe
 
 Manual spikesoring with phy::
 
