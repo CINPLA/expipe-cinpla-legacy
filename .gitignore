@@ -88,3 +88,4 @@ ENV/
 
 # Rope project settings
 .ropeproject
+exdir-browser/exdirbrowser/qml_qrc.py
