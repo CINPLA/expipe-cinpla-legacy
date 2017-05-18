@@ -452,6 +452,7 @@ class Plotter:
         from exana.waveform import (plot_amp_clusters, plot_waveforms)
         from exana.statistics import correlogram, plot_isi_hist
         import matplotlib.pyplot as plt
+        import matplotlib.gridspec as gridspec
         raw_dir = self._analysis.require_raw('spike_statistics')
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
@@ -467,47 +468,74 @@ class Plotter:
                 if unit.annotations['cluster_group'].lower() == 'noise':
                     continue
                 sptr = unit.spiketrains[0]
+                # try:
+                #     fname = '{} {} amplitude'.format(chx.name, unit.name)
+                #     fpath = op.join(raw_dir, fname).replace(" ", "_")
+                #     fig = plt.figure()
+                #     plot_waveforms(sptr=sptr, color=color, fig=fig)
+                #     self.savefig(fpath, fig)
+                # except Exception as e:
+                #     with open(fpath + '.exception', 'w+') as f:
+                #         print(str(e), file=f)
+                # try:
+                #     fname = '{} {} amplitude clusters'.format(chx.name, unit.name)
+                #     fpath = op.join(raw_dir, fname).replace(" ", "_")
+                #     fig = plt.figure()
+                #     plot_amp_clusters([sptr], colors=[color], fig=fig)
+                #     self.savefig(fpath, fig)
+                # except Exception as e:
+                #     with open(fpath + '.exception', 'w+') as f:
+                #         print(str(e), file=f)
+                # try:
+                #     fname = '{} {} autocorrelation'.format(chx.name, unit.name)
+                #     fpath = op.join(raw_dir, fname).replace(" ", "_")
+                #     fig, ax = plt.subplots()
+                #     bin_width = par['corr_bin_width'].rescale('s').magnitude
+                #     limit = par['corr_limit'].rescale('s').magnitude
+                #     count, bins = correlogram(t1=sptr.times.magnitude, t2=None,
+                #                               bin_width=bin_width, limit=limit,
+                #                               auto=True)
+                #     ax.bar(bins[:-1] + bin_width / 2., count, width=bin_width,
+                #             color=color)
+                #     ax.set_xlim([-limit, limit])
+                #     self.savefig(fpath, fig)
+                # except Exception as e:
+                #     with open(fpath + '.exception', 'w+') as f:
+                #         print(str(e), file=f)
+                # try:
+                #     fname = '{} {} isi'.format(chx.name, unit.name)
+                #     fpath = op.join(raw_dir, fname).replace(" ", "_")
+                #     fig, ax = plt.subplots()
+                #     plot_isi_hist(sptr.times, alpha=1, ax=ax, binsize=par['isi_binsize'],
+                #                   time_limit=par['isi_time_limit'], color=color)
+                #     self.savefig(fpath, fig)
+                # except Exception as e:
+                #     with open(fpath + '.exception', 'w+') as f:
+                #         print(str(e), file=f)
+
                 try:
-                    fname = '{} {} amplitude'.format(chx.name, unit.name)
+                    fname = '{} {}'.format(chx.name, unit.name)
                     fpath = op.join(raw_dir, fname).replace(" ", "_")
                     fig = plt.figure()
-                    plot_waveforms(sptr=sptr, color=color, fig=fig)
-                    self.savefig(fpath, fig)
-                except Exception as e:
-                    with open(fpath + '.exception', 'w+') as f:
-                        print(str(e), file=f)
-                try:
-                    fname = '{} {} amplitude clusters'.format(chx.name, unit.name)
-                    fpath = op.join(raw_dir, fname).replace(" ", "_")
-                    fig = plt.figure()
-                    plot_amp_clusters([sptr], colors=[color], fig=fig)
-                    self.savefig(fpath, fig)
-                except Exception as e:
-                    with open(fpath + '.exception', 'w+') as f:
-                        print(str(e), file=f)
-                try:
-                    fname = '{} {} autocorrelation'.format(chx.name, unit.name)
-                    fpath = op.join(raw_dir, fname).replace(" ", "_")
-                    fig, ax = plt.subplots()
+                    nrc = sptr.waveforms.shape[1]
+                    gs = gridspec.GridSpec(2*nrc+4, 2*nrc+4)
+                    plot_waveforms(sptr=sptr, color=color, fig=fig, gs=gs[:nrc+1, :nrc+1])
+                    plot_amp_clusters([sptr], colors=[color], fig=fig, gs=gs[:nrc+1, nrc+2:])
                     bin_width = par['corr_bin_width'].rescale('s').magnitude
                     limit = par['corr_limit'].rescale('s').magnitude
                     count, bins = correlogram(t1=sptr.times.magnitude, t2=None,
                                               bin_width=bin_width, limit=limit,
                                               auto=True)
-                    ax.bar(bins[:-1] + bin_width / 2., count, width=bin_width,
-                            color=color)
-                    ax.set_xlim([-limit, limit])
+                    ax_cor = fig.add_subplot(gs[nrc+3:, :nrc+1])
+                    ax_cor.bar(bins[:-1] + bin_width / 2., count, width=bin_width,
+                           color=color)
+                    ax_cor.set_xlim([-limit, limit])
+
+                    ax_isi = fig.add_subplot(gs[nrc+3:, nrc+2:])
+                    plot_isi_hist(sptr.times, alpha=1, ax=ax_isi, binsize=par['isi_binsize'],
+                                  time_limit=par['isi_time_limit'], color=color, )
                     self.savefig(fpath, fig)
                 except Exception as e:
                     with open(fpath + '.exception', 'w+') as f:
                         print(str(e), file=f)
-                try:
-                    fname = '{} {} isi'.format(chx.name, unit.name)
-                    fpath = op.join(raw_dir, fname).replace(" ", "_")
-                    fig, ax = plt.subplots()
-                    plot_isi_hist(sptr.times, alpha=1, ax=ax, binsize=par['isi_binsize'],
-                                  time_limit=par['isi_time_limit'], color=color)
-                    self.savefig(fpath, fig)
-                except Exception as e:
-                    with open(fpath + '.exception', 'w+') as f:
-                        print(str(e), file=f)
+
