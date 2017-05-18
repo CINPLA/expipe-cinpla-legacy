@@ -114,7 +114,7 @@ For help på en spesifikk kommando::
 
 To overwrite existing data use ``--overwrite``::
 
-  expipe register-axona `z:\USER\DATA\RAT\FILENAME.set`
+  expipe register-axona z:\USER\DATA\RAT\FILENAME.set
 
 Now modules are loaded to the firebase server and depth registration
 is promted to the user.
@@ -122,9 +122,46 @@ is promted to the user.
 **Spikesorting**::
 
   $ expipe spikesort ACTION-ID
+
+Manual spikesoring with phy::
+
   $ phy neo-gui c:\user\uiousername\expipe_temp_storage\ACTION-ID\main.exdir --channel-group 0
 
 Save with `ctrl-s`
+
+Working with Open Ephys
+-----------------------
+
+Open Anaconda 3 prompt::
+
+  activate phy
+
+To get an overview of available commands::
+  expipe --help
+For help på en spesifikk kommando::
+  expipe register-openephys --help
+
+To overwrite existing data use ``--overwrite``::
+
+  expipe register-openephys c:\open_ephys\data\1704_2017-05-13_13-52-26_03
+
+Now modules are loaded to the firebase server and depth registration
+is promted to the user.
+
+.. todo: probefile etc.
+
+**Data processing**::
+
+  $ expipe process-openephys ACTION-ID
+
+.. todo: Detail the processing: ground channels, cmr vs car, filtering, probe
+
+Manual spikesoring with phy::
+
+  $ phy neo-gui c:\user\uiousername\expipe_temp_storage\ACTION-ID\main.exdir --channel-group 0
+
+Save with `ctrl-s`
+
 
 Plotting og analysis
 --------------------
