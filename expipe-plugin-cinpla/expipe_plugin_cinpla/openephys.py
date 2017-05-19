@@ -103,7 +103,9 @@ class OpenEphysPlugin(IPlugin):
 
             COMMAND: action-id"""
             import numpy as np
-            import klusta
+            if not no_klusta:
+                import klusta
+                import klustakwik2
             action = None
             if exdir_path is None:
                 import exdir
@@ -123,6 +125,7 @@ class OpenEphysPlugin(IPlugin):
                 openephys_session = acquisition.attrs["openephys_session"]
                 openephys_path = op.join(acquisition.directory, openephys_session)
                 openephys_base = op.join(openephys_path, openephys_session)
+                klusta_prm = op.abspath(openephys_base) + '.prm'
                 prb_path = prb_path or _get_probe_file('oe', nchan=nchan,
                                                        spikesorter='klusta')
                 openephys_file = pyopenephys.File(openephys_path, prb_path)
@@ -134,11 +137,10 @@ class OpenEphysPlugin(IPlugin):
                 anas = openephys_file.analog_signals[0].signal
                 fs = openephys_file.sample_rate.magnitude
                 nchan = anas.shape[0]
-                # TODO the klusta param file is put outside opene
-                klusta_prm = create_klusta_prm(openephys_base, prb_path, nchan,
-                                               fs=fs, klusta_filter=klusta_filter,
-                                               filter_low=filter_low,
-                                               filter_high=filter_high)
+                create_klusta_prm(openephys_base, prb_path, nchan,
+                                  fs=fs, klusta_filter=klusta_filter,
+                                  filter_low=filter_low,
+                                  filter_high=filter_high)
                 if pre_filter:
                     anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
                                                  fs=fs, filter_type='bandpass')
