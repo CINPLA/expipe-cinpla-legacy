@@ -545,6 +545,8 @@ class CinplaPlugin(IPlugin):
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
+            print('Registering adjustment on "' + rat_id + '" by user "' +
+                  user + '"')
             users = action.users or dict()
             if user not in users:
                 users.update({user: 'true'})
