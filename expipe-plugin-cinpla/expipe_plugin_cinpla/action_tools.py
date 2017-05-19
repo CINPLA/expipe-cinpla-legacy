@@ -111,7 +111,7 @@ def register_depth(project, action, left=None, right=None):
         action.require_module(name=name, contents=mod, overwrite=True)
 
 
-def _get_local_path(file_record, assert_exists=False):
+def _get_local_path(file_record, assert_exists=False, make=False):
     '''
 
     :param file_record:
@@ -121,7 +121,7 @@ def _get_local_path(file_record, assert_exists=False):
     folder_name = 'expipe_temp_storage'
     local_path = file_record.local_path or op.join(os.path.expanduser('~'),
                                                    folder_name, path)
-    if not op.exists(local_path) and not assert_exists:
+    if not op.exists(local_path) and not assert_exists and make:
         os.makedirs(local_path)
     elif not op.exists(local_path) and assert_exists:
         raise IOError('Path does not exist.')
