@@ -196,7 +196,7 @@ class CinplaPlugin(IPlugin):
 
             COMMAND: action-id: Provide action id to find exdir path"""
             assert server in expipe.config.settings
-            server_dict = expipe.config.settings[server]
+            server_dict = expipe.config.settings.get(server)
             if len(exclude) > 0 and len(include) > 0:
                 raise IOError('You can only use exlude or include')
             from .ssh_tools import get_login, login, ssh_execute, untar
@@ -218,11 +218,11 @@ class CinplaPlugin(IPlugin):
             ssh, scp_client, sftp_client, pbar = login(hostname=host,
                                                        username=user,
                                                        password=pas, port=port)
-            serverpath = server_dict['data_path']
+            serverpath = expipe.config.settings[server]['data_path']
             server_data = op.dirname(op.join(serverpath, fr.exdir_path))
             server_data = server_data.replace('\\', '/')
-            local_data = op.dirname(_get_local_path(fr))
             if to_local:
+                local_data = op.dirname(_get_local_path(fr, make=True))
                 if recursive:
                     scp_client.get(server_data, local_data, recursive=True)
                     try:
@@ -257,6 +257,7 @@ class CinplaPlugin(IPlugin):
                     os.remove(local_data + '.tar')
                     sftp_client.remove(server_data + '.tar')
             elif from_local:
+                local_data = op.dirname(_get_local_path(fr, assert_exists=True))
                 if not raw:
                     tags = action.tags or {}
                     if len(obligatory_tags) > 0:
@@ -545,8 +546,6 @@ class CinplaPlugin(IPlugin):
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
-            print('Registering adjustment on "' + rat_id + '" by user "' +
-                  user + '"')
             users = action.users or dict()
             if user not in users:
                 users.update({user: 'true'})
