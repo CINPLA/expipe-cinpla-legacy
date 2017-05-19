@@ -11,5 +11,5 @@ Then follow the installation instructions for your operating system:
 
 ## Documentation
 
-See the [wiki](https://github.com/CINPLA/expipe-plugin-cinpla/wiki/) or the [documentation](http://cinpla.github.io/expipe) 
+See the [wiki](https://github.com/CINPLA/expipe-plugin-cinpla/wiki/) or the [documentation](http://expipe-plugin-cinpla.readthedocs.io/en/latest/) 
 for more information on how to use expipe.
