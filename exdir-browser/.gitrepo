@@ -7,5 +7,5 @@
 	remote = git@github.com:CINPLA/exdir-browser.git
 	branch = dev
 	commit = b78bc6e5a597b1929cad4dbedb2c730772ec5cc6
-	parent = 81a6001a708090828d4f103dc7376c6afccb5056
+	parent = facd8051357d54a8fd36058fe88c8e3ad6ec6a4c
 	cmdver = 0.3.1
