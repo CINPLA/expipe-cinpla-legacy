@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:CINPLA/exana.git
+	branch = dev
+	commit = 6f9e2c5f3903e572d246409e231d6418464442c7
+	parent = 9c7b2f8eadb398844390eb0278c040a589c201d5
+	cmdver = 0.3.1
