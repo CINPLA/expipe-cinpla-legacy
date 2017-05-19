@@ -25,3 +25,4 @@ dependencies:
     - xmljson
     - klusta
     - scp
+    - send2trash
