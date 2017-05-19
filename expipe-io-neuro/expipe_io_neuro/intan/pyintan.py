@@ -115,7 +115,7 @@ class File:
     """
     Class for reading experimental data from an OpenEphys dataset.
     """
-    def __init__(self, filename, probefile=None, save_binary=True):
+    def __init__(self, filename, probefile=None, save_binary=True, no_load=False):
         self._absolute_filename = op.abspath(filename)
         self._fname = op.split(filename)[-1]
         self._absolute_foldername = op.split(filename)[0]
@@ -123,7 +123,7 @@ class File:
         self._channel_groups_dirty = True
 
         filenames = [f for f in os.listdir(self._absolute_foldername)]
-        if any('amp.dat' in f for f in filenames):
+        if any('amp.dat' in f for f in filenames) and not no_load:
             load_binary = True
         else:
             load_binary = False
@@ -185,7 +185,7 @@ class File:
             # TODO sequential channel mapping
             print('sequential channel mapping')
 
-        if load_binary:
+        if load_binary and not no_load:
             # load amp.dat
             numchan = int(len(recorded_channels))
             fdat = 'amp.dat'
@@ -270,7 +270,7 @@ class File:
             with open(op.join(self._absolute_foldername, fdat), "rb") as fh:
                 nsamples = os.fstat(fh.fileno()).st_size // (numchan * 4)
                 print('Estimated samples: ', int(nsamples), ' Numchan: ', numchan)
-                amp_data = np.memmap(fh, np.dtype('i2'), mode='r',
+                amp_data = np.memmap(fh, np.dtype('f4'), mode='r',
                                      shape=(numchan, nsamples))
             # generate objects
             self._analog_signals = [AnalogSignal(
@@ -406,17 +406,12 @@ class File:
                 anas.signal = clip_anas(anas, self.times, clipping_times, start_end)
             for digs in self.digital_in_signals:
                 digs.times = clip_digs(digs, clipping_times, start_end)
-                digs.times = [times - clipping_times[0]
-                              for times in digs.times if len(digs.times) > 0]
             for digs in self.digital_out_signals:
                 digs.times = clip_digs(digs, clipping_times, start_end)
-                digs.times = [times - clipping_times[0]
-                              for times in digs.times if len(digs.times) > 0]
             for stim in self.stimulation:
                 stim.stim_signal = clip_stimulation(stim, self.times, clipping_times, start_end)
 
             self._times = clip_times(self._times, clipping_times, start_end)
-            self._times -= self._times[0]
             self._duration = self._times[-1] - self._times[0]
         else:
             print('Empty clipping times list.')
@@ -801,8 +796,9 @@ class File:
                         board_dig_in_data = []
                         for i in range(num_board_dig_in_channels):
                             # find idx of high level
-                            lev = 2**board_dig_in_channels[i]['native_order']
-                            idx_high = np.where(board_dig_in_raw == lev)
+                            mask = 2**board_dig_in_channels[i]['native_order']*np.ones(len(board_dig_in_raw))
+                            idx_high = np.where(np.bitwise_and(board_dig_in_raw.astype(dtype='int'),
+                                                               mask.astype(dtype='int')) > 0)
                             rising, falling = get_rising_falling_edges(idx_high)
                             board_dig_in_data.append(t[rising])
                         board_dig_in_data = np.array(board_dig_in_data)
@@ -814,8 +810,10 @@ class File:
                         board_dig_out_data = []
                         for i in range(num_board_dig_out_channels):
                             # find idx of high level
-                            lev = 2**board_dig_out_channels[i]['native_order']
-                            idx_high = np.where(board_dig_out_raw == lev)
+                            mask = 2 ** board_dig_out_channels[i]['native_order'] * np.ones(len(board_dig_out_raw))
+                            print(mask.shape, len(board_dig_out_data))
+                            idx_high = np.where(np.bitwise_and(board_dig_out_raw.astype(dtype='int'),
+                                                               mask.astype(dtype='int')) > 0)
                             rising, falling = get_rising_falling_edges(idx_high)
                             board_dig_out_data.append(t[rising])
                         board_dig_out_data = np.array(board_dig_out_data)
@@ -828,10 +826,6 @@ class File:
                     del board_dig_in_raw
 
                     #TODO optimize memory-wise: e.g. only save time and chan of compliance, ampsett, charge recovery as list
-                    # anas_gain = 0.195
-                    # anas_offset = 32768
-                    # dc_gain = -0.01923
-                    # dc_offset = 512
 
                     # Scale voltage levels appropriately.
                     amplifier_data -= anas_offset  # units = microvolts
@@ -840,9 +834,6 @@ class File:
                         dc_amplifier_data -= dc_offset  # units = volts
                         dc_amplifier_data *= dc_gain  # units = volts
 
-                    # self._channel_info['gain'] = {}
-                    # for ch in np.arange(amplifier_data.shape[0]):
-                    #     self._channel_info['gain'][str(ch)] = anas_gain
 
                     if np.count_nonzero(stim_data) != 0:
                         # TODO only save stim channel and respective signals waveform
@@ -1158,7 +1149,10 @@ def clip_digs(digital_signals, clipping_times, start_end):
                 idx = np.where(dig < clipping_times[0])
         else:
             raise AttributeError('clipping_times must be of length 1 or 2')
-        digs_clip.append(dig[idx])
+        if start_end != 'end':
+            digs_clip.append(dig[idx] - clipping_times[0])
+        else:
+            digs_clip.append(dig[idx])
 
     return np.array(digs_clip) * pq.s
 
@@ -1182,7 +1176,10 @@ def clip_times(times, clipping_times, start_end):
             idx = np.where(times < clipping_times[0])
     else:
         raise AttributeError('clipping_times must be of length 1 or 2')
-    times_clip = times[idx]
+    if start_end != 'end':
+        times_clip = times[idx] - clipping_times[0]
+    else:
+        times_clip = times[idx]
 
     return times_clip
 

@@ -848,6 +848,7 @@ class File:
         positions = []
         times = []
 
+        print('Syncing tracking timestamps')
         for t, (pos, software_ts) in enumerate(zip(self.tracking[0].positions, self.tracking[0].times)):
             # For each software ts find closest ttl_event
             ts = np.zeros(len(software_ts))
@@ -861,7 +862,8 @@ class File:
             iteration = 1
             max_iter = 10
             while len(wrong_ts_idx) != 0 and iteration < max_iter:
-                print('wrong assignments: ', len(wrong_ts_idx), ' Iteration: ', iteration)
+                print('Tracking source ', t, ' - Reassigning incorrect ',
+                      len(wrong_ts_idx), ' out of ', len(software_ts))
                 for i, w_ts in enumerate(wrong_ts_idx):
                     val, idx = find_nearest(ttl_events, software_ts[w_ts], not_in_idx=np.unique(ttl_idx))
                     ts[w_ts] = val[0]
