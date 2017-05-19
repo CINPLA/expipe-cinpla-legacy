@@ -446,7 +446,7 @@ def create_klusta_prm(pathname, prb_path, nchan=32, fs=30000,
     return full_filename
 
 
-def remove_stimulation_artifacts(anas, times, trigger, pre=3 * pq.ms, post=5 * pq.ms):
+def remove_stimulation_artifacts(anas, times, trigger, pre=3 * pq.ms, post=5 * pq.ms, mode='template'):
     '''
 
     :param anas:
@@ -454,14 +454,42 @@ def remove_stimulation_artifacts(anas, times, trigger, pre=3 * pq.ms, post=5 * p
     :param trigger:
     :param pre:
     :param post:
+    :param mode:
     :return:
     '''
+    from copy import copy
+    anas_rem = copy(anas)
 
-    for tr in trigger:
-        idx = np.where((times > tr - pre) & (times < tr + post))
-        anas[:, idx] = 0
+    print('Removing stimulation artifacts from ', len(trigger), ' triggers...')
 
-    return anas
+    if mode is 'template':
+        # Find shortest artifacte length
+        idxs = []
+        for i, tr in enumerate(trigger):
+            idxs.append(len(np.where((times > tr - pre) & (times < tr + post))[0]))
+
+        min_len = np.min(idxs)
+        templates = np.zeros((anas.shape[0], len(trigger), min_len))
+
+        # Compute average artifact template
+        for i, tr in enumerate(trigger):
+            idx = np.where((times > tr - pre) & (times < tr + post))[0][:min_len]
+            templates[:, i, ] = np.squeeze(anas[:, idx])
+        avg_artifact = np.mean(templates, axis=1)
+
+        # Remove average artifact template
+        for i, tr in enumerate(trigger):
+            idx = np.where((times > tr - pre) & (times < tr + post))[0][:min_len]
+            print(anas_rem[:, idx].shape)
+            anas_rem[:, idx] -= avg_artifact
+
+    elif mode is 'zero':
+        avg_artifact = []
+        for tr in trigger:
+            idx = np.where((times > tr - pre) & (times < tr + post))
+            anas_rem[:, idx] = 0
+
+    return anas_rem, avg_artifact
 
 
 def downsample_250(anas):
