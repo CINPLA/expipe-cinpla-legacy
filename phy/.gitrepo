@@ -7,5 +7,5 @@
 	remote = https://github.com/kwikteam/phy.git
 	branch = master
 	commit = 40234615a93505b70329fe259d1788d1e3c6a0f5
-	parent = ef414497bc2818767eb8ca0f6a98f161005f6e32
+	parent = 60d7b23cc85ca3e8fb53a9113d33081d9bc8f885
 	cmdver = 0.3.1
