@@ -7,5 +7,5 @@
 	remote = git@github.com:CINPLA/expipe-plugin-cinpla.git
 	branch = master
 	commit = 66f15b2376153df9ee230cb11445a991c84a0fda
-	parent = f6b699564033d2bfd13b334a4a4b6d840396753f
+	parent = 1ed23499221d96127368a2022c27586ab1d76f63
 	cmdver = 0.3.1
