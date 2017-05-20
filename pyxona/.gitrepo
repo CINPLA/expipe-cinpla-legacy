@@ -7,5 +7,5 @@
 	remote = git@github.com:CINPLA/pyxona.git
 	branch = dev
 	commit = e233ba1182c9bd3b86def420f59a824152561a2d
-	parent = 66ed5f41730211b307059f975d787cb9fadf4080
+	parent = 3a96a690af5f4ff157445fc2e16a4e9e687820f3
 	cmdver = 0.3.1
