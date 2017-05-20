@@ -7,5 +7,5 @@
 	remote = git@github.com:CINPLA/expipe-io-neuro.git
 	branch = dev
 	commit = e192d2b03851a6cd2b1a0c1feebe1124f657f190
-	parent = a93bee69a605fb8412219422ab300ddbf417e492
+	parent = b34489bdac507874d1dfe56cc17d5328702c2447
 	cmdver = 0.3.1
