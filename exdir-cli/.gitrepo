@@ -7,5 +7,5 @@
 	remote = git@github.com:CINPLA/exdir-cli.git
 	branch = dev
 	commit = 6004aaf6953d0d872ff234cfdd68a5911211d34b
-	parent = 8bf5c4d830c6f400c00edd49a32aaa8f6c778e91
+	parent = ebd3e73c3708807abbe277e0dd874b8deb511a2f
 	cmdver = 0.3.1
