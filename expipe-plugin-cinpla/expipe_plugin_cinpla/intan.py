@@ -786,85 +786,85 @@ class IntanPlugin(IPlugin):
             else:
                 exdir_path = fr.local_path
 
-            # anas = intan_file.analog_signals[0].signal
-            # fs = intan_file.sample_rate.magnitude
-            # nchan = anas.shape[0]
-            # fname = op.join(intan_ephys_path, intan_ephys_dir)
-            # klusta_prm = create_klusta_prm(fname, prb_path, nchan, fs=fs,
-            #                                klusta_filter=klusta_filter,
-            #                                filter_low=filter_low,
-            #                                filter_high=filter_high)
-            # if pre_filter:
-            #     anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
-            #                                  fs=fs, filter_type='bandpass')
-            #
-            # if len(ground) != 0:
-            #     ground = [int(g) for g in ground]
-            #     print('Grounding channels: ', ground)
-            #     anas = ground_bad_channels(anas, ground)
-            # if split_probe is not None:
-            #     split_chans = np.arange(nchan)
-            #     if split_probe != nchan / 2:
-            #         warnings.warn('The split probe is not dividing the number' +
-            #                       ' of channels in two')
-            #     print('Splitting probe in channels \n"' +
-            #           str(split_chans[:split_probe]) + '"\nand\n"' +
-            #           str(split_chans[split_probe:]) + '"')
-            # else:
-            #     split_chans = np.arange(nchan)
-            #     split_probe = None
-            #
-            # if remove_artifacts:
-            #     remove_artifacts = remove_artifacts.split('-')
-            #     assert len(remove_artifacts) == 3
-            #     trigger_sys = remove_artifacts[0]
-            #     trigger_sig = remove_artifacts[1]
-            #     trigger_chan = int(remove_artifacts[2])
-            #
-            #     if trigger_sys == 'intan':
-            #         if trigger_sig == 'adc':
-            #             trigger_ttl = pyintan.extract_sync_times(intan_file.adc_signals[0].signal[trigger_chan],
-            #                                                      intan_file.times)
-            #         elif trigger_sig == 'dig':
-            #             trigger_ttl = intan_file.digital_in_signals[0].times[trigger_chan]
-            #     elif trigger_sys == 'ephys':
-            #         if trigger_sig == 'dig':
-            #             trigger_ttl = openephys_file.digital_in_signals[0].times[trigger_chan]
-            #     else:
-            #         trigger_ttl = []
-            #     anas, _ = remove_stimulation_artifacts(anas, intan_file.times, trigger_ttl, mode='zero')
-            #
-            # if common_ref == 'car':
-            #     anas, _ = apply_CAR(anas, car_type='mean', split_probe=split_probe)
-            # elif common_ref == 'cmr':
-            #     anas, _ = apply_CAR(anas, car_type='median', split_probe=split_probe)
-            #
-            # if action is not None:
-            #     prepro = {
-            #         'common_ref': common_ref,
-            #         'filter': {
-            #             'pre_filter': pre_filter,
-            #             'klusta_filter': klusta_filter,
-            #             'filter_low': filter_low,
-            #             'filter_high': filter_high,
-            #         },
-            #         'grounded_channels': ground,
-            #         'probe_split': (str(split_chans[:split_probe]) +
-            #                         str(split_chans[split_probe:]))
-            #     }
-            #     action.require_module(name='preprocessing', contents=prepro,
-            #                           overwrite=True)
-            #
-            # save_binary_format(fname, anas)
-            #
-            #
-            # if not no_run:
-            #     print('Running klusta')
-            #     import subprocess
-            #     try:
-            #         subprocess.check_output(['klusta', klusta_prm, '--overwrite'])
-            #     except subprocess.CalledProcessError as e:
-            #         raise Exception(e.output)
+            anas = intan_file.analog_signals[0].signal
+            fs = intan_file.sample_rate.magnitude
+            nchan = anas.shape[0]
+            fname = op.join(intan_ephys_path, intan_ephys_dir)
+            klusta_prm = create_klusta_prm(fname, prb_path, nchan, fs=fs,
+                                           klusta_filter=klusta_filter,
+                                           filter_low=filter_low,
+                                           filter_high=filter_high)
+            if pre_filter:
+                anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
+                                             fs=fs, filter_type='bandpass')
+
+            if len(ground) != 0:
+                ground = [int(g) for g in ground]
+                print('Grounding channels: ', ground)
+                anas = ground_bad_channels(anas, ground)
+            if split_probe is not None:
+                split_chans = np.arange(nchan)
+                if split_probe != nchan / 2:
+                    warnings.warn('The split probe is not dividing the number' +
+                                  ' of channels in two')
+                print('Splitting probe in channels \n"' +
+                      str(split_chans[:split_probe]) + '"\nand\n"' +
+                      str(split_chans[split_probe:]) + '"')
+            else:
+                split_chans = np.arange(nchan)
+                split_probe = None
+
+            if remove_artifacts:
+                remove_artifacts = remove_artifacts.split('-')
+                assert len(remove_artifacts) == 3
+                trigger_sys = remove_artifacts[0]
+                trigger_sig = remove_artifacts[1]
+                trigger_chan = int(remove_artifacts[2])
+
+                if trigger_sys == 'intan':
+                    if trigger_sig == 'adc':
+                        trigger_ttl = pyintan.extract_sync_times(intan_file.adc_signals[0].signal[trigger_chan],
+                                                                 intan_file.times)
+                    elif trigger_sig == 'dig':
+                        trigger_ttl = intan_file.digital_in_signals[0].times[trigger_chan]
+                elif trigger_sys == 'ephys':
+                    if trigger_sig == 'dig':
+                        trigger_ttl = openephys_file.digital_in_signals[0].times[trigger_chan]
+                else:
+                    trigger_ttl = []
+                anas, _ = remove_stimulation_artifacts(anas, intan_file.times, trigger_ttl, mode='zero')
+
+            if common_ref == 'car':
+                anas, _ = apply_CAR(anas, car_type='mean', split_probe=split_probe)
+            elif common_ref == 'cmr':
+                anas, _ = apply_CAR(anas, car_type='median', split_probe=split_probe)
+
+            if action is not None:
+                prepro = {
+                    'common_ref': common_ref,
+                    'filter': {
+                        'pre_filter': pre_filter,
+                        'klusta_filter': klusta_filter,
+                        'filter_low': filter_low,
+                        'filter_high': filter_high,
+                    },
+                    'grounded_channels': ground,
+                    'probe_split': (str(split_chans[:split_probe]) +
+                                    str(split_chans[split_probe:]))
+                }
+                action.require_module(name='preprocessing', contents=prepro,
+                                      overwrite=True)
+
+            save_binary_format(fname, anas)
+
+
+            if not no_run:
+                print('Running klusta')
+                import subprocess
+                try:
+                    subprocess.check_output(['klusta', klusta_prm, '--overwrite'])
+                except subprocess.CalledProcessError as e:
+                    raise Exception(e.output)
 
             if not no_files:
                 if op.exists(exdir_path):
