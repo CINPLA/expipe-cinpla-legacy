@@ -7,5 +7,5 @@
 	remote = git@github.com:CINPLA/python-neo.git
 	branch = expipe
 	commit = acd431c8155ea011b46147d4aa1013801a0e47cd
-	parent = d3b1939fb34c2e1b4d9b263eb745d9f3eb6e843f
+	parent = a80f4ff318755cb3d8cafe8495a4dd794cd2e985
 	cmdver = 0.3.1
