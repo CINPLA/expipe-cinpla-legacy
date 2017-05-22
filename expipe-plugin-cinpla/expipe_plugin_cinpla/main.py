@@ -414,6 +414,34 @@ class CinplaPlugin(IPlugin):
                 clusters = model.cluster(np.arange(model.n_spikes), model.channel_ids)
                 model.save(spike_clusters=clusters)
 
+        @cli.command('tag')
+        @click.argument('action-id', type=click.STRING)
+        @click.option('--tag', '-t',
+                      required=True,
+                      multiple=True,
+                      type=click.Choice(possible_tags),
+                      help='The tag to be applied to the action.',
+                      )
+        @click.option('--note',
+                      type=click.STRING,
+                      help='Add note, use "text here" for sentences.',
+                      )
+        def tag(action_id, tag, note):
+            """Tag action
+
+            COMMAND: action-id: Provide action id to find exdir path"""
+            project = expipe.io.get_project(user_params['project_id'])
+            action = project.require_action(action_id)
+            if note is not None:
+                notes = action.require_module(name='notes').to_dict()
+                notes['unit_note'] = {'value': note}
+                action.require_module(name='notes', contents=notes,
+                                      overwrite=True)
+            tags = action.tags or {}
+            tags.update({t: 'true' for t in tag})
+            action.tags = tags
+
+
         @cli.command('register-units')
         @click.argument('action-id', type=click.STRING)
         @click.option('--no-local',
