@@ -608,6 +608,10 @@ class IntanPlugin(IPlugin):
                         raise FileExistsError('The exdir path to this action "' +
                                               exdir_path + '" exists, use ' +
                                               'overwrite flag')
+                try:
+                    os.mkdir(op.dirname(exdir_path))
+                except Exception:
+                    pass
                 # this will copy the entire folder containing the intan file as well
                 intan.convert(intan_file,
                               exdir_path=exdir_path,
@@ -783,6 +787,11 @@ class IntanPlugin(IPlugin):
                         raise FileExistsError('The exdir path to this action "' +
                                               exdir_path + '" exists, use ' +
                                               'overwrite flag')
+                try:
+                    os.mkdir(op.dirname(exdir_path))
+                except Exception:
+                    pass
+                shutil.copy(prb_path, intan_ephys_path)
                 # this will copy the entire folder containing the intan file as well
                 openephys.convert(openephys_file,
                                   exdir_path=exdir_path)
@@ -1047,11 +1056,6 @@ class IntanPlugin(IPlugin):
                         notes['register_note'] = {'value': note}
                     action.require_module(name='notes', contents=notes,
                                           overwrite=True)
-            fr = action.require_filerecord()
-            if not no_temp:
-                exdir_path = _get_local_path(fr, make=True)
-            else:
-                exdir_path = fr.local_path
 
             if not no_run:
                 anas = intan_file.analog_signals[0].signal
@@ -1141,7 +1145,31 @@ class IntanPlugin(IPlugin):
                     raise Exception(e.output)
 
             if not no_convert:
+                fr = action.require_filerecord()
+                if not no_temp:
+                    exdir_path = _get_local_path(fr)
+                else:
+                    exdir_path = fr.local_path
+
+                if op.exists(exdir_path):
+                    if overwrite:
+                        shutil.rmtree(exdir_path)
+                    else:
+                        raise FileExistsError('The exdir path to this action "' +
+                                              exdir_path + '" exists, use ' +
+                                              'overwrite flag')
+                try:
+                    os.mkdir(op.dirname(exdir_path))
+                except Exception:
+                    pass
+                shutil.copy(prb_path, intan_ephys_path)
+
                 print('Converting to exdir')
+                openephys.convert(openephys_file,
+                                  exdir_path=exdir_path)
+                intan.convert(intan_file,
+                              exdir_path=exdir_path,
+                              copyfiles=False)
                 openephys.generate_spike_trains(exdir_path, openephys_file, source='klusta')
                 print('Finished with spiketrains, you can now start manual ' +
                       'clustering while tracking and LFP is processed')
