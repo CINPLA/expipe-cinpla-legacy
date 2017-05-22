@@ -26,6 +26,259 @@ DTIME_FORMAT = expipe.io.core.datetime_format
 class IntanPlugin(IPlugin):
     """Create the `expipe parse-axona` command for neuro recordings."""
     def attach_to_cli(self, cli):
+        @cli.command('process-intan-ephys')
+        @click.argument('action-id', type=click.STRING)
+        @click.option('--prb-path',
+                      type=click.STRING,
+                      help='Path to probefile, assumed to be in expipe config directory by default.',
+                      )
+        @click.option('--intanephys-path',
+                      type=click.STRING,
+                      help='Path to openeophys dir, if none it is deduced from action id.',
+                      )
+        @click.option('--exdir-path',
+                      type=click.STRING,
+                      help='Path to desired exdir directory, if none it is deduced from action id.',
+                      )
+        @click.option('--nchan',
+                      type=click.INT,
+                      default=32,
+                      help='Number of channels. Default = 32',
+                      )
+        @click.option('--klusta-filter',
+                      is_flag=True,
+                      help='Let klusta filter or not. Default = False',
+                      )
+        @click.option('--pre-filter',
+                      is_flag=True,
+                      help='Pre filter or not, replaces klusta filter. Default = True',
+                      )
+        @click.option('--filter-low',
+                      type=click.INT,
+                      default=300,
+                      help='Low cut off frequencey. Default is 300 Hz',
+                      )
+        @click.option('--filter-high',
+                      type=click.INT,
+                      default=6000,
+                      help='High cut off frequencey. Default is 6000 Hz',
+                      )
+        @click.option('--common-ref',
+                      type=click.Choice(['car', 'cmr', 'none']),
+                      default='cmr',
+                      help='Apply Common average/median referencing. Default is "car"')
+        @click.option('--split-probe',
+                      type=click.INT,
+                      default=16,
+                      help='Splits referencing in 2 at selected channel (for CAR/CMR). Default is 16',
+                      )
+        @click.option('--ground', '-g',
+                      multiple=True,
+                      help='Ground selected channels')
+        @click.option('--no-klusta',
+                      is_flag=True,
+                      help='Not run klusta on dataset.',
+                      )
+        @click.option('--no-convert',
+                      is_flag=True,
+                      help='Not convert to exdir.',
+                      )
+        @click.option('--no-local',
+                      is_flag=True,
+                      help='Store temporary on local drive.',
+                      )
+        @click.option('--no-preprocess',
+                      is_flag=True,
+                      help='Preporcess data.',
+                      )
+        @click.option('--shutter-channel',
+                      type=click.INT,
+                      default=0,
+                      help='TTL channel for shutter events to sync tracking',
+                      )
+        def process_intan(action_id, prb_path, pre_filter,
+                               klusta_filter, filter_low,
+                               filter_high, nchan, common_ref, ground,
+                               split_probe, no_local, intanephys_path,
+                               exdir_path, no_klusta, no_convert, shutter_channel,
+                               no_preprocess):
+            """Generate a klusta .dat and .prm files from openephys directory.
+
+            COMMAND: action-id"""
+            import numpy as np
+            if not no_klusta:
+                import klusta
+                import klustakwik2
+            action = None
+            if exdir_path is None:
+                import exdir
+                project = expipe.io.get_project(user_params['project_id'])
+                action = project.require_action(action_id)
+                fr = action.require_filerecord()
+                if not no_local:
+                    exdir_path = _get_local_path(fr)
+                else:
+                    exdir_path = fr.server_path
+                exdir_file = exdir.File(exdir_path)
+            if openephys_path is None:
+                acquisition = exdir_file["acquisition"]
+                if acquisition.attrs['acquisition_system'] != 'Intan':
+                    raise ValueError('No Open Ephys aquisition system ' +
+                                     'related to this action')
+                openephys_session = acquisition.attrs["openephys_session"]
+                intan_ephys_path = op.join(acquisition.directory, openephys_session)
+                intan_ephys_base = op.join(intan_ephys_path, openephys_session)
+                rhs_file = [f for f in os.listdir(intan__ephys_path) if f.endswith('.rhs')][0]
+                rhs_path = op.join(intan_ephys_path, rhs_file)
+                klusta_prm = op.abspath(intan_ephys_base) + '.prm'
+                prb_path = prb_path or _get_probe_file('oe', nchan=nchan,
+                                                       spikesorter='klusta')
+                openephys_file = pyopenephys.File(openephys_path, prb_path)
+                intan_file = pyintan.File(rhs_path, pr)
+
+                prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
+                                                       spikesorter='klusta')
+                if prb_path is None:
+                    raise IOError('No probefile found in expipe config directory,' +
+                                  ' please provide one')
+                openephys_file = pyopenephys.File(intan_ephys_path)
+                intan_file = pyintan.File(rhs_path, prb_path)
+
+                # clip and sync
+                print('Pre-clip durations: Intan - ', intan_file.duration, ' Open Ephys - ', openephys_file.duration)
+                if intan_sync and intan_sync != 'none':
+                    intan_sync = intan_sync.split('-')
+                    assert len(intan_sync) == 2
+                    intan_chan = int(intan_sync[1])
+                    if intan_sync[0] == 'adc':
+                        intan_clip_times = pyintan.extract_sync_times(intan_file.adc_signals[0].signal[intan_chan],
+                                                                      intan_file.times)
+                    elif intan_sync[0] == 'dig':
+                        intan_clip_times = intan_file.digital_in_signals[0].times[intan_chan]
+                    else:
+                        intan_clip_times = None
+                    print('Intan clip times: ', intan_clip_times)
+                    intan_file.clip_recording(intan_clip_times)
+
+                if ephys_sync and ephys_sync != 'none':
+                    ephys_sync = ephys_sync.split('-')
+                    assert len(ephys_sync) == 2
+                    ephys_chan = int(ephys_sync[1])
+                    if ephys_sync[0] == 'sync':
+                        ephys_clip_times = openephys_file.sync_signals[0].times[ephys_chan]
+                    elif intan_sync[0] == 'dig':
+                        ephys_clip_times = openephys_file.digital_in_signals[0].times[intan_chan]
+                    else:
+                        ephys_clip_times = None
+                    print('Openephys clip times: ', ephys_clip_times)
+                    openephys_file.clip_recording(ephys_clip_times)
+
+                # Check duration
+                if round(openephys_file.duration, 1) != round(intan_file.duration, 1):
+                    if round(openephys_file.duration, 1) < round(intan_file.duration, 1):
+                        intan_file.clip_recording([openephys_file.duration], start_end='end')
+                    else:
+                        openephys_file.clip_recording([intan_file.duration], start_end='end')
+
+                print('Post-clip durations: Intan - ', intan_file.duration, ' Open Ephys - ', openephys_file.duration)
+
+                if shutter_events:
+                    shutter_events = shutter_events.split('-')
+                    assert len(shutter_events) == 3
+                    shutter_sys = shutter_events[0]
+                    shutter_sig = shutter_events[1]
+                    shutter_chan = int(shutter_events[2])
+
+                    if shutter_sys == 'intan':
+                        if shutter_sig == 'adc':
+                            shutter_ttl = pyintan.extract_sync_times(intan_file.adc_signals[0].signal[shutter_chan],
+                                                                     intan_file.times)
+                        elif shutter_sig == 'dig':
+                            shutter_ttl = intan_file.digital_in_signals[0].times[shutter_chan]
+                    elif shutter_sys == 'ephys':
+                        if shutter_sig == 'dig':
+                            shutter_ttl = openephys_file.digital_in_signals[0].times[shutter_chan]
+                    else:
+                        shutter_ttl = []
+                    openephys_file.sync_tracking_from_events(shutter_ttl)
+
+            if not no_preprocess:
+                if not pre_filter and not klusta_filter:
+                    pre_filter = True
+                elif pre_filter and klusta_filter:
+                    raise IOError('Choose either klusta-filter or pre-filter.')
+                anas = openephys_file.analog_signals[0].signal
+                fs = openephys_file.sample_rate.magnitude
+                nchan = anas.shape[0]
+                create_klusta_prm(openephys_base, prb_path, nchan,
+                                  fs=fs, klusta_filter=klusta_filter,
+                                  filter_low=filter_low,
+                                  filter_high=filter_high)
+                if pre_filter:
+                    anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
+                                                 fs=fs, filter_type='bandpass')
+                if len(ground) != 0:
+                    ground = [int(g) for g in ground]
+                    print('Grounding channels: ', ground)
+                    anas = ground_bad_channels(anas, ground)
+                if split_probe is not None:
+                    split_chans = np.arange(nchan)
+                    if split_probe != nchan / 2:
+                        import warnings
+                        warnings.warn('The split probe is not dividing the number' +
+                                      ' of channels in two')
+                    print('Splitting probe in channels \n"' +
+                          str(split_chans[:split_probe]) + '"\nand\n"' +
+                          str(split_chans[split_probe:]) + '"')
+                if common_ref == 'car':
+                    anas, _ = apply_CAR(anas, car_type='mean',
+                                        split_probe=split_probe)
+                elif common_ref == 'cmr':
+                    anas, _ = apply_CAR(anas, car_type='median',
+                                        split_probe=split_probe)
+                save_binary_format(openephys_base, anas)
+                if action is not None:
+                    prepro = {
+                        'common_ref': common_ref,
+                        'filter': {
+                            'pre_filter': pre_filter,
+                            'klusta_filter': klusta_filter,
+                            'filter_low': filter_low,
+                            'filter_high': filter_high,
+                        },
+                        'grounded_channels': ground,
+                        'probe_split': (str(split_chans[:split_probe]) +
+                                        str(split_chans[split_probe:]))
+                    }
+                    action.require_module(name='preprocessing', contents=prepro,
+                                          overwrite=True)
+
+            if not no_klusta:
+                print('Running klusta')
+                import subprocess
+                try:
+                    subprocess.check_output(['klusta', klusta_prm, '--overwrite'])
+                except subprocess.CalledProcessError as e:
+                    raise Exception(e.output)
+            if not no_convert:
+                print('Converting to exdir')
+                openephys.generate_spike_trains(exdir_path, openephys_file,
+                                                source='klusta')
+                print('Finished with spiketrains, you can now start manual ' +
+                      'clustering while tracking and LFP is processed')
+                if shutter_channel is not None:
+                    ttl_times = openephys_file.digital_in_signals[0].times[shutter_channel]
+                    if len(ttl_times) != 0:
+                        openephys_file.sync_tracking_from_events(ttl_times)
+                    else:
+                        import warnings
+                        warnings.warn(
+                            'No TTL events was found on IO channel {}'.format(shutter_channel)
+                        )
+                openephys.generate_tracking(exdir_path, openephys_file)
+                openephys.generate_lfp(exdir_path, openephys_file)
+
+
         @cli.command('klusta-intan')
         @click.argument('action-id', type=click.STRING)
         @click.option('--prb-path',
@@ -144,6 +397,7 @@ class IntanPlugin(IPlugin):
             if split_probe is not None:
                 split_chans = np.arange(nchan)
                 if split_probe != nchan / 2:
+                    import warnings
                     warnings.warn('The split probe is not dividing the number' +
                                   ' of channels in two')
                 print('Splitting probe in channels \n"' +
@@ -395,6 +649,8 @@ class IntanPlugin(IPlugin):
             COMMAND: intan-ephys-path"""
             from expipe_io_neuro import pyopenephys, pyintan
             from datetime import datetime
+            import numpy as np
+            from .action_tools import register_depth
             intan_ephys_path = op.abspath(intan_ephys_path)
             intan_ephys_dir = intan_ephys_path.split(os.sep)[-1]
             rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
@@ -421,6 +677,7 @@ class IntanPlugin(IPlugin):
                     intan_clip_times = intan_file.digital_in_signals[0].times[intan_chan]
                 else:
                     intan_clip_times = None
+                print('Intan clip times: ', intan_clip_times)
                 intan_file.clip_recording(intan_clip_times)
 
             if ephys_sync and ephys_sync != 'none':
@@ -433,6 +690,7 @@ class IntanPlugin(IPlugin):
                     ephys_clip_times = openephys_file.digital_in_signals[0].times[intan_chan]
                 else:
                     ephys_clip_times = None
+                print('Openephys clip times: ', ephys_clip_times)
                 openephys_file.clip_recording(ephys_clip_times)
 
             # Check duration
@@ -454,7 +712,7 @@ class IntanPlugin(IPlugin):
                 if shutter_sys == 'intan':
                     if shutter_sig == 'adc':
                         shutter_ttl = pyintan.extract_sync_times(intan_file.adc_signals[0].signal[shutter_chan],
-                                                                      intan_file.times)
+                                                                 intan_file.times)
                     elif shutter_sig == 'dig':
                         shutter_ttl = intan_file.digital_in_signals[0].times[shutter_chan]
                 elif shutter_sys == 'ephys':
@@ -471,6 +729,7 @@ class IntanPlugin(IPlugin):
             else:
                 raise ValueError('Did not find valid session number "' +
                                  session + '"')
+
             if action_id is None:
                 session_dtime = datetime.strftime(openephys_file.datetime,
                                                   '%d%m%y')
@@ -480,13 +739,16 @@ class IntanPlugin(IPlugin):
             action.datetime = openephys_file.datetime
             action.type = 'Recording'
             action.tags = {'open-ephys': 'true'}
+            print('Registering rat id ' + rat_id)
             action.subjects = {rat_id: 'true'}
-            headstage = action.require_module(name='hardware_intan_headstage').to_dict()
-            headstage['model']['value'] = 'RHS2132'
-            action.require_module(name='hardware_intan_headstage', contents=headstage,
-                                  overwrite=True)
+            user = user or user_params['user_name']
+            print('Registering user ' + user)
             action.users = {user: 'true'}
+            location = location or user_params['location']
+            assert location in possible_locations
+            print('Registering location ' + location)
             action.location = location
+
 
             if not no_modules:
                 if 'intanopenephys' not in templates:
@@ -495,21 +757,29 @@ class IntanPlugin(IPlugin):
                                      '{}"'.format(templates.keys()))
                 generate_templates(action, templates['intanopenephys'], overwrite,
                                    git_note=GIT_NOTE)
-                L = action.require_module('electrophysiology_L').to_dict()
-                L['depth'] = left * pq.mm
-                print('Registering depth left = ', L['depth'])
-                action.require_module('electrophysiology_L', contents=L,
+                headstage = action.require_module(name='hardware_intan_headstage').to_dict()
+                headstage['model']['value'] = 'RHS2132'
+                action.require_module(name='hardware_intan_headstage', contents=headstage,
                                       overwrite=True)
-                R = action.require_module('electrophysiology_R').to_dict()
-                R['depth'] = right * pq.mm
-                print('Registering depth right = ', R['depth'])
-                action.require_module('electrophysiology_R', contents=R,
-                                      overwrite=True)
+                register_depth(project, action, left, right)
+
+                if len(openephys_file.messages) != 0:
+                    notes = {}
+                    for idx, message in enumerate(openephys_file.messages):
+                        notes['note_{}'.format(idx)] = {
+                            'time': message['time'],
+                            'value': message['message']
+                        }
+                    if note is not None:
+                        notes['register_note'] = {'value': note}
+                    action.require_module(name='notes', contents=notes,
+                                          overwrite=True)
             fr = action.require_filerecord()
-            if temp:
-                exdir_path = _get_local_path(fr)
+            if not no_temp:
+                exdir_path = _get_local_path(fr, make=True)
             else:
                 exdir_path = fr.local_path
+
             if not no_files:
                 if op.exists(exdir_path):
                     if overwrite:
@@ -527,6 +797,7 @@ class IntanPlugin(IPlugin):
                 intan.generate_lfp(exdir_path, intan_file)
                 openephys.generate_spike_trains(exdir_path, openephys_file)
                 openephys.generate_tracking(exdir_path, openephys_file)
+
 
         @cli.command('register-spikesort-intan-ephys')
         @click.argument('intan-ephys-path', type=click.Path(exists=True))
@@ -786,79 +1057,79 @@ class IntanPlugin(IPlugin):
             else:
                 exdir_path = fr.local_path
 
-            anas = intan_file.analog_signals[0].signal
-            fs = intan_file.sample_rate.magnitude
-            nchan = anas.shape[0]
-            fname = op.join(intan_ephys_path, intan_ephys_dir)
-            klusta_prm = create_klusta_prm(fname, prb_path, nchan, fs=fs,
-                                           klusta_filter=klusta_filter,
-                                           filter_low=filter_low,
-                                           filter_high=filter_high)
-            if pre_filter:
-                anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
-                                             fs=fs, filter_type='bandpass')
-
-            if len(ground) != 0:
-                ground = [int(g) for g in ground]
-                print('Grounding channels: ', ground)
-                anas = ground_bad_channels(anas, ground)
-            if split_probe is not None:
-                split_chans = np.arange(nchan)
-                if split_probe != nchan / 2:
-                    warnings.warn('The split probe is not dividing the number' +
-                                  ' of channels in two')
-                print('Splitting probe in channels \n"' +
-                      str(split_chans[:split_probe]) + '"\nand\n"' +
-                      str(split_chans[split_probe:]) + '"')
-            else:
-                split_chans = np.arange(nchan)
-                split_probe = None
-
-            if remove_artifacts:
-                remove_artifacts = remove_artifacts.split('-')
-                assert len(remove_artifacts) == 3
-                trigger_sys = remove_artifacts[0]
-                trigger_sig = remove_artifacts[1]
-                trigger_chan = int(remove_artifacts[2])
-
-                if trigger_sys == 'intan':
-                    if trigger_sig == 'adc':
-                        trigger_ttl = pyintan.extract_sync_times(intan_file.adc_signals[0].signal[trigger_chan],
-                                                                 intan_file.times)
-                    elif trigger_sig == 'dig':
-                        trigger_ttl = intan_file.digital_in_signals[0].times[trigger_chan]
-                elif trigger_sys == 'ephys':
-                    if trigger_sig == 'dig':
-                        trigger_ttl = openephys_file.digital_in_signals[0].times[trigger_chan]
-                else:
-                    trigger_ttl = []
-                anas, _ = remove_stimulation_artifacts(anas, intan_file.times, trigger_ttl, mode='zero')
-
-            if common_ref == 'car':
-                anas, _ = apply_CAR(anas, car_type='mean', split_probe=split_probe)
-            elif common_ref == 'cmr':
-                anas, _ = apply_CAR(anas, car_type='median', split_probe=split_probe)
-
-            if action is not None:
-                prepro = {
-                    'common_ref': common_ref,
-                    'filter': {
-                        'pre_filter': pre_filter,
-                        'klusta_filter': klusta_filter,
-                        'filter_low': filter_low,
-                        'filter_high': filter_high,
-                    },
-                    'grounded_channels': ground,
-                    'probe_split': (str(split_chans[:split_probe]) +
-                                    str(split_chans[split_probe:]))
-                }
-                action.require_module(name='preprocessing', contents=prepro,
-                                      overwrite=True)
-
-            save_binary_format(fname, anas)
-
-
             if not no_run:
+                anas = intan_file.analog_signals[0].signal
+                fs = intan_file.sample_rate.magnitude
+                nchan = anas.shape[0]
+                fname = op.join(intan_ephys_path, intan_ephys_dir)
+                klusta_prm = create_klusta_prm(fname, prb_path, nchan, fs=fs,
+                                               klusta_filter=klusta_filter,
+                                               filter_low=filter_low,
+                                               filter_high=filter_high)
+                if pre_filter:
+                    anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
+                                                 fs=fs, filter_type='bandpass')
+
+                if len(ground) != 0:
+                    ground = [int(g) for g in ground]
+                    print('Grounding channels: ', ground)
+                    anas = ground_bad_channels(anas, ground)
+                if split_probe is not None:
+                    split_chans = np.arange(nchan)
+                    if split_probe != nchan / 2:
+                        import warnings
+                        warnings.warn('The split probe is not dividing the number' +
+                                      ' of channels in two')
+                    print('Splitting probe in channels \n"' +
+                          str(split_chans[:split_probe]) + '"\nand\n"' +
+                          str(split_chans[split_probe:]) + '"')
+                else:
+                    split_chans = np.arange(nchan)
+                    split_probe = None
+
+                if remove_artifacts:
+                    remove_artifacts = remove_artifacts.split('-')
+                    assert len(remove_artifacts) == 3
+                    trigger_sys = remove_artifacts[0]
+                    trigger_sig = remove_artifacts[1]
+                    trigger_chan = int(remove_artifacts[2])
+
+                    if trigger_sys == 'intan':
+                        if trigger_sig == 'adc':
+                            trigger_ttl = pyintan.extract_sync_times(intan_file.adc_signals[0].signal[trigger_chan],
+                                                                     intan_file.times)
+                        elif trigger_sig == 'dig':
+                            trigger_ttl = intan_file.digital_in_signals[0].times[trigger_chan]
+                    elif trigger_sys == 'ephys':
+                        if trigger_sig == 'dig':
+                            trigger_ttl = openephys_file.digital_in_signals[0].times[trigger_chan]
+                    else:
+                        trigger_ttl = []
+                    anas, _ = remove_stimulation_artifacts(anas, intan_file.times, trigger_ttl, mode='zero')
+
+                if common_ref == 'car':
+                    anas, _ = apply_CAR(anas, car_type='mean', split_probe=split_probe)
+                elif common_ref == 'cmr':
+                    anas, _ = apply_CAR(anas, car_type='median', split_probe=split_probe)
+
+                if action is not None:
+                    prepro = {
+                        'common_ref': common_ref,
+                        'filter': {
+                            'pre_filter': pre_filter,
+                            'klusta_filter': klusta_filter,
+                            'filter_low': filter_low,
+                            'filter_high': filter_high,
+                        },
+                        'grounded_channels': ground,
+                        'probe_split': (str(split_chans[:split_probe]) +
+                                        str(split_chans[split_probe:]))
+                    }
+                    action.require_module(name='preprocessing', contents=prepro,
+                                          overwrite=True)
+
+                save_binary_format(fname, anas)
+
                 print('Running klusta')
                 import subprocess
                 try:
