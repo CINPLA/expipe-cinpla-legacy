@@ -799,7 +799,7 @@ class IntanPlugin(IPlugin):
                 openephys.generate_tracking(exdir_path, openephys_file)
 
 
-        @cli.command('register-spikesort-intan-ephys')
+        @cli.command('register-process-intan-ephys')
         @click.argument('intan-ephys-path', type=click.Path(exists=True))
         @click.option('--user',
                       type=click.STRING,
@@ -883,6 +883,10 @@ class IntanPlugin(IPlugin):
                       is_flag=True,
                       help='Pre filter or not, replaces klusta filter. Default = False',
                       )
+        @click.option('--filter-27',
+                      is_flag=True,
+                      help='Filter out 2.7 kHz noise from Intan RHS chips. Default = False',
+                      )
         @click.option('--filter-low',
                       type=click.INT,
                       default=300,
@@ -913,11 +917,11 @@ class IntanPlugin(IPlugin):
                       type=click.STRING,
                       help='Add note, use "text here" for sentences.',
                       )
-        def generate_spikesot_intan_ephys_action(action_id, intan_ephys_path, no_temp,
+        def register_process_intan_ephys_action(action_id, intan_ephys_path, no_temp,
                                                  left, right, overwrite, no_files,
                                                  intan_sync, ephys_sync, shutter_events,
                                                  rat_id, user, prb_path, session, nchan,
-                                                 location, pre_filter, remove_artifacts,
+                                                 location, pre_filter, filter_27, remove_artifacts,
                                                  klusta_filter, filter_low, no_modules,
                                                  filter_high, common_ref, ground, note,
                                                  split_probe, no_run,):
@@ -1069,6 +1073,12 @@ class IntanPlugin(IPlugin):
                 if pre_filter:
                     anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
                                                  fs=fs, filter_type='bandpass')
+
+                if filter_27:
+                    stopband = [2.6, 2.8]
+                    anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
+                                                 fs=fs, filter_type='bandstop')
+
 
                 if len(ground) != 0:
                     ground = [int(g) for g in ground]
