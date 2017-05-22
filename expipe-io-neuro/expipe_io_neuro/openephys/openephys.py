@@ -111,8 +111,8 @@ def generate_spike_trains(exdir_path, openephys_file, source='klusta'):
         if len(kwikfile) > 0:
             kwikfile = op.join(openephys_directory, kwikfile[0])
             if op.exists(kwikfile):
-                kwikio = neo.io.KwikIO(filename=kwikfile)
-                blk = kwikio.read_block()
+                kwikio = neo.io.KwikIO(filename=kwikfile,)
+                blk = kwikio.read_block(raw_data_units='uV')
                 exdirio = neo.io.ExdirIO(exdir_path)
                 exdirio.write_block(blk)
         else:
