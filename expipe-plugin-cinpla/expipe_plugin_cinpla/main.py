@@ -726,3 +726,54 @@ class CinplaPlugin(IPlugin):
                 notes['note_{}'.format(idx)] = {'value': note}
                 action.require_module(name='notes', contents=notes,
                                       overwrite=True)
+
+        @cli.command('generate-analysis-action')
+        @click.argument('action-id', type=click.STRING)
+        @click.option('--user',
+                      type=click.STRING,
+                      help='The experimenter performing the analysis.',
+                      )
+        @click.option('-t', '--tag',
+                      multiple=True,
+                      type=click.STRING,
+                      help='Tags to sort the analysis.',
+                      )
+        @click.option('--overwrite',
+                      is_flag=True,
+                      help='Overwrite.',
+                      )
+        def generate_analysis(action_id, user, tag, overwrite):
+            """Parse info about recorded units
+
+            COMMAND: action-id: Provide action id to get action"""
+            from datetime import datetime
+            project = expipe.io.get_project(user_params['project_id'])
+            analysis_action = project.require_action(action_id)
+
+            analysis_action.type = 'Analysis'
+            user = user or user_params['user_name']
+            if user is None:
+                raise ValueError('Please add user name')
+            if len(user) == 0:
+                raise ValueError('Please add user name')
+            analysis_action.users = {user: 'true'}
+            analysis_action.datetime = datetime.now()
+            subjects = {}
+            analysis_action.tags = {t: 'true' for t in tag}
+            for action in project.actions:
+                if action.type != 'Recording':
+                    continue
+                if action.tags is None:
+                    raise ValueError('No tags in "' + action.id + '"')
+                if not any(t in tag for t in action.tags.keys()):
+                    continue
+                fr = action.require_filerecord()
+                name = action.id
+                subjects.update(action.subjects)
+                contents = {}
+                for key, val in action.modules.items():
+                    if 'channel_group' in key:
+                        contents[key] = val
+                analysis_action.require_module(name=name, contents=contents,
+                                               overwrite=overwrite)
+            analysis_action.subjects = subjects
