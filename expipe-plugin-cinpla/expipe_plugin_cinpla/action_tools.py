@@ -159,6 +159,15 @@ def generate_templates(action, action_templates, overwrite, git_note=None):
             raise e
 
 
+def _get_probe_file(system, nchan, spikesorter='klusta'):
+    # TODO add naming convention for openeophys (oe) and intan (intan) - argument 'oe' or 'intan'
+    fname = 'tetrodes' + str(nchan) + 'ch-' + spikesorter + '-' + system + '.prb'
+    prb_path = op.join(expipe.config.config_dir, fname)
+    if not op.exists(prb_path):
+        prb_path = None
+    return prb_path
+
+
 def create_notebook(exdir_path, channel_group=0):
     import exdir
     exob = exdir.File(exdir_path)
