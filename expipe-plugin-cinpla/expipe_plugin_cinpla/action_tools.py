@@ -138,8 +138,8 @@ def generate_templates(action, action_templates, overwrite, git_note=None):
     :return:
     '''
     if git_note is not None:
-        action.require_module(name='git-note', contents=git_note,
-                              overwrite=overwrite)
+        action.require_module(name='software_version_control_git',
+                              contents=git_note, overwrite=overwrite)
     for template in action_templates:
         try:
             if template.startswith('_inherit'):

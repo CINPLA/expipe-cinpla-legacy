@@ -33,7 +33,7 @@ class OptoPlugin(IPlugin):
                       type=click.Choice(possible_brain_areas),
                       help='The anatomical brain-area of the optogenetic stimulus.',
                       )
-        @click.option('--tag',
+        @click.option('-t', '--tag',
                       required=True,
                       type=click.Choice(['opto-inside', 'opto-outside', 'opto-train']),
                       help='The anatomical brain-area of the optogenetic stimulus.',
