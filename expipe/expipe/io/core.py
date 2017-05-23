@@ -374,31 +374,30 @@ class Action:
         self.id = action_id
         path = "/".join(["actions", self.project.id, self.id])
         self._firebase = FirebaseBackend(path)
-        self.db = db.child(self._firebase.path)
 
     @property
     def location(self):
-        return self.db.child('location').get(user['idToken']).val()
+        return db.child(self._firebase.path).child('location').get(user['idToken']).val()
 
     @location.setter
     def location(self, value):
         if not isinstance(value, str):
             raise ValueError('Location requires string')
-        self.db.child('location').set(value, user['idToken'])
+        db.child(self._firebase.path).child('location').set(value, user['idToken'])
 
     @property
     def type(self):
-        return self.db.child('type').get(user['idToken']).val()
+        return db.child(self._firebase.path).child('type').get(user['idToken']).val()
 
     @type.setter
     def type(self, value):
         if not isinstance(value, str):
             raise ValueError('Type requires string')
-        self.db.child('type').set(value, user['idToken'])
+        db.child(self._firebase.path).child('type').set(value, user['idToken'])
 
     @property
     def subjects(self):
-        return self.db.child('subjects').get(user['idToken']).val()
+        return db.child(self._firebase.path).child('subjects').get(user['idToken']).val()
 
     @subjects.setter
     def subjects(self, value):
@@ -410,12 +409,12 @@ class Action:
             if not all(val == 'true' or val is True for val in value.values()):
                 raise ValueError('Users requires a list or a dict formated ' +
                                  'like "{"value": "true"}"')
-        self.db.child('subjects').set(value, user['idToken'])
+        db.child(self._firebase.path).child('subjects').set(value, user['idToken'])
 
     @property
     def datetime(self):
         dtime = datetime.datetime.strptime(
-            self.db.child('datetime').get(
+            db.child(self._firebase.path).child('datetime').get(
                 user['idToken']).val(),
             self.project.datetime_format
         )
@@ -426,11 +425,11 @@ class Action:
         if not isinstance(value, datetime.datetime):
             raise ValueError('Datetime requires a datetime object.')
         dtime = value.strftime(self.project.datetime_format)
-        self.db.child('datetime').set(dtime, user['idToken'])
+        db.child(self._firebase.path).child('datetime').set(dtime, user['idToken'])
 
     @property
     def users(self):
-        return self.db.child('users').get(user['idToken']).val()
+        return db.child(self._firebase.path).child('users').get(user['idToken']).val()
 
     @users.setter
     def users(self, value):
@@ -442,11 +441,11 @@ class Action:
             if not all(val == 'true' or val is True for val in value.values()):
                 raise ValueError('Users requires a list or a dict formated ' +
                                  'like "{"value": "true"}"')
-        self.db.child('users').set(value, user['idToken'])
+        db.child(self._firebase.path).child('users').set(value, user['idToken'])
 
     @property
     def tags(self):
-        return self.db.child('tags').get(user['idToken']).val()
+        return db.child(self._firebase.path).child('tags').get(user['idToken']).val()
 
     @tags.setter
     def tags(self, value):
@@ -458,7 +457,7 @@ class Action:
             if not all(val == 'true' or val is True for val in value.values()):
                 raise ValueError('Users requires a list or a dict formated ' +
                                  'like "{"value": "true"}"')
-        self.db.child('tags').set(value, user['idToken'])
+        db.child(self._firebase.path).child('tags').set(value, user['idToken'])
 
     @property
     def modules(self):
