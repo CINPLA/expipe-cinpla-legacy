@@ -382,7 +382,7 @@ class OpenEphysPlugin(IPlugin):
                 if not no_move:
                     shutil.rmtree(openephys_path)
 
-        @cli.command('convert-klusta')
+        @cli.command('convert-klusta-oe')
         @click.argument('action-id', type=click.STRING)
         @click.option('--prb-path',
                       type=click.STRING,
