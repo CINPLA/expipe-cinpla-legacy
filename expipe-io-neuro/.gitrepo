@@ -6,6 +6,6 @@
 [subrepo]
 	remote = git@github.com:CINPLA/expipe-io-neuro.git
 	branch = dev
-	commit = e192d2b03851a6cd2b1a0c1feebe1124f657f190
-	parent = b34489bdac507874d1dfe56cc17d5328702c2447
+	commit = 40a7f7619ef21640ebd68d2fc7e91a718e49633a
+	parent = 8139f55ea4426638b3abff520c689dba577f450c
 	cmdver = 0.3.1
