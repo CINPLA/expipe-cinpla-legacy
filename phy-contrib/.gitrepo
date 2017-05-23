@@ -7,5 +7,5 @@
 	remote = git@github.com:CINPLA/phy-contrib.git
 	branch = NeoGUI
 	commit = 7e925249688b8cc3a2387c00dce42682d33b4e3f
-	parent = 52384adf8b1f5aa0911be829e873fe268c049999
+	parent = 40f28fc63cf283b6baf8a5b956162e8f15a59394
 	cmdver = 0.3.1
