@@ -6,10 +6,8 @@ from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
 
 from .action_tools import (generate_templates, _get_local_path, GIT_NOTE,
                            add_message, _get_probe_file)
-from .opto_tools import (generate_epochs, generate_axona_opto, populate_modules,
-                        extract_laser_pulse, read_pulse_pal_mat,
-                        read_pulse_pal_xml, read_laser_intensity,
-                        generate_openephys_opto)
+from .electro_tools import (generate_electrical_info, populate_modules)
+
 import os
 import os.path as op
 import sys
@@ -72,9 +70,10 @@ class ElectricalStimulationPlugin(IPlugin):
                       )
         def parse_electrical_stimulation(action_id, intan_sync, stim_chan, no_local, overwrite,
                                          prb_path, tag, message, ephys_sync, nchan):
-            """Parse optogenetics info to an action.
+            """Parse electrical stimulation info to an action.
 
             COMMAND: action-id: Provide action id to find exdir path"""
+
             import exdir
             from expipe_io_neuro import pyintan, pyopenephys
             # TODO deafault none
@@ -94,14 +93,13 @@ class ElectricalStimulationPlugin(IPlugin):
 
             acquisition = exdir_object["acquisition"]
             if acquisition.attrs['acquisition_system'] != 'Intan':
-                raise ValueError('No Open Ephys aquisition system ' +
+                raise ValueError('No Intan aquisition system ' +
                                  'related to this action')
             openephys_session = acquisition.attrs["openephys_session"]
             intan_ephys_path = op.join(acquisition.directory, openephys_session)
             intan_ephys_base = op.join(intan_ephys_path, openephys_session)
             rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
             rhs_path = op.join(intan_ephys_path, rhs_file)
-            klusta_prm = op.abspath(intan_ephys_base) + '_klusta.prm'
 
             prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
                                                    spikesorter='klusta')
@@ -149,51 +147,10 @@ class ElectricalStimulationPlugin(IPlugin):
 
             print('Post-clip durations: Intan - ', intan_file.duration, ' Open Ephys - ', openephys_file.duration)
 
+            trigger_param, channel_param = generate_electrical_info(exdir_path, intan_file, openephys_file,
+                                                                    stim_chan, stim_trigger='dig')
+            generate_templates(action, templates['electrical_stimulation'],
+                               overwrite, git_note=None)
+            populate_modules(action=action, params=trigger_param.update(channel_param))
+            add_message(action, message)
 
-
-
-            # generate_templates(action, templates['opto_' + aq_sys],
-            #                    overwrite, git_note=None)
-            # populate_modules(action, params)
-            # laser_id = laser_id or user_params['laser_device'].get('id')
-            # laser_name = user_params['laser_device'].get('name')
-            # assert laser_id is not None
-            # assert laser_name is not None
-            # laser = action.require_module(name=laser_name).to_dict()
-            # laser['device_id'] = {'value': laser_id}
-            # action.require_module(name=laser_name, contents=laser,
-            #                       overwrite=True)
-            # add_message(action, message)
-
-        @cli.command('register-opto-files')
-        @click.argument('action-id', type=click.STRING)
-        @click.option('--no-local',
-                      is_flag=True,
-                      help='Store temporary on local drive.',
-                      )
-        @click.option('--io-channel',
-                      default=4,
-                      type=click.INT,
-                      help='TTL input channel.',
-                      )
-        def parse_optogenetics_files(action_id, no_local, io_channel):
-            """Parse optogenetics info to an action.
-
-            COMMAND: action-id: Provide action id to find exdir path"""
-            import exdir
-            project = expipe.io.get_project(user_params['project_id'])
-            action = project.require_action(action_id)
-            fr = action.require_filerecord()
-            if not no_local:
-                exdir_path = _get_local_path(fr)
-            else:
-                exdir_path = fr.server_path
-            exdir_object = exdir.File(exdir_path)
-            if exdir_object['acquisition'].attrs['acquisition_system'] == 'Axona':
-                aq_sys = 'axona'
-                params = generate_axona_opto(exdir_path, io_channel)
-            elif exdir_object['acquisition'].attrs['acquisition_system'] == 'OpenEphys':
-                aq_sys = 'openephys'
-                params = generate_openephys_opto(exdir_path, io_channel)
-            else:
-                raise ValueError('Acquisition system not recognized')
