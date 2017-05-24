@@ -4,7 +4,8 @@ from expipecli.utils import IPlugin
 import click
 from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
 
-from .action_tools import generate_templates, _get_local_path, GIT_NOTE
+from .action_tools import (generate_templates, _get_local_path, GIT_NOTE,
+                           add_message)
 from .opto_tools import (generate_epochs, generate_axona_opto, populate_modules,
                         extract_laser_pulse, read_pulse_pal_mat,
                         read_pulse_pal_xml, read_laser_intensity,
@@ -38,9 +39,9 @@ class OptoPlugin(IPlugin):
                       type=click.Choice(['opto-inside', 'opto-outside', 'opto-train']),
                       help='The anatomical brain-area of the optogenetic stimulus.',
                       )
-        @click.option('--note',
+        @click.option('-m', '--message',
                       type=click.STRING,
-                      help='Add note, use "text here" for sentences.',
+                      help='Add message, use "text here" for sentences.',
                       )
         @click.option('--io-channel',
                       default=4,
@@ -60,7 +61,7 @@ class OptoPlugin(IPlugin):
                       help='A unique identifier of the laser.',
                       )
         def parse_optogenetics(action_id, brain_area, no_local, overwrite,
-                               io_channel, tag, note, laser_id):
+                               io_channel, tag, message, laser_id):
             """Parse optogenetics info to an action.
 
             COMMAND: action-id: Provide action id to find exdir path"""
@@ -100,23 +101,19 @@ class OptoPlugin(IPlugin):
             laser['device_id'] = {'value': laser_id}
             action.require_module(name=laser_name, contents=laser,
                                   overwrite=True)
-            if note is not None:
-                notes = action.require_module(name='notes').to_dict()
-                notes['opto_note'] = {'value': note}
-                action.require_module(name='notes', contents=notes,
-                                      overwrite=True)
+            add_message(action, message)
 
         @cli.command('register-opto-files')
         @click.argument('action-id', type=click.STRING)
         @click.option('--no-local',
-                is_flag=True,
-                help='Store temporary on local drive.',
-                )
+                      is_flag=True,
+                      help='Store temporary on local drive.',
+                      )
         @click.option('--io-channel',
-                default=4,
-                type=click.INT,
-                help='TTL input channel.',
-                )
+                      default=4,
+                      type=click.INT,
+                      help='TTL input channel.',
+                      )
         def parse_optogenetics_files(action_id, no_local, io_channel):
             """Parse optogenetics info to an action.
 

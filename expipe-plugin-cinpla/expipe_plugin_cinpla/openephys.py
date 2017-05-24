@@ -5,9 +5,11 @@ import os.path as op
 from expipecli.utils import IPlugin
 import click
 from expipe_io_neuro import pyopenephys, openephys
-from .action_tools import generate_templates, _get_local_path, _get_probe_file, GIT_NOTE
-from exana.misc.signal_tools import (create_klusta_prm, save_binary_format, apply_CAR,
-                           filter_analog_signals, ground_bad_channels)
+from .action_tools import (generate_templates, _get_local_path,
+                           _get_probe_file, GIT_NOTE, add_message)
+from exana.misc.signal_tools import (create_klusta_prm, save_binary_format,
+                                     apply_CAR, filter_analog_signals,
+                                     ground_bad_channels, duplicate_bad_channels)
 import sys
 sys.path.append(expipe.config.config_dir)
 if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
@@ -162,8 +164,8 @@ class OpenEphysPlugin(IPlugin):
                     anas, _ = apply_CAR(anas, car_type='median',
                                         split_probe=split_probe)
                 if len(ground) != 0:
-                    ground = [int(g) for g in ground]
-                    anas = ground_bad_channels(anas, ground)
+                    duplicate = [int(g) for g in ground]
+                    anas = duplicate_bad_channels(anas, duplicate)
                 save_binary_format(openephys_base, anas)
                 if action is not None:
                     prepro = {
@@ -208,7 +210,7 @@ class OpenEphysPlugin(IPlugin):
 
         @cli.command('register-openephys')
         @click.argument('openephys-path', type=click.Path(exists=True))
-        @click.option('--user',
+        @click.option('-u', '--user',
                       type=click.STRING,
                       help='The experimenter performing the recording.',
                       )
@@ -220,7 +222,7 @@ class OpenEphysPlugin(IPlugin):
                       type=click.FLOAT,
                       help='The depth on right side in "mm".',
                       )
-        @click.option('--location',
+        @click.option('-l', '--location',
                       type=click.Choice(possible_locations),
                       help='The location of the recording, e.g. "room1".',
                       )
@@ -267,9 +269,14 @@ class OpenEphysPlugin(IPlugin):
                       default=32,
                       help='Number of channels. Default = 32',
                       )
-        @click.option('--note',
+        @click.option('-m', '--message',
                       type=click.STRING,
-                      help='Add note, use "text here" for sentences.',
+                      help='Add message, use "text here" for sentences.',
+                      )
+        @click.option('-t', '--tag',
+                      multiple=True,
+                      type=click.STRING,
+                      help='Add tags to action.',
                       )
         @click.option('--no-move',
                       is_flag=True,
@@ -279,7 +286,7 @@ class OpenEphysPlugin(IPlugin):
                                       right, overwrite, no_files, no_modules,
                                       rat_id, user, prb_path, session, nchan,
                                       location, spikes_source,
-                                      note, no_move):
+                                      message, no_move, tag):
             """Generate an open-ephys recording-action to database.
 
             COMMAND: open-ephys-directory"""
@@ -313,7 +320,9 @@ class OpenEphysPlugin(IPlugin):
             action = project.require_action(action_id)
             action.datetime = openephys_file.datetime
             action.type = 'Recording'
-            action.tags = {'open-ephys': 'true'}
+            tags = {'open-ephys': 'true'}
+            tags.update({t: 'true' for t in tag})
+            action.tags = tags
             print('Registering rat id ' + rat_id)
             action.subjects = {rat_id: 'true'}
             user = user or user_params['user_name']
@@ -346,17 +355,10 @@ class OpenEphysPlugin(IPlugin):
                                       contents=headstage, overwrite=True)
                 register_depth(project, action, left, right)
 
-                if len(openephys_file.messages) != 0:
-                    notes = {}
-                    for idx, message in enumerate(openephys_file.messages):
-                        notes['note_{}'.format(idx)] = {
-                            'time': message['time'],
-                            'value': message['message']
-                        }
-                    if note is not None:
-                        notes['register_note'] = {'value': note}
-                    action.require_module(name='notes', contents=notes,
-                                          overwrite=True)
+                for idx, m in enumerate(openephys_file.messages):
+                    message.apend({'time': m['time'],
+                                   'value': m['message']})
+                add_message(action, message)
 
             if not no_files:
                 fr = action.require_filerecord()

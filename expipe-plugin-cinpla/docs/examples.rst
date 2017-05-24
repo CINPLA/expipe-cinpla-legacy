@@ -186,7 +186,7 @@ When your are finished with the analysis you want to produce a representation
 of the channel groups on the firebase server. This can be performed with the
 command::
 
-  $ expipe register-units ACTION-ID --tag GC --tag BC --note "found a beatiful grid cell on channel group 2"
+  $ expipe register-units ACTION-ID --tag GC --tag BC --message "found a beatiful grid cell on channel group 2"
 
 *Example tags:*
 Bare dritt: no, Good shit: yes, Vet ikke: maybe, Head direction: HD, Grid cell: GC,

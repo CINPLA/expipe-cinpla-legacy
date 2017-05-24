@@ -413,7 +413,14 @@ class Action:
 
     @property
     def datetime(self):
-        return db.child(self._firebase.path).child('datetime').get(user['idToken']).val()
+        time_string = db.child(self._firebase.path).child('datetime').get(
+            user['idToken']).val()
+        if time_string is not None:
+            dtime = datetime.datetime.strptime(
+                time_string, self.project.datetime_format)
+        else:
+            dtime = time_string
+        return dtime
 
     @datetime.setter
     def datetime(self, value):
