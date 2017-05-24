@@ -4,7 +4,8 @@ import os
 import os.path as op
 from expipecli.utils import IPlugin
 import click
-from .action_tools import generate_templates, _get_local_path, GIT_NOTE
+from .action_tools import (generate_templates, _get_local_path, GIT_NOTE,
+                           add_message)
 import sys
 sys.path.append(expipe.config.config_dir)
 if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
@@ -62,13 +63,13 @@ class AxonaPlugin(IPlugin):
                       is_flag=True,
                       help='Overwrite modules or not.',
                       )
-        @click.option('--note',
+        @click.option('-n', '--message',
                       type=click.STRING,
-                      help='Add note, use "text here" for sentences.',
+                      help='Add message, use "text here" for sentences.',
                       )
         def generate_axona_action(action_id, axona_filename, left, right, user,
                                   no_local, overwrite, no_files, no_modules,
-                                  rat_id, location, note):
+                                  rat_id, location, message):
             """Generate an axona recording-action to database.
 
             COMMAND: axona-filename"""
@@ -92,11 +93,7 @@ class AxonaPlugin(IPlugin):
             action = project.require_action(action_id)
             axona_file = pyxona.File(axona_filename)
 
-            if note is not None:
-                notes = action.require_module(name='notes').to_dict()
-                notes['register_note'] = {'value': note}
-                action.require_module(name='notes', contents=notes,
-                                      overwrite=True)
+            add_message(action, message)
 
             action.type = 'Recording'
             action.datetime = axona_file._start_datetime

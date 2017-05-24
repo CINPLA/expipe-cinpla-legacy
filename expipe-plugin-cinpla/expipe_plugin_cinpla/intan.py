@@ -5,7 +5,8 @@ import os.path as op
 from expipecli.utils import IPlugin
 import click
 from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
-from .action_tools import generate_templates, _get_local_path, _get_probe_file, GIT_NOTE
+from .action_tools import (generate_templates, _get_local_path,
+                           _get_probe_file, GIT_NOTE, add_message)
 from exana.misc.signal_tools import (create_klusta_prm, save_binary_format, apply_CAR,
                                      filter_analog_signals, ground_bad_channels,
                                      remove_stimulation_artifacts)
@@ -517,14 +518,15 @@ class IntanPlugin(IPlugin):
                       default=32,
                       help='Number of channels. Default = 32',
                       )
-        @click.option('--note',
+        @click.option('-m', '--message',
+                      multiple=True,
                       type=click.STRING,
-                      help='Add note, use "text here" for sentences.',
+                      help='Add message, use "text here" for sentences.',
                       )
         def generate_intan_action(action_id, intan_filepath, no_local, left,
                                   right, overwrite, no_files, no_modules,
                                   rat_id, user, prb_path, session, nchan,
-                                  location, note):
+                                  location, message):
             """Generate an intan recording-action to database.
 
             COMMAND: intan-filename"""
@@ -583,13 +585,7 @@ class IntanPlugin(IPlugin):
                 action.require_module(name='hardware_intan_headstage', contents=headstage,
                                       overwrite=True)
                 register_depth(project, action, left, right)
-
-
-                if note is not None:
-                    notes={}
-                    notes['register_note'] = {'value': note}
-                action.require_module(name='notes', contents=notes,
-                                      overwrite=True)
+                add_message(action, message)
 
             if not no_files:
                 fr = action.require_filerecord()
@@ -689,15 +685,16 @@ class IntanPlugin(IPlugin):
                       default=32,
                       help='Number of channels. Default = 32',
                       )
-        @click.option('--note',
+        @click.option('-m', '--message',
+                      multiple=True,
                       type=click.STRING,
-                      help='Add note, use "text here" for sentences.',
+                      help='Add message, use "text here" for sentences.',
                       )
         def generate_intan_ephys_action(action_id, intan_ephys_path, no_local, left,
                                         right, overwrite, no_files, no_modules,
                                         intan_sync, ephys_sync, shutter_events,
                                         rat_id, user, prb_path, session, nchan,
-                                        location, note):
+                                        location, message):
             """Generate an intan (ephys) open-ephys (tracking) recording-action to database.
 
             COMMAND: intan-ephys-path"""
@@ -758,17 +755,10 @@ class IntanPlugin(IPlugin):
                                       overwrite=True)
                 register_depth(project, action, left, right)
 
-                if len(openephys_file.messages) != 0:
-                    notes = {}
-                    for idx, message in enumerate(openephys_file.messages):
-                        notes['note_{}'.format(idx)] = {
-                            'time': message['time'],
-                            'value': message['message']
-                        }
-                    if note is not None:
-                        notes['register_note'] = {'value': note}
-                    action.require_module(name='notes', contents=notes,
-                                          overwrite=True)
+                for idx, m in enumerate(openephys_file.messages):
+                    message.apend({'time': m['time'],
+                                   'value': m['message']})
+                add_message(action, message)
 
             if not no_files:
                 fr = action.require_filerecord()
@@ -910,9 +900,10 @@ class IntanPlugin(IPlugin):
                       is_flag=True,
                       help='Run klusta on dataset.',
                       )
-        @click.option('--note',
+        @click.option('-m', '--message',
+                      multiple=True,
                       type=click.STRING,
-                      help='Add note, use "text here" for sentences.',
+                      help='Add message, use "text here" for sentences.',
                       )
         def register_process_intan_ephys_action(action_id, intan_ephys_path, no_temp,
                                                  left, right, overwrite, no_convert,
@@ -920,7 +911,7 @@ class IntanPlugin(IPlugin):
                                                  rat_id, user, prb_path, session, nchan,
                                                  location, pre_filter, filter_noise, remove_artifacts,
                                                  klusta_filter, filter_low, no_modules,
-                                                 filter_high, common_ref, ground, note,
+                                                 filter_high, common_ref, ground, message,
                                                  split_probe, no_run,):
             """Generate an intan (ephys) open-ephys (tracking) recording-action to database.
 
@@ -1041,17 +1032,10 @@ class IntanPlugin(IPlugin):
                                       overwrite=True)
                 register_depth(project, action, left, right)
 
-                if len(openephys_file.messages) != 0:
-                    notes = {}
-                    for idx, message in enumerate(openephys_file.messages):
-                        notes['note_{}'.format(idx)] = {
-                            'time': message['time'],
-                            'value': message['message']
-                        }
-                    if note is not None:
-                        notes['register_note'] = {'value': note}
-                    action.require_module(name='notes', contents=notes,
-                                          overwrite=True)
+                for idx, m in enumerate(openephys_file.messages):
+                    message.apend({'time': m['time'],
+                                   'value': m['message']})
+                add_message(action, message)
 
             if not no_run:
                 anas = intan_file.analog_signals[0].signal

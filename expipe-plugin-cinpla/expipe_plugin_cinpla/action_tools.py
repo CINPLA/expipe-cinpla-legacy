@@ -186,3 +186,25 @@ def create_notebook(exdir_path, channel_group=0):
             json.dump(notebook, outfile,
                       sort_keys=True, indent=4)
     return fnameout
+
+
+def add_message(action, message=None):
+    if message is None:
+        return
+    elif len(message) == 0:
+        return
+    messages = action.require_module(name='messages').to_dict()
+    names = [n for n in messages.keys() if 'message_' in n]
+    if len(names) == 0:
+        idx = 0
+    else:
+        idx = max(int(n.split('_')[-1]) for n in names)
+    for m_i, m in enumerate(message):
+        m_name = 'message_{}'.format(idx + m_i)
+        if isinstance(m, str):
+            messages[m_name] = {'value': m}
+        elif isinstance(m, dict):
+            assert 'value' in m
+            messages[m_name] = m
+    action.require_module(name='messages', contents=messages,
+                          overwrite=True)

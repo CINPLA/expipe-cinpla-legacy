@@ -5,7 +5,7 @@ import os.path as op
 from expipecli.utils import IPlugin
 import click
 from .action_tools import (generate_templates, _get_local_path, create_notebook,
-                           GIT_NOTE, nwb_main_groups)
+                           GIT_NOTE, nwb_main_groups, add_message)
 import sys
 sys.path.append(expipe.config.config_dir)
 if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
@@ -157,9 +157,9 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Recursive directory transfer.',
                       )
-        @click.option('-n', '--note',
+        @click.option('-m', '--message',
                       type=click.STRING,
-                      help='Add note, use "text here" for sentences.',
+                      help='Add message, use "text here" for sentences.',
                       )
         @click.option('-e', '--exclude',
                       multiple=True,
@@ -190,7 +190,7 @@ class CinplaPlugin(IPlugin):
                       help='Name of server as named in config.yaml. Default is "norstore"',
                       )
         def transfer(action_id, to_local, from_local, overwrite, no_trash,
-                     note, raw, exclude, include, merge, port, username,
+                     message, raw, exclude, include, merge, port, username,
                      hostname, recursive, server):
             """Transfer a dataset related to an expipe action
 
@@ -204,11 +204,7 @@ class CinplaPlugin(IPlugin):
             import shutil
             project = expipe.io.get_project(user_params['project_id'])
             action = project.require_action(action_id)
-            if note is not None:
-                notes = action.require_module(name='notes').to_dict()
-                notes['transfer_note'] = {'value': note}
-                action.require_module(name='notes', contents=notes,
-                                      overwrite=True)
+            add_message(action, message)
             fr = action.require_filerecord()
 
             host, user, pas, port = get_login(hostname=hostname,
@@ -414,33 +410,28 @@ class CinplaPlugin(IPlugin):
                 clusters = model.cluster(np.arange(model.n_spikes), model.channel_ids)
                 model.save(spike_clusters=clusters)
 
-        @cli.command('tag')
+        @cli.command('annotate')
         @click.argument('action-id', type=click.STRING)
         @click.option('--tag', '-t',
-                      required=True,
                       multiple=True,
                       type=click.Choice(possible_tags),
                       help='The tag to be applied to the action.',
                       )
-        @click.option('--note',
+        @click.option('--message', '-m',
+                      multiple=True,
                       type=click.STRING,
-                      help='Add note, use "text here" for sentences.',
+                      help='Add message, use "text here" for sentences.',
                       )
-        def tag(action_id, tag, note):
-            """Tag action
+        def register_units(action_id, tag, message):
+            """Parse info about recorded units
 
-            COMMAND: action-id: Provide action id to find exdir path"""
+            COMMAND: action-id: Provide action id to get action"""
             project = expipe.io.get_project(user_params['project_id'])
             action = project.require_action(action_id)
-            if note is not None:
-                notes = action.require_module(name='notes').to_dict()
-                notes['unit_note'] = {'value': note}
-                action.require_module(name='notes', contents=notes,
-                                      overwrite=True)
+            add_message(action, message)
             tags = action.tags or {}
             tags.update({t: 'true' for t in tag})
             action.tags = tags
-
 
         @cli.command('register-units')
         @click.argument('action-id', type=click.STRING)
@@ -462,12 +453,13 @@ class CinplaPlugin(IPlugin):
                       type=click.Choice(possible_tags),
                       help='The anatomical brain-area of the optogenetic stimulus.',
                       )
-        @click.option('--note',
+        @click.option('-m', '--message',
+                      required=True,
                       type=click.STRING,
-                      help='Add note, use "text here" for sentences.',
+                      help='Add message, use "text here" for sentences.',
                       )
         def register_units(action_id, no_local, channel_group, overwrite, tag,
-                           note):
+                           message):
             """Parse info about recorded units
 
             COMMAND: action-id: Provide action id to find exdir path"""
@@ -475,11 +467,7 @@ class CinplaPlugin(IPlugin):
             import copy
             project = expipe.io.get_project(user_params['project_id'])
             action = project.require_action(action_id)
-            if note is not None:
-                notes = action.require_module(name='notes').to_dict()
-                notes['unit_note'] = {'value': note}
-                action.require_module(name='notes', contents=notes,
-                                      overwrite=True)
+            add_message(action, message)
             tags = action.tags or {}
             tags.update({t: 'true' for t in tag})
             action.tags = tags
@@ -698,34 +686,6 @@ class CinplaPlugin(IPlugin):
                 plot.tfr()
             ## do not use:
             # plot.spatial_stim_overview()
-
-        @cli.command('note')
-        @click.argument('action-id', type=click.STRING)
-        @click.option('--note', '-n',
-                      type=click.STRING,
-                      help='Add note, use "text here" for sentences.',
-                      )
-        def register_units(action_id, note):
-            """Parse info about recorded units
-
-            COMMAND: action-id: Provide action id to get action"""
-            project = expipe.io.get_project(user_params['project_id'])
-            action = project.require_action(action_id)
-            if note is not None:
-                notes = action.require_module(name='notes').to_dict()
-                idx = []
-                for name in notes.keys():
-                    try:
-                        idx.append(int(name.split('_')[-1]))
-                    except Exception:
-                        continue
-                if len(idx) == 0:
-                    idx = 0
-                else:
-                    idx = max(idx)
-                notes['note_{}'.format(idx)] = {'value': note}
-                action.require_module(name='notes', contents=notes,
-                                      overwrite=True)
 
         @cli.command('generate-analysis-action')
         @click.argument('action-id', type=click.STRING)
