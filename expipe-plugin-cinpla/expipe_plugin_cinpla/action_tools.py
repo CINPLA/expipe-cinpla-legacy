@@ -66,7 +66,7 @@ def deltadate(adjustdate, regdate):
 
 
 def register_depth(project, action, left=None, right=None):
-    regdate = datetime.strptime(action.datetime, DTIME_FORMAT)
+    regdate = action.datetime
     if left is None or right is None:
         ratnr = action.id.split('-')[0]
         try:
