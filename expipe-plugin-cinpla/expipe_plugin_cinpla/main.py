@@ -422,7 +422,7 @@ class CinplaPlugin(IPlugin):
                       type=click.STRING,
                       help='Add message, use "text here" for sentences.',
                       )
-        def register_units(action_id, tag, message):
+        def annotate(action_id, tag, message):
             """Parse info about recorded units
 
             COMMAND: action-id: Provide action id to get action"""

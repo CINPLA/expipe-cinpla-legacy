@@ -317,8 +317,7 @@ class IntanPlugin(IPlugin):
                 rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
                 rhs_path = op.join(intan_ephys_path, rhs_file)
                 klusta_prm = op.abspath(intan_ephys_base) + '_klusta.prm'
-                prb_path = prb_path or _get_probe_file('oe', nchan=nchan,
-                                                       spikesorter='klusta')
+
                 prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
                                                        spikesorter='klusta')
                 if prb_path is None:

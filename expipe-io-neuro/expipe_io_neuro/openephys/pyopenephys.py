@@ -200,6 +200,9 @@ class File:
         self.oscInfo = []
         self.tracking_timesamples_rate = 1000 * 1000. * pq.Hz
 
+        self.track_stim = False
+        self.track_stimInfo = []
+
         self.sync = False
         self.syncID = []
 
@@ -265,7 +268,18 @@ class File:
                 if processor['name'] == 'Sinks/Tracker Stimulator':
                     self.track_stim = True
                     self.track_stimID = processor['NodeId']
-
+                    if 'TRACKERSTIMULATOR' in processor.keys():
+                        #old version
+                        self.track_stimInfo = dict()
+                        self.track_stimInfo.update(processor['TRACKERSTIMULATOR'])
+                    else:
+                        #new version
+                        self.track_stimInfo = dict()
+                        self.track_stimInfo['circles'] = processor['CIRCLES']
+                        self.track_stimInfo['channels'] = processor['CHANNELS']
+                        self.track_stimInfo['output'] = processor['SELECTEDCHANNEL']
+                        self.track_stimInfo['sync'] = {'ttl': processor['EDITOR']['TRACKERSTIMULATOR']['syncTTLchan'],
+                                                       'output': processor['EDITOR']['TRACKERSTIMULATOR']['syncStimchan']}
 
 
         # Check openephys format
