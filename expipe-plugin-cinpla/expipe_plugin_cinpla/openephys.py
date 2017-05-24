@@ -7,7 +7,7 @@ import click
 from expipe_io_neuro import pyopenephys, openephys
 from .action_tools import generate_templates, _get_local_path, _get_probe_file, GIT_NOTE
 from exana.misc.signal_tools import (create_klusta_prm, save_binary_format, apply_CAR,
-                           filter_analog_signals, ground_bad_channels)
+                                     filter_analog_signals, ground_bad_channels, duplicate_bad_channels)
 import sys
 sys.path.append(expipe.config.config_dir)
 if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
@@ -162,8 +162,8 @@ class OpenEphysPlugin(IPlugin):
                     anas, _ = apply_CAR(anas, car_type='median',
                                         split_probe=split_probe)
                 if len(ground) != 0:
-                    ground = [int(g) for g in ground]
-                    anas = ground_bad_channels(anas, ground)
+                    duplicate = [int(g) for g in ground]
+                    anas = duplicate_bad_channels(anas, duplicate)
                 save_binary_format(openephys_base, anas)
                 if action is not None:
                     prepro = {
