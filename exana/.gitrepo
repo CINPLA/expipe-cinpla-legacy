@@ -6,6 +6,6 @@
 [subrepo]
 	remote = git@github.com:CINPLA/exana.git
 	branch = dev
-	commit = fda024ffe54e120f005add0364ada4cd92c2d307
-	parent = 4f440bae717fd5dec18634af73da181e01cdc9f0
+	commit = 97c6676d12cb51761bb4244e58207d83b54861fc
+	parent = c13b304bcf4dbf3fd7d4c19e3fb23c3225ac95a0
 	cmdver = 0.3.1
