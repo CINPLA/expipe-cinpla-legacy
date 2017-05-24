@@ -24,7 +24,7 @@ def make_spatiality_overview(x, y, t, angles, t_angles, sptr, acorr=None,
                              G=None, fig=None, mask_unvisited=False,
                              vmin=0, ang_binsize=2, projection='polar',
                              title=None, rate_map=None, params=None,
-                             spike_size=10., origin='upper'):
+                             spike_size=10., origin='upper', cmap='jet'):
     """
 
 
@@ -80,7 +80,7 @@ def make_spatiality_overview(x, y, t, angles, t_angles, sptr, acorr=None,
                      mask_unvisited=mask_unvisited, ax=ax2)
     else:
         ax2.imshow(rate_map, interpolation='none', origin=origin,
-                  extent=(0, 1, 0, 1), vmin=vmin)
+                  extent=(0, 1, 0, 1), vmin=vmin, cmap=cmap)
         ax2.set_title('%.2f Hz' % np.nanmax(rate_map))
     ax2.grid(False)
     ax3 = fig.add_subplot(nrow, ncol, 3, xlim=[0, 1], ylim=[0, 1], aspect=1)
