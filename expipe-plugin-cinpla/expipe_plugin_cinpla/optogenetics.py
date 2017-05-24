@@ -38,7 +38,7 @@ class OptoPlugin(IPlugin):
                       type=click.Choice(['opto-inside', 'opto-outside', 'opto-train']),
                       help='The anatomical brain-area of the optogenetic stimulus.',
                       )
-        @click.option('--note',
+        @click.option('-n', '--note',
                       type=click.STRING,
                       help='Add note, use "text here" for sentences.',
                       )
@@ -109,14 +109,14 @@ class OptoPlugin(IPlugin):
         @cli.command('register-opto-files')
         @click.argument('action-id', type=click.STRING)
         @click.option('--no-local',
-                is_flag=True,
-                help='Store temporary on local drive.',
-                )
+                      is_flag=True,
+                      help='Store temporary on local drive.',
+                      )
         @click.option('--io-channel',
-                default=4,
-                type=click.INT,
-                help='TTL input channel.',
-                )
+                      default=4,
+                      type=click.INT,
+                      help='TTL input channel.',
+                      )
         def parse_optogenetics_files(action_id, no_local, io_channel):
             """Parse optogenetics info to an action.
 

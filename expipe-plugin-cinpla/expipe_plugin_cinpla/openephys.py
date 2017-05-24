@@ -206,7 +206,7 @@ class OpenEphysPlugin(IPlugin):
 
         @cli.command('register-openephys')
         @click.argument('openephys-path', type=click.Path(exists=True))
-        @click.option('--user',
+        @click.option('-u', '--user',
                       type=click.STRING,
                       help='The experimenter performing the recording.',
                       )
@@ -218,7 +218,7 @@ class OpenEphysPlugin(IPlugin):
                       type=click.FLOAT,
                       help='The depth on right side in "mm".',
                       )
-        @click.option('--location',
+        @click.option('-l', '--location',
                       type=click.Choice(possible_locations),
                       help='The location of the recording, e.g. "room1".',
                       )

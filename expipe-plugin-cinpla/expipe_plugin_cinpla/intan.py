@@ -463,7 +463,7 @@ class IntanPlugin(IPlugin):
 
         @cli.command('register-intan')
         @click.argument('intan-filepath', type=click.Path(exists=True))
-        @click.option('--user',
+        @click.option('-u', '--user',
                       required=True,
                       type=click.STRING,
                       help='The experimenter performing the recording.',
@@ -478,7 +478,7 @@ class IntanPlugin(IPlugin):
                       type=click.FLOAT,
                       help='The depth on right side in "mm".',
                       )
-        @click.option('--location',
+        @click.option('-l', '--location',
                       required=True,
                       type=click.STRING,
                       help='The location of the recording, i.e. "room_1".',
@@ -620,7 +620,7 @@ class IntanPlugin(IPlugin):
 
         @cli.command('register-intan-ephys')
         @click.argument('intan-ephys-path', type=click.Path(exists=True))
-        @click.option('--user',
+        @click.option('-u', '--user',
                       required=True,
                       type=click.STRING,
                       help='The experimenter performing the recording.',
@@ -635,7 +635,7 @@ class IntanPlugin(IPlugin):
                       type=click.FLOAT,
                       help='The depth on right side in "mm".',
                       )
-        @click.option('--location',
+        @click.option('-l', '--location',
                       required=True,
                       type=click.STRING,
                       help='The location of the recording, i.e. "room_1".',
@@ -802,7 +802,7 @@ class IntanPlugin(IPlugin):
 
         @cli.command('register-process-intan-ephys')
         @click.argument('intan-ephys-path', type=click.Path(exists=True))
-        @click.option('--user',
+        @click.option('-u', '--user',
                       type=click.STRING,
                       help='The experimenter performing the recording.',
                       )
@@ -814,7 +814,7 @@ class IntanPlugin(IPlugin):
                       type=click.FLOAT,
                       help='The depth on right side in "mm".',
                       )
-        @click.option('--location',
+        @click.option('-l', '--location',
                       required=True,
                       type=click.STRING,
                       help='The location of the recording, i.e. "room_1".',
