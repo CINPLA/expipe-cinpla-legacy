@@ -262,6 +262,10 @@ class File:
                 if processor['name'] == 'Sources/Sync Port':
                     self.sync = True
                     self.syncID = processor['NodeId']
+                if processor['name'] == 'Sinks/Tracker Stimulator':
+                    self.track_stim = True
+                    self.track_stimID = processor['NodeId']
+
 
 
         # Check openephys format

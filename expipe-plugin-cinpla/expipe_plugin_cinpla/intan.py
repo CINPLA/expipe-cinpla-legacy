@@ -5,10 +5,10 @@ import os.path as op
 from expipecli.utils import IPlugin
 import click
 from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
-from .action_tools import generate_templates, _get_local_path, GIT_NOTE
-from .signal_tools import (create_klusta_prm, save_binary_format, apply_CAR,
-                           filter_analog_signals, ground_bad_channels,
-                           remove_stimulation_artifacts, _get_probe_file)
+from .action_tools import generate_templates, _get_local_path, _get_probe_file, GIT_NOTE
+from exana.misc.signal_tools import (create_klusta_prm, save_binary_format, apply_CAR,
+                                     filter_analog_signals, ground_bad_channels,
+                                     remove_stimulation_artifacts)
 import quantities as pq
 import shutil
 import sys
@@ -149,7 +149,6 @@ class IntanPlugin(IPlugin):
                                                  fs=fs, filter_type='bandpass')
                 if len(ground) != 0:
                     ground = [int(g) for g in ground]
-                    print('Grounding channels: ', ground)
                     anas = ground_bad_channels(anas, ground)
                 if split_probe is not None:
                     split_chans = np.arange(nchan)
@@ -168,7 +167,6 @@ class IntanPlugin(IPlugin):
                                         split_probe=split_probe)
                 if len(ground) != 0:
                     ground = [int(g) for g in ground]
-                    print('Grounding channels: ', ground)
                     anas = ground_bad_channels(anas, ground)
 
                 save_binary_format(intan_base, anas)
@@ -403,7 +401,6 @@ class IntanPlugin(IPlugin):
                                                  fs=fs, filter_type='bandpass')
                 if len(ground) != 0:
                     ground = [int(g) for g in ground]
-                    print('Grounding channels: ', ground)
                     anas = ground_bad_channels(anas, ground)
 
                 if split_probe is not None:
@@ -424,7 +421,6 @@ class IntanPlugin(IPlugin):
 
                 if len(ground) != 0:
                     ground = [int(g) for g in ground]
-                    print('Grounding channels: ', ground)
                     anas = ground_bad_channels(anas, ground)
 
                 save_binary_format(intan_ephys_base, anas)
@@ -1075,12 +1071,10 @@ class IntanPlugin(IPlugin):
                     anas = filter_analog_signals(anas, freq=stopband,
                                                  fs=fs, filter_type='bandstop', order=2)
 
-
-
                 if len(ground) != 0:
                     ground = [int(g) for g in ground]
-                    print('Grounding channels: ', ground)
                     anas = ground_bad_channels(anas, ground)
+
                 if split_probe is not None:
                     split_chans = np.arange(nchan)
                     if split_probe != nchan / 2:
@@ -1118,6 +1112,10 @@ class IntanPlugin(IPlugin):
                     anas, _ = apply_CAR(anas, car_type='mean', split_probe=split_probe)
                 elif common_ref == 'cmr':
                     anas, _ = apply_CAR(anas, car_type='median', split_probe=split_probe)
+
+                if len(ground) != 0:
+                    ground = [int(g) for g in ground]
+                    anas = ground_bad_channels(anas, ground)
 
                 if action is not None:
                     prepro = {
