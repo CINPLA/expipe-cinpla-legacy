@@ -80,7 +80,7 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Overwrite modules or not.',
                       )
-        @click.option('--user',
+        @click.option('-u', '--user',
                       type=click.STRING,
                       help='The experimenter performing the surgery.',
                       )
@@ -545,7 +545,7 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Initialize, retrieve depth from surgery.',
                       )
-        @click.option('--user',
+        @click.option('-u', '--user',
                       type=click.STRING,
                       help='The experimenter performing the adjustment.',
                       )
@@ -729,7 +729,7 @@ class CinplaPlugin(IPlugin):
 
         @cli.command('generate-analysis-action')
         @click.argument('action-id', type=click.STRING)
-        @click.option('--user',
+        @click.option('-u', '--user',
                       type=click.STRING,
                       help='The experimenter performing the analysis.',
                       )
@@ -737,6 +737,16 @@ class CinplaPlugin(IPlugin):
                       multiple=True,
                       type=click.STRING,
                       help='Tags to sort the analysis.',
+                      )
+        @click.option('-s', '--subject',
+                      multiple=True,
+                      type=click.STRING,
+                      help='Subjects to sort the analysis.',
+                      )
+        @click.option('-l', '--location',
+                      multiple=True,
+                      type=click.STRING,
+                      help='Subjects to sort the analysis.',
                       )
         @click.option('--overwrite',
                       is_flag=True,
