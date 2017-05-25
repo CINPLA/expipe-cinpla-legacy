@@ -29,12 +29,12 @@ class ElectricalStimulationPlugin(IPlugin):
         @click.argument('action-id', type=click.STRING)
         @click.option('--intan-sync',
                       type=click.STRING,
-                      help='Sync source of Intan. e.g. adc-1, dig-0',
+                      help='Sync source of Intan. e.g. adc-1, dig-0. DEFAULT is adc-0',
                       default='adc-0'
                       )
         @click.option('--ephys-sync',
                       type=click.STRING,
-                      help='Sync source of Open Ephys. e.g. dig-0, sync-0',
+                      help='Sync source of Open Ephys. e.g. dig-0, sync-0. DEFAULT is sync-0',
                       default='sync-0'
                       )
         @click.option('--prb-path',
@@ -44,7 +44,7 @@ class ElectricalStimulationPlugin(IPlugin):
         @click.option('--stim-chan',
                       required=True,
                       type=click.STRING,
-                      help='TTL source for stimulation triggers. e.g. intan-adc-0, ephys-dig-1',
+                      help='TTL source for stimulation triggers. e.g. intan-adc-0, ephys-dig-1. DEFAULT is intan-dig-0',
                       default='intan-dig-0'
                       )
         @click.option('-t', '--tag',
@@ -170,6 +170,9 @@ class ElectricalStimulationPlugin(IPlugin):
                                                                     trigger_chan, stim_trigger=trigger_sig)
             generate_templates(action, templates['electrical_stimulation'],
                                overwrite, git_note=None)
-            populate_modules(action=action, params=trigger_param.update(channel_param))
+
+            trigger_param.update(channel_param)
+
+            populate_modules(action=action, params=trigger_param)
             add_message(action, message)
 
