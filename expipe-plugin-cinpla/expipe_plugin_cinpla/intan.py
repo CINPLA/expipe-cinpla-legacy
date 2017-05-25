@@ -168,7 +168,7 @@ class IntanPlugin(IPlugin):
                                         split_probe=split_probe)
                 if len(ground) != 0:
                     duplicate = [int(g) for g in ground]
-                    anas = duplicate_bad_channels(anas, duplicate)
+                    anas = duplicate_bad_channels(anas, duplicate, prb_path)
 
                 save_binary_format(intan_base, anas)
 
@@ -421,7 +421,7 @@ class IntanPlugin(IPlugin):
 
                 if len(ground) != 0:
                     duplicate = [int(g) for g in ground]
-                    anas = duplicate_bad_channels(anas, duplicate)
+                    anas = duplicate_bad_channels(anas, duplicate, prb_path)
 
                 save_binary_format(intan_ephys_base, anas)
                 if action is not None:
@@ -1098,7 +1098,7 @@ class IntanPlugin(IPlugin):
 
                 if len(ground) != 0:
                     duplicate = [int(g) for g in ground]
-                    anas = duplicate_bad_channels(anas, duplicate)
+                    anas = duplicate_bad_channels(anas, duplicate, prb_path)
 
                 if action is not None:
                     prepro = {
