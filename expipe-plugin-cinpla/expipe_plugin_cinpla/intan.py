@@ -1052,7 +1052,7 @@ class IntanPlugin(IPlugin):
                 if filter_noise:
                     stopband = [3150, 3250]
                     anas = filter_analog_signals(anas, freq=stopband,
-                                                 fs=fs, filter_type='bandstop', order=2)
+                                                 fs=fs, filter_type='bandstop', order=4)
 
                 if len(ground) != 0:
                     ground = [int(g) for g in ground]
