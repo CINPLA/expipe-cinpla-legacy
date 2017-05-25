@@ -67,9 +67,11 @@ def generate_electrical_info(exdir_path, intan_file, openephys_file, stim_chan, 
     from exana.misc.signal_tools import extract_stimulation_waveform
     trigger_param = dict()
 
+    print(stim_trigger)
+
     if stim_trigger == 'dig':
         triggers = intan_file.digital_in_signals[0].times[stim_chan]
-    if stim_trigger == 'adc':
+    elif stim_trigger == 'adc':
         triggers = pyintan.extract_sync_times(intan_file.adc_signals[0].signal[stim_chan],
                                                                       intan_file.times)
     else:
@@ -83,7 +85,7 @@ def generate_electrical_info(exdir_path, intan_file, openephys_file, stim_chan, 
 
     if openephys_file.track_stim:
         trigger_param['pulsepal-chan'] = openephys_file.track_stimInfo['output']['channel']
-        chan = 'Chan_' + str(openephys_file.track_stimInfo['output']['channel'] + 1)
+        chan = 'Chan_' + str(int(openephys_file.track_stimInfo['output']['channel']) + 1)
         trigger_param['pulsepal-info'] = openephys_file.track_stimInfo['channels'][chan]
         trigger_param['circles-info'] = openephys_file.track_stimInfo['circles']
         trigger_param['frequency'] = openephys_file.track_stimInfo['channels'][chan]['freq']

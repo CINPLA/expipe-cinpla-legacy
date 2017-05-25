@@ -79,9 +79,10 @@ class ElectricalStimulationPlugin(IPlugin):
             # TODO deafault none
             project = expipe.io.get_project(user_params['project_id'])
             action = project.require_action(action_id)
-            tags = action.tags or {}
-            tags.update({t: 'true' for t in tag})
-            action.tags = tags
+            # tags = action.tags or {}
+            # if tags is not None:
+            #     tags.update({t: 'true' for t in tag})
+            #     action.tags = tags
             fr = action.require_filerecord()
             if not no_local:
                 exdir_path = _get_local_path(fr)
@@ -147,8 +148,26 @@ class ElectricalStimulationPlugin(IPlugin):
 
             print('Post-clip durations: Intan - ', intan_file.duration, ' Open Ephys - ', openephys_file.duration)
 
+            stim_chan = stim_chan.split('-')
+            assert len(stim_chan) == 3
+            trigger_sys = stim_chan[0]
+            trigger_sig = stim_chan[1]
+            trigger_chan = int(stim_chan[2])
+
+            if trigger_sys == 'intan':
+                if trigger_sig == 'adc':
+                    trigger_ttl = pyintan.extract_sync_times(intan_file.adc_signals[0].signal[trigger_chan],
+                                                             intan_file.times)
+                elif trigger_sig == 'dig':
+                    trigger_ttl = intan_file.digital_in_signals[0].times[trigger_chan]
+            elif trigger_sys == 'ephys':
+                if trigger_sig == 'dig':
+                    trigger_ttl = openephys_file.digital_in_signals[0].times[trigger_chan]
+            else:
+                trigger_ttl = []
+
             trigger_param, channel_param = generate_electrical_info(exdir_path, intan_file, openephys_file,
-                                                                    stim_chan, stim_trigger='dig')
+                                                                    trigger_chan, stim_trigger=trigger_sig)
             generate_templates(action, templates['electrical_stimulation'],
                                overwrite, git_note=None)
             populate_modules(action=action, params=trigger_param.update(channel_param))
