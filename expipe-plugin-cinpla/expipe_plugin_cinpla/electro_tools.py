@@ -56,15 +56,11 @@ def populate_modules(action, params):
     assert len(name) == 1
     name = name[0]
     elec_dict = action.require_module(name=name).to_dict()
-    print(params['amplitudes'])
     elec_dict['active-electrodes'] = params['active-electrodes']
     elec_dict['intensity']['value'] = dict()
     elec_dict['phase']['value'] = dict()
-    for i, ch in enumerate(params['active-electrodes']):
-        elec_dict['intensity']['value'].update(params['amplitudes'][str(i)])
-        elec_dict['phase']['value'].update(params['amplitudes'][str(i)])
-    # elec_dict['intensity'] = params['amplitudes']
-    # elec_dict['phase'] = params['phases']
+    elec_dict['intensity']['value'].update(params['amplitudes'])
+    elec_dict['phase']['value'].update(params['phases'])
     action.require_module(name=name, contents=elec_dict,
                           overwrite=True)
 
