@@ -1050,9 +1050,9 @@ class IntanPlugin(IPlugin):
                                                  fs=fs, filter_type='bandpass')
 
                 if filter_noise:
-                    stopband = [3150, 3250]
+                    stopband = [3100, 3600]
                     anas = filter_analog_signals(anas, freq=stopband,
-                                                 fs=fs, filter_type='bandstop', order=4)
+                                                 fs=fs, filter_type='bandstop', order=2)
 
                 if len(ground) != 0:
                     ground = [int(g) for g in ground]
@@ -1108,6 +1108,7 @@ class IntanPlugin(IPlugin):
                             'klusta_filter': klusta_filter,
                             'filter_low': filter_low,
                             'filter_high': filter_high,
+                            'filter_noise': filter_noise
                         },
                         'grounded_channels': ground,
                         'probe_split': (str(split_chans[:split_probe]) +
