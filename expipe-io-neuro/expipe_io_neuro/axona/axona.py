@@ -145,15 +145,15 @@ def generate_units(exdir_path, axona_file):
                 unit_times.attrs["stop_time"] = stop_time
 
                 unit_ids = [i for i in np.unique(cut.indices) if i > 0]
-                unit_ids = np.array(unit_ids) - 1  # -1 for pyhton convention
+                unit_ids = np.array(unit_ids)
                 for index in unit_ids:
                     unit = unit_times.require_group("unit_{}".format(index))
                     indices = np.where(cut.indices == index)[0]
                     times = spike_train.times[indices]
                     unit.require_dataset("times", data=times)
                     unit.attrs['num_samples'] = len(times)
-                    unit.attrs["cluster_group"] = "unsorted"
-                    unit.attrs["cluster_id"] = int(index)
+                    unit.attrs["cluster_group"] = "Good"
+                    unit.attrs["cluster_id"] = int(index - 1)  # -1 for python convention
                     # TODO: Add unit_description (e.g. cell type) and source as in NWB
                     unit.attrs["source"] = None
                     unit.attrs["unit_description"] = None
