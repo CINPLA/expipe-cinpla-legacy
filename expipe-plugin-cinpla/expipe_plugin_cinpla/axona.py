@@ -137,6 +137,9 @@ class AxonaPlugin(IPlugin):
                 axona.generate_tracking(exdir_path, axona_file)
                 axona.generate_analog_signals(exdir_path, axona_file)
                 axona.generate_spike_trains(exdir_path, axona_file)
+                axona.generate_units(exdir_path, axona_file)
+                axona.generate_inp(exdir_path, axona_file)
+                axona.generate_clusters(exdir_path, axona_file)
             time_string = exdir.File(exdir_path).attrs['session_start_time']
             dtime = datetime.strptime(time_string, '%Y-%m-%dT%H:%M:%S')
             action.datetime = dtime
