@@ -125,7 +125,7 @@ def generate_clusters(exdir_path, axona_file):
                 times.attrs["num_samples"] = len(spike_train.times)
                 clnums = cluster.require_dataset("cluster_nums", data=units)
                 clnums.attrs["num_samples"] = len(units)
-                nums = cluster.require_dataset("nums", data=cut.indices)
+                nums = cluster.require_dataset("nums", data=cut.indices-1)  # -1 for python convention
                 nums.attrs["num_samples"] = len(cut.indices)
 
 
@@ -147,7 +147,7 @@ def generate_units(exdir_path, axona_file):
                 unit_ids = [i for i in np.unique(cut.indices) if i > 0]
                 unit_ids = np.array(unit_ids)
                 for index in unit_ids:
-                    unit = unit_times.require_group("unit_{}".format(index))
+                    unit = unit_times.require_group("unit_{}".format(index - 1))  # -1 for python convention
                     indices = np.where(cut.indices == index)[0]
                     times = spike_train.times[indices]
                     unit.require_dataset("times", data=times)
