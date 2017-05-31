@@ -139,6 +139,56 @@ class Plotter:
                     continue
                 self.savefig(fpath, fig)
 
+    def occupancy(self):
+        import exana.tracking as tr
+        import matplotlib.pyplot as plt
+        import matplotlib.gridspec as gridspec
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+        raw_dir = self._analysis.require_raw('occupancy')
+
+        fname = 'occupancy_map'
+        fpath = op.join(raw_dir,fname)
+        if op.isdir(fpath):
+            os.removedirs(fpath)
+        # try:
+        fig = plt.figure()
+        gs = gridspec.GridSpec(20,9)
+        ax1 = fig.add_subplot(gs[:9, 3:6])
+        ax2 = fig.add_subplot(gs[11:, 3:6])
+        tr.plot_path(self.x, self.y, self.t,
+                          box_xlen=par['box_xlen'],
+                          box_ylen=par['box_ylen'],
+                          ax=ax1)
+        ax1.set_xlim([0, 1])
+        ax1.set_ylim([0, 1])
+        im, max_t = tr.plot_occupancy(self.x, self.y, self.t,
+                          binsize=par['spat_binsize'],
+                          box_xlen=par['box_xlen'],
+                          box_ylen=par['box_ylen'],
+                          ax=ax2)
+        divider = make_axes_locatable(ax2)
+        cax = divider.append_axes("bottom", size="5%", pad=0.05)
+
+        plt.colorbar(im, cax=cax)
+        cbar = fig.colorbar(im, cax = cax, ticks= [int(0), max_t], orientation='horizontal')
+
+        ax1.axis('tight')
+        ax2.axis('tight')
+
+        ax1.set_xticks([])
+        ax1.set_yticks([])
+        ax1.axes.xaxis.set_ticklabels([])
+        ax1.axes.yaxis.set_ticklabels([])
+        # ax2.axes.xaxis.set_ticklabels([])
+        # ax2.axes.yaxis.set_ticklabels([])
+        ax2.axis('off')
+
+
+        # except Exception as e:
+        #     with open(fpath + '.exception', 'w+') as f:
+        #         print(str(e), file=f)
+        self.savefig(fpath, fig)
+
     def spatial_stim_overview(self):
         if self.epo is None:
             print('There is no epochs related to this experiment')
@@ -468,50 +518,6 @@ class Plotter:
                 if unit.annotations['cluster_group'].lower() == 'noise':
                     continue
                 sptr = unit.spiketrains[0]
-                # try:
-                #     fname = '{} {} amplitude'.format(chx.name, unit.name)
-                #     fpath = op.join(raw_dir, fname).replace(" ", "_")
-                #     fig = plt.figure()
-                #     plot_waveforms(sptr=sptr, color=color, fig=fig)
-                #     self.savefig(fpath, fig)
-                # except Exception as e:
-                #     with open(fpath + '.exception', 'w+') as f:
-                #         print(str(e), file=f)
-                # try:
-                #     fname = '{} {} amplitude clusters'.format(chx.name, unit.name)
-                #     fpath = op.join(raw_dir, fname).replace(" ", "_")
-                #     fig = plt.figure()
-                #     plot_amp_clusters([sptr], colors=[color], fig=fig)
-                #     self.savefig(fpath, fig)
-                # except Exception as e:
-                #     with open(fpath + '.exception', 'w+') as f:
-                #         print(str(e), file=f)
-                # try:
-                #     fname = '{} {} autocorrelation'.format(chx.name, unit.name)
-                #     fpath = op.join(raw_dir, fname).replace(" ", "_")
-                #     fig, ax = plt.subplots()
-                #     bin_width = par['corr_bin_width'].rescale('s').magnitude
-                #     limit = par['corr_limit'].rescale('s').magnitude
-                #     count, bins = correlogram(t1=sptr.times.magnitude, t2=None,
-                #                               bin_width=bin_width, limit=limit,
-                #                               auto=True)
-                #     ax.bar(bins[:-1] + bin_width / 2., count, width=bin_width,
-                #             color=color)
-                #     ax.set_xlim([-limit, limit])
-                #     self.savefig(fpath, fig)
-                # except Exception as e:
-                #     with open(fpath + '.exception', 'w+') as f:
-                #         print(str(e), file=f)
-                # try:
-                #     fname = '{} {} isi'.format(chx.name, unit.name)
-                #     fpath = op.join(raw_dir, fname).replace(" ", "_")
-                #     fig, ax = plt.subplots()
-                #     plot_isi_hist(sptr.times, alpha=1, ax=ax, binsize=par['isi_binsize'],
-                #                   time_limit=par['isi_time_limit'], color=color)
-                #     self.savefig(fpath, fig)
-                # except Exception as e:
-                #     with open(fpath + '.exception', 'w+') as f:
-                #         print(str(e), file=f)
 
                 try:
                     fname = '{} {}'.format(chx.name, unit.name)
