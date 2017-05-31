@@ -219,6 +219,12 @@ class File:
         # read date in US format
         if platform.system() == 'Windows':
             locale.setlocale(locale.LC_ALL, 'english')
+        elif platform.system() == 'Darwin':
+            # bad hack...
+            try:
+                locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
+            except Exception:
+                pass
         else:
             locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
         self._start_datetime = datetime.strptime(self.settings['INFO']['DATE'], '%d %b %Y %H:%M:%S')
@@ -528,9 +534,14 @@ class File:
             bytes = fh.read(struct_len)
             if not bytes:
                 break
-            s = struct_unpack(bytes)
-            read_data.append(s)
-            nread+=1
+            try:
+                s = struct_unpack(bytes)
+                read_data.append(s)
+                nread+=1
+            except Exception:
+                print('Data were not in the right format: loading as many samples as possible')
+                break
+
 
         print('Read position samples: ', nread)
 
