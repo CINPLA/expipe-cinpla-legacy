@@ -645,6 +645,10 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Plot stimulation statistics.',
                       )
+        @click.option('--occupancy',
+                      is_flag=True,
+                      help='Plot occupancy matrix.',
+                      )
         @click.option('--all',
                       is_flag=True,
                       help='Plot all.',
@@ -674,6 +678,8 @@ class CinplaPlugin(IPlugin):
                            skip=kwargs['skip'])
             if kwargs['stim_stat'] or kwargs['all']:
                 plot.stimulation_statistics()
+            if kwargs['occupancy'] or kwargs['all']:
+                plot.occupancy()
             if kwargs['spatial'] or kwargs['all']:
                 plot.spatial_overview()
             if kwargs['spike_stat'] or kwargs['all']:
