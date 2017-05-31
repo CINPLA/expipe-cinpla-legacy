@@ -136,6 +136,12 @@ class File:
         # read date in US format
         if platform.system() == 'Windows':
             locale.setlocale(locale.LC_ALL, 'english')
+        elif platform.system() == 'Darwin':
+            # bad hack...
+            try:
+                locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
+            except Exception:
+                pass
         else:
             locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
         self._start_datetime = datetime.strptime(under_date[0]+under_date[1], '%y%m%d%H%M%S')
