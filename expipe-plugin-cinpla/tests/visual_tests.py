@@ -70,7 +70,6 @@ def test_remove_bad_positions():
 
 
 def test_convert_inp_values_to_keys():
-    # TODO: move this function to visual stim tests in expipe
     keys = np.array(("space", "!", "+", "K", "L", "R", "Z", "s"))
 
     byte_7_values = np.array((32, 33, 43, 75, 76, 82, 90, 115), dtype=int)
@@ -85,7 +84,6 @@ def test_convert_inp_values_to_keys():
 
 
 def test_find_identical_trailing_elements():
-    # TODO: move this function to visual stim tests in expipe
     a = [0, 1, 1, 2, 3, 3, 4, 5, 5]
     ids = [1, 4, 7]
     assert(ids == _find_identical_trialing_elements(a))
