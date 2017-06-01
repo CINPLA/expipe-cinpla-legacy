@@ -4,7 +4,7 @@ import exdir
 
 
 ###############################################################################
-#                  core parser functions for stimulus files                  #
+#                  core parser functions for stimulus files
 ###############################################################################
 def get_raw_inp_data(inp_group):
     # TODO: check tests
@@ -214,10 +214,9 @@ def get_grating_stimulus_events(inp_group, mode="orientation"):
 
 
 ###############################################################################
-#                       stimulus generate functions                           #
+#              stimulus group/epoch generate functions
 ###############################################################################
 def generate_grating_stimulus_group(exdir_path, data, timestamps, mode="None"):
-    # TODO: move this function to visual stim tools.py in expipe
     '''
     Generates grating exdir group with timestamp dataset and
     data (eg. orientation) dataset.
@@ -247,7 +246,6 @@ def generate_grating_stimulus_group(exdir_path, data, timestamps, mode="None"):
 
 
 def generate_blank_group(exdir_path, timestamps):
-    # TODO: move this function to visual stim tools.py in expipe
     '''
     Generates blank exdir group with timestamp dataset
 
@@ -268,7 +266,6 @@ def generate_blank_group(exdir_path, timestamps):
 
 
 def generate_key_event_group(exdir_path, keys, timestamps):
-    # TODO: move this function to visual stim tools.py in expipe
     '''
     Generates key press exdir group with timestamp
     dataset and key dataset.
@@ -293,7 +290,6 @@ def generate_key_event_group(exdir_path, keys, timestamps):
 
 
 def generate_grating_stimulus_epoch(exdir_path, timestamps, durations, data):
-    # TODO: move this function to visual stim tools.py in expipe
     '''
     Generates visual stimulus epoch exdir group with timestamps
     and duration.
@@ -317,7 +313,7 @@ def generate_grating_stimulus_epoch(exdir_path, timestamps, durations, data):
 
 
 ###############################################################################
-#                           Bonsai parsing                                    #
+#                           Bonsai parsing
 ###############################################################################
 def copy_bonsai_raw_data(exdir_path, axona_filename):
     import os
@@ -526,7 +522,7 @@ def generate_head_tracking_groups(exdir_path, tracking_data,
 
     """
     print("generating head tracking groups....")
-    
+
     exdir_file = exdir.File(exdir_path)
     processing = exdir_file.require_group("processing")
     tracking = processing.require_group("tracking")
@@ -540,3 +536,10 @@ def generate_head_tracking_groups(exdir_path, tracking_data,
         timestamps = tracked_spot.require_dataset("timestamps", data["t"])
         tracked_spot.require_dataset("data",
                                      np.column_stack((data["x"], data["y"])))
+
+
+###############################################################################
+#                           Plot functions
+###############################################################################
+def orient_raster_plots(stim_trials):
+    pass
