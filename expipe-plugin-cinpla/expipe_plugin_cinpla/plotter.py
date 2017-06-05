@@ -50,19 +50,21 @@ class Plotter:
                      if ana.sampling_rate == 250 * pq.Hz]
         exdir_group = exdir.File(exdir_path)
 
+        position_group = exdir_group['processing']['tracking']['camera_0']['Position']
+        x1, y1, t1 = tr.get_raw_position(position_group['led_0'])
         try:
-            position_group = exdir_group['processing']['tracking']['camera_0']['Position']
-            x1, y1, t1 = tr.get_raw_position(position_group['led_0'])
             x2, y2, t2 = tr.get_raw_position(position_group['led_1'])
-            x, y, t = tr.select_best_position(x1, y1, t1, x2, y2, t2)
-            self.ang, self.ang_t = tr.head_direction(x1, y1, x2, y2, t1,
-                                                     return_rad=False)
-            self.x, self.y, self.t = tr.interp_filt_position(x, y, t,
-                                                             pos_fs=par['pos_fs'],
-                                                             f_cut=par['f_cut'])
         except KeyError:
-            print("could not find tracking data")
+            x2, y2, t2 = x1, y1, t1
+            print("Only found one tracking led..")
 
+        x, y, t = tr.select_best_position(x1, y1, t1, x2, y2, t2)
+        self.ang, self.ang_t = tr.head_direction(x1, y1, x2, y2, t1,
+                                                 return_rad=False)
+        self.x, self.y, self.t = tr.interp_filt_position(x, y, t,
+                                                         pos_fs=par['pos_fs'],
+                                                         f_cut=par['f_cut'])
+        self.x, self.y, self.t = self.x, self.y, self.t
         if len(self.seg.epochs) == 1:
             self.epo = self.seg.epochs[0]
         else:
@@ -71,7 +73,6 @@ class Plotter:
         self._processing = self._exdir_object.require_group("processing")
         self._epochs = self._exdir_object.require_group("epochs")
         self._analysis = self._exdir_object.require_group("analysis")
-
 
     def savefig(self, fname, fig, dpi=300):
         import matplotlib.pyplot as plt
@@ -153,7 +154,7 @@ class Plotter:
         raw_dir = self._analysis.require_raw('occupancy')
 
         fname = 'occupancy_map'
-        fpath = op.join(raw_dir,fname)
+        fpath = op.join(raw_dir, fname)
         if op.isdir(fpath):
             os.removedirs(fpath)
         # try:
