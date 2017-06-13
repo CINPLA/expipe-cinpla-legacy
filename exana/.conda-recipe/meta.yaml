@@ -1,0 +1,37 @@
+package:
+    name: exana
+    version: {{ environ.get("GIT_TAG", "0.0.0_custom")|replace("v", "")|replace("-", "_") }}
+source:
+    git_url: ..
+build:
+    script: pip install neo && python setup.py install
+requirements:
+    build:
+        - python
+        - setuptools
+        - pip
+        - numpy
+        - pandas
+        - matplotlib
+        - scipy
+        - quantities
+    run:
+        - python
+        - setuptools
+        - pip
+        - numpy
+        - pandas
+        - scipy
+        - quantities
+test:
+  imports:
+    - exana
+about:
+    description: ''
+    dev_url: https://github.com/CINPLA/exana
+    license: GNU GPLv3
+    license_family: GPL
+    license_file: LICENSE
+extra:
+    recipe-maintainers:
+        - dragly
