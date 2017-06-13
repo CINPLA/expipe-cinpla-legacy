@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/CINPLA/expipe-io-neuro.git
+	branch = dev
+	commit = 18dc43a65344efdb00b3d9b9e37dfaf6e378ceb0
+	parent = d000516ad5889a750aa80357da0ad7560d544af8
+	cmdver = 0.3.1
