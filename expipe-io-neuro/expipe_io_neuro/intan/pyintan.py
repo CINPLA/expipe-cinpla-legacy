@@ -21,6 +21,9 @@ import time
 import locale
 import platform
 
+from .tools import (_fread_QString, _plural, clip_anas, clip_digs, 
+                    clip_times, clip_stimulation, get_rising_falling_edges)
+
 
 def _read_python(path):
     path = op.realpath(op.expanduser(path))
@@ -491,9 +494,9 @@ class File:
         charge_recovery_target_voltage = np.fromfile(f, 'f4', 1)[0]
 
         # Place notes in data structure
-        notes = {'note1': fread_QString(f),
-                 'note2': fread_QString(f),
-                 'note3': fread_QString(f)}
+        notes = {'note1': _fread_QString(f),
+                 'note2': _fread_QString(f),
+                 'note3': _fread_QString(f)}
 
         # See if dc amplifier was saved
         dc_amp_data_saved = np.fromfile(f, 'i2', 1)[0]
@@ -501,7 +504,7 @@ class File:
         # Load eval board mode
         eval_board_mode = np.fromfile(f, 'i2', 1)[0]
 
-        reference_channel = fread_QString(f)
+        reference_channel = _fread_QString(f)
 
         # Place frequency-related information in data structure.
         frequency_parameters = {
@@ -571,8 +574,8 @@ class File:
         print('Signal groups: ', number_of_signal_groups)
 
         for signal_group in range(number_of_signal_groups):
-            signal_group_name = fread_QString(f)
-            signal_group_prefix = fread_QString(f)
+            signal_group_name = _fread_QString(f)
+            signal_group_prefix = _fread_QString(f)
             signal_group_enabled = np.fromfile(f, 'i2', 1)[0]
             signal_group_num_channels = np.fromfile(f, 'i2', 1)[0]
             signal_group_num_amp_channels = np.fromfile(f, 'i2', 1)[0]
@@ -585,8 +588,8 @@ class File:
                 new_channel['port_prefix'] = signal_group_prefix
                 new_channel['port_number'] = signal_group
                 for signal_channel in range(signal_group_num_channels):
-                    new_channel['native_channel_name'] = fread_QString(f)
-                    new_channel['custom_channel_name'] = fread_QString(f)
+                    new_channel['native_channel_name'] = _fread_QString(f)
+                    new_channel['custom_channel_name'] = _fread_QString(f)
                     new_channel['native_order'] = np.fromfile(f, 'i2', 1)[0]
                     new_channel['custom_order'] = np.fromfile(f, 'i2', 1)[0]
                     signal_type = np.fromfile(f, 'i2', 1)[0]
@@ -640,13 +643,13 @@ class File:
         num_board_dig_in_channels = board_dig_in_index
         num_board_dig_out_channels = board_dig_out_index
 
-        print('Found ', num_amplifier_channels, ' amplifier channel' , plural(num_amplifier_channels))
+        print('Found ', num_amplifier_channels, ' amplifier channel' , _plural(num_amplifier_channels))
         if dc_amp_data_saved != 0:
-            print('Found ', num_amplifier_channels, 'DC amplifier channel' , plural(num_amplifier_channels))
-        print('Found ', num_board_adc_channels, ' board ADC channel' , plural(num_board_adc_channels))
-        print('Found ', num_board_dac_channels, ' board DAC channel' , plural(num_board_adc_channels))
-        print('Found ', num_board_dig_in_channels, ' board digital input channel' , plural(num_board_dig_in_channels))
-        print('Found ', num_board_dig_out_channels, ' board digital output channel' , plural(num_board_dig_out_channels))
+            print('Found ', num_amplifier_channels, 'DC amplifier channel' , _plural(num_amplifier_channels))
+        print('Found ', num_board_adc_channels, ' board ADC channel' , _plural(num_board_adc_channels))
+        print('Found ', num_board_dac_channels, ' board DAC channel' , _plural(num_board_adc_channels))
+        print('Found ', num_board_dig_in_channels, ' board digital input channel' , _plural(num_board_dig_in_channels))
+        print('Found ', num_board_dig_out_channels, ' board digital output channel' , _plural(num_board_dig_out_channels))
 
         # Determine how many samples the data file contains.
 
@@ -1022,198 +1025,3 @@ class File:
                     print('Extracted waveform information is now available in the python workspace.')
 
         return data
-
-
-def fread_QString(f):
-
-    a = ''
-    length = np.fromfile(f, 'u4', 1)[0]
-
-    if hex(length) == '0xffffffff':
-        print('return fread_QString')
-        return
-
-    # convert length from bytes to 16-bit Unicode words
-    length = int(length / 2)
-
-    for ii in range(length):
-        newchar = np.fromfile(f, 'u2', 1)[0]
-        a += newchar.tostring().decode('utf-16')
-    return a
-
-
-def plural(n):
-
-    # s = plural(n)
-    #
-    # Utility function to optionally plurailze words based on the value
-    # of n.
-
-    if n == 1:
-        s = ''
-    else:
-        s = 's'
-
-    return s
-
-def get_rising_falling_edges(idx_high):
-    '''
-
-    :param idx_high: indeces where dig signal is '1'
-    :return: rising and falling indices lists
-    '''
-    rising = []
-    falling = []
-
-    idx_high = idx_high[0]
-
-    if len(idx_high) != 0:
-        for i, idx in enumerate(idx_high[:-1]):
-            if i==0:
-                # first idx is rising
-                rising.append(idx)
-            else:
-                if idx_high[i+1] != idx + 1:
-                    falling.append(idx)
-                if idx - 1 != idx_high[i-1]:
-                    rising.append(idx)
-
-    return rising, falling
-
-# clipping functions
-def extract_sync_times(adc_signal, times):
-    '''
-
-    :param adc_signal: analog_signal with sync event ('1' is > 1.65V)
-    :param times: array of timestamps of analog signal
-    :return: array with rising times
-    '''
-    idx_high = np.where(adc_signal>1.65)[0]
-    rising = []
-
-    if len(idx_high) != 0:
-        for i, idx in enumerate(idx_high[:-1]):
-            if i==0:
-                # first idx is rising
-                rising.append(idx)
-            elif idx - 1 != idx_high[i-1]:
-                rising.append(idx)
-
-    return np.array(times[rising]) * pq.s
-
-
-def clip_anas(analog_signals, times, clipping_times, start_end):
-    '''
-
-    :param analog_signals:
-    :param times:
-    :param clipping_times:
-    :param start_end:
-    :return:
-    '''
-
-    if len(analog_signals.signal) != 0:
-        times.rescale(pq.s)
-        if len(clipping_times) == 2:
-            idx = np.where((times > clipping_times[0]) & (times < clipping_times[1]))
-        elif len(clipping_times) ==  1:
-            if start_end == 'start':
-                idx = np.where(times > clipping_times[0])
-            elif start_end == 'end':
-                idx = np.where(times < clipping_times[0])
-        else:
-            raise AttributeError('clipping_times must be of length 1 or 2')
-
-        if len(analog_signals.signal.shape) == 2:
-            anas_clip = analog_signals.signal[:, idx[0]]
-        else:
-            anas_clip = analog_signals.signal[idx[0]]
-
-        return anas_clip
-    else:
-        return []
-
-
-def clip_digs(digital_signals, clipping_times, start_end):
-    '''
-
-    :param digital_signals:
-    :param clipping_times:
-    :param start_end:
-    :return:
-    '''
-
-    digs_clip = []
-    for i, dig in enumerate(digital_signals.times):
-        dig.rescale(pq.s)
-        if len(clipping_times) == 2:
-            idx = np.where((dig > clipping_times[0]) & (dig < clipping_times[1]))
-        elif len(clipping_times) == 1:
-            if start_end == 'start':
-                idx = np.where(dig > clipping_times[0])
-            elif start_end == 'end':
-                idx = np.where(dig < clipping_times[0])
-        else:
-            raise AttributeError('clipping_times must be of length 1 or 2')
-        if start_end != 'end':
-            digs_clip.append(dig[idx] - clipping_times[0])
-        else:
-            digs_clip.append(dig[idx])
-
-    return np.array(digs_clip) * pq.s
-
-
-def clip_times(times, clipping_times, start_end):
-    '''
-
-    :param times:
-    :param clipping_times:
-    :param start_end:
-    :return:
-    '''
-    times.rescale(pq.s)
-
-    if len(clipping_times) == 2:
-        idx = np.where((times > clipping_times[0]) & (times < clipping_times[1]))
-    elif len(clipping_times) ==  1:
-        if start_end == 'start':
-            idx = np.where(times > clipping_times[0])
-        elif start_end == 'end':
-            idx = np.where(times < clipping_times[0])
-    else:
-        raise AttributeError('clipping_times must be of length 1 or 2')
-    if start_end != 'end':
-        times_clip = times[idx] - clipping_times[0]
-    else:
-        times_clip = times[idx]
-
-    return times_clip
-
-def clip_stimulation(stimulation, times, clipping_times, start_end):
-    '''
-
-    :param stimulation:
-    :param times:
-    :param clipping_times:
-    :param start_end:
-    :return:
-    '''
-    if len(stimulation.stim_signal) != 0:
-        if len(clipping_times) == 2:
-            idx = np.where((times > clipping_times[0]) & (times < clipping_times[1]))
-        elif len(clipping_times) ==  1:
-            if start_end == 'start':
-                idx = np.where(times > clipping_times[0])
-            elif start_end == 'end':
-                idx = np.where(times < clipping_times[0])
-        else:
-            raise AttributeError('clipping_times must be of length 1 or 2')
-
-        if len(stimulation.stim_signal.shape) == 2:
-            stim_clip = stimulation.stim_signal[:, idx[0]]
-        else:
-            stim_clip = stimulation.stim_signal[idx[0]]
-
-        return stim_clip
-    else:
-        return []
