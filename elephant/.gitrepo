@@ -7,5 +7,5 @@
 	remote = https://github.com/NeuralEnsemble/elephant.git
 	branch = master
 	commit = 93169704d6bde21f4fdc7a27079c90503a7b65a7
-	parent = be39aeef343739eabfa5b654576963ca9711a0c4
+	parent = c389fdede37db48278ba034e49ddb69944f22363
 	cmdver = 0.3.1
