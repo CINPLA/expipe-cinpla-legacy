@@ -41,7 +41,7 @@ class AxonaPlugin(IPlugin):
         @click.option('--action-id',
                       type=click.STRING,
                       help=('Desired action id for this action, if none' +
-                             ', it is generated from axona-path.'),
+                            ', it is generated from axona-path.'),
                       )
         @click.option('--no-local',
                       is_flag=True,
@@ -94,7 +94,6 @@ class AxonaPlugin(IPlugin):
             axona_file = pyxona.File(axona_filename)
 
             add_message(action, message)
-
             action.type = 'Recording'
             action.datetime = axona_file._start_datetime
             action.tags = {'axona': 'true'}
@@ -122,7 +121,7 @@ class AxonaPlugin(IPlugin):
                 register_depth(project, action, left, right)
             fr = action.require_filerecord()
             if not no_local:
-                exdir_path = _get_local_path(fr)
+                exdir_path = _get_local_path(fr, make=True)
             else:
                 exdir_path = fr.server_path
             if not no_files:
@@ -137,6 +136,9 @@ class AxonaPlugin(IPlugin):
                 axona.generate_tracking(exdir_path, axona_file)
                 axona.generate_analog_signals(exdir_path, axona_file)
                 axona.generate_spike_trains(exdir_path, axona_file)
+                axona.generate_units(exdir_path, axona_file)
+                axona.generate_inp(exdir_path, axona_file)
+                axona.generate_clusters(exdir_path, axona_file)
             time_string = exdir.File(exdir_path).attrs['session_start_time']
             dtime = datetime.strptime(time_string, '%Y-%m-%dT%H:%M:%S')
             action.datetime = dtime

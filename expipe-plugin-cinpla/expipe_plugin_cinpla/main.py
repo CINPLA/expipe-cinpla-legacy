@@ -645,6 +645,10 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Plot stimulation statistics.',
                       )
+        @click.option('--occupancy',
+                      is_flag=True,
+                      help='Plot occupancy matrix.',
+                      )
         @click.option('--all',
                       is_flag=True,
                       help='Plot all.',
@@ -656,6 +660,10 @@ class CinplaPlugin(IPlugin):
         @click.option('--skip',
                       is_flag=True,
                       help='Skip previously generated files.',
+                      )
+        @click.option('--orient-tuning',
+                      is_flag=True,
+                      help='Plot orientation tuning overview.',
                       )
         def plotting(**kwargs):
             """Analyse a dataset
@@ -674,6 +682,8 @@ class CinplaPlugin(IPlugin):
                            skip=kwargs['skip'])
             if kwargs['stim_stat'] or kwargs['all']:
                 plot.stimulation_statistics()
+            if kwargs['occupancy'] or kwargs['all']:
+                plot.occupancy()
             if kwargs['spatial'] or kwargs['all']:
                 plot.spatial_overview()
             if kwargs['spike_stat'] or kwargs['all']:
@@ -684,6 +694,8 @@ class CinplaPlugin(IPlugin):
                 plot.spike_lfp_coherence()
             if kwargs['tfr']:
                 plot.tfr()
+            if kwargs['orient_tuning']:
+                plot.orient_tuning_overview()
             ## do not use:
             # plot.spatial_stim_overview()
 

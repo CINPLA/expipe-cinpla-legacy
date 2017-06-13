@@ -1075,8 +1075,7 @@ class IntanPlugin(IPlugin):
                                                filter_high=filter_high)
                 if pre_filter:
                     anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
-                                                 fs=fs, filter_type='bandpass')
-
+                                                     fs=fs, filter_type='bandpass')
                 if filter_noise:
                     freq_range=[2000, 4000]
                     fpre, Pxxpre = signal.welch(eap_pre, fs, nperseg=1024)
