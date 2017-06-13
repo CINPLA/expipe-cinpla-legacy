@@ -9,7 +9,8 @@ from .action_tools import (generate_templates, _get_local_path,
                            _get_probe_file, GIT_NOTE, add_message)
 from exana.misc.signal_tools import (create_klusta_prm, save_binary_format, apply_CAR,
                                      filter_analog_signals, ground_bad_channels,
-                                     remove_stimulation_artifacts, duplicate_bad_channels)
+                                     remove_stimulation_artifacts, duplicate_bad_channels,
+                                     extract_rising_edges)
 import quantities as pq
 import shutil
 import sys
@@ -351,8 +352,8 @@ class IntanPlugin(IPlugin):
                     assert len(intan_sync) == 2
                     intan_chan = int(intan_sync[1])
                     if intan_sync[0] == 'adc':
-                        intan_clip_times = pyintan.extract_sync_times(intan_file.adc_signals[0].signal[intan_chan],
-                                                                      intan_file.times)
+                        intan_clip_times = extract_rising_edges(intan_file.adc_signals[0].signal[intan_chan],
+                                                                intan_file.times)
                     elif intan_sync[0] == 'dig':
                         intan_clip_times = intan_file.digital_in_signals[0].times[intan_chan]
                     else:
@@ -391,8 +392,8 @@ class IntanPlugin(IPlugin):
 
                     if shutter_sys == 'intan':
                         if shutter_sig == 'adc':
-                            shutter_ttl = pyintan.extract_sync_times(intan_file.adc_signals[0].signal[shutter_chan],
-                                                                     intan_file.times)
+                            shutter_ttl = extract_rising_edges(intan_file.adc_signals[0].signal[shutter_chan],
+                                                             intan_file.times)
                         elif shutter_sig == 'dig':
                             shutter_ttl = intan_file.digital_in_signals[0].times[shutter_chan]
                     elif shutter_sys == 'ephys':
@@ -967,8 +968,8 @@ class IntanPlugin(IPlugin):
                 assert len(intan_sync) == 2
                 intan_chan = int(intan_sync[1])
                 if intan_sync[0] == 'adc':
-                    intan_clip_times = pyintan.extract_sync_times(intan_file.adc_signals[0].signal[intan_chan],
-                                                                  intan_file.times)
+                    intan_clip_times = extract_rising_edges(intan_file.adc_signals[0].signal[intan_chan],
+                                                            intan_file.times)
                 elif intan_sync[0] == 'dig':
                     intan_clip_times = intan_file.digital_in_signals[0].times[intan_chan]
                 else:
@@ -1007,8 +1008,8 @@ class IntanPlugin(IPlugin):
 
                 if shutter_sys == 'intan':
                     if shutter_sig == 'adc':
-                        shutter_ttl = pyintan.extract_sync_times(intan_file.adc_signals[0].signal[shutter_chan],
-                                                                 intan_file.times)
+                        shutter_ttl = extract_rising_edges(intan_file.adc_signals[0].signal[shutter_chan],
+                                                           intan_file.times)
                     elif shutter_sig == 'dig':
                         shutter_ttl = intan_file.digital_in_signals[0].times[shutter_chan]
                 elif shutter_sys == 'ephys':
@@ -1113,8 +1114,8 @@ class IntanPlugin(IPlugin):
 
                     if trigger_sys == 'intan':
                         if trigger_sig == 'adc':
-                            trigger_ttl = pyintan.extract_sync_times(intan_file.adc_signals[0].signal[trigger_chan],
-                                                                     intan_file.times)
+                            trigger_ttl = extract_rising_edges(intan_file.adc_signals[0].signal[trigger_chan],
+                                                               intan_file.times)
                         elif trigger_sig == 'dig':
                             trigger_ttl = intan_file.digital_in_signals[0].times[trigger_chan]
                     elif trigger_sys == 'ephys':
