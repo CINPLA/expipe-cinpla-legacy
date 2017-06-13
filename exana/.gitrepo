@@ -7,5 +7,5 @@
 	remote = https://github.com/CINPLA/exana.git
 	branch = dev
 	commit = ee5f2d3df2f9a2695d6e8d277b13769a496bc16d
-	parent = 7144d13df771e57fd21349eb97872c1772435705
+	parent = c3658c05620d02cb51eb807407909f44bad70fce
 	cmdver = 0.3.1
