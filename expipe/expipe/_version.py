@@ -293,6 +293,8 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     else:
         # HEX: no tags
         pieces["closest-tag"] = None
+        git_version, _ = run_command(GITS, ["--version"], cwd=root)
+        git_version = git_version.split()[-1]
         count_out, rc = run_command(GITS, ["rev-list", "HEAD", "--count"],
                                     cwd=root)
         pieces["distance"] = int(count_out)  # total number of commits

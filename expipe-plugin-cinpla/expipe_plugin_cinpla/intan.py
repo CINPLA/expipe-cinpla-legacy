@@ -54,6 +54,10 @@ class IntanPlugin(IPlugin):
                       is_flag=True,
                       help='Pre filter or not, replaces klusta filter. Default = True',
                       )
+        @click.option('--filter-noise',
+                      is_flag=True,
+                      help='Filter out spurious noise between 2-4 kHz noise from Intan RHS chips. Default = False',
+                      )
         @click.option('--filter-low',
                       type=click.INT,
                       default=300,
@@ -148,6 +152,16 @@ class IntanPlugin(IPlugin):
                 if pre_filter:
                     anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
                                                  fs=fs, filter_type='bandpass')
+                if filter_noise:
+                    freq_range=[2000, 4000]
+                    fpre, Pxxpre = signal.welch(eap_pre, fs, nperseg=1024)
+                    avg_spectrum = np.mean(Pxxpre, axis=0)
+                    fpeak = fpre[np.where((fpre>freq_range[0]) & 
+                                            (fpre<freq_range[1]))][np.argmax(
+                                             avg_spectrum[np.where((fpre>freq_range[0]) & (fpre<freq_range[1]))])]
+                    stopband = [fpeak-150*pq.Hz, fpeak+150*pq.Hz]
+                    anas = filter_analog_signals(anas, freq=stopband,
+                                                 fs=fs, filter_type='bandstop', order=2)
                 if len(ground) != 0:
                     ground = [int(g) for g in ground]
                     anas = ground_bad_channels(anas, ground)
@@ -229,6 +243,10 @@ class IntanPlugin(IPlugin):
         @click.option('--pre-filter',
                       is_flag=True,
                       help='Pre filter or not, replaces klusta filter. Default = True',
+                      )
+        @click.option('--filter-noise',
+                      is_flag=True,
+                      help='Filter out spurious noise between 2-4 kHz noise from Intan RHS chips. Default = False',
                       )
         @click.option('--filter-low',
                       type=click.INT,
@@ -399,6 +417,16 @@ class IntanPlugin(IPlugin):
                 if pre_filter:
                     anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
                                                  fs=fs, filter_type='bandpass')
+                if filter_noise:
+                    freq_range=[2000, 4000]
+                    fpre, Pxxpre = signal.welch(eap_pre, fs, nperseg=1024)
+                    avg_spectrum = np.mean(Pxxpre, axis=0)
+                    fpeak = fpre[np.where((fpre>freq_range[0]) & 
+                                            (fpre<freq_range[1]))][np.argmax(
+                                             avg_spectrum[np.where((fpre>freq_range[0]) & (fpre<freq_range[1]))])]
+                    stopband = [fpeak-150*pq.Hz, fpeak+150*pq.Hz]
+                    anas = filter_analog_signals(anas, freq=stopband,
+                                                 fs=fs, filter_type='bandstop', order=2)
                 if len(ground) != 0:
                     ground = [int(g) for g in ground]
                     anas = ground_bad_channels(anas, ground)
@@ -871,7 +899,7 @@ class IntanPlugin(IPlugin):
                       )
         @click.option('--filter-noise',
                       is_flag=True,
-                      help='Filter out 2.7 kHz noise from Intan RHS chips. Default = False',
+                      help='Filter out spurious noise between 2-4 kHz noise from Intan RHS chips. Default = False',
                       )
         @click.option('--filter-low',
                       type=click.INT,
@@ -1050,7 +1078,13 @@ class IntanPlugin(IPlugin):
                                                  fs=fs, filter_type='bandpass')
 
                 if filter_noise:
-                    stopband = [3100, 3600]
+                    freq_range=[2000, 4000]
+                    fpre, Pxxpre = signal.welch(eap_pre, fs, nperseg=1024)
+                    avg_spectrum = np.mean(Pxxpre, axis=0)
+                    fpeak = fpre[np.where((fpre>freq_range[0]) & 
+                                            (fpre<freq_range[1]))][np.argmax(
+                                             avg_spectrum[np.where((fpre>freq_range[0]) & (fpre<freq_range[1]))])]
+                    stopband = [fpeak-150*pq.Hz, fpeak+150*pq.Hz]
                     anas = filter_analog_signals(anas, freq=stopband,
                                                  fs=fs, filter_type='bandstop', order=2)
 
