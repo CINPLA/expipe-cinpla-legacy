@@ -97,4 +97,13 @@ QtObject {
         req.open("POST", url)
         req.send(JSON.stringify(data))
     }
+
+    property var timer: Timer {
+        interval: 60 * 1000
+        repeat: true
+        running: true
+        onTriggered: {
+            Pyrebase.refreshToken()
+        }
+    }
 }

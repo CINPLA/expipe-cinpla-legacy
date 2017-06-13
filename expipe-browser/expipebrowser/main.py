@@ -484,6 +484,10 @@ class Pyrebase(QObject):
     @pyqtSlot(str, name="buildUrl", result=str)
     def build_url(self, path):
         return expipe.io.core.db.child(path).build_request_url(expipe.io.core.user["idToken"])
+    
+    @pyqtSlot(name="refreshToken")
+    def refresh_token(self):
+        expipe.io.core.refresh_token()
 
 pyrebase_static = Pyrebase()
 
