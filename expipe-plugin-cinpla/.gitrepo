@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/CINPLA/expipe-plugin-cinpla.git
+	branch = master
+	commit = 2c2dd6ab5a2d1ff657ee92ebf029da126101993c
+	parent = 4ab9e13ad49cbfc983f16b8087773d8288c3af19
+	cmdver = 0.3.1
