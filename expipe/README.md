@@ -1,5 +1,7 @@
-[![Build Status](https://travis-ci.com/CINPLA/expipe.svg?token=oLKxdB9do3q7nZzTrDLQ&branch=travis-test)](https://travis-ci.com/CINPLA/expipe)
+[![Build Status](https://travis-ci.org/CINPLA/expipe.svg)](https://travis-ci.org/CINPLA/expipe)
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+[![Anaconda-Server Badge](https://anaconda.org/cinpla/expipe/badges/installer/conda.svg)](https://conda.anaconda.org/cinpla)
+[![codecov](https://codecov.io/gh/CINPLA/expipe/branch/dev/graph/badge.svg)](https://codecov.io/gh/CINPLA/expipe)
 
 # Expipe
 
@@ -16,23 +18,5 @@ production and analysis of the data.
 
 ## Installation
 
-Follow the installation instructions for your operating system:
-
-- [Installation on Linux](https://github.com/CINPLA/expipe/wiki/Installation-on-Linux)
-- [Installation on Windows](https://github.com/CINPLA/expipe/wiki/Installation-on-Windows)
-
-## Documentation
-
 See the [documentation](http://cinpla.github.io/expipe) 
 for more information on how to use expipe.
-
-## Development
-
-To set up a development environment for expipe, we recommend installing Anaconda
-and then running 
-
-```
-conda develop .
-```
-
-in the root folder of this repository.

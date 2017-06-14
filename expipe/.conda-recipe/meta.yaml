@@ -8,32 +8,28 @@ source:
 build:
     # noarch: python  # TODO Add back noarch when it works properly on Windows,
                       # we are converting packages manually now
-    script: python setup.py install
+    script: pip install pyrebase && python setup.py install
 
 requirements:
   build:
     - python
     - setuptools
+    - pyyaml
     - pip
     - quantities
-    - exdir
 
   run:
     - python
     - setuptools
     - pip
+    - pyyaml
     - quantities
-    - exdir
 
 test:
   imports:
     - expipe
-  # requires:
-    # - sphinx
-  # commands:
-    # - pip install pyrebase && cd docs && make doctest
-  # files:
-    # - docs
+  requires:
+    - sphinx
 
 about:
   home: https://github.com/CINPLA/expipe/

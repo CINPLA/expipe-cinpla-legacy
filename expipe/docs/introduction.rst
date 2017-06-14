@@ -1,8 +1,8 @@
 Introduction
 ------------
 
-In neuroscience today, due to technological advances, we are witnessing a
-revolution in methodology. The vast collection of recording setups used on a
+We are witnessing a revolution in methodology in neuroscience today,
+due to technological advances. The vast collection of recording setups used on a
 variety of experimental subjects puts high demands on flexible data organization.
 
 To ease this organization we introduce a tool for the experiment pipeline named
@@ -37,3 +37,6 @@ can be `a priori` filled out by a user or added in an empty state for
 There exist other projects of similar goals (see e.g.
 `Alyx <http://alyx.readthedocs.io/en/latest/>`_,
 `LabLog <http://lablog.sourceforge.net/>`_)
+
+.. todo:: compare similar projects
+.. todo:: detail goals/aims
