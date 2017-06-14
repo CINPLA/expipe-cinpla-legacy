@@ -1,0 +1,17 @@
+name: expipe
+dependencies:
+  - python=3.5
+  - numpy
+  - matplotlib
+  - scipy
+  - h5py
+  - cython
+  - pandas
+  - seaborn
+  - pyyaml
+  - pytest
+  - nose
+  - jupyter
+  - astropy
+  - pip:
+    - quantities
