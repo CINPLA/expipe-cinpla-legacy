@@ -45,7 +45,7 @@ class VisualStimulusPlugin(IPlugin):
             COMMAND: action-id: Provide action id to find exdir path"""
             import exdir
 
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             exdir_path = _get_local_path(fr)
@@ -87,7 +87,7 @@ class VisualStimulusPlugin(IPlugin):
             COMMAND: action-id: Provide action id to find exdir path"""
             import exdir
 
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             exdir_path = _get_local_path(fr)

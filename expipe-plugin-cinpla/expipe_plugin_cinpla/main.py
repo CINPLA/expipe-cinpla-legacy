@@ -1,5 +1,4 @@
 import expipe
-import expipe.io
 import os
 import os.path as op
 from expipecli.utils import IPlugin
@@ -41,7 +40,7 @@ class CinplaPlugin(IPlugin):
 
             COMMAND: action-id: Provide action id to find exdir path
             """
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_local:
@@ -106,18 +105,18 @@ class CinplaPlugin(IPlugin):
             birthday = datetime.strptime(birthday, '%d.%m.%Y')
             birthday = datetime.strftime(birthday, DTIME_FORMAT)
             date = datetime.strptime(date, '%d.%m.%Y:%H:%M')
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             action = project.require_action(rat + '-surgery-' + procedure)
             action.location = 'Sterile surgery station'
             action.type = 'Surgery'
-            action.tags = {procedure: 'true'}
-            action.subjects = {rat: 'true'}
+            action.tags = [procedure]
+            action.subjects = [rat]
             user = user or user_params['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
-            action.users = {user: 'true'}
+            action.users = [user]
             action.datetime = date
             generate_templates(action, templates['surgery_' + procedure],
                                overwrite, git_note=GIT_NOTE)
@@ -202,9 +201,12 @@ class CinplaPlugin(IPlugin):
             from .ssh_tools import get_login, login, ssh_execute, untar
             import tarfile
             import shutil
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             action = project.require_action(action_id)
-            add_message(action, message)
+            action.messages.append([{'message': m,
+                                     'user': user,
+                                     'datetime': datetime.now()}
+                                   for m in message])
             fr = action.require_filerecord()
 
             host, user, pas, port = get_login(hostname=hostname,
@@ -255,7 +257,7 @@ class CinplaPlugin(IPlugin):
             elif from_local:
                 local_data = op.dirname(_get_local_path(fr, assert_exists=True))
                 if not raw:
-                    tags = action.tags or {}
+                    tags = action.tags or list()
                     if len(obligatory_tags) > 0:
                         if sum([tag in tags for tag in obligatory_tags]) != 1:
                             raise ValueError('Tags are not approved, please revise')
@@ -338,7 +340,7 @@ class CinplaPlugin(IPlugin):
             """Transfer a dataset related to an expipe action
             COMMAND: action-id: Provide action id to find exdir path"""
             import shutil
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if to_local:
@@ -393,7 +395,7 @@ class CinplaPlugin(IPlugin):
             ch.setLevel(logging.DEBUG)
             logger.addHandler(ch)
 
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_local:
@@ -426,9 +428,12 @@ class CinplaPlugin(IPlugin):
             """Parse info about recorded units
 
             COMMAND: action-id: Provide action id to get action"""
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             action = project.require_action(action_id)
-            add_message(action, message)
+            action.messages.append([{'message': m,
+                                     'user': user,
+                                     'datetime': datetime.now()}
+                                   for m in message])
             tags = action.tags or {}
             tags.update({t: 'true' for t in tag})
             action.tags = tags
@@ -454,30 +459,44 @@ class CinplaPlugin(IPlugin):
                       help='The anatomical brain-area of the optogenetic stimulus.',
                       )
         @click.option('-m', '--message',
+                      multiple=True,
                       required=True,
                       type=click.STRING,
                       help='Add message, use "text here" for sentences.',
                       )
+        @click.option('-u', '--user',
+                      type=click.STRING,
+                      help='The experimenter performing the adjustment.',
+                      )
         def register_units(action_id, no_local, channel_group, overwrite, tag,
-                           message):
+                           message, user):
             """Parse info about recorded units
 
             COMMAND: action-id: Provide action id to find exdir path"""
             import neo
             import copy
-            project = expipe.io.get_project(user_params['project_id'])
+            from datetime import datetime
+            project = expipe.get_project(user_params['project_id'])
             action = project.require_action(action_id)
-            add_message(action, message)
-            tags = action.tags or {}
-            tags.update({t: 'true' for t in tag})
-            action.tags = tags
-
+            action.tags.update(tag)
+            action.messages.append([{'message': m,
+                                     'user': user,
+                                     'datetime': datetime.now()}
+                                   for m in message])
             fr = action.require_filerecord()
             if not no_local:
                 exdir_path = _get_local_path(fr)
             else:
                 exdir_path = fr.server_path
-            print(exdir_path)
+            user = user or user_params['user_name']
+            if user is None:
+                raise ValueError('Please add user name')
+            if len(user) == 0:
+                raise ValueError('Please add user name')
+            users = action.users or list()
+            if user not in users:
+                users.append(user)
+            action.users = users
             io = neo.io.ExdirIO(exdir_path)
             blk = io.read_block()
             for chx in blk.channel_indexes:
@@ -553,7 +572,7 @@ class CinplaPlugin(IPlugin):
             datestring = datetime.strftime(date, DTIME_FORMAT)
             left = left * pq.um
             right = right * pq.um
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             action = project.require_action(rat_id + '-adjustment')
             action.type = action.type or 'Adjustment'
             action.subjects = action.subjects or {rat_id: 'true'}
@@ -562,9 +581,9 @@ class CinplaPlugin(IPlugin):
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
-            users = action.users or dict()
+            users = action.users or list()
             if user not in users:
-                users.update({user: 'true'})
+                users.append(user)
             action.users = users
             if index is None and not init:
                 deltas = []
@@ -673,7 +692,7 @@ class CinplaPlugin(IPlugin):
             # TODO add exana version and git note
             if isinstance(kwargs['channel_group'], int):
                 kwargs['channel_group'] = [kwargs['channel_group']]
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             action = project.require_action(kwargs['action_id'])
             plot = Plotter(kwargs['action_id'],
                            channel_group=kwargs['channel_group'],
@@ -729,7 +748,7 @@ class CinplaPlugin(IPlugin):
 
             COMMAND: action-id: Provide action id to get action"""
             from datetime import datetime
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             analysis_action = project.require_action(action_id)
 
             analysis_action.type = 'Analysis'
@@ -738,10 +757,12 @@ class CinplaPlugin(IPlugin):
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
-            analysis_action.users = {user: 'true'}
-            analysis_action.datetime = datetime.now()
+            users = analysis_action.users or list()
+            if user not in users:
+                users.append(user)
+            analysis_action.users = users
             subjects = {}
-            analysis_action.tags = {t: 'true' for t in tag}
+            analysis_action.tags = tag
             for action in project.actions:
                 if action.type != 'Recording':
                     continue

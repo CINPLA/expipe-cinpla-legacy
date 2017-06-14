@@ -1,6 +1,6 @@
 import quantities as pq
 from datetime import timedelta, datetime
-import expipe.io
+import expipe
 import os.path as op
 from distutils.util import strtobool
 import sys

@@ -24,7 +24,7 @@ class Plotter:
         import exana.tracking as tr
         import quantities as pq
         import neo
-        project = expipe.io.get_project(user_params['project_id'])
+        project = expipe.get_project(user_params['project_id'])
         action = project.require_action(action_id)
         fr = action.require_filerecord()
         if not no_local:

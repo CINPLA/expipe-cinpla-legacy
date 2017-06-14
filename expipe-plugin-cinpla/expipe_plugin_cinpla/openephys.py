@@ -110,7 +110,7 @@ class OpenEphysPlugin(IPlugin):
             action = None
             if exdir_path is None:
                 import exdir
-                project = expipe.io.get_project(user_params['project_id'])
+                project = expipe.get_project(user_params['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:
@@ -270,6 +270,7 @@ class OpenEphysPlugin(IPlugin):
                       help='Number of channels. Default = 32',
                       )
         @click.option('-m', '--message',
+                      multiple=True,
                       type=click.STRING,
                       help='Add message, use "text here" for sentences.',
                       )
@@ -294,11 +295,11 @@ class OpenEphysPlugin(IPlugin):
             from expipe_io_neuro import pyopenephys
             import quantities as pq
             import shutil
-            from datetime import datetime
+            from datetime import datetime, timedelta
             from .action_tools import register_depth
             openephys_path = op.abspath(openephys_path)
             openephys_dirname = openephys_path.split(os.sep)[-1]
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             prb_path = prb_path or _get_probe_file(system='oe', nchan=nchan,
                                                    spikesorter='klusta')
             if prb_path is None:
@@ -320,18 +321,16 @@ class OpenEphysPlugin(IPlugin):
             action = project.require_action(action_id)
             action.datetime = openephys_file.datetime
             action.type = 'Recording'
-            tags = {'open-ephys': 'true'}
-            tags.update({t: 'true' for t in tag})
-            action.tags = tags
+            action.tags.update(tag + ['open-ephys'])
             print('Registering rat id ' + rat_id)
-            action.subjects = {rat_id: 'true'}
+            action.subjects = [rat_id]
             user = user or user_params['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
             print('Registering user ' + user)
-            action.users = {user: 'true'}
+            action.users = [user]
             location = location or user_params['location']
             if location is None:
                 raise ValueError('Please add location')
@@ -340,7 +339,8 @@ class OpenEphysPlugin(IPlugin):
             assert location in possible_locations
             print('Registering location ' + location)
             action.location = location
-
+            messages = [{'message': m, 'user': user, 'datetime': datetime.now()}
+                        for m in message]
             if not no_modules:
                 if 'openephys' not in templates:
                     raise ValueError('Could not find "openephys" in ' +
@@ -356,10 +356,11 @@ class OpenEphysPlugin(IPlugin):
                 register_depth(project, action, left, right)
 
                 for idx, m in enumerate(openephys_file.messages):
-                    message.apend({'time': m['time'],
-                                   'value': m['message']})
-                add_message(action, message)
-
+                    dtime = openephys_file.datetime + timedelta(seconds=m['time'])
+                    messages.apend({'datetime': dtime,
+                                    'message': m['message'],
+                                    'user': user})
+            action.messages.messages.append(messages)
             if not no_files:
                 fr = action.require_filerecord()
                 if not no_local:
@@ -405,10 +406,10 @@ class OpenEphysPlugin(IPlugin):
                       help='Store temporary on local drive.',
                       )
         @click.option('--nchan',
-                type=click.INT,
-                default=32,
-                help='Number of channels. Default = 32',
-                )
+                      type=click.INT,
+                      default=32,
+                      help='Number of channels. Default = 32',
+                      )
         def generate_klusta_oe(action_id, prb_path, no_local, openephys_path,
                                exdir_path, nchan):
             """Convert klusta spikes to exdir.
@@ -417,7 +418,7 @@ class OpenEphysPlugin(IPlugin):
             import numpy as np
             if openephys_path is None:
                 import exdir
-                project = expipe.io.get_project(user_params['project_id'])
+                project = expipe.get_project(user_params['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:

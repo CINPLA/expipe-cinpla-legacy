@@ -1,5 +1,4 @@
 import expipe
-import expipe.io
 import os
 import os.path as op
 from expipecli.utils import IPlugin
@@ -63,13 +62,19 @@ class AxonaPlugin(IPlugin):
                       is_flag=True,
                       help='Overwrite modules or not.',
                       )
-        @click.option('-n', '--message',
+        @click.option('-m', '--message',
+                      multiple=True,
                       type=click.STRING,
                       help='Add message, use "text here" for sentences.',
                       )
+        @click.option('-t', '--tag',
+                      multiple=True,
+                      type=click.STRING,
+                      help='Add tags to action.',
+                      )
         def generate_axona_action(action_id, axona_filename, left, right, user,
                                   no_local, overwrite, no_files, no_modules,
-                                  rat_id, location, message):
+                                  rat_id, location, message, tag):
             """Generate an axona recording-action to database.
 
             COMMAND: axona-filename"""
@@ -84,7 +89,7 @@ class AxonaPlugin(IPlugin):
                 print("Sorry, we need an Axona .set file not " +
                       "'{}'.".format(axona_filename))
                 return
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             if action_id is None:
                 action_id = op.splitext(
                     '-'.join(axona_filename.split(os.sep)[-2:]))[0]
@@ -96,17 +101,17 @@ class AxonaPlugin(IPlugin):
             add_message(action, message)
             action.type = 'Recording'
             action.datetime = axona_file._start_datetime
-            action.tags = {'axona': 'true'}
+            action.tags = tag + ['axona']
             print('Registering action id ' + action_id)
             print('Registering rat id ' + rat_id)
-            action.subjects = {rat_id: 'true'}
+            action.subjects = [rat_id]
             user = user or user_params['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
             print('Registering user ' + user)
-            action.users = {user: 'true'}
+            action.users = [user]
             location = location or user_params['location']
             if location is None:
                 raise ValueError('Please add location')
@@ -150,7 +155,7 @@ class AxonaPlugin(IPlugin):
         #     COMMAND: axona-filename"""
         #     import pyxona
         #     import exdir
-        #     project = expipe.io.get_project(user_params['project_id'])
+        #     project = expipe.get_project(user_params['project_id'])
         #
         #
         #     for action in project.actions:

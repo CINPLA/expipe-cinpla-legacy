@@ -113,7 +113,7 @@ class IntanPlugin(IPlugin):
             action = None
             if exdir_path is None:
                 import exdir
-                project = expipe.io.get_project(user_params['project_id'])
+                project = expipe.get_project(user_params['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:
@@ -157,7 +157,7 @@ class IntanPlugin(IPlugin):
                     freq_range=[2000, 4000]
                     fpre, Pxxpre = signal.welch(eap_pre, fs, nperseg=1024)
                     avg_spectrum = np.mean(Pxxpre, axis=0)
-                    fpeak = fpre[np.where((fpre>freq_range[0]) & 
+                    fpeak = fpre[np.where((fpre>freq_range[0]) &
                                             (fpre<freq_range[1]))][np.argmax(
                                              avg_spectrum[np.where((fpre>freq_range[0]) & (fpre<freq_range[1]))])]
                     stopband = [fpeak-150*pq.Hz, fpeak+150*pq.Hz]
@@ -317,7 +317,7 @@ class IntanPlugin(IPlugin):
             action = None
             if exdir_path is None:
                 import exdir
-                project = expipe.io.get_project(user_params['project_id'])
+                project = expipe.get_project(user_params['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:
@@ -422,7 +422,7 @@ class IntanPlugin(IPlugin):
                     freq_range=[2000, 4000]
                     fpre, Pxxpre = signal.welch(eap_pre, fs, nperseg=1024)
                     avg_spectrum = np.mean(Pxxpre, axis=0)
-                    fpeak = fpre[np.where((fpre>freq_range[0]) & 
+                    fpeak = fpre[np.where((fpre>freq_range[0]) &
                                             (fpre<freq_range[1]))][np.argmax(
                                              avg_spectrum[np.where((fpre>freq_range[0]) & (fpre<freq_range[1]))])]
                     stopband = [fpeak-150*pq.Hz, fpeak+150*pq.Hz]
@@ -566,7 +566,7 @@ class IntanPlugin(IPlugin):
             intan_dir = intan_path.split(os.sep)[-1]
             rhs_file = [f for f in os.listdir(intan_path) if f.endswith('.rhs')][0]
             rhs_path = op.join(intan_path, rhs_file)
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
                                                    spikesorter='klusta')
             if prb_path is None:
@@ -734,7 +734,7 @@ class IntanPlugin(IPlugin):
             intan_ephys_dir = intan_ephys_path.split(os.sep)[-1]
             rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
             rhs_path = op.join(intan_ephys_path, rhs_file)
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
                                                    spikesorter='klusta')
             if prb_path is None:
@@ -952,7 +952,7 @@ class IntanPlugin(IPlugin):
             intan_ephys_dir = intan_ephys_path.split(os.sep)[-1]
             rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
             rhs_path = op.join(intan_ephys_path, rhs_file)
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
                                                    spikesorter='klusta')
             if prb_path is None:
@@ -1081,7 +1081,7 @@ class IntanPlugin(IPlugin):
                     freq_range=[2000, 4000]
                     fpre, Pxxpre = signal.welch(eap_pre, fs, nperseg=1024)
                     avg_spectrum = np.mean(Pxxpre, axis=0)
-                    fpeak = fpre[np.where((fpre>freq_range[0]) & 
+                    fpeak = fpre[np.where((fpre>freq_range[0]) &
                                             (fpre<freq_range[1]))][np.argmax(
                                              avg_spectrum[np.where((fpre>freq_range[0]) & (fpre<freq_range[1]))])]
                     stopband = [fpeak-150*pq.Hz, fpeak+150*pq.Hz]
@@ -1225,7 +1225,7 @@ class IntanPlugin(IPlugin):
             import numpy as np
             if intan_path is None:
                 import exdir
-                project = expipe.io.get_project(user_params['project_id'])
+                project = expipe.get_project(user_params['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:

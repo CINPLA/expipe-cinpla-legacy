@@ -70,7 +70,7 @@ class OptoPlugin(IPlugin):
             if brain_area not in possible_brain_areas:
                 raise ValueError("brain_area must be either %s",
                                  possible_brain_areas)
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             action = project.require_action(action_id)
             tags = action.tags or {}
             tags.update({tag: 'true', 'opto-' + brain_area: 'true'})
@@ -119,7 +119,7 @@ class OptoPlugin(IPlugin):
 
             COMMAND: action-id: Provide action id to find exdir path"""
             import exdir
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_local:

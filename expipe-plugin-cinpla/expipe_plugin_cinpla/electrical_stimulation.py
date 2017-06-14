@@ -77,7 +77,7 @@ class ElectricalStimulationPlugin(IPlugin):
             import exdir
             from expipe_io_neuro import pyintan, pyopenephys
             # TODO deafault none
-            project = expipe.io.get_project(user_params['project_id'])
+            project = expipe.get_project(user_params['project_id'])
             action = project.require_action(action_id)
             # tags = action.tags or {}
             # if tags is not None:
