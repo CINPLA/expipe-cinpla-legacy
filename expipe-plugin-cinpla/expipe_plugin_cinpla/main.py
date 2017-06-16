@@ -68,7 +68,7 @@ class CinplaPlugin(IPlugin):
         @click.option('--date', '-d',
                       required=True,
                       type=click.STRING,
-                      help='The date of the surgery format: "dd.mm.yyyy:HH:MM".',
+                      help='The date of the surgery format: "dd.mm.yyyyTHH:MM".',
                       )
         @click.option('--procedure',
                       required=True,
@@ -93,8 +93,16 @@ class CinplaPlugin(IPlugin):
                       type=click.STRING,
                       help='The birthday of the subject.',
                       )
+        @click.option('-l', '--left',
+                      type=click.INT,
+                      help='The depth on left side in "mm".',
+                      )
+        @click.option('-r', '--right',
+                      type=click.INT,
+                      help='The depth on right side in "mm".',
+                      )
         def generate_surgery(rat, procedure, date, user, weight, birthday,
-                             overwrite):
+                             overwrite, left, right, center):
             """Generate a surgery action."""
             # TODO give depth if implantation
             import quantities as pq
@@ -104,7 +112,7 @@ class CinplaPlugin(IPlugin):
                                  'or "injection"')
             birthday = datetime.strptime(birthday, '%d.%m.%Y')
             birthday = datetime.strftime(birthday, DTIME_FORMAT)
-            date = datetime.strptime(date, '%d.%m.%Y:%H:%M')
+            date = datetime.strptime(date, '%d.%m.%YT%H:%M')
             project = expipe.get_project(user_params['project_id'])
             action = project.require_action(rat + '-surgery-' + procedure)
             action.location = 'Sterile surgery station'
@@ -118,6 +126,22 @@ class CinplaPlugin(IPlugin):
                 raise ValueError('Please add user name')
             action.users = [user]
             action.datetime = date
+            for desc, inp in zip(['left', 'right', 'center'], [left, right, center]):
+                cnt = 0
+                for key, val in action.modules.items():
+                    if any(string in key for string in ['implant_drive', 'injection']):
+                        hem = val.get('hemisphere')
+                        if hem['value'].lower() == desc[0] or hem['value'] == desc:
+                            cnt += 1
+                            name, mod = key, val
+                if cnt == 1:
+                    if 'depth' in mod:
+                        mod['depth'] = pq.Quantity(inp, 'mm')
+                    elif 'position' in mod:
+                        assert isinstance(mod['position'], pq.Quantity)
+                        mod['position'][2] = mod
+                    print('Registering depth ', desc, ' = ', mod['depth'])
+                    action.require_module(name=name, contents=mod, overwrite=True)
             generate_templates(action, templates['surgery_' + procedure],
                                overwrite, git_note=GIT_NOTE)
             subject = action.require_module(name='subject').to_dict()  # TODO standard name?
@@ -203,7 +227,7 @@ class CinplaPlugin(IPlugin):
             import shutil
             project = expipe.get_project(user_params['project_id'])
             action = project.require_action(action_id)
-            action.messages.append([{'message': m,
+            action.messages.extend([{'message': m,
                                      'user': user,
                                      'datetime': datetime.now()}
                                    for m in message])
@@ -426,7 +450,7 @@ class CinplaPlugin(IPlugin):
                       )
         @click.option('-u', '--user',
                       type=click.STRING,
-                      help='The experimenter performing the adjustment.',
+                      help='The experimenter performing the annotation.',
                       )
         def annotate(action_id, tag, message, user):
             """Parse info about recorded units
@@ -502,7 +526,7 @@ class CinplaPlugin(IPlugin):
                 users.append(user)
             action.users = users
             action.tags.update(tag)
-            action.messages.append([{'message': m,
+            action.messages.extend([{'message': m,
                                      'user': user,
                                      'datetime': datetime.now()}
                                    for m in message])
@@ -542,7 +566,7 @@ class CinplaPlugin(IPlugin):
         @click.option('-d', '--date',
                       required=True,
                       type=click.STRING,
-                      help='The date of the surgery format: "dd.mm.yyyy:HH:MM" or "now".',
+                      help='The date of the surgery format: "dd.mm.yyyyTHH:MM" or "now".',
                       )
         @click.option('-l', '--left',
                       required=True,
@@ -582,7 +606,7 @@ class CinplaPlugin(IPlugin):
             if date == 'now':
                 date = datetime.now()
             else:
-                date = datetime.strptime(date, '%d.%m.%Y:%H:%M')
+                date = datetime.strptime(date, '%d.%m.%YT%H:%M')
             datestring = datetime.strftime(date, DTIME_FORMAT)
             left = left * pq.um
             right = right * pq.um
@@ -637,8 +661,10 @@ class CinplaPlugin(IPlugin):
             print('Registering adjustment left = {}, new depth = {}.'.format(left, left_depth))
             print('Registering adjustment right = {}, new depth = {}.'.format(right, right_depth))
             content = module.to_dict()
-            content['depth'] = np.array([left_depth, right_depth]) * pq.mm
-            content['adjustment'] = np.array([left, right]) * pq.um
+            content['depth']['left'] = left_depth * pq.mm
+            content['depth']['right'] = right_depth * pq.mm
+            content['adjustment']['left'] = left * pq.um
+            content['adjustment']['right'] = right * pq.um
             content['experimenter'] = user
             content['date'] = datestring
             content['git_note'] = GIT_NOTE

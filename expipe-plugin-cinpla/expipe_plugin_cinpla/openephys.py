@@ -357,10 +357,10 @@ class OpenEphysPlugin(IPlugin):
 
                 for idx, m in enumerate(openephys_file.messages):
                     dtime = openephys_file.datetime + timedelta(seconds=m['time'])
-                    messages.apend({'datetime': dtime,
+                    messages.append({'datetime': dtime,
                                     'message': m['message'],
                                     'user': user})
-            action.messages.messages.append(messages)
+            action.messages.extend(messages)
             if not no_files:
                 fr = action.require_filerecord()
                 if not no_local:

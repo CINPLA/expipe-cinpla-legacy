@@ -29,7 +29,7 @@ from .utils import discover_plugins, IPlugin
 # @click.version_option(version=__version_git__)
 @click.help_option('-h', '--help')
 @click.pass_context
-def expipe(ctx, pdb=None):
+def expipe(ctx):
     """Add subcommands to 'expipe' with plugins
     using `attach_to_cli()` and the `click` library.
 
@@ -74,7 +74,7 @@ class Default(IPlugin):
 
 def load_cli_plugins(cli, config_dir=None):
     """Load all plugins and attach them to a CLI object."""
-    
+
     plugins = discover_plugins()
     for plugin in plugins:
         if not hasattr(plugin, 'attach_to_cli'):  # pragma: no cover
