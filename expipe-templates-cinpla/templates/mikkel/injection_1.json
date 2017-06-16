@@ -63,6 +63,14 @@
             7.3
         ]
     },
+    "hemisphere": {
+        "alternatives": {
+            "L, left": "left hemisphere",
+            "R, right": "right hemisphere",
+            "C, center": "between hemispheres"
+        },
+        "value": "C"
+    },
     "position_reference": {
         "alternatives": {
             "bregma": true,

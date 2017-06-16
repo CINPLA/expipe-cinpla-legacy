@@ -22,8 +22,9 @@
     },
     "hemisphere": {
         "alternatives": {
-            "L": "left hemisphere",
-            "R": "right hemisphere"
+            "L, left": "left hemisphere",
+            "R, right": "right hemisphere",
+            "C, center": "between hemispheres"
         },
         "value": "R"
     },
