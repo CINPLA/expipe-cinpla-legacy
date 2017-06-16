@@ -424,19 +424,32 @@ class CinplaPlugin(IPlugin):
                       type=click.STRING,
                       help='Add message, use "text here" for sentences.',
                       )
-        def annotate(action_id, tag, message):
+        @click.option('-u', '--user',
+                      type=click.STRING,
+                      help='The experimenter performing the adjustment.',
+                      )
+        def annotate(action_id, tag, message, user):
             """Parse info about recorded units
 
             COMMAND: action-id: Provide action id to get action"""
+            from datetime import datetime
             project = expipe.get_project(user_params['project_id'])
             action = project.require_action(action_id)
-            action.messages.append([{'message': m,
+            user = user or user_params['user_name']
+            if user is None:
+                raise ValueError('Please add user name')
+            if len(user) == 0:
+                raise ValueError('Please add user name')
+
+            users = list(set(action.users))
+            if user not in users:
+                users.append(user)
+            action.users = users
+            action.messages.extend([{'message': m,
                                      'user': user,
                                      'datetime': datetime.now()}
                                    for m in message])
-            tags = action.tags or {}
-            tags.update({t: 'true' for t in tag})
-            action.tags = tags
+            action.tags.extend(tag)
 
         @cli.command('register-units')
         @click.argument('action-id', type=click.STRING)
@@ -478,6 +491,16 @@ class CinplaPlugin(IPlugin):
             from datetime import datetime
             project = expipe.get_project(user_params['project_id'])
             action = project.require_action(action_id)
+            user = user or user_params['user_name']
+            if user is None:
+                raise ValueError('Please add user name')
+            if len(user) == 0:
+                raise ValueError('Please add user name')
+
+            users = list(set(action.users))
+            if user not in users:
+                users.append(user)
+            action.users = users
             action.tags.update(tag)
             action.messages.append([{'message': m,
                                      'user': user,
@@ -488,15 +511,6 @@ class CinplaPlugin(IPlugin):
                 exdir_path = _get_local_path(fr)
             else:
                 exdir_path = fr.server_path
-            user = user or user_params['user_name']
-            if user is None:
-                raise ValueError('Please add user name')
-            if len(user) == 0:
-                raise ValueError('Please add user name')
-            users = action.users or list()
-            if user not in users:
-                users.append(user)
-            action.users = users
             io = neo.io.ExdirIO(exdir_path)
             blk = io.read_block()
             for chx in blk.channel_indexes:
@@ -581,7 +595,7 @@ class CinplaPlugin(IPlugin):
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
-            users = action.users or list()
+            users = list(set(action.users))
             if user not in users:
                 users.append(user)
             action.users = users
