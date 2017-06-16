@@ -5,7 +5,7 @@ import click
 from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
 
 from .action_tools import (generate_templates, _get_local_path, GIT_NOTE,
-                           add_message, _get_probe_file)
+                            _get_probe_file)
 from .electro_tools import (generate_electrical_info, populate_modules)
 
 import os
@@ -52,6 +52,7 @@ class ElectricalStimulationPlugin(IPlugin):
                       help='The anatomical brain-area of the optogenetic stimulus.',
                       )
         @click.option('-m', '--message',
+                      multiple=True,
                       type=click.STRING,
                       help='Add message, use "text here" for sentences.',
                       )
@@ -174,5 +175,7 @@ class ElectricalStimulationPlugin(IPlugin):
             trigger_param.update(channel_param)
 
             populate_modules(action=action, params=trigger_param)
-            add_message(action, message)
-
+            action.messages.extend([{'message': m,
+                                     'user': user,
+                                     'datetime': datetime.now()}
+                                   for m in message])

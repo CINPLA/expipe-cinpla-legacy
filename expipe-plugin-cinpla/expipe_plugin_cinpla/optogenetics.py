@@ -4,8 +4,7 @@ from expipecli.utils import IPlugin
 import click
 from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
 
-from .action_tools import (generate_templates, _get_local_path, GIT_NOTE,
-                           add_message)
+from .action_tools import (generate_templates, _get_local_path, GIT_NOTE)
 from .opto_tools import (generate_epochs, generate_axona_opto, populate_modules,
                         extract_laser_pulse, read_pulse_pal_mat,
                         read_pulse_pal_xml, read_laser_intensity,
@@ -40,6 +39,7 @@ class OptoPlugin(IPlugin):
                       help='The anatomical brain-area of the optogenetic stimulus.',
                       )
         @click.option('-m', '--message',
+                      multiple=True,
                       type=click.STRING,
                       help='Add message, use "text here" for sentences.',
                       )
@@ -101,7 +101,10 @@ class OptoPlugin(IPlugin):
             laser['device_id'] = {'value': laser_id}
             action.require_module(name=laser_name, contents=laser,
                                   overwrite=True)
-            add_message(action, message)
+            action.messages.extend([{'message': m,
+                                     'user': user,
+                                     'datetime': datetime.now()}
+                                   for m in message])
 
         @cli.command('register-opto-files')
         @click.argument('action-id', type=click.STRING)

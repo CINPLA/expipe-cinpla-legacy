@@ -23,7 +23,7 @@ def test_annotate(setup_project_action):
                                  '-t', pytest.POSSIBLE_TAGS[1],
                                  '--message', 'first message',
                                  '-m', 'second message'])
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.output
     assert action.tags[0] == pytest.POSSIBLE_TAGS[0]
     assert action.tags[1] == pytest.POSSIBLE_TAGS[1]
     assert action.messages.messages[0]['message'] == 'first message'
@@ -33,7 +33,7 @@ def test_annotate(setup_project_action):
     result = runner.invoke(cli, ['annotate', pytest.ACTION_ID,
                                  '--user', 'test_user',
                                  '-m', 'third message'])
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.output
     assert action.messages.messages[2]['message'] == 'third message'
     assert action.messages.messages[2]['user'] == 'test_user'
 
@@ -44,12 +44,12 @@ def test_reg_rat_init_depth_adjustment(setup_project_action):
     # make surgery action
     result = runner.invoke(cli, ['register-surgery', pytest.RAT_ID,
                                  '--weight', '500',
-                                 '--birthday', '21.05.2017T14:40',
+                                 '--birthday', '21.05.2017',
                                  '--procedure', 'implantation',
                                  '-d', '21.01.2017T14:40',
-                                 '-l': 1.9,
-                                 '-r': 1.8])
-    assert result.exit_code == 0
+                                 '-l', 1.9,
+                                 '-r', 1.8])
+    assert result.exit_code == 0, result.output
 
     # init
     result = runner.invoke(cli, ['adjust', pytest.RAT_ID,
@@ -57,14 +57,14 @@ def test_reg_rat_init_depth_adjustment(setup_project_action):
                                  '-r', '50',
                                  '-d', 'now',
                                  '--init'])
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.output
 
     # adjust more
     result = runner.invoke(cli, ['adjust', pytest.RAT_ID,
                                  '-l', '50',
                                  '-r', '50',
                                  '-d', 'now'])
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.output
     action = project.require_action(pytest.RAT_ID + '-adjustment')
     l, r = 1.9, 1.8
     for adjustment in action.modules:

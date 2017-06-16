@@ -35,5 +35,10 @@ def setup_project_action():
     except NameError:
         pass
     project = expipe.require_project(PROJECT_ID)
+    for key, val in templates.items():
+        for template in val:
+            if template.startswith('_inherit'):
+                name = '_'.join(template.split('_')[2:])
+                project.require_module(name=name, contents={'test': 'cont'}, overwrite=True)
     action = project.require_action(ACTION_ID)
     yield project, action

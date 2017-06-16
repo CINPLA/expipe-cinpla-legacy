@@ -6,7 +6,7 @@ from expipecli.utils import IPlugin
 import click
 from expipe_io_neuro import pyopenephys, openephys
 from .action_tools import (generate_templates, _get_local_path,
-                           _get_probe_file, GIT_NOTE, add_message)
+                           _get_probe_file, GIT_NOTE)
 from exana.misc.signal_tools import (create_klusta_prm, save_binary_format,
                                      apply_CAR, filter_analog_signals,
                                      ground_bad_channels, duplicate_bad_channels)

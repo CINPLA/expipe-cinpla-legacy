@@ -4,8 +4,7 @@ from expipecli.utils import IPlugin
 import click
 from expipe_io_neuro import axona
 
-from .action_tools import (generate_templates, _get_local_path, GIT_NOTE,
-                           add_message)
+from .action_tools import (generate_templates, _get_local_path, GIT_NOTE)
 
 from .visual_tools import (get_grating_stimulus_events, get_key_press_events,
                            generate_blank_group, generate_key_event_group,

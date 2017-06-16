@@ -3,8 +3,7 @@ import os
 import os.path as op
 from expipecli.utils import IPlugin
 import click
-from .action_tools import (generate_templates, _get_local_path, GIT_NOTE,
-                           add_message)
+from .action_tools import (generate_templates, _get_local_path, GIT_NOTE)
 import sys
 sys.path.append(expipe.config.config_dir)
 if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
@@ -98,7 +97,10 @@ class AxonaPlugin(IPlugin):
             action = project.require_action(action_id)
             axona_file = pyxona.File(axona_filename)
 
-            add_message(action, message)
+            action.messages.extend([{'message': m,
+                                     'user': user,
+                                     'datetime': datetime.now()}
+                                   for m in message])
             action.type = 'Recording'
             action.datetime = axona_file._start_datetime
             action.tags = tag + ['axona']

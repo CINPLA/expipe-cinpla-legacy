@@ -5,8 +5,8 @@ import json
 import quantities as pq
 
 ########################### DANGER DELETES ALL TEMPLATES #######################
-# expipe.io.core.FirebaseBackend("/templates").set({})
-# expipe.io.core.FirebaseBackend("/templates_contents").set({})
+expipe.io.core.FirebaseBackend("/templates").set({})
+expipe.io.core.FirebaseBackend("/templates_contents").set({})
 ################################################################################
 
 for root, dirs, files in os.walk('templates'):

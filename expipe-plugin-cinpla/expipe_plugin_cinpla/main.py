@@ -4,7 +4,7 @@ import os.path as op
 from expipecli.utils import IPlugin
 import click
 from .action_tools import (generate_templates, _get_local_path, create_notebook,
-                           GIT_NOTE, nwb_main_groups, add_message)
+                           GIT_NOTE, nwb_main_groups)
 import sys
 sys.path.append(expipe.config.config_dir)
 if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
@@ -60,11 +60,7 @@ class CinplaPlugin(IPlugin):
             shutil.copy(filename, expipe.config.config_dir)
 
         @cli.command('register-surgery')
-        @click.option('--rat',
-                      required=True,
-                      type=click.STRING,
-                      help='ID of the rat.',
-                      )
+        @click.argument('subject-id')
         @click.option('--date', '-d',
                       required=True,
                       type=click.STRING,
@@ -91,17 +87,21 @@ class CinplaPlugin(IPlugin):
         @click.option('--birthday',
                       required=True,
                       type=click.STRING,
-                      help='The birthday of the subject.',
+                      help='The birthday of the subject, format: "dd.mm.yyyy".',
                       )
         @click.option('-l', '--left',
-                      type=click.INT,
+                      type=click.FLOAT,
                       help='The depth on left side in "mm".',
                       )
         @click.option('-r', '--right',
-                      type=click.INT,
+                      type=click.FLOAT,
                       help='The depth on right side in "mm".',
                       )
-        def generate_surgery(rat, procedure, date, user, weight, birthday,
+        @click.option('-c', '--center',
+                      type=click.FLOAT,
+                      help='The depth on center in "mm".',
+                      )
+        def generate_surgery(subject_id, procedure, date, user, weight, birthday,
                              overwrite, left, right, center):
             """Generate a surgery action."""
             # TODO give depth if implantation
@@ -114,11 +114,11 @@ class CinplaPlugin(IPlugin):
             birthday = datetime.strftime(birthday, DTIME_FORMAT)
             date = datetime.strptime(date, '%d.%m.%YT%H:%M')
             project = expipe.get_project(user_params['project_id'])
-            action = project.require_action(rat + '-surgery-' + procedure)
+            action = project.require_action(subject_id + '-surgery-' + procedure)
             action.location = 'Sterile surgery station'
             action.type = 'Surgery'
             action.tags = [procedure]
-            action.subjects = [rat]
+            action.subjects = [subject_id]
             user = user or user_params['user_name']
             if user is None:
                 raise ValueError('Please add user name')
@@ -334,7 +334,6 @@ class CinplaPlugin(IPlugin):
             sftp_client.close()
             scp_client.close()
             # TODO send to trash
-
 
         @cli.command('copy-action')
         @click.argument('action-id', type=click.STRING)
@@ -562,7 +561,7 @@ class CinplaPlugin(IPlugin):
             contents.update({'git_note': GIT_NOTE})
 
         @cli.command('adjust')
-        @click.argument('rat-id',  type=click.STRING)
+        @click.argument('subject-id',  type=click.STRING)
         @click.option('-d', '--date',
                       required=True,
                       type=click.STRING,
@@ -594,11 +593,11 @@ class CinplaPlugin(IPlugin):
                       type=click.STRING,
                       help='The experimenter performing the adjustment.',
                       )
-        def generate_adjustment(rat_id, date, left, right, user, index, init,
+        def generate_adjustment(subject_id, date, left, right, user, index, init,
                                 overwrite):
             """Parse info about drive depth adjustment
 
-            COMMAND: rat-id: ID of the rat."""
+            COMMAND: subject-id: ID of the subject."""
             import numpy as np
             import quantities as pq
             from .action_tools import query_yes_no
@@ -611,9 +610,9 @@ class CinplaPlugin(IPlugin):
             left = left * pq.um
             right = right * pq.um
             project = expipe.get_project(user_params['project_id'])
-            action = project.require_action(rat_id + '-adjustment')
+            action = project.require_action(subject_id + '-adjustment')
             action.type = action.type or 'Adjustment'
-            action.subjects = action.subjects or {rat_id: 'true'}
+            action.subjects = action.subjects or {subject_id: 'true'}
             user = user or user_params['user_name']
             if user is None:
                 raise ValueError('Please add user name')
@@ -632,7 +631,7 @@ class CinplaPlugin(IPlugin):
                 index = max(deltas) + 1
             if init:
                 index = 0
-                surgery = project.get_action(rat_id + '-surgery-implantation')
+                surgery = project.get_action(subject_id + '-surgery-implantation')
                 sdict = surgery.modules.to_dict()
                 sleft = sdict['implant_drive_L']['position'][2]
                 sright = sdict['implant_drive_R']['position'][2]
