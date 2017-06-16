@@ -1,0 +1,44 @@
+{
+    "definition": "This is a software section .",
+    "description": {
+        "definition": "The descrisption of the software.",
+        "value": "Bonsai is open-source software for processing heterogeneous streams of data. It is ideal for real-time video analysis, but it can simultaneously control your experiments and/or acquire data from the Open Ephys acquisition board."
+    },
+    "developer": {
+        "definition": "The developer or the developers firm.",
+        "value": "Gon\u00e7alo Lopes at the Champalimaud Centre for the Unknown"
+    },
+    "distribution": {
+        "definition": "Distribution type",
+        "value": ""
+    },
+    "identifier": "software_bonsai_gui",
+    "licence": {
+        "definition": "License type",
+        "value": ""
+    },
+    "licence_count": {
+        "definition": "Number of the software's licence.",
+        "value": ""
+    },
+    "licence_duration": {
+        "definition": "Duration of the licence for the software.",
+        "value": ""
+    },
+    "licence_expiration": {
+        "definition": "The end date of time limited licence.",
+        "value": ""
+    },
+    "licence_start": {
+        "definition": "The start date of time limited licence.",
+        "value": ""
+    },
+    "owner": {
+        "definition": "The owner of the software.",
+        "value": ""
+    },
+    "version": {
+        "definition": "Version of the software.",
+        "value": "2.3.0"
+    }
+}

@@ -1,0 +1,87 @@
+{
+    "definition": "Describing the settings on pulse pal.",
+    "identifier": "alessio_pulse_pal_settings",
+    "interstimulus_interval": {
+        "unit": "s",
+        "value": ""
+    },
+    "notes": {
+        "definition": "Notes specific for this stimulus session.",
+        "value": ""
+    },
+    "output_channels": {
+        "definition": "The physical output channels used.",
+        "value": [
+            1.0,
+            4.0
+        ]
+    },
+    "output_device": {
+        "definition": "The physical output device.",
+        "value": "Pulse Pal"
+    },
+    "outputs": {
+        "alternatives": {
+            "Sync": "PulsePal used to synchronize",
+            "TTL": "PulsePal used to send TTL",
+            "Trigger": "PulsePal used as trigger for electrical stimulation"
+        },
+        "definition": "The output purpose.",
+        "value": [
+            "Trigger",
+            " Sync"
+        ]
+    },
+    "outputs_to": {
+        "definition": "The receiving end of the output channels.",
+        "value": [
+            "Intan Stimulation Recording Controller",
+            " Intan Stimulation Recording Controller"
+        ]
+    },
+    "pulse_frequency": {
+        "unit": "Hz",
+        "value": ""
+    },
+    "pulse_period": {
+        "unit": "ms",
+        "value": ""
+    },
+    "pulse_phase_duration": {
+        "unit": "ms",
+        "value": ""
+    },
+    "pulse_sd": {
+        "unit": "%",
+        "value": ""
+    },
+    "pulse_voltage": {
+        "unit": "Volt",
+        "value": ""
+    },
+    "registered": "2017-05-24T16:30:04.973Z",
+    "repetitions": {
+        "definition": "The number of repetitions of the described stimulation. Defined as on time of a train of pulses",
+        "value": ""
+    },
+    "start_times": {
+        "unit": "s",
+        "value": ""
+    },
+    "train_durations": {
+        "unit": "s",
+        "value": ""
+    },
+    "trigger_channels": {
+        "definition": "If externally triggered, by which channel.",
+        "value": ""
+    },
+    "trigger_software": {
+        "alternatives": {
+            "Matlab": "Matlab software provided by PulsePal",
+            "OpenEphys": "Trigger software from the Open Ephys GUI"
+        },
+        "definition": "What software triggers the pulsepal.",
+        "value": ""
+    }
+}

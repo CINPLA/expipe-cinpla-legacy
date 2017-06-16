@@ -1,0 +1,62 @@
+{
+    "definition": "Properties a filter modul for analog signal conditioning.",
+    "description": {
+        "definition": "A description of this hardware item.",
+        "value": ""
+    },
+    "highpass_cutoff": {
+        "definition": "The highpass filter cutoff frequency.",
+        "value": ""
+    },
+    "highpass_order": {
+        "definition": "The order of the highpass filter",
+        "value": ""
+    },
+    "identifier": "hardware_filter",
+    "inventory_no": {
+        "definition": "The inventory number of the device.",
+        "value": ""
+    },
+    "lowpass_cutoff": {
+        "definition": "The lowpass filter cutoff frequency.",
+        "value": ""
+    },
+    "lowpass_order": {
+        "definition": "The order of the lowpass filter",
+        "value": ""
+    },
+    "manufacturer": {
+        "definition": "The Manufacturer of this hardware item.",
+        "value": ""
+    },
+    "model": {
+        "definition": "The model name of this hardware item.",
+        "value": ""
+    },
+    "owner": {
+        "definition": "Who's the owner of the device.",
+        "value": ""
+    },
+    "serial_no": {
+        "definition": "The device's serial number.",
+        "value": ""
+    },
+    "sub_type": {
+        "alternatives": {
+            "Bessel": true,
+            "Butterworth": true
+        },
+        "definition": "The type of filter.",
+        "value": ""
+    },
+    "type": {
+        "alternatives": {
+            "Bandpass": true,
+            "Highpass": true,
+            "Lowpass": true,
+            "Notch": true
+        },
+        "definition": "The type of filter.",
+        "value": ""
+    }
+}

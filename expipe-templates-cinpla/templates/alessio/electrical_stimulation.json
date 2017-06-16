@@ -1,0 +1,19 @@
+{
+    "active-electrodes": {
+        "definition": "The list of active electrodes.",
+        "value": ""
+    },
+    "description": "Constant current electrical stimulation with electrodes",
+    "identifier": "alessio_electrical_stimulation",
+    "intensity": {
+        "definition": "The intensity of each phase.",
+        "value": ""
+    },
+    "modality": "electrical",
+    "phase": {
+        "definition": "The phase of each pulse.",
+        "value": ""
+    },
+    "pulse": "balanced biphasic",
+    "registered": "2017-05-24T15:37:16.847Z"
+}

@@ -1,0 +1,74 @@
+{
+    "baseline_noise": {
+        "definition": "The standard deviation of the baseline\n         membrane potential.",
+        "value": ""
+    },
+    "baseline_rate": {
+        "definition": "For spiking cells, the spontaneous activity\n         which might be an indicator for the cell's health status and\n         thus recording quality.",
+        "value": ""
+    },
+    "brain_region": {
+        "definition": "The region the cell is located in. For example\n         Retina, Cortex, Cerebellum etc.",
+        "value": ""
+    },
+    "brain_sub_region": {
+        "definition": "More detailed specification of the region the\n         cell is located in. For example, if BrainRegion is\n         \"hippocampus\", then the BrainSubRegion may be \"CA1\".",
+        "value": ""
+    },
+    "comment": {
+        "definition": "A comment on the cell.",
+        "value": ""
+    },
+    "definition": {
+        "a": {
+            "content": "Subject",
+            "href": "../subject/subject.xml"
+        },
+        "content": "Specification of the recorded cell. A cell definition\nshould be a subsection of the"
+    },
+    "ganglion": {
+        "definition": "Like the pro-, meta- and mesothoracal ganglion\n         in invertebrates.",
+        "value": ""
+    },
+    "identification": {
+        "definition": "How was the cell identified?",
+        "value": ""
+    },
+    "identifier": "cell_cell",
+    "input_resistance": {
+        "definition": "The input resistance of the recorded\n         cell.",
+        "value": ""
+    },
+    "layer": {
+        "definition": "The name of the layer. For example, layer 4 in CA1.",
+        "value": ""
+    },
+    "membrane_capacity": {
+        "definition": "The capacity of the cell.",
+        "value": ""
+    },
+    "recording_location": {
+        "definition": "The recording location in the cell. E.g. axonal, dendritic,\n         somatic, ...",
+        "value": ""
+    },
+    "resting_potential": {
+        "definition": "What is the cells resting potential of the\n         cell. An indiator for the recording quality.",
+        "value": ""
+    },
+    "rheobase": {
+        "definition": "The minimum current required to make the cell\n         fire action potentials.",
+        "value": ""
+    },
+    "structure": {
+        "definition": "The structure of the organism the cell is\n         located in e.g. Eye, Spinal cord...",
+        "value": ""
+    },
+    "time_constant": {
+        "definition": "The mebrane time-constant.",
+        "value": ""
+    },
+    "type": {
+        "definition": "The type of the recorded cell. E.g. pyramidal cell.",
+        "value": ""
+    }
+}

@@ -1,0 +1,88 @@
+{
+    "ai_channel_count": {
+        "definition": "The number of input channels of the DAQ-device.",
+        "value": ""
+    },
+    "ai_channel_gain": {
+        "definition": "The gain of an input channel.",
+        "value": ""
+    },
+    "ai_max_sample_rate": {
+        "definition": "The maximum sampling rate.",
+        "value": ""
+    },
+    "ai_polarity": {
+        "definition": "The polarity of the measurement \"unipolar\" or \"bipolar\".",
+        "value": ""
+    },
+    "ai_reference": {
+        "definition": "The reference to which voltages were measured. Usually either \"common ground\" or \"differential\".",
+        "value": ""
+    },
+    "ai_resolution": {
+        "definition": "The voltage resolution of the analog input (AIN) subsystem given in bit.",
+        "value": ""
+    },
+    "ai_sample_rate": {
+        "definition": "The sample rate with which an individual input\n            channel was sampled. Given in Hz.",
+        "value": ""
+    },
+    "ai_used_channel_count": {
+        "definition": "The number of used analog input channels.",
+        "value": ""
+    },
+    "ao_channel_count": {
+        "definition": "The number of output channels of the device.",
+        "value": ""
+    },
+    "ao_channel_gain": {
+        "definition": "The gain of an output channel.",
+        "value": ""
+    },
+    "ao_max_sample_rate": {
+        "definition": "The maximum sampling rate.",
+        "value": ""
+    },
+    "ao_resolution": {
+        "definition": "The voltage resolution of a data-acquisition\n             analog output (AO) subsystem given in bit.",
+        "value": ""
+    },
+    "ao_sample_rate": {
+        "definition": "The sample rate with which an individual output\n            channel was sampled. Given in Hz.",
+        "value": ""
+    },
+    "ao_used_channel_count": {
+        "definition": "The number of used analog output channels.",
+        "value": ""
+    },
+    "definition": "The hardware section describes the settings of the used hardware. There should be one hardware section for each hardware item that was used.",
+    "description": {
+        "definition": "A description of this hardware item.",
+        "value": ""
+    },
+    "dio_line_count": {
+        "definition": "The number of digital input/output lines (DIO) of the device.",
+        "value": ""
+    },
+    "identifier": "hardware_daq",
+    "inventory_no": {
+        "definition": "The inventory number of the device.",
+        "value": ""
+    },
+    "manufacturer": {
+        "definition": "The Manufacturer of this hardware item.",
+        "value": ""
+    },
+    "model": {
+        "definition": "The model name of this hardware item.",
+        "value": ""
+    },
+    "owner": {
+        "definition": "Who's the owner of the device.",
+        "value": ""
+    },
+    "serial_no": {
+        "definition": "The device's serial number.",
+        "value": ""
+    }
+}

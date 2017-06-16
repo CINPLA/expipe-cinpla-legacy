@@ -1,0 +1,23 @@
+{
+    "definition": {
+        "definition": "A definition of the conducted experiment.",
+        "value": ""
+    },
+    "environment": {
+        "definition": "The environment in which the experiments were conducted. Classical environments are e.g. the Y-maze or T-maze. Some environments are called enriched also reduced or even natural.",
+        "value": ""
+    },
+    "identifier": "experiment_behavior",
+    "individual_count": {
+        "definition": "The number of individuals that are observed/investigated at the same time.",
+        "value": ""
+    },
+    "paradigm": {
+        "definition": "The paradigm used in the experiment, e.g. Learning, navigation, etc...",
+        "value": ""
+    },
+    "protocol": {
+        "definition": "A description of the task protocol undertaken by the subject.",
+        "value": ""
+    }
+}

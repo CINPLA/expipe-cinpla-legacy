@@ -1,0 +1,68 @@
+{
+    "age": {
+        "definition": "The age of the subject since birth. E.g. P19,\n         or 5 days.",
+        "value": ""
+    },
+    "birthday": {
+        "definition": "The birthday. Age can be inferred from the\n         date of recording.",
+        "value": ""
+    },
+    "cell_line": {
+        "definition": ".",
+        "value": ""
+    },
+    "comment": {
+        "definition": "A general comment on a specific\n         subject.",
+        "value": ""
+    },
+    "conact_information": {
+        "definition": "How to get in contact with this subject.",
+        "value": ""
+    },
+    "definition": "The investigated experimental subject (animal or person).\n      May contain the Cell and Preparation sections as subsections.",
+    "developmental_stage": {
+        "definition": "The developemtal stage of the subject. E.g. \"embroyonal\", \"adult\", \"larval\" etc.",
+        "value": ""
+    },
+    "gender": {
+        "definition": "Male or female?",
+        "value": ""
+    },
+    "genus": {
+        "definition": "The Genus of the studied\n         subject.",
+        "value": ""
+    },
+    "health_status": {
+        "definition": "Information about the health status of this\n         subject.",
+        "value": ""
+    },
+    "identifier": "subject_subject",
+    "label": {
+        "definition": "If the subject has been labled in a specific\n         way. The lable can be described here.",
+        "value": ""
+    },
+    "population": {
+        "definition": "The population this subject is offspring\n         of. This may be the bee hive, the ant colony,\n         etc.",
+        "value": ""
+    },
+    "size": {
+        "definition": "The size of the subject. This value may be used context dependent. Size could be length for a fish, heigth for a human subject, or shoulder height for a horse etc...",
+        "value": ""
+    },
+    "species": {
+        "definition": "The scientific name of the species e.g. Apis\n         mellifera, Homo sapiens.",
+        "value": ""
+    },
+    "strain": {
+        "definition": "The strain the subject was taken from. E.g. a\n         specific genetic variation etc.",
+        "value": ""
+    },
+    "trivial_name": {
+        "definition": "The trivial name of the species like\n         Honeybee, Human.",
+        "value": ""
+    },
+    "weight": {
+        "definition": "The weigth of this subject.",
+        "value": ""
+    }
+}

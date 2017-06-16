@@ -1,0 +1,17 @@
+{
+    "air_humidity": {
+        "definition": "The air humidity in %..",
+        "value": ""
+    },
+    "definition": "The environment conditions for the experiment.",
+    "description": {
+        "value": ""
+    },
+    "identifier": "environment_environment",
+    "room_temperature": {
+        "value": ""
+    },
+    "weather": {
+        "value": ""
+    }
+}

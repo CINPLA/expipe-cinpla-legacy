@@ -1,0 +1,30 @@
+{
+    "definition": "Specification of an experiment. The Experiment is\n      part of a Project and the recorded data for a specific\n      Experiment are found in Datasets. Possible subsections are, for\n      example, Dataset and Stimulus.",
+    "description": {
+        "definition": "A description of the\n         experiment.",
+        "value": ""
+    },
+    "identifier": "experiment_experiment",
+    "project_id": {
+        "definition": "The ID of the project this experiment belongs\n         to.",
+        "value": ""
+    },
+    "project_name": {
+        "definition": "The name of the project this experiment belongs\n         to.",
+        "value": ""
+    },
+    "subtype": {
+        "value": ""
+    },
+    "type": {
+        "alternatives": {
+            "behavior": true,
+            "electrophysiology": true,
+            "imaging": true,
+            "psychophysics": true,
+            "simulation": true
+        },
+        "definition": "The type of experiment.",
+        "value": ""
+    }
+}

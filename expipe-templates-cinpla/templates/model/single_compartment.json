@@ -1,0 +1,8 @@
+{
+    "definition": "Properties to describe a biophysical model that consists of a single compartment.",
+    "identifier": "model_single_compartment",
+    "simulation_type": {
+        "definition": "The type of simulation: mathmatical, phenomenological, biophysical etc..",
+        "value": ""
+    }
+}

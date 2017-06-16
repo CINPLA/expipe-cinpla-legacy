@@ -1,0 +1,63 @@
+{
+    "definition": "The Scanner used to scan microscope images.",
+    "description": {
+        "definition": "A description of this hardware item.",
+        "value": ""
+    },
+    "dwell_time": {
+        "value": ""
+    },
+    "identifier": "hardware_scanner",
+    "image_height": {
+        "definition": "The height of the scanned image.",
+        "value": ""
+    },
+    "image_width": {
+        "definition": "The width of the scanned image.",
+        "value": ""
+    },
+    "inventory_no": {
+        "definition": "The inventory number of the FilterSet.",
+        "value": ""
+    },
+    "manufacturer": {
+        "definition": "The Manufacturer providing the scanner.",
+        "value": ""
+    },
+    "model": {
+        "definition": "The scanner model name.",
+        "value": ""
+    },
+    "owner": {
+        "definition": "The inventory number of the FilterSet.",
+        "value": ""
+    },
+    "pixel_size": {
+        "definition": "The size of each pixel.",
+        "value": ""
+    },
+    "scan_mode": {
+        "definition": "The scanning mode e.g. line or xy.",
+        "value": ""
+    },
+    "scan_rate": {
+        "definition": "The size of each pixel.",
+        "value": ""
+    },
+    "serial_no": {
+        "definition": "The device's serial number.",
+        "value": ""
+    },
+    "stack_z_range": {
+        "definition": "The depth scanned.",
+        "value": ""
+    },
+    "stack_z_step_size": {
+        "definition": "The step size with which the range is scanned.",
+        "value": ""
+    },
+    "type": {
+        "definition": "The type of scanner used in a scanning microscope. (e.g. Galvanometer, electro-optic-deflector etc.)",
+        "value": ""
+    }
+}

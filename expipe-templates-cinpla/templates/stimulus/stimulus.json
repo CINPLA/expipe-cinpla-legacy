@@ -1,0 +1,73 @@
+{
+    "author": {
+        "definition": "Who is the author of this stimulus.",
+        "value": ""
+    },
+    "comment": {
+        "definition": "A comment on this specific stimulus.",
+        "value": ""
+    },
+    "definition": "General description of an applied stimulus. This\n      section is basis of various related sections that specify\n      more specific stimuli.",
+    "description": {
+        "definition": "A textual description of the stimulus.",
+        "value": ""
+    },
+    "duration": {
+        "definition": "The duration of the stimulus.",
+        "value": ""
+    },
+    "end_time": {
+        "definition": "The time the stimulus ended.",
+        "value": ""
+    },
+    "identifier": "stimulus_stimulus",
+    "intensity": {
+        "definition": "like the current in case of electrical stimulation.",
+        "value": ""
+    },
+    "interstimulus_interval": {
+        "definition": "The time between two subsequent stimulations.",
+        "value": ""
+    },
+    "location": {
+        "definition": "Describes the site of the stimulus application.",
+        "value": ""
+    },
+    "modality": {
+        "definition": "Visual, acoustic, haptic, electrical, etc. stimulation.",
+        "value": ""
+    },
+    "position": {
+        "definition": "The position of the stimulus on e.g the screen. Specified as a 2-tuple (x;y). By default this position refers to the top-left corner of the object or its bounding box.",
+        "value": ""
+    },
+    "position_reference": {
+        "alternatives": {
+            "bottom-right": true,
+            "center": true,
+            "top-left": true
+        },
+        "definition": "By default stimulus positions are specified by the coordinates of the top-left corner (or of the bounding box). Use this property for other definitions.",
+        "value": ""
+    },
+    "repetitions": {
+        "definition": "The number of repetitions of the described stimulation.",
+        "value": ""
+    },
+    "spatial_extent": {
+        "definition": "The spatial extend of the presented stimulus (width;height) e.g. (1024;768).",
+        "value": ""
+    },
+    "start_time": {
+        "definition": "The time the stimulus started.",
+        "value": ""
+    },
+    "stimulus_file": {
+        "definition": "The stimulus file used. Using it will blow\n         up the the size of the metadatafile and we recommend to\n         rather define the URL of underlying stimulus\n         file.",
+        "value": ""
+    },
+    "stimulus_file_url": {
+        "definition": "The URL of a an applied stimulus file. This\n         is the recommended alternative to explicitely including the\n         actual stimulus via StimulusFile.",
+        "value": ""
+    }
+}

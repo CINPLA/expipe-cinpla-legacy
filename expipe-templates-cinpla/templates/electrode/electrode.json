@@ -1,0 +1,77 @@
+{
+    "coating": {
+        "definition": "The coating used to insulate the electrodes.",
+        "value": ""
+    },
+    "definition": "Properties to describe an electrode.",
+    "description": {
+        "value": ""
+    },
+    "electrode_count": {
+        "definition": "Number of electrodes in a multi-electrode-array.",
+        "value": ""
+    },
+    "fire_polish": {
+        "definition": "Specifies whether or not the electrodes were fire polished.",
+        "value": ""
+    },
+    "glass_specification": {
+        "definition": "Inner and outer diameter, with or without filament.",
+        "value": ""
+    },
+    "glass_type": {
+        "definition": "The Type of Glass used to pull these electrodes. (e.g. Quartz, Borosilicate)",
+        "value": ""
+    },
+    "identifier": "electrode_electrode",
+    "impedance": {
+        "definition": "Electrode impedance.",
+        "value": ""
+    },
+    "manufacturer": {
+        "definition": "The manufacturer of the electrodes if e.g. ordered from a company.",
+        "value": ""
+    },
+    "material": {
+        "definition": "The Material the electrodes are made of e.g. glass. tungsten, steel ...",
+        "value": ""
+    },
+    "pull_parameter": {
+        "definition": "The specific pull parameters like heat, trip velocity, heat and cooling duration etc..",
+        "value": ""
+    },
+    "puller": {
+        "definition": "The Puller used to make the electrodes.",
+        "value": ""
+    },
+    "shape_parameters": {
+        "definition": "The shape parameters of the electrode.",
+        "value": ""
+    },
+    "tip_size": {
+        "definition": "The tip size.",
+        "value": ""
+    },
+    "type": {
+        "alternatives": {
+            "extracellular": true,
+            "injection": true,
+            "multi-electrode-array": true,
+            "multibarrel": true,
+            "patch": true,
+            "sharp": true,
+            "tetrode": true
+        },
+        "definition": "The type of electrode.",
+        "value": ""
+    },
+    "usage": {
+        "alternatives": {
+            "Channel": true,
+            "Ground": true,
+            "Reference": true
+        },
+        "definition": "Usage of electrode.",
+        "value": ""
+    }
+}

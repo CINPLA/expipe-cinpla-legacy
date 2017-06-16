@@ -1,0 +1,26 @@
+{
+    "definition": "Describing an optetrode micro drive.",
+    "description": {
+        "value": "Optetrode - combined tetrodes and optic fibre in a micro drive."
+    },
+    "identifier": "mikkel_drive_optetrode",
+    "manufacturer": {
+        "definition": "The manufacturer of the drive e.g. ordered from a company.",
+        "value": "Axona made the chassie and tetrodes and optic fibre is assembled on site"
+    },
+    "notes": {
+        "value": ""
+    },
+    "optic_fibre_count": {
+        "definition": "Number of optic fibres in drive.",
+        "value": 1
+    },
+    "registration_type": {
+        "definition": "The type of registration.",
+        "value": "extracellular"
+    },
+    "tetrode_count": {
+        "definition": "Number of tetrodes in drive.",
+        "value": 4
+    }
+}
