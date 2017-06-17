@@ -29,7 +29,7 @@ def pytest_namespace():
 
 
 @pytest.fixture(scope='function')
-def setup_project_action():
+def teardown_setup_project():
     try:
         expipe.delete_project(PROJECT_ID, remove_all_childs=True)
     except NameError:
@@ -39,6 +39,25 @@ def setup_project_action():
         for template in val:
             if template.startswith('_inherit'):
                 name = '_'.join(template.split('_')[2:])
-                project.require_module(name=name, contents={'test': 'cont'}, overwrite=True)
+                try:
+                    project.require_module(name=name, contents={'test': 'cont'})
+                except NameError:
+                    pass
+    action = project.require_action(ACTION_ID)
+    yield project, action
+
+
+@pytest.fixture
+def setup_project_action():
+    project = expipe.require_project(PROJECT_ID)
+    for key, val in templates.items():
+        for template in val:
+            if template.startswith('_inherit'):
+                name = '_'.join(template.split('_')[2:])
+                try:
+                    project.require_module(name=name, contents={'test': 'cont'})
+                except NameError:
+                    pass
+    project.delete_action(ACTION_ID)
     action = project.require_action(ACTION_ID)
     yield project, action

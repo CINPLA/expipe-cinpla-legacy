@@ -89,20 +89,14 @@ class CinplaPlugin(IPlugin):
                       type=click.STRING,
                       help='The birthday of the subject, format: "dd.mm.yyyy".',
                       )
-        @click.option('-l', '--left',
-                      type=click.FLOAT,
-                      help='The depth on left side in "mm".',
-                      )
-        @click.option('-r', '--right',
-                      type=click.FLOAT,
-                      help='The depth on right side in "mm".',
-                      )
-        @click.option('-c', '--center',
-                      type=click.FLOAT,
-                      help='The depth on center in "mm".',
+        @click.option('-a', '--anatomy',
+                      multiple=True,
+                      required=True,
+                      type=(click.STRING, float),
+                      help='The adjustment amount on given anatomical location in "um".',
                       )
         def generate_surgery(subject_id, procedure, date, user, weight, birthday,
-                             overwrite, left, right, center):
+                             overwrite, anatomy):
             """Generate a surgery action."""
             # TODO give depth if implantation
             import quantities as pq
@@ -144,10 +138,14 @@ class CinplaPlugin(IPlugin):
                     action.require_module(name=name, contents=mod, overwrite=True)
             generate_templates(action, templates['surgery_' + procedure],
                                overwrite, git_note=GIT_NOTE)
-            subject = action.require_module(name='subject').to_dict()  # TODO standard name?
+            subject_name = [n for n in templates['surgery_' + procedure]
+                            if 'subject' in n]
+            assert len(subject_name) == 1
+            subject_name = subject_name[0]
+            subject = action.require_module(name=subject_name).to_dict()  # TODO standard name?
             subject['birthday']['value'] = birthday
             subject['weight'] = weight * pq.g
-            action.require_module(name='subject', contents=subject,
+            action.require_module(name=subject_name, contents=subject,
                                   overwrite=True)
 
         @cli.command('transfer')
@@ -567,15 +565,11 @@ class CinplaPlugin(IPlugin):
                       type=click.STRING,
                       help='The date of the surgery format: "dd.mm.yyyyTHH:MM" or "now".',
                       )
-        @click.option('-l', '--left',
+        @click.option('-a', '--anatomy',
+                      multiple=True,
                       required=True,
-                      type=click.INT,
-                      help='The adjustment amount on left side in "um".',
-                      )
-        @click.option('-r', '--right',
-                      required=True,
-                      type=click.INT,
-                      help='The adjustment amount on right side in "um".',
+                      type=(click.STRING, int),
+                      help='The adjustment amount on given anatomical location in "um".',
                       )
         @click.option('--overwrite',
                       is_flag=True,
@@ -593,7 +587,7 @@ class CinplaPlugin(IPlugin):
                       type=click.STRING,
                       help='The experimenter performing the adjustment.',
                       )
-        def generate_adjustment(subject_id, date, left, right, user, index, init,
+        def generate_adjustment(subject_id, date, anatomy, user, index, init,
                                 overwrite):
             """Parse info about drive depth adjustment
 
@@ -607,12 +601,10 @@ class CinplaPlugin(IPlugin):
             else:
                 date = datetime.strptime(date, '%d.%m.%YT%H:%M')
             datestring = datetime.strftime(date, DTIME_FORMAT)
-            left = left * pq.um
-            right = right * pq.um
             project = expipe.get_project(user_params['project_id'])
             action = project.require_action(subject_id + '-adjustment')
-            action.type = action.type or 'Adjustment'
-            action.subjects = action.subjects or {subject_id: 'true'}
+            action.type = 'Adjustment'
+            action.subjects = [subject_id]
             user = user or user_params['user_name']
             if user is None:
                 raise ValueError('Please add user name')
@@ -633,37 +625,42 @@ class CinplaPlugin(IPlugin):
                 index = 0
                 surgery = project.get_action(subject_id + '-surgery-implantation')
                 sdict = surgery.modules.to_dict()
-                sleft = sdict['implant_drive_L']['position'][2]
-                sright = sdict['implant_drive_R']['position'][2]
-                if not np.isfinite(sleft):
-                    raise ValueError('Depth of left implant ' +
-                                     '"{}" not recognized'.format(sleft))
-                if not np.isfinite(sright):
-                    raise ValueError('Depth of left implant ' +
-                                     '"{}" not recognized'.format(sright))
-                prev_dict = {'depth': [sleft, sright]}
+                modules['implantation'][anatomy]
+                prev_depth = {key: sdict[modules['implantation'][key]]['position'][2]
+                              for key, _ in anatomy}
+                for key, depth in prev_depth:
+                    if not np.isfinite(depth):
+                        raise ValueError('Depth of left implant ' +
+                                         '"{}={}" not recognized'.format(key, depth))
             else:
-                prev_name = '%.3d_adjustment' % (index - 1)
+                prev_name = '{:.3d}_adjustment'.format(index - 1)
                 prev_dict = action.require_module(name=prev_name).to_dict()
-                assert prev_dict['location'].lower() == 'left, right'
+                prev_depth = {key: prev_dict['depth'][key] for key, _ in anatomy}
             name = '%.3d_adjustment' % index
             module = action.require_module(template=templates['adjustment'],
                                            name=name, overwrite=overwrite)
-            left_depth = round(prev_dict['depth'][0] + left.rescale('mm'), 3) # round to um
-            right_depth = round(prev_dict['depth'][1] + right.rescale('mm'), 3)
+
+            curr_depth = {key: round(prev_dict['depth'][key] + val * pq.um, 3)
+                          for key, val in anatomy} # round to um
+            curr_adjustment = {key: val * pq.um for key, val in anatomy}
             answer = query_yes_no(
-                'Correct adjustment: left = {}, right = {}?'.format(left, right) +
-                ' New depth: left = {}, right = {}'.format(left_depth, right_depth))
+                'Correct adjustment: ' +
+                ' '.join('{} = {}'.format(key, val) for key, val in curr_adjustment.items()) +
+                '? New depth: ' +
+                ' '.join('{} = {}'.format(key, val) for key, val in curr_depth.items())
+            )
             if answer == False:
                 print('Aborting adjustment')
                 return
-            print('Registering adjustment left = {}, new depth = {}.'.format(left, left_depth))
-            print('Registering adjustment right = {}, new depth = {}.'.format(right, right_depth))
+            print(
+                'Registering adjustment: ' +
+                ' '.join('{} = {}'.format(key, val) for key, val in anatomy) +
+                ' New depth: ' +
+                ' '.join('{} = {}'.format(key, val) for key, val in curr_depth.items())
+            )
             content = module.to_dict()
-            content['depth']['left'] = left_depth * pq.mm
-            content['depth']['right'] = right_depth * pq.mm
-            content['adjustment']['left'] = left * pq.um
-            content['adjustment']['right'] = right * pq.um
+            content['depth'] = curr_depth
+            content['adjustment'] = curr_adjustment
             content['experimenter'] = user
             content['date'] = datestring
             content['git_note'] = GIT_NOTE
