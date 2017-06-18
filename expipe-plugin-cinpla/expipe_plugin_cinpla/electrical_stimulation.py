@@ -16,8 +16,8 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     print('No config params file found, use "expipe' +
           'copy-to-config expipe_params.py"')
 else:
-    from expipe_params import (user_params, templates, unit_info,
-                               possible_brain_areas)
+    from expipe_params import (USER_PARAMS, TEMPLATES, UNIT_INFO,
+                               POSSIBLE_BRAIN_AREAS)
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
@@ -78,7 +78,7 @@ class ElectricalStimulationPlugin(IPlugin):
             import exdir
             from expipe_io_neuro import pyintan, pyopenephys
             # TODO deafault none
-            project = expipe.get_project(user_params['project_id'])
+            project = expipe.get_project(USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             # tags = action.tags or {}
             # if tags is not None:
@@ -169,7 +169,7 @@ class ElectricalStimulationPlugin(IPlugin):
 
             trigger_param, channel_param = generate_electrical_info(exdir_path, intan_file, openephys_file,
                                                                     trigger_chan, stim_trigger=trigger_sig)
-            generate_templates(action, templates['electrical_stimulation'],
+            generate_templates(action, TEMPLATES['electrical_stimulation'],
                                overwrite, git_note=None)
 
             trigger_param.update(channel_param)

@@ -12,7 +12,7 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     print('No config params file found, use "expipe' +
           'copy-to-config expipe_params.py"')
 else:
-    from expipe_params import user_params
+    from expipe_params import USER_PARAMS
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
@@ -145,7 +145,7 @@ def generate_templates(action, action_templates, overwrite, git_note=None):
             if template.startswith('_inherit'):
                 name = '_'.join(template.split('_')[2:])
                 contents = {'_inherits': '/project_modules/' +
-                                         user_params['project_id'] + '/' +
+                                         USER_PARAMS['project_id'] + '/' +
                                          name}
                 action.require_module(name=name, contents=contents,
                                       overwrite=overwrite)

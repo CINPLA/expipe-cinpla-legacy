@@ -10,8 +10,8 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     print('No config params file found, use "expipe' +
           'copy-to-config expipe_params.py"')
 else:
-    from expipe_params import user_params
-    from expipe_params import analysis_params as par
+    from expipe_params import USER_PARAMS
+    from expipe_params import ANALYSIS_PARAMS as par
 
 # TODO select channel_group, delete names with channel group if selected
 
@@ -24,7 +24,7 @@ class Plotter:
         import exana.tracking as tr
         import quantities as pq
         import neo
-        project = expipe.get_project(user_params['project_id'])
+        project = expipe.get_project(USER_PARAMS['project_id'])
         action = project.require_action(action_id)
         fr = action.require_filerecord()
         if not no_local:

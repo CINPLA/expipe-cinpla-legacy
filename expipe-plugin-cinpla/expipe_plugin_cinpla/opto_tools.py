@@ -18,7 +18,7 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     print('No config params file found, use ' +
           '"expipe copy-to-config expipe_params.py"')
 else:
-    from expipe_params import user_params
+    from expipe_params import USER_PARAMS
 
 
 def generate_axona_opto(exdir_path, io_channel=8, **annotations):

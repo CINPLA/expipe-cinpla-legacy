@@ -11,7 +11,7 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     print('No config params file found, use ' +
           '"expipe copy-to-config expipe_params.py"')
 else:
-    from expipe_params import user_params
+    from expipe_params import USER_PARAMS
 
 
 def generate_epochs(exdir_path, triggers, trigger_params, channel_params, stim_signals, **annotations):

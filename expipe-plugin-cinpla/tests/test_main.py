@@ -40,6 +40,7 @@ CinplaPlugin().attach_to_cli(cli)
 #     assert action.messages.messages[2]['message'] == 'third message'
 #     assert action.messages.messages[2]['user'] == 'test_user'
 
+# TODO get alternatives from keys
 
 def test_reg_rat_init_depth_adjustment(teardown_setup_project):
     project, _ = teardown_setup_project

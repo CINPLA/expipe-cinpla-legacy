@@ -17,8 +17,8 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     print('No config params file found, use "expipe' +
           'copy-to-config expipe_params.py"')
 else:
-    from expipe_params import (user_params, templates, unit_info,
-                               possible_brain_areas)
+    from expipe_params import (USER_PARAMS, TEMPLATES, UNIT_INFO,
+                               POSSIBLE_BRAIN_AREAS)
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
@@ -30,7 +30,7 @@ class OptoPlugin(IPlugin):
         @click.argument('action-id', type=click.STRING)
         @click.option('--brain-area',
                       required=True,
-                      type=click.Choice(possible_brain_areas),
+                      type=click.Choice(POSSIBLE_BRAIN_AREAS),
                       help='The anatomical brain-area of the optogenetic stimulus.',
                       )
         @click.option('-t', '--tag',
@@ -67,10 +67,10 @@ class OptoPlugin(IPlugin):
             COMMAND: action-id: Provide action id to find exdir path"""
             import exdir
             # TODO deafault none
-            if brain_area not in possible_brain_areas:
+            if brain_area not in POSSIBLE_BRAIN_AREAS:
                 raise ValueError("brain_area must be either %s",
-                                 possible_brain_areas)
-            project = expipe.get_project(user_params['project_id'])
+                                 POSSIBLE_BRAIN_AREAS)
+            project = expipe.get_project(USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             tags = action.tags or {}
             tags.update({tag: 'true', 'opto-' + brain_area: 'true'})
@@ -90,11 +90,11 @@ class OptoPlugin(IPlugin):
             else:
                 raise ValueError('Acquisition system not recognized')
             params.update({'location': brain_area})
-            generate_templates(action, templates['opto_' + aq_sys],
+            generate_templates(action, TEMPLATES['opto_' + aq_sys],
                                overwrite, git_note=None)
             populate_modules(action, params)
-            laser_id = laser_id or user_params['laser_device'].get('id')
-            laser_name = user_params['laser_device'].get('name')
+            laser_id = laser_id or USER_PARAMS['laser_device'].get('id')
+            laser_name = USER_PARAMS['laser_device'].get('name')
             assert laser_id is not None
             assert laser_name is not None
             laser = action.require_module(name=laser_name).to_dict()
@@ -122,7 +122,7 @@ class OptoPlugin(IPlugin):
 
             COMMAND: action-id: Provide action id to find exdir path"""
             import exdir
-            project = expipe.get_project(user_params['project_id'])
+            project = expipe.get_project(USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_local:

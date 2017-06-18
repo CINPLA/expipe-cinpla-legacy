@@ -16,8 +16,8 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     print('No config params file found, use "expipe' +
           'copy-to-config expipe_params.py"')
 else:
-    from expipe_params import (user_params, templates, unit_info,
-                               possible_locations)
+    from expipe_params import (USER_PARAMS, TEMPLATES, UNIT_INFO,
+                               POSSIBLE_LOCATIONS)
 DTIME_FORMAT = expipe.io.core.datetime_format
 
 
@@ -110,7 +110,7 @@ class OpenEphysPlugin(IPlugin):
             action = None
             if exdir_path is None:
                 import exdir
-                project = expipe.get_project(user_params['project_id'])
+                project = expipe.get_project(USER_PARAMS['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:
@@ -223,7 +223,7 @@ class OpenEphysPlugin(IPlugin):
                       help='The depth on right side in "mm".',
                       )
         @click.option('-l', '--location',
-                      type=click.Choice(possible_locations),
+                      type=click.Choice(POSSIBLE_LOCATIONS),
                       help='The location of the recording, e.g. "room1".',
                       )
         @click.option('--session',
@@ -299,7 +299,7 @@ class OpenEphysPlugin(IPlugin):
             from .action_tools import register_depth
             openephys_path = op.abspath(openephys_path)
             openephys_dirname = openephys_path.split(os.sep)[-1]
-            project = expipe.get_project(user_params['project_id'])
+            project = expipe.get_project(USER_PARAMS['project_id'])
             prb_path = prb_path or _get_probe_file(system='oe', nchan=nchan,
                                                    spikesorter='klusta')
             if prb_path is None:
@@ -324,29 +324,29 @@ class OpenEphysPlugin(IPlugin):
             action.tags.update(tag + ['open-ephys'])
             print('Registering rat id ' + rat_id)
             action.subjects = [rat_id]
-            user = user or user_params['user_name']
+            user = user or USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
             print('Registering user ' + user)
             action.users = [user]
-            location = location or user_params['location']
+            location = location or USER_PARAMS['location']
             if location is None:
                 raise ValueError('Please add location')
             if len(location) == 0:
                 raise ValueError('Please add location')
-            assert location in possible_locations
+            assert location in POSSIBLE_LOCATIONS
             print('Registering location ' + location)
             action.location = location
             messages = [{'message': m, 'user': user, 'datetime': datetime.now()}
                         for m in message]
             if not no_modules:
-                if 'openephys' not in templates:
+                if 'openephys' not in TEMPLATES:
                     raise ValueError('Could not find "openephys" in ' +
-                                     'expipe_params.py templates: "' +
-                                     '{}"'.format(templates.keys()))
-                generate_templates(action, templates['openephys'], overwrite,
+                                     'expipe_params.py TEMPLATES: "' +
+                                     '{}"'.format(TEMPLATES.keys()))
+                generate_templates(action, TEMPLATES['openephys'], overwrite,
                                    git_note=GIT_NOTE)
                 headstage = action.require_module(
                     name='hardware_intan_headstage').to_dict()
@@ -418,7 +418,7 @@ class OpenEphysPlugin(IPlugin):
             import numpy as np
             if openephys_path is None:
                 import exdir
-                project = expipe.get_project(user_params['project_id'])
+                project = expipe.get_project(USER_PARAMS['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:
