@@ -139,6 +139,8 @@ class AxonaPlugin(IPlugin):
                         raise FileExistsError('The exdir path to this action "' +
                                               exdir_path + '" exists, use ' +
                                               'overwrite flag')
+                else:
+                    os.makedirs(op.dirname(exdir_path))
                 axona.convert(axona_file, exdir_path)
                 axona.generate_tracking(exdir_path, axona_file)
                 axona.generate_analog_signals(exdir_path, axona_file)

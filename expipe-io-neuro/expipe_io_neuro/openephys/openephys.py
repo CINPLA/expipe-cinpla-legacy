@@ -163,9 +163,9 @@ def generate_tracking(exdir_path, openephys_file):
     for n, (times, coords) in enumerate(zip(tracking_data.times,
                                             tracking_data.positions)):
         led = position.require_group("led_" + str(n))
-        dset = led.require_dataset('data', coords.transpose() * pq.m) # TODO units??
+        dset = led.require_dataset('data', data=coords.transpose() * pq.m) # TODO units??
         dset.attrs['num_samples'] = coords.shape[1]
-        dset = led.require_dataset("timestamps", times)
+        dset = led.require_dataset("timestamps", data=times)
         dset.attrs['num_samples'] = len(times)
         led.attrs['start_time'] = 0 * pq.s
         led.attrs['stop_time'] = openephys_file.duration
