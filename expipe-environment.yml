@@ -15,6 +15,7 @@ dependencies:
   - h5py
   - paramiko
   - tqdm
+  - packaging
   - pip:
     - pycircstat
     - quantities
