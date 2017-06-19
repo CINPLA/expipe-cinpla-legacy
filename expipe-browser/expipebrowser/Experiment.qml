@@ -39,8 +39,20 @@ Rectangle {
         }
     }
 
+    function refreshMessages(path) {
+        if(path.length < 1) {
+            return
+        }
+        for(var i = 0; i < messageView.count; i++) {
+            var dictEditor = messageView.itemAt(i)
+            if(dictEditor.key === path[0]) {
+                dictEditor.refreshPath(path)
+            }
+        }
+    }
+
     EventSource {
-        id: eventSource
+        id: moduleEventSource
         path: experimentData ? "action_modules/" + currentProject + "/" + experimentData.__key : ""
 
         onPutReceived: {
@@ -48,6 +60,18 @@ Rectangle {
         }
         onPatchReceived: {
             refreshModules(path)
+        }
+    }
+
+    EventSource {
+        id: messagesEventSource
+        path: experimentData ? "action_messages/" + currentProject + "/" + experimentData.__key : ""
+
+        onPutReceived: {
+            refreshMessages(path)
+        }
+        onPatchReceived: {
+            refreshMessages(path)
         }
     }
 
@@ -69,7 +93,7 @@ Rectangle {
             }
             Button {
                 id: codeButton
-                property string snippet: "import expipe.io\n" +
+                property string snippet: "import expipe\n" +
                                          "project = expipe.io.get_project('" + experimentData.project+ "')\n" +
                                          "action = project.require_action('" + experimentData.__key + "')\n" +
                                          "# continue working with action"
@@ -98,6 +122,9 @@ Rectangle {
                 })
                 Firebase.remove("action_modules/" + currentProject + "/" + experimentData.__key, function(reply) {
                     console.log("Removed action modules and got reply", reply.responseText)
+                })
+                Firebase.remove("action_messages/" + currentProject + "/" + experimentData.__key, function(reply) {
+                    console.log("Removed action messages and got reply", reply.responseText)
                 })
             }
         }
@@ -157,22 +184,102 @@ Rectangle {
                 text: "Date and time"
             }
 
-            ExperimentListEdit {
+            FirebaseListEdit {
                 experimentData: root.experimentData
                 property: "users"
                 text: "Experimenters"
             }
 
-            ExperimentListEdit {
+            FirebaseListEdit {
                 experimentData: root.experimentData
                 property: "subjects"
                 text: "Subjects"
             }
 
-            ExperimentListEdit {
+            FirebaseListEdit {
                 experimentData: root.experimentData
                 property: "tags"
                 text: "Tags"
+            }
+
+            Item {
+                width: 1
+                height: 24
+            }
+
+            RowLayout {
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    leftMargin: 100
+                    rightMargin: 48
+                }
+
+                Label {
+                    id: messageTitle
+                    font.pixelSize: 24
+                    font.weight: Font.Light
+                    color: "#434343"
+                    horizontalAlignment: Text.AlignRight
+                    text: "Messages"
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                }
+
+                Button {
+                    id: addMessageButton
+                    text: "Add message"
+                    onClicked: {
+                        newMessageDialog.open()
+                    }
+                }
+            }
+
+            Label {
+                id: messagesLoadingText
+                x: 100
+                visible: messagesEventSource.status != EventSource.Connected
+                color: "#ababab"
+                text: {
+                    switch(messagesEventSource.status) {
+                    case EventSource.Connecting:
+                        return "Loading..."
+                    case EventSource.Disconnected:
+                        return "Error loading modules!"
+                    }
+                    return ""
+                }
+            }
+
+            Label {
+                x: 100
+                visible: !messagesLoadingText.visible && messageView.count < 1
+                color: "#ababab"
+                text: "No messages"
+            }
+
+            Dialog {
+                title: "Not implemented yet."
+                id: newMessageDialog
+                standardButtons: Dialog.Ok | Dialog.Cancel
+            }
+
+            Repeater {
+                id: messageView
+                model: messagesEventSource
+                DictionaryEditor {
+                    property string key: model.key
+                    x: 100
+                    keyString: model.key
+                    contents: model.contents
+                    basePath: "action_messages/" + currentProject + "/" + experimentData.__key + "/" + model.key
+                    onContentsChanged: {
+                        console.log("Contents changed with length", contents.length)
+                    }
+                }
             }
 
             Item {
@@ -215,10 +322,10 @@ Rectangle {
             Label {
                 id: modulesLoadingText
                 x: 100
-                visible: eventSource.status != EventSource.Connected
+                visible: moduleEventSource.status != EventSource.Connected
                 color: "#ababab"
                 text: {
-                    switch(eventSource.status) {
+                    switch(moduleEventSource.status) {
                     case EventSource.Connecting:
                         return "Loading..."
                     case EventSource.Disconnected:
@@ -242,7 +349,7 @@ Rectangle {
 
             Repeater {
                 id: moduleView
-                model: eventSource
+                model: moduleEventSource
                 DictionaryEditor {
                     property string key: model.key
                     x: 100

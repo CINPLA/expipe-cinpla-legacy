@@ -35,7 +35,7 @@ def convert(axona_file, exdir_path):
     processing = exdir_file.require_group("processing")
     subject = general.require_group("subject")
 
-    target_folder = acquisition.require_raw(axona_file.session)
+    target_folder = acquisition.require_raw(axona_file.session).directory
     acquisition.attrs["axona_session"] = axona_file.session
     acquisition.attrs["acquisition_system"] = 'Axona'
     related_files = glob.glob(os.path.join(axona_directory,
@@ -207,9 +207,9 @@ def generate_tracking(exdir_path, axona_file):
     for n in range(tracked_spots):
         led = position.require_group("led_" + str(n))
         data = coords[:, n * 2: n * 2 + 1 + 1]
-        dset = led.require_dataset('data', data)
+        dset = led.require_dataset('data', data=data)
         dset.attrs['num_samples'] = len(data)
-        dset = led.require_dataset("timestamps", times)
+        dset = led.require_dataset("timestamps", data=times)
         dset.attrs['num_samples'] = len(times)
         led.attrs['start_time'] = 0 * pq.s
         led.attrs['stop_time'] = axona_file._duration
@@ -226,11 +226,11 @@ def generate_inp(exdir_path, axona_file):
         inp.attrs['stop_time'] = axona_file._duration
 
     inp_data = axona_file.inp_data
-    times = inp.require_dataset('timestamps', inp_data.times)
+    times = inp.require_dataset('timestamps', data=inp_data.times)
     times.attrs['num_samples'] = len(times[:])
-    types = inp.require_dataset('event_types', inp_data.event_types)
+    types = inp.require_dataset('event_types', data=inp_data.event_types)
     types.attrs['num_samples'] = len(types[:])
-    vals = inp.require_dataset('values', inp_data.values)
+    vals = inp.require_dataset('values', data=inp_data.values)
     vals.attrs['num_samples'] = len(vals[:])
 
 

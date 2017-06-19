@@ -1,0 +1,28 @@
+{
+    "definition": "Properties for describing an electrophysiological experiment.",
+    "identifier": "experiment_electrophysiology",
+    "subtype": {
+        "alternatives": {
+            "dual electrode recording": true,
+            "multi electrode recording": true,
+            "single electrode recording": true
+        },
+        "definition": "Subtype of this electrophysiological experiment.",
+        "value": ""
+    },
+    "type": {
+        "alternatives": {
+            "EEG": true,
+            "EKG": true,
+            "EMG": true,
+            "ERG": true,
+            "extracellular recording": true,
+            "intracellular recording": true,
+            "loose patch": true,
+            "patch clamp": true,
+            "whole cell patch": true
+        },
+        "definition": "Intracellular recording of single cell responses with sharp microelectrodes.",
+        "value": ""
+    }
+}

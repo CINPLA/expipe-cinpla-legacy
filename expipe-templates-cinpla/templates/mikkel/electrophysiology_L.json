@@ -1,0 +1,67 @@
+{
+    "channel_groups": {
+        "definition": "Which channel groups are associated with this electrophysiological measurement",
+        "value": [
+            0.0,
+            1.0,
+            2.0,
+            3.0
+        ]
+    },
+    "definition": "Describing electrophysiology in the expirimental setup.",
+    "depth": {
+        "unit": "mm",
+        "value": ""
+    },
+    "depth_reference": {
+        "alternatives": {
+            "dura": true,
+            "skull": true,
+            "value": "dura"
+        }
+    },
+    "hemisphere": {
+        "alternatives": {
+            "L, left": "left hemisphere",
+            "R, right": "right hemisphere",
+            "C, center": "between hemispheres"
+        },
+        "value": "L"
+    },
+    "identifier": "mikkel_electrophysiology_L",
+    "location": {
+        "alternatives": {
+            "MECL": "Medial entorhinal cortex left hemisphere",
+            "MECR": "Medial entorhinal cortex right hemisphere",
+            "MS": "Medial septum"
+        },
+        "definition": "Describes the brain area of recording.",
+        "value": "MECL"
+    },
+    "notes": {
+        "value": ""
+    },
+    "subtype": {
+        "alternatives": {
+            "dual electrode recording": true,
+            "multi electrode recording": true,
+            "single electrode recording": true
+        },
+        "definition": "Subtype of this electrophysiological experiment.",
+        "value": "multi electrode recording"
+    },
+    "type": {
+        "alternatives": {
+            "EEG": true,
+            "EKG": true,
+            "EMG": true,
+            "ERG": true,
+            "extracellular recording": true,
+            "intracellular recording": true,
+            "loose patch": true,
+            "patch clamp": true,
+            "whole cell patch": true
+        },
+        "value": "extracellular recording"
+    }
+}

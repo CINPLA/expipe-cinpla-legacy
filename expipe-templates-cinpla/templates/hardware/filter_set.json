@@ -1,0 +1,88 @@
+{
+    "beamsplitter_manufacturer": {
+        "definition": "The Manufacturer providing the beam splitter.",
+        "value": ""
+    },
+    "beamsplitter_model": {
+        "definition": "The beam splitter model name.",
+        "value": ""
+    },
+    "beamsplitter_type": {
+        "definition": "The type of beamsplitter used.",
+        "value": ""
+    },
+    "beamsplitter_wavelength": {
+        "definition": "The wavelength at which the beam splitter separates the beams.",
+        "value": ""
+    },
+    "definition": "The FilterSet or also FilterCube used in a microscope.",
+    "description": {
+        "definition": "A description of this hardware item.",
+        "value": ""
+    },
+    "emission_filter_lower_bound": {
+        "definition": "The lower bound of of the wavelength transmitted by the emission filter.",
+        "value": ""
+    },
+    "emission_filter_manufacturer": {
+        "definition": "The Manufacturer providing the  of the excitation filter.",
+        "value": ""
+    },
+    "emission_filter_model": {
+        "definition": "The model of excitation filter.",
+        "value": ""
+    },
+    "emission_filter_passband_transmission": {
+        "definition": "The transmission in the passband. Given in %.",
+        "value": ""
+    },
+    "emission_filter_range": {
+        "definition": "The width of the transmitted wavelength range.",
+        "value": ""
+    },
+    "emission_filter_upper_bound": {
+        "definition": "The upper bound of of the wavelength transmitted by the excitation filter.",
+        "value": ""
+    },
+    "emission_filter_wavelength": {
+        "definition": "The wavelength of the excitation filter.",
+        "value": ""
+    },
+    "excitation_filter_lower_bound": {
+        "definition": "The lower bound of of the wavelength transmitted by the excitation filter.",
+        "value": ""
+    },
+    "excitation_filter_manufacturer": {
+        "definition": "The Manufacturer providing the  of the excitation filter.",
+        "value": ""
+    },
+    "excitation_filter_model": {
+        "definition": "The model of excitation filter.",
+        "value": ""
+    },
+    "excitation_filter_passband_transmission": {
+        "definition": "The transmission in the passband. Given in %.",
+        "value": ""
+    },
+    "excitation_filter_range": {
+        "definition": "The width of the transmitted wavelength range.",
+        "value": ""
+    },
+    "excitation_filter_upper_bound": {
+        "definition": "The upper bound of of the wavelength transmitted by the excitation filter.",
+        "value": ""
+    },
+    "excitation_filter_wavelength": {
+        "definition": "The wavelength of the excitation filter.",
+        "value": ""
+    },
+    "identifier": "hardware_filter_set",
+    "inventory_no": {
+        "definition": "The inventory number of the FilterSet.",
+        "value": ""
+    },
+    "owner": {
+        "definition": "The inventory number of the FilterSet.",
+        "value": ""
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "definition": "Properties to describe a perfect integrate and fire model.",
+    "identifier": "model_pif",
+    "simulation_type": {
+        "definition": "The type of simulation: mathmatical, phenomenological, biophysical etc..",
+        "value": ""
+    }
+}

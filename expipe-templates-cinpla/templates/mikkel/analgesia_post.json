@@ -1,0 +1,23 @@
+{
+    "definition": "Analgesia , e.g. post surgery.",
+    "description": {
+        "definition": "A textual description of the preparation.",
+        "value": "Analgesics"
+    },
+    "identifier": "mikkel_analgesia_post",
+    "notes": {
+        "value": ""
+    },
+    "post_op_analgesic": {
+        "definition": "The drug used for post surgery analgesia.",
+        "value": "Rimadyl"
+    },
+    "post_op_analgesic_dose": {
+        "unit": "mL",
+        "value": 0.5
+    },
+    "post_op_analgesic_procedure": {
+        "definition": "The procedure of post surgery analgesic.",
+        "value": "Rimadyl was given in equal doses for 3 consecutive days after surgery"
+    }
+}

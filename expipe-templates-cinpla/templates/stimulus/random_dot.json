@@ -1,0 +1,65 @@
+{
+    "definition": "Properties to describe a random dot stimulus.",
+    "dot_count": {
+        "definition": "The number of random dots placed on the screen.",
+        "value": ""
+    },
+    "dot_horizontal_extent": {
+        "definition": "The width of a single dot given in \u00b0.",
+        "value": ""
+    },
+    "dot_pixel_height": {
+        "definition": "The height of a single dot in pixel.",
+        "value": ""
+    },
+    "dot_pixel_width": {
+        "definition": "The width of a single dot given in pixel.",
+        "value": ""
+    },
+    "dot_size": {
+        "definition": "The size of a single dot specified as 2-tuple (width;height).",
+        "value": ""
+    },
+    "dot_vertical_extent": {
+        "definition": "The height of a single dot in \u00b0.",
+        "value": ""
+    },
+    "duration": {
+        "definition": "The duration of the stimulus in seconds.",
+        "value": ""
+    },
+    "function": {
+        "definition": "The function of the described stimulus. E.g. if the white noise constituted the carrier.",
+        "value": ""
+    },
+    "identifier": "stimulus_random_dot",
+    "modality": {
+        "definition": "The stimulus modality like acoustic, haptic, light etc.",
+        "value": ""
+    },
+    "output_channel": {
+        "definition": "The physical output device (e.g. an analog output channel, a monitor screen, the same loudspeaker, etc.). This \n      information can be used to explicitely express that several stimuli (that share the same OutputChannel) are jointly presented.",
+        "value": ""
+    },
+    "position": {
+        "definition": "The position of the stimulus on e.g the screen. Specified as a 2-tuple (x;y). By default this position refers to the top-left corner of the object or its bounding box.",
+        "value": ""
+    },
+    "position_reference": {
+        "alternatives": {
+            "bottom-right": true,
+            "center": true,
+            "top-left": true
+        },
+        "definition": "By default stimulus positions are specified by the coordinates of the top-left corner (or of the bounding box). Use this property for other definitions.",
+        "value": ""
+    },
+    "spatial_extent": {
+        "definition": "The spatial extend of the presented stimulus (width;height) e.g. (1024;768).",
+        "value": ""
+    },
+    "temporal_offset": {
+        "definition": "The temporal offset (with respect to the begin of the recorded trial) with which this stimulus was presented.",
+        "value": ""
+    }
+}

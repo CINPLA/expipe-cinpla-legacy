@@ -1,0 +1,12 @@
+{
+    "definition": "Section for grouping short annotations that are taken during\n     an experiment, preparation etc..",
+    "description": {
+        "definition": "A description of the event.",
+        "value": ""
+    },
+    "identifier": "collection_event_list",
+    "timestamp": {
+        "definition": "The local datetime entry of the moment the event was\n         taken (YYYY-MM-DD hh:mm:ss format).",
+        "value": ""
+    }
+}

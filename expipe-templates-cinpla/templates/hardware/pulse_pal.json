@@ -1,0 +1,47 @@
+{
+    "channel_count": {
+        "definition": "The number of input channels of the DAQ-device.",
+        "value": "4"
+    },
+    "definition": "Describing the Pulse Pal TTL pulse giver hardware.",
+    "description": {
+        "definition": "A description of this hardware item.",
+        "value": "Pulse Pal is an open source device that generates precise sequences of voltage pulses."
+    },
+    "identifier": "hardware_pulse_pal",
+    "inventory_no": {
+        "definition": "The inventory number of the device.",
+        "value": ""
+    },
+    "manufacturer": {
+        "definition": "The Manufacturer of this hardware item.",
+        "value": "Sanworks"
+    },
+    "manufacturer_email": {
+        "definition": "The Manufacturer's email of this hardware item.",
+        "value": "sanders@dandrite.au.dk"
+    },
+    "model": {
+        "definition": "The model name of this hardware item.",
+        "value": "pulse pal version 1"
+    },
+    "notes": {
+        "value": ""
+    },
+    "owner": {
+        "definition": "Who's the owner of the device.",
+        "value": "Marianne Fyhn, Torkel Hafting"
+    },
+    "polarity": {
+        "definition": "The polarity of the measurement \"unipolar\" or \"bipolar\".",
+        "value": "unipolar"
+    },
+    "serial_no": {
+        "definition": "The device's serial number.",
+        "value": ""
+    },
+    "used_channel_count": {
+        "definition": "The number of used analog input channels.",
+        "value": "2"
+    }
+}

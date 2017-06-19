@@ -1,0 +1,31 @@
+{
+    "definition": {
+        "definition": "A definition of the conducted experiment.",
+        "value": ""
+    },
+    "identifier": "experiment_psychophysics",
+    "paradigm": {
+        "definition": "The experimental paradigm e.g. Two-alternative-forced-choice, Three-alternative-forced-choice.",
+        "value": ""
+    },
+    "subject_instruction": {
+        "definition": "The instructions given to the subjects.",
+        "value": ""
+    },
+    "subject_knowledge": {
+        "definition": "Was the subject \"naive\", \"trained\", or \"instructed\"?",
+        "value": ""
+    },
+    "task": {
+        "definition": "The task the subjects have to do like \"discrimination\" between different stimuli, \"detection\" of a stimulus etc...",
+        "value": ""
+    },
+    "training_duration": {
+        "definition": "The training duration.",
+        "value": ""
+    },
+    "training_trials": {
+        "definition": "The number of trials used for training of the experimental subject.",
+        "value": ""
+    }
+}

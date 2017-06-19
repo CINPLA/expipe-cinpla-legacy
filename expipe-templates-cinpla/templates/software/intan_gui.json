@@ -1,0 +1,44 @@
+{
+    "definition": "This is a software section .",
+    "description": {
+        "definition": "The descrisption of the software.",
+        "value": "Intan Recording/Stimulation GUI."
+    },
+    "developer": {
+        "definition": "The developer or the developers firm.",
+        "value": "Intan Technologies"
+    },
+    "distribution": {
+        "definition": "Distribution type",
+        "value": ""
+    },
+    "identifier": "software_intan_gui",
+    "licence": {
+        "definition": "License type",
+        "value": ""
+    },
+    "licence_count": {
+        "definition": "Number of the software's licence.",
+        "value": ""
+    },
+    "licence_duration": {
+        "definition": "Duration of the licence for the software.",
+        "value": ""
+    },
+    "licence_expiration": {
+        "definition": "The end date of time limited licence.",
+        "value": ""
+    },
+    "licence_start": {
+        "definition": "The start date of time limited licence.",
+        "value": ""
+    },
+    "owner": {
+        "definition": "The owner of the software.",
+        "value": ""
+    },
+    "version": {
+        "definition": "Version of the software.",
+        "value": "1.01"
+    }
+}

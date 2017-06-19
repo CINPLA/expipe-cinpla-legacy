@@ -1,0 +1,68 @@
+{
+    "coating": {
+        "definition": "The coating used to insulate the electrodes.",
+        "value": "Heavy poly-imid"
+    },
+    "definition": "Describing electrodes in tetrodes used.",
+    "description": {
+        "value": "Tetrode - four electrodes wined together."
+    },
+    "electro_plating": {
+        "definition": "Specifies whether or not electro plating was performed.",
+        "value": "true"
+    },
+    "electrode_count": {
+        "definition": "Number of electrodes in a multi-electrode-array.",
+        "value": 4
+    },
+    "electrode_specification": {
+        "unit": "um",
+        "value": [
+            17.0
+        ]
+    },
+    "identifier": "mikkel_tetrode",
+    "impedance": {
+        "definition": "Electrode impedance.",
+        "uncertainty": "100",
+        "unit": "k ohm",
+        "value": "150"
+    },
+    "manufacturer": {
+        "definition": "The manufacturer of the electrodes if e.g. ordered from a company.",
+        "value": "California fine wire, CA, USA"
+    },
+    "material": {
+        "definition": "The Material the electrodes are made of e.g. glass. tungsten, steel ...",
+        "value": "10 % platinum, 90 % iridium"
+    },
+    "notes": {
+        "value": ""
+    },
+    "tip_size": {
+        "unit": "um",
+        "value": [
+            34.0
+        ]
+    },
+    "type": {
+        "alternatives": {
+            "extracellular": true,
+            "multi-electrode-array": true,
+            "multibarrel": true,
+            "patch": true,
+            "sharp": true
+        },
+        "definition": "The type of electrode registration.",
+        "value": "extracellular"
+    },
+    "usage": {
+        "alternatives": {
+            "Channel": true,
+            "Ground": true,
+            "Reference": true
+        },
+        "definition": "Usage of tetrode.",
+        "value": "Channel"
+    }
+}

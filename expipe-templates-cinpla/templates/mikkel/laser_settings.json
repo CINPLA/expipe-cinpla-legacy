@@ -1,0 +1,34 @@
+{
+    "identifier": "mikkel_laser_settings",
+    "intensity": {
+        "measure_device": "",
+        "uncertainty": "",
+        "unit": "",
+        "value": ""
+    },
+    "intensity_date_time": {
+        "value": ""
+    },
+    "intensity_file_url": {
+        "definition": "The URL of a file containing the intensity measure. OBLIGATORY",
+        "value": ""
+    },
+    "intensity_info": {
+        "value": ""
+    },
+    "laser_device": {
+        "definition": "The hardware generating the laser pulse.",
+        "value": "blue laser"
+    },
+    "registered": "2017-04-04T14:35:18.681Z",
+    "setting": {
+        "definition": "The actual manual laser intensity setting.",
+        "value": ""
+    },
+    "wavelength": {
+        "unit": "nm",
+        "value": [
+            473.0
+        ]
+    }
+}

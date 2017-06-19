@@ -9,13 +9,11 @@ from ..misc.tools import find_first_peak, is_quantities
 def _rescale_orients(trials, unit=pq.deg):
     """
     Rescales all orient annotations to the same unit
-
     Parameters
     ----------
     trials : neo.SpikeTrains
         list of spike trains where orientation is given as
         annotation 'orient' (quantity scalar) on each spike train.
-
     unit : Quantity, optional
         scaling unit. Default is degree.
     """
@@ -27,14 +25,12 @@ def _rescale_orients(trials, unit=pq.deg):
         trial.annotations["orient"] = orient.rescale(unit)
 
 
-def convert_quantity_scalar_to_string(value):
+def _convert_quantity_scalar_to_string(value):
     """
     converts quantity scalar to string
-
     Parameters
     ----------
     value : quantity scalar
-
     Returns
     -------
     out : str
@@ -43,15 +39,13 @@ def convert_quantity_scalar_to_string(value):
     return str(value.magnitude)+" "+value.dimensionality.string
 
 
-def convert_string_to_quantity_scalar(value):
+def _convert_string_to_quantity_scalar(value):
     """
     converts string to quantity scalar
-
     Parameters
     ----------
     value : str
         magnitude and unit are assumed to be separated with space.
-
     Returns
     -------
     out : quantity scalar
@@ -63,11 +57,9 @@ def convert_string_to_quantity_scalar(value):
 def add_orientation_to_trials(trials, orients):
     """
     Adds annotation 'orient' to trials
-
     Parameters
     ----------
     trials : list of neo.SpikeTrains
-
     orients : quantity array
         orientation array
     """
@@ -84,7 +76,6 @@ def make_stimulus_trials(chxs, stim_epoch):
         list of neo.core.ChannelIndex
     stim_epoch : neo.core.Epoch
         stimulus epoch
-
     Returns
     -------
     out : defaultdict(dict)
@@ -114,17 +105,14 @@ def make_stimulus_trials(chxs, stim_epoch):
 def make_orientation_trials(trials, unit=pq.deg):
     """
     Makes trials based on stimulus orientation
-
     Parameters
     ----------
     trials : neo.SpikeTrains
         list of spike trains where orientation is given as
         annotation 'orient' (quantity scalar) on each spike train.
-
     unit : Quantity, optional
         scaling unit (default is degree) used for orients
         used as keys in dictionary.
-
     Returns
     -------
     trials : collections.OrderedDict
@@ -136,82 +124,88 @@ def make_orientation_trials(trials, unit=pq.deg):
 
     for trial in trials:
         orient = trial.annotations["orient"]
-        key = convert_quantity_scalar_to_string(orient)
+        key = _convert_quantity_scalar_to_string(orient)
         sorted_trials[key].append(trial)
 
     return OrderedDict(sorted(sorted_trials.items(),
-                              key=lambda x: convert_string_to_quantity_scalar(x[0]).magnitude))
+                              key=lambda x: _convert_string_to_quantity_scalar(x[0]).magnitude))
 
 
-def make_spiketrain_trials(epo, t_start, t_stop, unit=None, sptr=None):
-    # TODO: add test 
+def make_spiketrain_trials(spike_train, epoch, t_start=None, t_stop=None):
     '''
     Makes trials based on an Epoch and given temporal bound
-
     Parameters
     ----------
-    epo : neo.Epoch
+    spike_train : neo.SpikeTrain, neo.Unit, numpy.array, quantities.Quantity
+    epoch : neo.Epoch
     t_start : quantities.Quantity
-        time before epochs
+        time before epochs, default is 0 s
     t_stop : quantities.Quantity
-        time after epochs
-    unit : neo.Unit
-    sptr : neo.SpikeTrain
-
+        time after epochs default is duration of epoch
     Returns
     -------
     out : list of neo.SpikeTrains
     '''
     from neo.core import SpikeTrain
-
+    t_start = t_start or 0 * pq.s
     if t_start.ndim == 0:
-        t_starts = t_start * np.ones(len(epo.times))
+        t_starts = t_start * np.ones(len(epoch.times))
     else:
         t_starts = t_start
-        assert len(epo.times) == len(t_starts), 'epo.times and t_starts have different size'
+        assert len(epoch.times) == len(t_starts), 'epoch.times and t_starts have different size'
 
+    t_stop = t_stop or epoch.durations
     if t_stop.ndim == 0:
-        t_stops = t_stop * np.ones(len(epo.times))
+        t_stops = t_stop * np.ones(len(epoch.times))
     else:
-        t_stops = epo.durations
-        assert len(epo.times) == len(t_stops), 'epo.times and t_stops have different size'
+        t_stops = t_stop
+        assert len(epoch.times) == len(t_stops), 'epoch.times and t_stops have different size'
 
     dim = 's'
 
-    if sptr is None:
-        assert unit is not None, 'unit and st cannot be both None'
+    if isinstance(spike_train, neo.Unit):
         sptr = []
         for st in unit.spiketrains:
-            sptr.append(st.rescale(dim).magnitude)
-        sptr = np.array(st)*pq.s
+            sptr.append(spike_train.rescale(dim).magnitude)
+        sptr = np.sort(sptr) * pq.s
+    elif isinstance(spike_train, neo.SpikeTrain):
+        sptr = spike_train.times.rescale(dim)
+    elif isinstance(spike_train, pq.Quantity):
+        assert is_quantities(spike_train, 'vector')
+        sptr = spike_train.rescale(dim)
+    elif isinstance(spike_train, np.array):
+        sptr = spike_train * pq.s
     else:
-        sptr = sptr.rescale(dim)
+        raise TypeError('Expected (neo.Unit, neo.SpikeTrain, ' +
+                        'quantities.Quantity, numpy.array), got "' +
+                        str(type(spike_train)) + '"')
+    if not isinstance(epoch, neo.Epoch):
+        raise TypeError('Expected "neo.Epoch" got "' + str(type(epoch)) + '"')
+
     trials = []
-    for j, t in enumerate(epo.times.rescale(dim)):
+    for j, t in enumerate(epoch.times.rescale(dim)):
         t_start = t_starts[j].rescale(dim)
         t_stop = t_stops[j].rescale(dim)
         spikes = []
-        for spike in sptr[(t+t_start <= sptr) & (sptr < t+t_stop)]:
+        for spike in sptr[(t+t_start < sptr) & (sptr < t+t_stop)]:
             spikes.append(spike-t)
-        trials.append(SpikeTrain(times=spikes*pq.s,
+        trials.append(SpikeTrain(times=spikes * pq.s,
                                  t_start=t_start,
                                  t_stop=t_stop))
     return trials
 
 
-def make_analog_trials(ana, epo, t_start, t_stop):
+def make_analog_trials(ana, epoch, t_start, t_stop):
     '''
     Makes trials based on an Epoch and given temporal bound
-
     Parameters
     ----------
-    epo : neo.Epoch
+    epoch : neo.Epoch
     t_start : quantities.Quantity
         time before epochs
     t_stop : quantities.Quantity
         time after epochs
     ana : neo.AnalogSignal
-
     Returns
     -------
     out : list of neo.AnalogSignal
@@ -221,7 +215,7 @@ def make_analog_trials(ana, epo, t_start, t_stop):
     dim = 's'
     t_start = t_start.rescale(dim)
     t_stop = t_stop.rescale(dim)
-    times = epo.times.rescale(dim)
+    times = epoch.times.rescale(dim)
     trials = []
     nsamp = int(abs(t_start - t_stop) * ana.sampling_rate)-1
     for j, t in enumerate(times):
@@ -241,7 +235,6 @@ def get_epoch(epochs, epoch_type):
         list of neo.core.Epoch
     epoch_type : str
         epoch type (name)
-
     Returns
     -------
     out : neo.core.Epoch
@@ -256,14 +249,12 @@ def get_epoch(epochs, epoch_type):
 def make_stimulus_off_epoch(epo, include_boundary=False):
     '''
     Creates a neo.Epoch of off periods.
-
     Parameters
     ----------
     epo : neo.Epoch
         stimulus epoch
     include_boundary :
         add 0 to be first off period
-
     Returns
     ------
     out : neo.Epoch
@@ -287,11 +278,9 @@ def epoch_overview(epo, period, expected_num_epochs=None):
     '''
     Makes a new Epoch with start and stop time as first and last event in
     a burst of epochs, bursts are separated by > period + stim duration*2
-
     Parameters
     ----------
     epo : neo.Epoch
-
     Returns
     -------
     out : neo.Epoch
@@ -316,12 +305,10 @@ def epoch_overview(epo, period, expected_num_epochs=None):
 def print_epo(epo, N=20):
     '''
     Print the N first epochs
-
     Parameters
     ----------
     epo : neo.Epoch
     N : number of epochs to print
-
     Returns
     ------
     prints : print of epoch
@@ -348,12 +335,10 @@ def wrap_angle(angle, wrap_range=360.):
         input array/float
     wrap_range : float
         wrap range (eg. 360 or 2pi)
-
     Returns
     -------
     out : numpy.array/float
         angle in interval [0, wrap_range]
-
     '''
     return angle - wrap_range * np.floor(angle/float(wrap_range))
 
@@ -362,14 +347,12 @@ def compute_osi(rates, orients):
     # TODO: write tests
     '''
     calculates orientation selectivity index
-
     Parameters
     ----------
     rates : quantity array
         array of mean firing rates
     orients : quantity array
         array of orientations
-
     Returns
     -------
     out : quantity scalar
@@ -405,14 +388,12 @@ def compute_spontan_rate(chxs, stim_off_epoch):
     # TODO: test
     '''
     Calculates spontaneous firing rate
-
     Parameters
     ----------
     chxs : list
         list of neo.core.ChannelIndex
     stim_off_epoch : neo.core.Epoch
         stimulus epoch
-
     Returns
     -------
     out : defaultdict(dict)
@@ -443,15 +424,13 @@ def compute_spontan_rate(chxs, stim_off_epoch):
 
 def compute_orientation_tuning(orient_trials):
     from exana.stimulus.tools import (make_orientation_trials,
-                                      convert_string_to_quantity_scalar)
+                                      _convert_string_to_quantity_scalar)
     '''
     Calculates the mean firing rate for each orientation
-
     Parameters
     ----------
     trials : collections.OrderedDict
         OrderedDict with orients as keys and trials as values.
-
     Returns
     -------
     rates : quantity array
@@ -469,7 +448,7 @@ def compute_orientation_tuning(orient_trials):
     orients = np.zeros((orient_count)) * unit_orients
 
     for i, (orient, trials) in enumerate(orient_trials.items()):
-        orient = convert_string_to_quantity_scalar(orient)
+        orient = _convert_string_to_quantity_scalar(orient)
         rate = 0 * unit_rates
 
         for trial in trials:

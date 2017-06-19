@@ -1,0 +1,96 @@
+{
+    "adaptation_equation": {
+        "definition": "The equation to calculate the adaptation currrent.",
+        "value": ""
+    },
+    "adaptation_increment": {
+        "definition": "When an adaptation current is implemented the amount about which the adaptation is increased when a spike is fired.",
+        "value": ""
+    },
+    "adaptation_time_constant": {
+        "definition": "The time constant with which the adaptation current returns back to zero.",
+        "value": ""
+    },
+    "author": {
+        "definition": "The author of this model.",
+        "value": ""
+    },
+    "bias_current": {
+        "definition": "The offset current.",
+        "value": ""
+    },
+    "capacitance": {
+        "definition": "The membrane restisance.",
+        "value": ""
+    },
+    "date": {
+        "definition": "The simulation date.",
+        "value": ""
+    },
+    "definition": "Properties to describe a leaky integrate and fire neuron model.",
+    "description": {
+        "definition": "A descriptive text.",
+        "value": ""
+    },
+    "identifier": "model_lif",
+    "membrane_time_constant": {
+        "definition": "The membrane time constant.",
+        "value": ""
+    },
+    "noise_amplitude": {
+        "definition": "The amount of noise added.",
+        "value": ""
+    },
+    "noise_correlation": {
+        "definition": "The correlation time constant used e.g. with OU noise.",
+        "value": ""
+    },
+    "noise_type": {
+        "definition": "The type of noise. For example Gaussian, Ohrnstein-Uhlenbeck etc.",
+        "value": ""
+    },
+    "program": {
+        "definition": "The program name.",
+        "value": ""
+    },
+    "program_version": {
+        "definition": "The program version name.",
+        "value": ""
+    },
+    "reset_potential": {
+        "definition": "The potential to which the neuron's potential is set after a spike.",
+        "value": ""
+    },
+    "resistance": {
+        "definition": "The membrane restisance.",
+        "value": ""
+    },
+    "resting_potential": {
+        "definition": "The resting voltage.",
+        "value": ""
+    },
+    "threshold": {
+        "definition": "The firing threshold.",
+        "value": ""
+    },
+    "threshold_equation": {
+        "definition": "The equation to calculate the threshold.",
+        "value": ""
+    },
+    "threshold_increment": {
+        "definition": "The voltage about which the threshold is increased once a spike has been fired.",
+        "value": ""
+    },
+    "threshold_time_constant": {
+        "definition": "The time ocnstant with which the threshold returns back to baseline.",
+        "value": ""
+    },
+    "timestep": {
+        "definition": "The duration of a time step in the simulation.",
+        "value": ""
+    },
+    "voltage_equation": {
+        "definition": "The equation to calculate the membrane voltage.",
+        "value": ""
+    }
+}

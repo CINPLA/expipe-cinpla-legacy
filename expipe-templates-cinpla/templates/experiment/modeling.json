@@ -1,0 +1,8 @@
+{
+    "definition": "Properties for describing a modeling experiment.",
+    "identifier": "experiment_modeling",
+    "simulation_type": {
+        "definition": "The type of simulation: mathmatical, phenomenological, biophysical etc..",
+        "value": ""
+    }
+}

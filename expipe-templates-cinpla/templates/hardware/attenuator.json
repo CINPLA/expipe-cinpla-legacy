@@ -1,0 +1,48 @@
+{
+    "attenuation": {
+        "definition": "The actual attenuation setting.",
+        "value": ""
+    },
+    "definition": "Settings of the data acquisition system. most settings refer to individual channels the channel number should be given after the property name like DAQ.AISampleRate0 for the sampling rate of the analog input\tchannel 0.",
+    "description": {
+        "definition": "A description of this hardware item.",
+        "value": ""
+    },
+    "identifier": "hardware_attenuator",
+    "inventory_no": {
+        "definition": "The inventory number of the device.",
+        "value": ""
+    },
+    "line_count": {
+        "definition": "The number of indepoendent lines.",
+        "value": ""
+    },
+    "manufacturer": {
+        "definition": "The Manufacturer of this hardware item.",
+        "value": ""
+    },
+    "max_attenuation": {
+        "definition": "The maximum attenuation.",
+        "value": ""
+    },
+    "min_attenuation": {
+        "definition": "The minimum attenuation.",
+        "value": ""
+    },
+    "model": {
+        "definition": "The model name of this hardware item.",
+        "value": ""
+    },
+    "owner": {
+        "definition": "Who's the owner of the device.",
+        "value": ""
+    },
+    "serial_no": {
+        "definition": "The device's serial number.",
+        "value": ""
+    },
+    "step_size": {
+        "definition": "The size of the attenuation steps between minimum and maximum attenuation.",
+        "value": ""
+    }
+}

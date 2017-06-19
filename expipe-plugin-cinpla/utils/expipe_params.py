@@ -70,13 +70,13 @@ opto_axona_templates = [
 
 #  thse are e.g. the brain areas you investigate, this ensures that you
 #  register with with the same nomenclature for every recording
-possible_brain_areas = ['MECR', 'MECL', 'MS']
-possible_locations = ['room2', 'room1']
+POSSIBLE_BRAIN_AREAS = ['MECR', 'MECL', 'MS']
+POSSIBLE_LOCATIONS = ['room2', 'room1']
 
 #  obligatory tags will be enforced uppon transfer, this is to ensure you
 #  have a minimum of tags for each action
-obligatory_tags = ['no', 'yes', 'maybe']
-possible_tags = ['GC', 'PC', 'BC', 'SC', 'HD', 'TC', 'theta'] + obligatory_tags
+OBLIGATORY_TAGS = ['no', 'yes', 'maybe']
+POSSIBLE_TAGS = ['GC', 'PC', 'BC', 'SC', 'HD', 'TC', 'theta'] + OBLIGATORY_TAGS
 
 #  thse are the templates you want to load to each suregery implantation
 #  procedure
@@ -102,7 +102,7 @@ surgery_injection_templates = [
 ]
 
 # this is how you represent each unit when you use expipe register-units
-unit_info = {
+UNIT_INFO = {
     'info_waveform': {
         'alternatives': {
             'BS': 'definition: broad spiking waveform (putative excitatory)',
@@ -134,7 +134,7 @@ unit_info = {
 }
 
 # these are the analysis parameters you pass to exana
-analysis_params = {
+ANALYSIS_PARAMS = {
     'speed_filter': 5 * pq.m / pq.s,
     'pos_fs': 100 * pq.Hz,
     'f_cut': 6 * pq.Hz,
@@ -153,7 +153,7 @@ analysis_params = {
 }
 
 # this is personal user parameters
-user_params = {
+USER_PARAMS = {
     'project_id': 'mikkel_septum_entorhinal',
     'user_name': 'Mikkel Elle Lepperød',
     'location': 'room2',
@@ -161,7 +161,7 @@ user_params = {
 }
 
 # this is a placeholder for all your templates
-templates = {
+TEMPLATES = {
     'axona': axona_templates,
     'opto_axona': opto_axona_templates,
     'openephys': openephys_templates,

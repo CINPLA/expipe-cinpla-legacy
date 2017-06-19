@@ -1,4 +1,4 @@
-name: expipe
+name: expipe-list
 dependencies:
   - numpy
   - matplotlib

@@ -12,7 +12,7 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     print('No config params file found, use "expipe' +
           'copy-to-config expipe_params.py"')
 else:
-    from expipe_params import user_params
+    from expipe_params import USER_PARAMS, MODULES
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
@@ -65,15 +65,17 @@ def deltadate(adjustdate, regdate):
     return delta
 
 
-def register_depth(project, action, left=None, right=None):
+def register_depth(project, action, anatomy=None):
     regdate = action.datetime
-    if left is None or right is None:
-        ratnr = action.id.split('-')[0]
+    mod_info = MODULES['electrophysiology']
+    if anatomy is None:
+        assert len(action.subjects) == 1
+        subject = action.subjects[0]
         try:
-            adjustments = project.get_action(name=ratnr + '-adjustment')
-        except IOError as e:
-            raise IOError(
-                str(e) + ', depth parameters left and right must be given')
+            adjustments = project.get_action(name=subject + '-adjustment')
+        except NameError as e:
+            raise NameError(
+                str(e) + ', Cannot find current depth, anatomy must be given')
         adjusts = {}
         for adjust in adjustments.modules:
             values = adjust.to_dict()
@@ -82,32 +84,26 @@ def register_depth(project, action, left=None, right=None):
         adjustdates = adjusts.keys()
         adjustdate = min(adjustdates, key=lambda x: deltadate(x, regdate))
         adjustment = adjusts[adjustdate].to_dict()
-        adleft = adjustment['depth'][0]
-        adright = adjustment['depth'][1]
-        assert adjustment['location'].lower() == 'left, right'
+        curr_depth = {key: adjustment['depth'][key] for key in mod_info}
     else:
-        adjustdate, adleft, adright = None, None, None
-    left = left or adleft
-    right = right or adright
+        curr_depth = {key: val * pq.mm for key, val in anatomy}
+        adjustdate = None
+
     answer = query_yes_no(
         'Are the following values correct:' +
-        ' left = {}, right = {}, '. format(left, right) +
+        ', '.join('{} = {}'.format(key, val) for key, val in curr_depth.items()) +
         'adjust date time = {}'.format(adjustdate))
     if answer is False:
         print('Aborting depth registration')
         return
-    for desc, inp in zip(['left', 'right'], [left, right]):
-        mod, name, cnt = None, None, 0
-        for key, val in action.modules.items():
-            if 'electrophysiology' in key:
-                hem = val.get('hemisphere')
-                if hem['value'] == desc[0].capitalize() or hem['value'] == desc:
-                    cnt += 1
-                    name, mod = key, val
-        if cnt != 1:
-            raise IOError('Failed to acquire electrophysiology module')
-        mod['depth'] = pq.Quantity(inp, 'mm')
-        print('Registering depth ', desc, ' = ', mod['depth'])
+    modules_dict = action.modules.to_dict()
+    for key, val in curr_depth:
+        name = mod_info[key]
+        if not name in modules_dict:
+            raise NameError('Failed to acquire electrophysiology module')
+        mod = modules_dict[name]
+        print('Registering depth ', key, ' = ', val)
+        mod['depth'][key] = val
         action.require_module(name=name, contents=mod, overwrite=True)
 
 
@@ -145,7 +141,7 @@ def generate_templates(action, action_templates, overwrite, git_note=None):
             if template.startswith('_inherit'):
                 name = '_'.join(template.split('_')[2:])
                 contents = {'_inherits': '/project_modules/' +
-                                         user_params['project_id'] + '/' +
+                                         USER_PARAMS['project_id'] + '/' +
                                          name}
                 action.require_module(name=name, contents=contents,
                                       overwrite=overwrite)
@@ -186,25 +182,3 @@ def create_notebook(exdir_path, channel_group=0):
             json.dump(notebook, outfile,
                       sort_keys=True, indent=4)
     return fnameout
-
-
-def add_message(action, message=None):
-    if message is None:
-        return
-    elif len(message) == 0:
-        return
-    messages = action.require_module(name='messages').to_dict()
-    names = [n for n in messages.keys() if 'message_' in n]
-    if len(names) == 0:
-        idx = 0
-    else:
-        idx = max(int(n.split('_')[-1]) for n in names)
-    for m_i, m in enumerate(message):
-        m_name = 'message_{}'.format(idx + m_i)
-        if isinstance(m, str):
-            messages[m_name] = {'value': m}
-        elif isinstance(m, dict):
-            assert 'value' in m
-            messages[m_name] = m
-    action.require_module(name='messages', contents=messages,
-                          overwrite=True)

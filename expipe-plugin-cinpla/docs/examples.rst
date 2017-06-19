@@ -92,13 +92,13 @@ Drive adjustment
 The first time you want to adjust the depth ``X``, ``Y`` of a drive you need to
 initialize an adjustment action with the command::
 
-  $ expipe adjust RAT --left X um --right Y um --date dd.mm.yyyy:HH:MM --init
+  $ expipe adjust RAT --left X um --right Y um --date dd.mm.yyyyTHH:MM --init
 
 When you have initialized and later make a new adjustment::
 
-  $ expipe adjust RAT --date dd.mm.yyyy:HH:MM --left X um --right Y um
+  $ expipe adjust RAT --date dd.mm.yyyyTHH:MM --left X um --right Y um
 
-Note that in stead of ``--date dd.mm.yyyy:HH:MM`` can use ``-d now``.
+Note that in stead of ``--date dd.mm.yyyyTHH:MM`` can use ``-d now``.
 
 Working with Axona
 ------------------

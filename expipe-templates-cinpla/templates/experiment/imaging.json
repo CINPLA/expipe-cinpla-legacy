@@ -1,0 +1,15 @@
+{
+    "definition": "Properties for describing an imaging experiment ranging from conventional light microscpoy to fMRI.",
+    "identifier": "experiment_imaging",
+    "type": {
+        "alternatives": {
+            "REM": true,
+            "confocal": true,
+            "fMRI": true,
+            "light microscopy": true,
+            "two-photon": true
+        },
+        "definition": "The type of imaging like two-photon, confocal, REM, light microscopy, fMRI, etc..",
+        "value": ""
+    }
+}

@@ -6,7 +6,7 @@ from expipecli.utils import IPlugin
 import click
 from expipe_io_neuro import pyopenephys, openephys
 from .action_tools import (generate_templates, _get_local_path,
-                           _get_probe_file, GIT_NOTE, add_message)
+                           _get_probe_file, GIT_NOTE)
 from exana.misc.signal_tools import (create_klusta_prm, save_binary_format,
                                      apply_CAR, filter_analog_signals,
                                      ground_bad_channels, duplicate_bad_channels)
@@ -16,8 +16,8 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     print('No config params file found, use "expipe' +
           'copy-to-config expipe_params.py"')
 else:
-    from expipe_params import (user_params, templates, unit_info,
-                               possible_locations)
+    from expipe_params import (USER_PARAMS, TEMPLATES, UNIT_INFO,
+                               POSSIBLE_LOCATIONS)
 DTIME_FORMAT = expipe.io.core.datetime_format
 
 
@@ -110,7 +110,7 @@ class OpenEphysPlugin(IPlugin):
             action = None
             if exdir_path is None:
                 import exdir
-                project = expipe.get_project(user_params['project_id'])
+                project = expipe.get_project(USER_PARAMS['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:
@@ -214,16 +214,14 @@ class OpenEphysPlugin(IPlugin):
                       type=click.STRING,
                       help='The experimenter performing the recording.',
                       )
-        @click.option('-l', '--left',
-                      type=click.FLOAT,
-                      help='The depth on left side in "mm".',
-                      )
-        @click.option('-r', '--right',
-                      type=click.FLOAT,
-                      help='The depth on right side in "mm".',
+        @click.option('-a', '--anatomy',
+                      multiple=True,
+                      required=True,
+                      type=(click.STRING, float),
+                      help='The adjustment amount on given anatomical location in "um".',
                       )
         @click.option('-l', '--location',
-                      type=click.Choice(possible_locations),
+                      type=click.Choice(POSSIBLE_LOCATIONS),
                       help='The location of the recording, e.g. "room1".',
                       )
         @click.option('--session',
@@ -252,9 +250,9 @@ class OpenEphysPlugin(IPlugin):
                       is_flag=True,
                       help='Generate action without storing modules.',
                       )
-        @click.option('--rat-id',
+        @click.option('--subject-id',
                       type=click.STRING,
-                      help='The id number of the rat.',
+                      help='The id number of the subject.',
                       )
         @click.option('--prb-path',
                       type=click.STRING,
@@ -283,9 +281,9 @@ class OpenEphysPlugin(IPlugin):
                       is_flag=True,
                       help='Do not delete open ephys directory after copying.',
                       )
-        def generate_openephys_action(action_id, openephys_path, no_local, left,
-                                      right, overwrite, no_files, no_modules,
-                                      rat_id, user, prb_path, session, nchan,
+        def generate_openephys_action(action_id, openephys_path, no_local,
+                                      anatomy, overwrite, no_files, no_modules,
+                                      subject_id, user, prb_path, session, nchan,
                                       location, spikes_source,
                                       message, no_move, tag):
             """Generate an open-ephys recording-action to database.
@@ -299,14 +297,14 @@ class OpenEphysPlugin(IPlugin):
             from .action_tools import register_depth
             openephys_path = op.abspath(openephys_path)
             openephys_dirname = openephys_path.split(os.sep)[-1]
-            project = expipe.get_project(user_params['project_id'])
+            project = expipe.get_project(USER_PARAMS['project_id'])
             prb_path = prb_path or _get_probe_file(system='oe', nchan=nchan,
                                                    spikesorter='klusta')
             if prb_path is None:
                 raise IOError('No probefile found in expipe config directory,' +
                               ' please provide one')
             openephys_file = pyopenephys.File(openephys_path, prb_path)
-            rat_id = rat_id or openephys_dirname.split('_')[0]
+            subject_id = subject_id or openephys_dirname.split('_')[0]
             session = session or openephys_dirname.split('_')[-1]
             if session.isdigit():
                 session = int(session)
@@ -316,51 +314,51 @@ class OpenEphysPlugin(IPlugin):
             if action_id is None:
                 session_dtime = datetime.strftime(openephys_file.datetime,
                                                   '%d%m%y')
-                action_id = rat_id + '-' + session_dtime + '-%.2d' % session
+                action_id = subject_id + '-' + session_dtime + '-%.2d' % session
             print('Generating action', action_id)
             action = project.require_action(action_id)
             action.datetime = openephys_file.datetime
             action.type = 'Recording'
             action.tags.update(tag + ['open-ephys'])
-            print('Registering rat id ' + rat_id)
-            action.subjects = [rat_id]
-            user = user or user_params['user_name']
+            print('Registering subject id ' + subject_id)
+            action.subjects = [subject_id]
+            user = user or USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
             print('Registering user ' + user)
             action.users = [user]
-            location = location or user_params['location']
+            location = location or USER_PARAMS['location']
             if location is None:
                 raise ValueError('Please add location')
             if len(location) == 0:
                 raise ValueError('Please add location')
-            assert location in possible_locations
+            assert location in POSSIBLE_LOCATIONS
             print('Registering location ' + location)
             action.location = location
             messages = [{'message': m, 'user': user, 'datetime': datetime.now()}
                         for m in message]
             if not no_modules:
-                if 'openephys' not in templates:
+                if 'openephys' not in TEMPLATES:
                     raise ValueError('Could not find "openephys" in ' +
-                                     'expipe_params.py templates: "' +
-                                     '{}"'.format(templates.keys()))
-                generate_templates(action, templates['openephys'], overwrite,
+                                     'expipe_params.py TEMPLATES: "' +
+                                     '{}"'.format(TEMPLATES.keys()))
+                generate_templates(action, TEMPLATES['openephys'], overwrite,
                                    git_note=GIT_NOTE)
                 headstage = action.require_module(
                     name='hardware_intan_headstage').to_dict()
                 headstage['model']['value'] = 'RHD2132'
                 action.require_module(name='hardware_intan_headstage',
                                       contents=headstage, overwrite=True)
-                register_depth(project, action, left, right)
+                register_depth(project, action, anatomy)
 
                 for idx, m in enumerate(openephys_file.messages):
                     dtime = openephys_file.datetime + timedelta(seconds=m['time'])
-                    messages.apend({'datetime': dtime,
+                    messages.append({'datetime': dtime,
                                     'message': m['message'],
                                     'user': user})
-            action.messages.messages.append(messages)
+            action.messages.extend(messages)
             if not no_files:
                 fr = action.require_filerecord()
                 if not no_local:
@@ -418,7 +416,7 @@ class OpenEphysPlugin(IPlugin):
             import numpy as np
             if openephys_path is None:
                 import exdir
-                project = expipe.get_project(user_params['project_id'])
+                project = expipe.get_project(USER_PARAMS['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:

@@ -1,0 +1,90 @@
+{
+    "author": {
+        "definition": "The name of the person who did the analysis, e.g. 'John Doe' or 'Doe, John'",
+        "value": ""
+    },
+    "code_file": {
+        "definition": "The program code to analyse the data can be transferred using this property. \n         Using it will blow up the the size of the metadatafile and we recommend to rather define the URL of underlying code file.",
+        "value": ""
+    },
+    "code_file_url": {
+        "definition": "The URL of the applied piece of program code to actually do the analysis.",
+        "value": ""
+    },
+    "code_revision": {
+        "definition": "If the analysis code is under version control the revision number can be specified using this property.",
+        "value": ""
+    },
+    "commandline_call": {
+        "definition": "The command used to execute the analysis including the command line parameter.",
+        "value": ""
+    },
+    "comment": {
+        "definition": "Specific comments on this analysis.",
+        "value": ""
+    },
+    "config_file": {
+        "definition": "The configurations used to analyse the data can be transferred using this property. \n         Using it will blow up the the size of the metadatafile and we recommend to rather define the URL of underlying configuration file.",
+        "value": ""
+    },
+    "config_file_url": {
+        "definition": "The URL of the used configuration file used to run the analysis.",
+        "value": ""
+    },
+    "dataset_file": {
+        "definition": "The data analysed ion the described way can be transferred using this property. \n         Using it will blow up the the size of the metadatafile and we recommend to rather define the URL of underlying dataset file.",
+        "value": ""
+    },
+    "dataset_file_url": {
+        "definition": "The URL of a analysed datasetFile.",
+        "value": ""
+    },
+    "date": {
+        "definition": "The date of analysis.",
+        "value": ""
+    },
+    "definition": "An Analysis-type section to describe an PSTH.",
+    "description": {
+        "definition": "A general description of the analysis.",
+        "value": ""
+    },
+    "identifier": "analysis_psth",
+    "method": {
+        "alternatives": {
+            "discrete window": true,
+            "instantaneous spike rate": true,
+            "sliding window": true
+        },
+        "definition": "The method used for creating the PSTH.",
+        "value": ""
+    },
+    "paper_doi": {
+        "definition": "If the results of this analysis have been published one can store the doi of the paper.",
+        "value": ""
+    },
+    "paper_url": {
+        "definition": "If the results of this analysis have been published the URL of the document can be given here",
+        "value": ""
+    },
+    "result_figure": {
+        "definition": "A figure showing the results. This property is meant to strore the real figure content. \n         This will blow up the the size of the metadatafile and we recommend to rather define the URL of the figure.",
+        "value": ""
+    },
+    "result_file": {
+        "definition": "The results of this analysis can be transferred using this property. \n         Using it willblow up the the size of the metadatafile and we recommend to rather define the URL of the results file.",
+        "value": ""
+    },
+    "result_file_url": {
+        "definition": "The URL of a results file.",
+        "value": ""
+    },
+    "window_type": {
+        "alternatives": {
+            "alpha": true,
+            "gaussian": true,
+            "rectangular": true
+        },
+        "definition": "The kind of windowing function used to cerate the PSTH.",
+        "value": ""
+    }
+}

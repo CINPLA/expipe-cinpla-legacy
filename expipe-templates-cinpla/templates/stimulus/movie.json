@@ -1,0 +1,57 @@
+{
+    "color_depth": {
+        "definition": "The color resolution in bit.",
+        "value": ""
+    },
+    "color_space": {
+        "alternatives": {
+            "color": true,
+            "monochrome": true
+        },
+        "definition": "Defines whether the movie is a monochrome, black and white, or a color movie.",
+        "value": ""
+    },
+    "definition": "Properties to describe a movie (or image sequence) stimulus.",
+    "duration": {
+        "definition": "The duration of the stimulus in seconds.",
+        "value": ""
+    },
+    "frame_rate": {
+        "definition": "The framerate with which the movie was presented.",
+        "value": ""
+    },
+    "identifier": "stimulus_movie",
+    "modality": {
+        "definition": "The stimulus modality like acoustic, haptic, visual etc.",
+        "value": ""
+    },
+    "output_channel": {
+        "definition": "The physical output device (e.g. an analog output channel, a monitor screen, the same loudspeaker, etc.). This information can be used to explicitely express that several stimuli (that share the same OutputChannel) are jointly\tpresented.",
+        "value": ""
+    },
+    "position": {
+        "definition": "The position of the stimulus on e.g the screen. Specified as a 2-tuple (x;y). By default this position refers to the top-left corner of the object or its bounding box.",
+        "value": ""
+    },
+    "position_reference": {
+        "alternatives": {
+            "bottom-right": true,
+            "center": true,
+            "top-left": true
+        },
+        "definition": "By default stimulus positions are specified by the coordinates of the top-left corner (or of the bounding box). Use this property for other definitions.",
+        "value": ""
+    },
+    "spatial_extent": {
+        "definition": "The spatial extend of the presented stimulus (width;height) e.g. (1024;768).",
+        "value": ""
+    },
+    "spatial_resolution": {
+        "definition": "The image resolution e.g. (640;480) pixel.",
+        "value": ""
+    },
+    "temporal_offset": {
+        "definition": "The temporal offset (with respect to the begin of the recorded trial) with which this stimulus was presented.",
+        "value": ""
+    }
+}

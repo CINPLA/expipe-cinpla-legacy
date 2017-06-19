@@ -1,0 +1,59 @@
+{
+    "box_distal_que": {
+        "definition": "Distal que in the environment.",
+        "value": "curtains, DAC, cable to headstage in celing"
+    },
+    "box_distal_que_position": {
+        "definition": "Distal que in the environment",
+        "value": "north"
+    },
+    "box_local_que": {
+        "definition": "Local que in the environment",
+        "value": "white A4 paper sheet"
+    },
+    "box_local_que_position": {
+        "definition": "Position of local que in the environment, relative to position reference",
+        "value": "north"
+    },
+    "box_size": {
+        "unit": "cm",
+        "value": [
+            100.0,
+            100.0
+        ]
+    },
+    "box_type": {
+        "definition": "The shape of the box",
+        "value": "square box"
+    },
+    "definition": "Describing tracking setup, e.g. info on box size and ques.",
+    "description": {
+        "value": "Environment during open field experiment."
+    },
+    "experimenter_position": {
+        "definition": "Position of experimenter relative to behaviour setup",
+        "value": "right side"
+    },
+    "identifier": "mikkel_tracking_environment",
+    "light_intensity": {
+        "definition": "Intesity of light",
+        "value": "minimal light from small lamp and desktop computer screen"
+    },
+    "notes": {
+        "value": ""
+    },
+    "position_reference": {
+        "definition": "Position reference of the room",
+        "value": "TODO"
+    },
+    "relative_humidity": {
+        "uncertainty": 10,
+        "unit": "%",
+        "value": 55.0
+    },
+    "room_temperature": {
+        "uncertainty": 0.1,
+        "unit": "degC",
+        "value": 21.0
+    }
+}

@@ -1,0 +1,53 @@
+{
+    "definition": "This section contains properties that describe the objective used in a microscope.",
+    "description": {
+        "definition": "A description of this hardware item.",
+        "value": ""
+    },
+    "identifier": "hardware_microscope_objective",
+    "inventory_no": {
+        "definition": "The inventory number of the device.",
+        "value": ""
+    },
+    "magnification": {
+        "definition": "The magnification of the objective.",
+        "value": ""
+    },
+    "manufacturer": {
+        "definition": "The Manufacturer providing the objective.",
+        "value": ""
+    },
+    "model": {
+        "definition": "The objective model name.",
+        "value": ""
+    },
+    "numerical_aperture": {
+        "definition": "The numerical aperture (N.A.) of the objective.",
+        "value": ""
+    },
+    "owner": {
+        "definition": "The owner of this device.",
+        "value": ""
+    },
+    "transmission_lower_bound": {
+        "definition": "The lower bound of transmission.",
+        "value": ""
+    },
+    "transmission_range": {
+        "definition": "The transmission range (min - max).",
+        "value": ""
+    },
+    "transmission_upper_bound": {
+        "definition": "The upper bound of transmission.",
+        "value": ""
+    },
+    "type": {
+        "alternatives": {
+            "dry": true,
+            "oil immersion": true,
+            "water immersion": true
+        },
+        "definition": "The type of objective used in a microscope. (e.g. water immersion, oil immersion, dry.)",
+        "value": ""
+    }
+}

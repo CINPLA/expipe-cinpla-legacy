@@ -1,0 +1,32 @@
+{
+    "config": {
+        "definition": "An identifier of the used setup\n         configuration, e.g. if variations of the same setup are\n         used.",
+        "value": ""
+    },
+    "config_id": {
+        "definition": "The ID of a setup configuration stored e.g. in a database.",
+        "value": ""
+    },
+    "creator": {
+        "definition": "The person who built the setup.",
+        "value": ""
+    },
+    "definition": "The experimental setup used in the recordings. By\n      using HardwareProperties as a subsection, a very detailed\n      description of the setup can be given.",
+    "department": {
+        "definition": "The department where the setup is\n         located.",
+        "value": ""
+    },
+    "description": {
+        "definition": "A description of the setup.",
+        "value": ""
+    },
+    "identifier": "setup_setup",
+    "location": {
+        "definition": "The location of the setup (e.g. room).",
+        "value": ""
+    },
+    "maintainer": {
+        "definition": "The person who is responsible for the setup\n          maintanance.",
+        "value": ""
+    }
+}

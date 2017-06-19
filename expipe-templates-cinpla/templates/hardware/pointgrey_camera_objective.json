@@ -1,0 +1,78 @@
+{
+    "aperture": {
+        "definition": "The actual aperture setting of the objective.",
+        "value": ""
+    },
+    "definition": "This section contains properties that describe a camera objective.",
+    "description": {
+        "definition": "A description of this hardware item.",
+        "value": ""
+    },
+    "focal_length": {
+        "definition": "The focal length of the objective.",
+        "value": ""
+    },
+    "focal_length_range": {
+        "definition": "The range of focal lengths of the objective.",
+        "value": ""
+    },
+    "identifier": "hardware_pointgrey_camera_objective",
+    "inventory_no": {
+        "definition": "The inventory number of this device.",
+        "value": ""
+    },
+    "manufacturer": {
+        "definition": "The Manufacturer providing the objective.",
+        "value": "PointGrey"
+    },
+    "maximum_aperture": {
+        "definition": "The maximum aperture of the objective.",
+        "value": ""
+    },
+    "model": {
+        "definition": "The objective model name.",
+        "value": ""
+    },
+    "mount": {
+        "alternatives": {
+            "C-Mount": true,
+            "CS-Mount": true
+        },
+        "definition": "The type of mount.",
+        "value": ""
+    },
+    "numerical_aperture": {
+        "definition": "The numerical aperture (N.A.) of the objective.",
+        "value": ""
+    },
+    "owner": {
+        "definition": "The owner of this device.",
+        "value": ""
+    },
+    "serial_no": {
+        "definition": "The serial number of this device.",
+        "value": ""
+    },
+    "transmission_lower_bound": {
+        "definition": "The lower bound of transmission.",
+        "value": ""
+    },
+    "transmission_range": {
+        "definition": "The transmission range (min - max).",
+        "value": ""
+    },
+    "transmission_upper_bound": {
+        "definition": "The upper bound of transmission.",
+        "value": ""
+    },
+    "type": {
+        "alternatives": {
+            "FixedApperture": true,
+            "FixedFocus": true,
+            "Macro": true,
+            "Zoom": true
+        },
+        "definition": "The type of objective.",
+        "value": ""
+    }
+}

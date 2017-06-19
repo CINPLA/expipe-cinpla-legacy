@@ -1,0 +1,35 @@
+{
+    "air_humidity": {
+        "unit": "%",
+        "value": [
+            "55 +- 10"
+        ]
+    },
+    "definition": "Describing the housing environment of the housing.",
+    "description": {
+        "value": "Housing environment."
+    },
+    "identifier": "mikkel_housing_environment",
+    "light_cycle": {
+        "definition": "The time when is swiched on and off.",
+        "value": "10:00 p.m. - 10:00 a.m."
+    },
+    "light_cycle_duration": {
+        "definition": "The duration with light on.",
+        "value": "12 hours"
+    },
+    "light_intensity": {
+        "definition": "Intesity of light during light phase.",
+        "value": "> 100 lux"
+    },
+    "notes": {
+        "value": ""
+    },
+    "room_temperature": {
+        "value": ""
+    },
+    "ventilation": {
+        "definition": "Ventilation rate.",
+        "value": "5 - 20 pr. hour."
+    }
+}

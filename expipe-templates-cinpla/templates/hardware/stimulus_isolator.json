@@ -1,0 +1,88 @@
+{
+    "definition": "Properties of a stimulus Isolator device.",
+    "description": {
+        "definition": "A description of this hardware item.",
+        "value": ""
+    },
+    "gain": {
+        "definition": "The gain of the device.",
+        "value": ""
+    },
+    "gain_db": {
+        "definition": "The gain of the device given in db.",
+        "value": ""
+    },
+    "gain_step_size": {
+        "definition": "The size of the gain steps between minimum and maximum.",
+        "value": ""
+    },
+    "identifier": "hardware_stimulus_isolator",
+    "input_range_max_voltage": {
+        "definition": "The maximal input voltage.",
+        "value": ""
+    },
+    "input_range_min_voltage": {
+        "definition": "The minimal input voltage.",
+        "value": ""
+    },
+    "inventory_no": {
+        "definition": "The inventory number of the device.",
+        "value": ""
+    },
+    "manufacturer": {
+        "definition": "The Manufacturer of this hardware item.",
+        "value": ""
+    },
+    "maximum_gain": {
+        "definition": "The maximum gain of the device.",
+        "value": ""
+    },
+    "minimum_gain": {
+        "definition": "The minimum gain of the device.",
+        "value": ""
+    },
+    "model": {
+        "definition": "The model name of this hardware item.",
+        "value": ""
+    },
+    "outpu_mode": {
+        "alternatives": {
+            "BipolarOff": true,
+            "BipolarOn": true
+        },
+        "definition": "The polarity mode of the stimulus isolator.",
+        "value": ""
+    },
+    "output_range_max_current": {
+        "definition": "The maximal ouput current.",
+        "value": ""
+    },
+    "output_range_max_voltage": {
+        "definition": "The maximal ouput voltage.",
+        "value": ""
+    },
+    "output_range_min_current": {
+        "definition": "The minimal output current.",
+        "value": ""
+    },
+    "output_range_min_volatge": {
+        "definition": "The minimal output voltage.",
+        "value": ""
+    },
+    "output_type": {
+        "alternatives": {
+            "Current": true,
+            "Voltage": true
+        },
+        "definition": "The type of output of the stimulus isolator.",
+        "value": ""
+    },
+    "owner": {
+        "definition": "Who's the owner of the device.",
+        "value": ""
+    },
+    "serial_no": {
+        "definition": "The device's serial number.",
+        "value": ""
+    }
+}

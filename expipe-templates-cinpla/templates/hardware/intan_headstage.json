@@ -1,0 +1,38 @@
+{
+    "definition": "This is a generic hardware section meant to take information of items for which no specific terminology exists.",
+    "description": {
+        "definition": "A description of this hardware item.",
+        "value": "Headstage"
+    },
+    "identifier": "hardware_intan_headstage",
+    "inventory_no": {
+        "definition": "The inventory number of the device.",
+        "value": ""
+    },
+    "manufacturer": {
+        "definition": "The Manufacturer of this hardware item.",
+        "value": "Intan"
+    },
+    "model": {
+        "alternatives": {
+            "RHD2116": true,
+            "RHD2132": true,
+            "RHS2116": true,
+            "RHS2132": true
+        },
+        "definition": "The model name of this hardware item.",
+        "value": ""
+    },
+    "owner": {
+        "definition": "Who's the owner of the device.",
+        "value": "Fyhn-Hafting"
+    },
+    "serial_no": {
+        "definition": "The device's serial number.",
+        "value": ""
+    },
+    "type": {
+        "definition": "The type of amplifier. E.g. extracellular, intracellular amplifier etc.",
+        "value": "extracellular"
+    }
+}

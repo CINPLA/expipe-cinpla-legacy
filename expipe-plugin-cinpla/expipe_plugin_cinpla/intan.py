@@ -6,7 +6,7 @@ from expipecli.utils import IPlugin
 import click
 from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
 from .action_tools import (generate_templates, _get_local_path,
-                           _get_probe_file, GIT_NOTE, add_message)
+                           _get_probe_file, GIT_NOTE)
 from exana.misc.signal_tools import (create_klusta_prm, save_binary_format, apply_CAR,
                                      filter_analog_signals, ground_bad_channels,
                                      remove_stimulation_artifacts, duplicate_bad_channels,
@@ -19,8 +19,8 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     print('No config params file found, use "expipe' +
           'copy-to-config expipe_params.py"')
 else:
-    from expipe_params import (user_params, templates, unit_info,
-                               possible_locations)
+    from expipe_params import (USER_PARAMS, TEMPLATES, UNIT_INFO,
+                               POSSIBLE_LOCATIONS)
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
@@ -113,7 +113,7 @@ class IntanPlugin(IPlugin):
             action = None
             if exdir_path is None:
                 import exdir
-                project = expipe.get_project(user_params['project_id'])
+                project = expipe.get_project(USER_PARAMS['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:
@@ -317,7 +317,7 @@ class IntanPlugin(IPlugin):
             action = None
             if exdir_path is None:
                 import exdir
-                project = expipe.get_project(user_params['project_id'])
+                project = expipe.get_project(USER_PARAMS['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:
@@ -566,7 +566,7 @@ class IntanPlugin(IPlugin):
             intan_dir = intan_path.split(os.sep)[-1]
             rhs_file = [f for f in os.listdir(intan_path) if f.endswith('.rhs')][0]
             rhs_path = op.join(intan_path, rhs_file)
-            project = expipe.get_project(user_params['project_id'])
+            project = expipe.get_project(USER_PARAMS['project_id'])
             prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
                                                    spikesorter='klusta')
             if prb_path is None:
@@ -593,27 +593,30 @@ class IntanPlugin(IPlugin):
             action.tags = {'open-ephys': 'true'}
             print('Registering rat id ' + rat_id)
             action.subjects = {rat_id: 'true'}
-            user = user or user_params['user_name']
+            user = user or USER_PARAMS['user_name']
             print('Registering user ' + user)
             action.users = {user: 'true'}
-            location = location or user_params['location']
-            assert location in possible_locations
+            location = location or USER_PARAMS['location']
+            assert location in POSSIBLE_LOCATIONS
             print('Registering location ' + location)
             action.location = location
 
             if not no_modules:
-                if 'intanopenephys' not in templates:
+                if 'intanopenephys' not in TEMPLATES:
                     raise ValueError('Could not find "intanopenephys" in ' +
-                                     'expipe_params.py templates: "' +
-                                     '{}"'.format(templates.keys()))
-                generate_templates(action, templates['intanopenephys'], overwrite,
+                                     'expipe_params.py TEMPLATES: "' +
+                                     '{}"'.format(TEMPLATES.keys()))
+                generate_templates(action, TEMPLATES['intanopenephys'], overwrite,
                                    git_note=GIT_NOTE)
                 headstage = action.require_module(name='hardware_intan_headstage').to_dict()
                 headstage['model']['value'] = 'RHS2132'
                 action.require_module(name='hardware_intan_headstage', contents=headstage,
                                       overwrite=True)
                 register_depth(project, action, left, right)
-                add_message(action, message)
+                action.messages.extend([{'message': m,
+                                         'user': user,
+                                         'datetime': datetime.now()}
+                                       for m in message])
 
             if not no_files:
                 fr = action.require_filerecord()
@@ -734,7 +737,7 @@ class IntanPlugin(IPlugin):
             intan_ephys_dir = intan_ephys_path.split(os.sep)[-1]
             rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
             rhs_path = op.join(intan_ephys_path, rhs_file)
-            project = expipe.get_project(user_params['project_id'])
+            project = expipe.get_project(USER_PARAMS['project_id'])
             prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
                                                    spikesorter='klusta')
             if prb_path is None:
@@ -762,20 +765,20 @@ class IntanPlugin(IPlugin):
             action.tags = {'open-ephys': 'true'}
             print('Registering rat id ' + rat_id)
             action.subjects = {rat_id: 'true'}
-            user = user or user_params['user_name']
+            user = user or USER_PARAMS['user_name']
             print('Registering user ' + user)
             action.users = {user: 'true'}
-            location = location or user_params['location']
-            assert location in possible_locations
+            location = location or USER_PARAMS['location']
+            assert location in POSSIBLE_LOCATIONS
             print('Registering location ' + location)
             action.location = location
 
             if not no_modules:
-                if 'intanopenephys' not in templates:
+                if 'intanopenephys' not in TEMPLATES:
                     raise ValueError('Could not find "intanopenephys" in ' +
-                                     'expipe_params.py templates: "' +
-                                     '{}"'.format(templates.keys()))
-                generate_templates(action, templates['intanopenephys'], overwrite,
+                                     'expipe_params.py TEMPLATES: "' +
+                                     '{}"'.format(TEMPLATES.keys()))
+                generate_templates(action, TEMPLATES['intanopenephys'], overwrite,
                                    git_note=GIT_NOTE)
                 headstage = action.require_module(name='hardware_intan_headstage').to_dict()
                 headstage['model']['value'] = 'RHS2132'
@@ -952,7 +955,7 @@ class IntanPlugin(IPlugin):
             intan_ephys_dir = intan_ephys_path.split(os.sep)[-1]
             rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
             rhs_path = op.join(intan_ephys_path, rhs_file)
-            project = expipe.get_project(user_params['project_id'])
+            project = expipe.get_project(USER_PARAMS['project_id'])
             prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
                                                    spikesorter='klusta')
             if prb_path is None:
@@ -1038,21 +1041,21 @@ class IntanPlugin(IPlugin):
             action.tags = {'open-ephys': 'true'}
             print('Registering rat id ' + rat_id)
             action.subjects = {rat_id: 'true'}
-            user = user or user_params['user_name']
+            user = user or USER_PARAMS['user_name']
             print('Registering user ' + user)
             action.users = {user: 'true'}
-            location = location or user_params['location']
-            assert location in possible_locations
+            location = location or USER_PARAMS['location']
+            assert location in POSSIBLE_LOCATIONS
             print('Registering location ' + location)
             action.location = location
 
 
             if not no_modules:
-                if 'intanopenephys' not in templates:
+                if 'intanopenephys' not in TEMPLATES:
                     raise ValueError('Could not find "intanopenephys" in ' +
-                                     'expipe_params.py templates: "' +
-                                     '{}"'.format(templates.keys()))
-                generate_templates(action, templates['intanopenephys'], overwrite,
+                                     'expipe_params.py TEMPLATES: "' +
+                                     '{}"'.format(TEMPLATES.keys()))
+                generate_templates(action, TEMPLATES['intanopenephys'], overwrite,
                                    git_note=GIT_NOTE)
                 headstage = action.require_module(name='hardware_intan_headstage').to_dict()
                 headstage['model']['value'] = 'RHS2132'
@@ -1225,7 +1228,7 @@ class IntanPlugin(IPlugin):
             import numpy as np
             if intan_path is None:
                 import exdir
-                project = expipe.get_project(user_params['project_id'])
+                project = expipe.get_project(USER_PARAMS['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:

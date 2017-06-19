@@ -1,0 +1,72 @@
+{
+    "anaestesia": {
+        "definition": "Is the animal under anaesthesia (true) or\n         awake (false)?",
+        "value": ""
+    },
+    "anaesthetic": {
+        "definition": "The drug used for anaesthesia.",
+        "value": ""
+    },
+    "anaesthetic_dose": {
+        "definition": "The dose of the used anaesthetic.",
+        "value": ""
+    },
+    "bath_solution": {
+        "definition": "The solution the slice is bathed in.",
+        "value": ""
+    },
+    "bath_temperature": {
+        "definition": "The temperature of the bath solution.",
+        "value": ""
+    },
+    "date": {
+        "definition": "Actual preparation date.",
+        "value": ""
+    },
+    "definition": "Description of the preparation procedure.",
+    "description": {
+        "definition": "A textual description of the preparation.",
+        "value": ""
+    },
+    "identifier": "preparation_preparation",
+    "local_anaesthesia": {
+        "definition": "Was there some local anaesthesia applied (true or false).",
+        "value": ""
+    },
+    "local_anaesthetic": {
+        "definition": "The drug that was used for local\n         anaesthesia.",
+        "value": ""
+    },
+    "local_anaesthetic_dose": {
+        "definition": "The dose of the used local anaesthetic.",
+        "value": ""
+    },
+    "local_anaesthetic_location": {
+        "definition": "Describes the place the local anaesthetic was applied.",
+        "value": ""
+    },
+    "ringers_solution": {
+        "definition": "The Ringer solution used during preparation.",
+        "value": ""
+    },
+    "slice_orientation": {
+        "definition": "The slice orientation: horizontal, sagital etc.",
+        "value": ""
+    },
+    "slice_thickness": {
+        "definition": "The thickness of the slice.",
+        "value": ""
+    },
+    "slicing_method": {
+        "definition": "How was the brain sliced: Microtome etc.",
+        "value": ""
+    },
+    "solution_flow_speed": {
+        "definition": "The flow speed of the bath solution.",
+        "value": ""
+    },
+    "type": {
+        "definition": "In vivo or in vitro?",
+        "value": ""
+    }
+}

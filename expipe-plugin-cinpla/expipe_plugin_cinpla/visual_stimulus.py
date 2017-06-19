@@ -4,8 +4,7 @@ from expipecli.utils import IPlugin
 import click
 from expipe_io_neuro import axona
 
-from .action_tools import (generate_templates, _get_local_path, GIT_NOTE,
-                           add_message)
+from .action_tools import (generate_templates, _get_local_path, GIT_NOTE)
 
 from .visual_tools import (get_grating_stimulus_events, get_key_press_events,
                            generate_blank_group, generate_key_event_group,
@@ -23,8 +22,8 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     print('No config params file found, use "expipe' +
           'copy-to-config expipe_params.py"')
 else:
-    from expipe_params import (user_params, templates, unit_info,
-                               possible_brain_areas)
+    from expipe_params import (USER_PARAMS, TEMPLATES, UNIT_INFO,
+                               POSSIBLE_BRAIN_AREAS)
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
@@ -45,7 +44,7 @@ class VisualStimulusPlugin(IPlugin):
             COMMAND: action-id: Provide action id to find exdir path"""
             import exdir
 
-            project = expipe.get_project(user_params['project_id'])
+            project = expipe.get_project(USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             exdir_path = _get_local_path(fr)
@@ -87,7 +86,7 @@ class VisualStimulusPlugin(IPlugin):
             COMMAND: action-id: Provide action id to find exdir path"""
             import exdir
 
-            project = expipe.get_project(user_params['project_id'])
+            project = expipe.get_project(USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             exdir_path = _get_local_path(fr)

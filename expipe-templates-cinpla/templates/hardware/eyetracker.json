@@ -1,0 +1,69 @@
+{
+    "calibration": {
+        "definition": "The calibration procedure.",
+        "value": ""
+    },
+    "comment": {
+        "definition": "Space for some comments.",
+        "value": ""
+    },
+    "definition": "Properties of an eyetracker.",
+    "description": {
+        "definition": "A description of this hardware item.",
+        "value": ""
+    },
+    "detektor_type": {
+        "alternatives": {
+            "Coil": true,
+            "Dual Purkinje": true,
+            "Infrared": true
+        },
+        "definition": "The kind of detektor used in this eyetracker.",
+        "value": ""
+    },
+    "filter": {
+        "definition": "The kind of filter applied to the data.",
+        "value": ""
+    },
+    "fixation": {
+        "alternatives": {
+            "Bitebar": true,
+            "Chinrest": true
+        },
+        "definition": "The way the head was fixed. Makes no sense if the eytracker is head mounted.",
+        "value": ""
+    },
+    "identifier": "hardware_eyetracker",
+    "inventory_no": {
+        "definition": "The inventory number of the device.",
+        "value": ""
+    },
+    "manufacturer": {
+        "definition": "The Manufacturer of this hardware item.",
+        "value": ""
+    },
+    "model": {
+        "definition": "The model name of this hardware item.",
+        "value": ""
+    },
+    "owner": {
+        "definition": "Who's the owner of the device.",
+        "value": ""
+    },
+    "sample_rate": {
+        "definition": "The rate with which eye positions are sampled.",
+        "value": ""
+    },
+    "serial_no": {
+        "definition": "The device's serial number.",
+        "value": ""
+    },
+    "type": {
+        "alternatives": {
+            "head mounted": true,
+            "tabletop": true
+        },
+        "definition": "The kind of eyetracker.",
+        "value": ""
+    }
+}
