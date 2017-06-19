@@ -214,13 +214,11 @@ class OpenEphysPlugin(IPlugin):
                       type=click.STRING,
                       help='The experimenter performing the recording.',
                       )
-        @click.option('-l', '--left',
-                      type=click.FLOAT,
-                      help='The depth on left side in "mm".',
-                      )
-        @click.option('-r', '--right',
-                      type=click.FLOAT,
-                      help='The depth on right side in "mm".',
+        @click.option('-a', '--anatomy',
+                      multiple=True,
+                      required=True,
+                      type=(click.STRING, float),
+                      help='The adjustment amount on given anatomical location in "um".',
                       )
         @click.option('-l', '--location',
                       type=click.Choice(POSSIBLE_LOCATIONS),
@@ -252,9 +250,9 @@ class OpenEphysPlugin(IPlugin):
                       is_flag=True,
                       help='Generate action without storing modules.',
                       )
-        @click.option('--rat-id',
+        @click.option('--subject-id',
                       type=click.STRING,
-                      help='The id number of the rat.',
+                      help='The id number of the subject.',
                       )
         @click.option('--prb-path',
                       type=click.STRING,
@@ -283,9 +281,9 @@ class OpenEphysPlugin(IPlugin):
                       is_flag=True,
                       help='Do not delete open ephys directory after copying.',
                       )
-        def generate_openephys_action(action_id, openephys_path, no_local, left,
-                                      right, overwrite, no_files, no_modules,
-                                      rat_id, user, prb_path, session, nchan,
+        def generate_openephys_action(action_id, openephys_path, no_local,
+                                      anatomy, overwrite, no_files, no_modules,
+                                      subject_id, user, prb_path, session, nchan,
                                       location, spikes_source,
                                       message, no_move, tag):
             """Generate an open-ephys recording-action to database.
@@ -306,7 +304,7 @@ class OpenEphysPlugin(IPlugin):
                 raise IOError('No probefile found in expipe config directory,' +
                               ' please provide one')
             openephys_file = pyopenephys.File(openephys_path, prb_path)
-            rat_id = rat_id or openephys_dirname.split('_')[0]
+            subject_id = subject_id or openephys_dirname.split('_')[0]
             session = session or openephys_dirname.split('_')[-1]
             if session.isdigit():
                 session = int(session)
@@ -316,14 +314,14 @@ class OpenEphysPlugin(IPlugin):
             if action_id is None:
                 session_dtime = datetime.strftime(openephys_file.datetime,
                                                   '%d%m%y')
-                action_id = rat_id + '-' + session_dtime + '-%.2d' % session
+                action_id = subject_id + '-' + session_dtime + '-%.2d' % session
             print('Generating action', action_id)
             action = project.require_action(action_id)
             action.datetime = openephys_file.datetime
             action.type = 'Recording'
             action.tags.update(tag + ['open-ephys'])
-            print('Registering rat id ' + rat_id)
-            action.subjects = [rat_id]
+            print('Registering subject id ' + subject_id)
+            action.subjects = [subject_id]
             user = user or USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
@@ -353,7 +351,7 @@ class OpenEphysPlugin(IPlugin):
                 headstage['model']['value'] = 'RHD2132'
                 action.require_module(name='hardware_intan_headstage',
                                       contents=headstage, overwrite=True)
-                register_depth(project, action, left, right)
+                register_depth(project, action, anatomy)
 
                 for idx, m in enumerate(openephys_file.messages):
                     dtime = openephys_file.datetime + timedelta(seconds=m['time'])

@@ -24,13 +24,10 @@ class AxonaPlugin(IPlugin):
                       type=click.STRING,
                       help='The experimenter performing the recording.',
                       )
-        @click.option('-l', '--left',
-                      type=click.FLOAT,
-                      help='The depth on left side in "mm".',
-                      )
-        @click.option('-r', '--right',
-                      type=click.FLOAT,
-                      help='The depth on right side in "mm".',
+        @click.option('-a', '--anatomy',
+                      multiple=True,
+                      type=(click.STRING, float),
+                      help='The adjustment amount on given anatomical location in "um".',
                       )
         @click.option('-l', '--location',
                       type=click.STRING,
@@ -53,9 +50,9 @@ class AxonaPlugin(IPlugin):
                       is_flag=True,
                       help='Generate action without storing modules.',
                       )
-        @click.option('--rat-id',
+        @click.option('--subject-id',
                       type=click.STRING,
-                      help='The id number of the rat.',
+                      help='The id number of the subject.',
                       )
         @click.option('--overwrite',
                       is_flag=True,
@@ -71,9 +68,9 @@ class AxonaPlugin(IPlugin):
                       type=click.STRING,
                       help='Add tags to action.',
                       )
-        def generate_axona_action(action_id, axona_filename, left, right, user,
+        def generate_axona_action(action_id, axona_filename, anatomy, user,
                                   no_local, overwrite, no_files, no_modules,
-                                  rat_id, location, message, tag):
+                                  subject_id, location, message, tag):
             """Generate an axona recording-action to database.
 
             COMMAND: axona-filename"""
@@ -89,24 +86,22 @@ class AxonaPlugin(IPlugin):
                       "'{}'.".format(axona_filename))
                 return
             project = expipe.get_project(USER_PARAMS['project_id'])
-            if action_id is None:
-                action_id = op.splitext(
-                    '-'.join(axona_filename.split(os.sep)[-2:]))[0]
-                action_id = action_id[:-2] + '-' + action_id[-2:]
-            rat_id = rat_id or axona_filename.split(os.sep)[-2]
-            action = project.require_action(action_id)
+            subject_id = subject_id or axona_filename.split(os.sep)[-2]
             axona_file = pyxona.File(axona_filename)
+            if action_id is None:
+                session_dtime = datetime.strftime(axona_file._start_datetime,
+                                                  '%d%m%y')
+                basename, _ = op.splitext(axona_filename)
+                session = basename[-2:]
+                action_id = subject_id + '-' + session_dtime + '-' + session
+            action = project.require_action(action_id)
 
-            action.messages.extend([{'message': m,
-                                     'user': user,
-                                     'datetime': datetime.now()}
-                                   for m in message])
             action.type = 'Recording'
             action.datetime = axona_file._start_datetime
-            action.tags = tag + ['axona']
+            action.tags = list(tag) + ['axona']
             print('Registering action id ' + action_id)
-            print('Registering rat id ' + rat_id)
-            action.subjects = [rat_id]
+            print('Registering subject id ' + subject_id)
+            action.subjects = [subject_id]
             user = user or USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
@@ -122,16 +117,21 @@ class AxonaPlugin(IPlugin):
             assert location in POSSIBLE_LOCATIONS
             print('Registering location ' + location)
             action.location = location
+            action.messages.extend([{'message': m,
+                                     'user': user,
+                                     'datetime': datetime.now()}
+                                   for m in message])
             if not no_modules:
                 generate_templates(action, TEMPLATES['axona'], overwrite,
                                    git_note=GIT_NOTE)
-                register_depth(project, action, left, right)
-            fr = action.require_filerecord()
-            if not no_local:
-                exdir_path = _get_local_path(fr, make=True)
-            else:
-                exdir_path = fr.server_path
+                register_depth(project, action, anatomy)
+
             if not no_files:
+                fr = action.require_filerecord()
+                if not no_local:
+                    exdir_path = _get_local_path(fr, make=False)
+                else:
+                    exdir_path = fr.server_path
                 if op.exists(exdir_path):
                     if overwrite:
                         shutil.rmtree(exdir_path)

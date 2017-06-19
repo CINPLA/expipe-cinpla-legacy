@@ -1,22 +1,31 @@
-import pytest
-import expipe
-import subprocess
-import click
-from click.testing import CliRunner
-
-expipe.ensure_testing()
-
-
-@click.group()
-@click.pass_context
-def cli(ctx):
-    pass
-
-
-from expipe_plugin_cinpla.main import CinplaPlugin
-CinplaPlugin().attach_to_cli(cli)
-
-
+# import pytest
+# import expipe
+# import subprocess
+# import click
+# from click.testing import CliRunner
+# import quantities as pq
+#
+# expipe.ensure_testing()
+#
+#
+# @click.group()
+# @click.pass_context
+# def cli(ctx):
+#     pass
+#
+#
+# from expipe_plugin_cinpla.main import CinplaPlugin
+# CinplaPlugin().attach_to_cli(cli)
+#
+#
+# def run_command(command_list, inp=None):
+#     runner = CliRunner()
+#     result = runner.invoke(cli, command_list, input=inp)
+#     if result.exit_code != 0:
+#         print(result.output)
+#         raise result.exception
+#
+#
 # def test_annotate(setup_project_action):
 #     project, action = setup_project_action
 #     runner = CliRunner()
@@ -25,7 +34,8 @@ CinplaPlugin().attach_to_cli(cli)
 #                                  '-t', pytest.POSSIBLE_TAGS[1],
 #                                  '--message', 'first message',
 #                                  '-m', 'second message'])
-#     assert result.exit_code == 0, result.output
+#     if result.exit_code != 0:
+#         raise result.exception
 #     assert action.tags[0] == pytest.POSSIBLE_TAGS[0]
 #     assert action.tags[1] == pytest.POSSIBLE_TAGS[1]
 #     assert action.messages.messages[0]['message'] == 'first message'
@@ -35,45 +45,40 @@ CinplaPlugin().attach_to_cli(cli)
 #     result = runner.invoke(cli, ['annotate', pytest.ACTION_ID,
 #                                  '--user', 'test_user',
 #                                  '-m', 'third message'])
-#     assert result.exit_code == 0, result.output
+#     if result.exit_code != 0:
+#         raise result.exception
 #     print(action.messages.messages)
 #     assert action.messages.messages[2]['message'] == 'third message'
 #     assert action.messages.messages[2]['user'] == 'test_user'
-
-# TODO get alternatives from keys
-
-def test_reg_rat_init_depth_adjustment(teardown_setup_project):
-    project, _ = teardown_setup_project
-    runner = CliRunner()
-    # make surgery action
-    result = runner.invoke(cli, ['register-surgery', pytest.RAT_ID,
-                                 '--weight', '500',
-                                 '--birthday', '21.05.2017',
-                                 '--procedure', 'implantation',
-                                 '-d', '21.01.2017T14:40',
-                                 '-a', 'mecl', 1.9,
-                                 '-a', 'mecr', 1.8])
-    assert result.exit_code == 0, result.output
-
-    # init
-    result = runner.invoke(cli, ['adjust', pytest.RAT_ID,
-                                 '-a', 'mecl', 50,
-                                 '-a', 'mecr', 50,
-                                 '-d', 'now',
-                                 '--init'])
-    assert result.exit_code == 0, result.output
-
-    # adjust more
-    result = runner.invoke(cli, ['adjust', pytest.RAT_ID,
-                                 '-l', '50',
-                                 '-r', '50',
-                                 '-d', 'now'])
-    assert result.exit_code == 0
-    action = project.require_action(pytest.RAT_ID + '-adjustment')
-    l, r = 1.9, 1.8
-    for adjustment in action.modules:
-        ad = adjustment.to_dict()
-        l += 0.05
-        r += 0.05
-        assert ad['depth']['left']['value'] == l
-        assert ad['depth']['right']['value'] == r
+#
+#
+# def test_reg_rat_init_depth_adjustment(teardown_setup_project):
+#     project, _ = teardown_setup_project
+#     # make surgery action
+#     run_command(['register-surgery', pytest.RAT_ID,
+#                  '--weight', '500',
+#                  '--birthday', '21.05.2017',
+#                  '--procedure', 'implantation',
+#                  '-d', '21.01.2017T14:40',
+#                  '-a', 'mecl', 1.9,
+#                  '-a', 'mecr', 1.8])
+#
+#     # init
+#     run_command(['adjust', pytest.RAT_ID,
+#                  '-a', 'mecl', 50,
+#                  '-a', 'mecr', 50,
+#                  '-d', 'now',
+#                  '--init'], inp='y')
+#
+#     # adjust more
+#     run_command(['adjust', pytest.RAT_ID,
+#                  '-a', 'mecl', 50,
+#                  '-a', 'mecr', 50,
+#                  '-d', 'now'], inp='y')
+#
+#     action = project.require_action(pytest.RAT_ID + '-adjustment')
+#     ad_dict = action.modules.to_dict()
+#     assert ad_dict['000_adjustment']['depth']['mecl'] == 1.95 * pq.mm
+#     assert ad_dict['000_adjustment']['depth']['mecr'] == 1.85 * pq.mm
+#     assert ad_dict['001_adjustment']['depth']['mecl'] == 2 * pq.mm
+#     assert ad_dict['001_adjustment']['depth']['mecr'] == 1.9 * pq.mm

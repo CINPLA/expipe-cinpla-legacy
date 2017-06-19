@@ -12,7 +12,7 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
           'copy-to-config expipe_params.py"')
 else:
     from expipe_params import (USER_PARAMS, TEMPLATES, UNIT_INFO, POSSIBLE_TAGS,
-                              POSSIBLE_LOCATIONS, OBLIGATORY_TAGS)
+                              POSSIBLE_LOCATIONS, OBLIGATORY_TAGS, MODULES)
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
@@ -118,6 +118,7 @@ class CinplaPlugin(IPlugin):
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
+            print('Registering user ' + user)
             action.users = [user]
             action.datetime = date
             generate_templates(action, TEMPLATES['surgery_' + procedure],
@@ -125,11 +126,11 @@ class CinplaPlugin(IPlugin):
             modules_dict = action.modules.to_dict()
             for key, val in anatomy:
                 name = MODULES[procedure][key]
-                mod = modules_dict[modules_dict[name]}
+                mod = modules_dict[name]
                 assert 'position' in mod
                 assert isinstance(mod['position'], pq.Quantity)
-                mod['position'][2] = position
-                print('Registering depth ', key, ' = ', mod['depth'])
+                print('Registering depth ', key, ' = ', val)
+                mod['position'][2] = pq.Quantity(val, 'mm')
                 action.require_module(name=name, contents=mod, overwrite=True)
 
             subject = action.require_module(name=MODULES['subject']).to_dict()  # TODO standard name?
@@ -617,19 +618,20 @@ class CinplaPlugin(IPlugin):
                 sdict = surgery.modules.to_dict()
                 prev_depth = {key: sdict[MODULES['implantation'][key]]['position'][2]
                               for key, _ in anatomy}
-                for key, depth in prev_depth:
-                    if not np.isfinite(depth):
-                        raise ValueError('Depth of left implant ' +
-                                         '"{}={}" not recognized'.format(key, depth))
+                for key, depth in prev_depth.items():
+                    if not isinstance(depth, pq.Quantity):
+                        raise ValueError('Depth of implant ' +
+                                         '"{} = {}" not recognized'.format(key, depth))
+                    prev_depth[key] = depth.astype(float)
             else:
-                prev_name = '{:.3d}_adjustment'.format(index - 1)
+                prev_name = '{:03d}_adjustment'.format(index - 1)
                 prev_dict = action.require_module(name=prev_name).to_dict()
                 prev_depth = {key: prev_dict['depth'][key] for key, _ in anatomy}
-            name = '%.3d_adjustment' % index
+            name = '{:03d}_adjustment'.format(index)
             module = action.require_module(template=TEMPLATES['adjustment'],
                                            name=name, overwrite=overwrite)
 
-            curr_depth = {key: round(prev_dict['depth'][key] + val * pq.um, 3)
+            curr_depth = {key: round(prev_depth[key] + val * pq.um, 3)
                           for key, val in anatomy} # round to um
             curr_adjustment = {key: val * pq.um for key, val in anatomy}
             answer = query_yes_no(
