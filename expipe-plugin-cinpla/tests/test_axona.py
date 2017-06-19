@@ -21,7 +21,7 @@ from expipe_plugin_cinpla.main import CinplaPlugin
 CinplaPlugin().attach_to_cli(cli)
 
 
-def run_command(command_list, cli, inp=None):
+def run_command(command_list, inp=None):
     result = CliRunner().invoke(cli, command_list, input=inp)
     if result.exit_code != 0:
         print(result.output)
@@ -29,18 +29,25 @@ def run_command(command_list, cli, inp=None):
     return result
 
 
-def test_axona(teardown_setup_project):
-    project, _ = teardown_setup_project
-
-    data_path = op.join(expipe.settings['data_path'],
-                        pytest.USER_PAR.project_id,
-                        pytest.RAT_ID + '-311013-03')
-    if op.exists(data_path):
-        import shutil
-        shutil.rmtree(data_path)
+def test_axona():#module_teardown_setup_project_setup):
+    # project = module_teardown_setup_project_setup
+    #
+    action_id = pytest.RAT_ID + '-311013-03'
+    # data_path = op.join(expipe.settings['data_path'],
+    #                     pytest.USER_PAR.project_id,
+    #                     action_id)
+    # if op.exists(data_path):
+    #     import shutil
+    #     shutil.rmtree(data_path)
     currdir = op.abspath(op.dirname(__file__))
     axona_filename = op.join(currdir, 'test_data', 'axona', 'DVH_2013103103.set')
-    res = run_command(['register-axona', axona_filename,
-                         '--subject-id', pytest.RAT_ID,
-                         '-m', 'some message',
-                         '-t', pytest.POSSIBLE_TAGS[0]], inp='y')
+    # res = run_command(['register-axona', axona_filename,
+    #                      '--subject-id', pytest.RAT_ID,
+    #                      '-m', 'register-axona message',
+    #                      '-t', pytest.POSSIBLE_TAGS[0]], inp='y')
+
+    run_command(['spikesort', action_id])
+    run_command(['register-units', action_id,
+                '-m', 'register-units message',
+                '-t', pytest.POSSIBLE_TAGS[0],
+                '-t', pytest.POSSIBLE_TAGS[0]])

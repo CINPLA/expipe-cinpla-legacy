@@ -2,6 +2,9 @@ import pytest
 import expipe
 import sys
 import os.path as op
+import click
+from click.testing import CliRunner
+
 expipe.ensure_testing()
 
 sys.path.append(expipe.config.config_dir)
@@ -26,6 +29,12 @@ def pytest_namespace():
             "USER_PAR": USER_PARAMS,
             "POSSIBLE_TAGS": POSSIBLE_TAGS,
             "OBLIGATORY_TAGS": OBLIGATORY_TAGS}
+
+
+@click.group()
+@click.pass_context
+def cli(ctx):
+    pass
 
 
 def run_command(command_list, inp=None):
@@ -56,7 +65,7 @@ def teardown_setup_project():
 
 
 @pytest.fixture(scope='module')
-def teardown_setup_project_setup_surgery():
+def module_teardown_setup_project_setup():
     try:
         expipe.delete_project(PROJECT_ID, remove_all_childs=True)
     except NameError:
@@ -73,7 +82,6 @@ def teardown_setup_project_setup_surgery():
 
     from expipe_plugin_cinpla.main import CinplaPlugin
     CinplaPlugin().attach_to_cli(cli)
-
 
     # make surgery action
     run_command(['register-surgery', pytest.RAT_ID,

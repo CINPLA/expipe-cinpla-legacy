@@ -21,9 +21,9 @@ def generate_epochs(exdir_path, triggers, trigger_params, channel_params, stim_s
     epo_group.attrs['num_samples'] = len(triggers)
     epo_group.attrs['active-electrodes'] = channel_params['active-electrodes']
     epo_group.attrs['trigger_params'] = trigger_params
-    dset = epo_group.require_dataset('timestamps', triggers)
+    dset = epo_group.require_dataset('timestamps', data=triggers)
     dset.attrs['num_samples'] = len(triggers)
-    dset = epo_group.require_dataset('stimulus', stim_signals)
+    dset = epo_group.require_dataset('stimulus', data=stim_signals)
     for i, ch in enumerate(channel_params['active-electrodes']):
         attr = dict()
         attr['amplitudes'] = channel_params['amplitudes'][i]
@@ -126,8 +126,3 @@ def generate_electrical_info(exdir_path, intan_file, openephys_file, stim_chan, 
         channel_param['phases'][str(i)] = phase[i]
 
     return trigger_param, channel_param
-
-
-
-
-

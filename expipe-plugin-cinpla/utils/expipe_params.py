@@ -12,7 +12,7 @@ will be overloaded for that particular action.
 Reserved names:
     subject
     electrophysiology
-    implant_drive
+    implantation
     injection
 '''
 
