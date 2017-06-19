@@ -8,6 +8,12 @@ want to "inherit" this module from the project. This is for modules
 that are general and which you dont want to repeat in every action.
 Note that you can modify these modules afterwords, then the modification
 will be overloaded for that particular action.
+
+Reserved names:
+    subject
+    electrophysiology
+    implant_drive
+    injection
 '''
 
 
@@ -108,27 +114,9 @@ UNIT_INFO = {
             'BS': 'definition: broad spiking waveform (putative excitatory)',
             'NS': 'definition: narrow spiking waveform (putative inhibitory)'
         },
-        'type': 'string',
         'value': ""
-    },
-    'info_notes': {
-        'type': 'string',
-        'value': ""
-    },
-    'info_flag': {
-        'alternatives': {
-            'true': 'definition: this is an interesting unit',
-            'false': 'definition: not worth looking into again'
-        },
-        'type': 'bolean',
-        'value': "false"
     },
     'info_pheno_type': {
-        'alternatives': {
-            'GC': 'definition: grid cell',
-            'PC': 'definition: place cell'
-        },
-        'type': 'string',
         'value': ""
     }
 }
@@ -169,4 +157,15 @@ TEMPLATES = {
     'surgery_implantation': surgery_implantation_templates,
     'surgery_injection': surgery_injection_templates,
     'adjustment': 'mikkel_drive_depth_adjustment'
+}
+
+MODULES = {
+    'electrophysiology': {'mecl': 'mikkel_electrophysiology_L',
+                          'mecr': 'mikkel_electrophysiology_R'},
+    'implantation': {'mecl': 'mikkel_implant_drive_L',
+                     'mecr': 'mikkel_implant_drive_R',
+                     'ms': 'mikkel_implant_fibre'},
+    'injection': {'ms1': 'mikkel_injection_1',
+                  'ms2': 'mikkel_injection_2'},
+    'subject': 'mikkel_subject'
 }
