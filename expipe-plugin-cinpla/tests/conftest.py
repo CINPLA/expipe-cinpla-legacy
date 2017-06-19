@@ -28,6 +28,14 @@ def pytest_namespace():
             "OBLIGATORY_TAGS": OBLIGATORY_TAGS}
 
 
+def run_command(command_list, inp=None):
+    result = CliRunner().invoke(cli, command_list, input=inp)
+    if result.exit_code != 0:
+        print(result.output)
+        raise result.exception
+    return result
+
+
 @pytest.fixture(scope='function')
 def teardown_setup_project():
     try:
@@ -45,6 +53,44 @@ def teardown_setup_project():
                     pass
     action = project.require_action(ACTION_ID)
     yield project, action
+
+
+@pytest.fixture(scope='module')
+def teardown_setup_project_setup_surgery():
+    try:
+        expipe.delete_project(PROJECT_ID, remove_all_childs=True)
+    except NameError:
+        pass
+    project = expipe.require_project(PROJECT_ID)
+    for key, val in TEMPLATES.items():
+        for template in val:
+            if template.startswith('_inherit'):
+                name = '_'.join(template.split('_')[2:])
+                try:
+                    project.require_module(name=name, contents={'test': 'cont'})
+                except NameError:
+                    pass
+
+    from expipe_plugin_cinpla.main import CinplaPlugin
+    CinplaPlugin().attach_to_cli(cli)
+
+
+    # make surgery action
+    run_command(['register-surgery', pytest.RAT_ID,
+                 '--weight', '500',
+                 '--birthday', '21.05.2017',
+                 '--procedure', 'implantation',
+                 '-d', '21.01.2017T14:40',
+                 '-a', 'mecl', 1.9,
+                 '-a', 'mecr', 1.8])
+
+    # init adjusment
+    run_command(['adjust', pytest.RAT_ID,
+                 '-a', 'mecl', 50,
+                 '-a', 'mecr', 50,
+                 '-d', 'now',
+                 '--init'], inp='y')
+    yield project
 
 
 @pytest.fixture
