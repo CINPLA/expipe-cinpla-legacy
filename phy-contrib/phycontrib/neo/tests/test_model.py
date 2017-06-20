@@ -16,6 +16,7 @@ from phy.utils.testing import captured_output
 
 from ..model import NeoModel
 import neo
+import quantities as pq
 import os
 import shutil
 logger = logging.getLogger(__name__)
@@ -31,21 +32,23 @@ def test_load_save():
     n_samples = 20
     n_spikes = 50
     fname = '/tmp/test_phy.exdir'
+    if os.path.exists(fname):
+        shutil.rmtree(fname)
     wf = np.random.random((n_spikes, n_channels, n_samples))
     ts = np.sort(np.random.random(n_spikes))
     t_stop = np.ceil(ts[-1])
-    sptr = neo.SpikeTrain(times=ts, units='s', waveforms=wf,
-                          t_stop=t_stop)
+    sptr = neo.SpikeTrain(times=ts, units='s', waveforms=wf * pq.V,
+                          t_stop=t_stop, **{'group_id': 0})
     blk = neo.Block()
     seg = neo.Segment()
     seg.duration = t_stop
     blk.segments.append(seg)
-    chx = neo.ChannelIndex(index=range(n_channels))
+    chx = neo.ChannelIndex(index=range(n_channels), **{'group_id': 0})
     blk.channel_indexes.append(chx)
     sptr.channel_index = chx
     unit = neo.Unit()
     unit.spiketrains.append(sptr)
-    chx.units.append(sptr)
+    chx.units.append(unit)
     seg.spiketrains.append(sptr)
     epo = neo.Epoch()
     if os.path.exists(fname):
