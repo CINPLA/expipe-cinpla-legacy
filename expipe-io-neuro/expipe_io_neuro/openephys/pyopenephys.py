@@ -190,8 +190,6 @@ class File:
         self._events_dirty = True
         self._times = []
         self._duration = []
-        self.__dict__.update(self._read_messages())
-
         self.rhythm = False
         self.rhythmID = []
         rhythmRates = np.array([1., 1.25, 1.5, 2, 2.5, 3, 3.33, 4., 5., 6.25,
@@ -205,6 +203,7 @@ class File:
 
         self.sync = False
         self.syncID = []
+        self.__dict__.update(self._read_messages())
 
         print('Loading Open-Ephys: reading settings.xml...')
         set_fname = [fname for fname in os.listdir(self._absolute_foldername)
@@ -433,6 +432,7 @@ class File:
         messagefile = [f for f in filenames if '.eventsmessages' in f][0]
         info = {'messages': []}
         stimes = []
+        softstart = []
         with open(op.join(self._absolute_foldername, messagefile), "r") as fh:
             while True:
                 spl = fh.readline().split()
@@ -442,9 +442,11 @@ class File:
                     stime = spl[-1]
                     stime = stime.split('@')
                     info['start_timestamp'] = int(stime[0])
+                    softstart = int(stime[0])
                     hz_start = stime[-1].find('Hz')
                     sr = float(stime[-1][:hz_start]) * pq.Hz
                     info['_software_sample_rate'] = sr
+                    self._software_sample_rate = sr
                 elif 'Processor:' in spl:
                     stimes.append(int(spl[0]))
                     sr = spl[-1].split('@')[-1]
@@ -459,7 +461,10 @@ class File:
         if any(np.diff(np.array(stimes, dtype=int))):
             raise ValueError('Found different processor start times')
         for message in info['messages']:
-            time = (message['time'] - stimes[0]) / sample_rate
+            if len(stimes) !=0:
+                time = (message['time'] - stimes[0]) / self.sample_rate
+            else:
+                time = (message['time'] - softstart) / self.sample_rate
             message['time'] = round(time.rescale('s'), 3)
 
         return info

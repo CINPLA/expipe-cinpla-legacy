@@ -159,8 +159,6 @@ class Plotter:
                           box_xlen=par['box_xlen'],
                           box_ylen=par['box_ylen'],
                           ax=ax1)
-        ax1.set_xlim([0, 1])
-        ax1.set_ylim([0, 1])
         im, max_t = tr.plot_occupancy(self.x, self.y, self.t,
                           binsize=par['spat_binsize'],
                           box_xlen=par['box_xlen'],

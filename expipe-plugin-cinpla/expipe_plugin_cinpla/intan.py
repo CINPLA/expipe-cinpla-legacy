@@ -1032,7 +1032,8 @@ class IntanPlugin(IPlugin):
                 register_depth(project, action, left, right)
 
                 for idx, m in enumerate(openephys_file.messages):
-                    message.apend({'time': m['time'],
+                    message = list(message)
+                    message.append({'time': m['time'],
                                    'value': m['message']})
                 add_message(action, message)
 
