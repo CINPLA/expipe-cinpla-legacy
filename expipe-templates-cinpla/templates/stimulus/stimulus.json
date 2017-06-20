@@ -42,11 +42,11 @@
         "value": ""
     },
     "position_reference": {
-        "alternatives": {
-            "bottom-right": true,
-            "center": true,
-            "top-left": true
-        },
+        "alternatives": [
+            "bottom-right",
+            "center",
+            "top-left"
+        ],
         "definition": "By default stimulus positions are specified by the coordinates of the top-left corner (or of the bounding box). Use this property for other definitions.",
         "value": ""
     },

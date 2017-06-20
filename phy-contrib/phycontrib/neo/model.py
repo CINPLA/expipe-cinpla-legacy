@@ -290,13 +290,13 @@ class NeoModel(object):
         # for saving phy data directly to disc
         feat = self._exdir_save_group.require_group('FeatureExtraction')
         feat.attrs['electrode_idx'] = self.chx.index
-        dset = feat.require_dataset('data', self.features)
+        dset = feat.require_dataset('data', data=self.features)
         dset.attrs['feature_type'] = self.feature_type
         dset.attrs['num_samples'] = self.features.shape[0]
         dset.attrs['num_channels'] = self.features.shape[1]
         dset.attrs['num_features'] = self.features.shape[2]
-        feat.require_dataset('masks', self.masks)
-        feat.require_dataset('timestamps', self.spike_times)
+        feat.require_dataset('masks', data=self.masks)
+        feat.require_dataset('timestamps', data=self.spike_times)
 
     def load_features_masks(self):
         # for saving phy data directly to disc

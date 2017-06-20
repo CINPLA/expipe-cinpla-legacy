@@ -38,13 +38,13 @@
         "value": ""
     },
     "role": {
-        "alternatives": {
-            "Author": true,
-            "Experimenter": true,
-            "Principle Investigator": true,
-            "Responsible Investigator": true,
-            "Subject": true
-        },
+        "alternatives": [
+            "Author",
+            "Experimenter",
+            "Principle Investigator",
+            "Responsible Investigator",
+            "Subject"
+        ],
         "definition": "The role of this person e.g. when describing\n         a project (Responsible investigator), or a recording\n         (Experimenter).",
         "value": ""
     }

@@ -513,7 +513,7 @@ class CinplaPlugin(IPlugin):
             if user not in users:
                 users.append(user)
             action.users = users
-            action.tags.update(tag)
+            action.tags.extend(tag)
             action.messages.extend([{'message': m,
                                      'user': user,
                                      'datetime': datetime.now()}

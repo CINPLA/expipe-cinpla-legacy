@@ -9,13 +9,21 @@
     "description": {
         "value": ""
     },
+    "hemisphere": {
+        "alternatives": {
+            "C, center": "between hemispheres",
+            "L, left": "left hemisphere",
+            "R, right": "right hemisphere"
+        },
+        "value": "C"
+    },
     "identifier": "mikkel_implant_fibre",
     "location": {
-        "alternatives": {
-            "MECL": true,
-            "MECR": true,
-            "MS": true
-        },
+        "alternatives": [
+            "MECL",
+            "MECR",
+            "MS"
+        ],
         "definition": "Describes the brain area of recording. MS: Medial Septum, MECR: Medial Entorhinal Cortex Right hemisphere, MECL: Medial Entorhinal Cortex Left hemisphere, ",
         "value": "MS"
     },
@@ -30,23 +38,15 @@
             " z"
         ]
     },
-    "hemisphere": {
-        "alternatives": {
-            "L, left": "left hemisphere",
-            "R, right": "right hemisphere",
-            "C, center": "between hemispheres"
-        },
-        "value": "C"
-    },
     "position_reference": {
-        "alternatives": {
-            "bregma": true,
-            "dura": true,
-            "lambda": true,
-            "longitudinal suture": true,
-            "skull": true,
-            "transverse sinus": true
-        },
+        "alternatives": [
+            "bregma",
+            "dura",
+            "lambda",
+            "longitudinal suture",
+            "skull",
+            "transverse sinus"
+        ],
         "definition": "By default position are specified by the coordinates of skull. Use this property for other definitions.",
         "value": [
             "bregma",

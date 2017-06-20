@@ -17,13 +17,13 @@
         "value": ""
     },
     "type": {
-        "alternatives": {
-            "behavior": true,
-            "electrophysiology": true,
-            "imaging": true,
-            "psychophysics": true,
-            "simulation": true
-        },
+        "alternatives": [
+            "behavior",
+            "electrophysiology",
+            "imaging",
+            "psychophysics",
+            "simulation"
+        ],
         "definition": "The type of experiment.",
         "value": ""
     }

@@ -119,9 +119,9 @@ class ExdirIO(BaseIO):
                 'sample_rate': sampling_rate}
         attr.update(annotations)
         wf_group.attrs = attr
-        ts_data = wf_group.require_dataset("timestamps", spike_times)
+        ts_data = wf_group.require_dataset("timestamps", data=spike_times)
         ts_data.attrs['num_samples'] = len(spike_times)
-        wf = wf_group.require_dataset("data", waveforms)
+        wf = wf_group.require_dataset("data", data=waveforms)
         wf.attrs['num_samples'] = len(spike_times)
         wf.attrs['sample_rate'] = sampling_rate
 
@@ -133,11 +133,11 @@ class ExdirIO(BaseIO):
         if annotations:
             cl_group.attrs = annotations
         cluster_nums = np.unique(spike_clusters)
-        dset = cl_group.require_dataset('nums', spike_clusters)
+        dset = cl_group.require_dataset('nums', data=spike_clusters)
         dset.attrs['num_samples'] = len(spike_times)
-        dset = cl_group.require_dataset('cluster_nums', cluster_nums)
+        dset = cl_group.require_dataset('cluster_nums', data=cluster_nums)
         dset.attrs['num_samples'] = len(cluster_nums)
-        dset = cl_group.require_dataset('timestamps', spike_times)
+        dset = cl_group.require_dataset('timestamps', data=spike_times)
         dset.attrs['num_samples'] = len(spike_times)
 
     def write_unit_times(self, units, path, **annotations):
@@ -168,7 +168,7 @@ class ExdirIO(BaseIO):
         channel_group = self._exdir_directory[path]
         sptr_attrs = copy.deepcopy(sptr.annotations)
         sptr_attrs.update(annotations)
-        ts_data = channel_group.require_dataset('times', sptr.times)
+        ts_data = channel_group.require_dataset('times', data=sptr.times)
         ts_data.attrs['num_samples'] = len(sptr.times)
         sptr_attrs.update({'name': sptr.name,
                            'description': sptr.description,
@@ -192,7 +192,7 @@ class ExdirIO(BaseIO):
                       'stop_time': ana.t_stop,
                       'sample_rate': ana.sampling_rate})
         lfp_group.attrs = attrs
-        lfp_data = lfp_group.require_dataset('data', ana)
+        lfp_data = lfp_group.require_dataset('data', data=ana)
         lfp_data.attrs['num_samples'] = len(ana)
         lfp_data.attrs['sample_rate'] = ana.sampling_rate # TODO not save twice
 
@@ -203,12 +203,12 @@ class ExdirIO(BaseIO):
         attrs = copy.deepcopy(epo.annotations)
         attrs.update(annotations)
         attrs.update({'name': epo.name, 'description': epo.description})
-        dset = epo_group.require_dataset('timestamps', epo.times)
+        dset = epo_group.require_dataset('timestamps', data=epo.times)
         dset.attrs['num_samples'] = len(epo.times)
         if epo.durations is not None:
-            dset = epo_group.require_dataset('durations', epo.durations)
+            dset = epo_group.require_dataset('durations', data=epo.durations)
             dset.attrs['num_samples'] = len(epo.durations)
-        dset = epo_group.require_dataset('data', epo.labels)
+        dset = epo_group.require_dataset('data', data=epo.labels)
         dset.attrs['num_samples'] = len(epo.labels)
         epo_group.attrs = attrs
 

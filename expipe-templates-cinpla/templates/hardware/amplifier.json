@@ -30,13 +30,13 @@
         "value": ""
     },
     "measurement_type": {
-        "alternatives": {
-            "Bridge": true,
-            "CC": true,
-            "Dynamic Clamp": true,
-            "VC": true,
-            "VCcCC": true
-        },
+        "alternatives": [
+            "Bridge",
+            "CC",
+            "Dynamic Clamp",
+            "VC",
+            "VCcCC"
+        ],
         "definition": "The amplifier mode. Measurement in Voltage clamp controlled current clamp -mode.",
         "value": ""
     },
@@ -45,10 +45,10 @@
         "value": ""
     },
     "operation_mode": {
-        "alternatives": {
-            "Bridged": true,
-            "Discontinuous": true
-        },
+        "alternatives": [
+            "Bridged",
+            "Discontinuous"
+        ],
         "definition": "The amplifier mode.",
         "value": ""
     },

@@ -46,10 +46,10 @@
         "value": ""
     },
     "outpu_mode": {
-        "alternatives": {
-            "BipolarOff": true,
-            "BipolarOn": true
-        },
+        "alternatives": [
+            "BipolarOff",
+            "BipolarOn"
+        ],
         "definition": "The polarity mode of the stimulus isolator.",
         "value": ""
     },
@@ -70,10 +70,10 @@
         "value": ""
     },
     "output_type": {
-        "alternatives": {
-            "Current": true,
-            "Voltage": true
-        },
+        "alternatives": [
+            "Current",
+            "Voltage"
+        ],
         "definition": "The type of output of the stimulus isolator.",
         "value": ""
     },

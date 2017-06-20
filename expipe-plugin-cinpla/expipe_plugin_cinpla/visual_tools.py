@@ -240,8 +240,8 @@ def generate_grating_stimulus_group(exdir_path, data, timestamps, mode="None"):
     visual = presentation.require_group("visual")
 
     grating = visual.require_group("grating")
-    grating.require_dataset("timestamps", timestamps)
-    dset = grating.require_dataset("data", data)
+    grating.require_dataset("timestamps", data=timestamps)
+    dset = grating.require_dataset("data", data=data)
     dset.attrs["mode"] = mode
 
 
@@ -262,7 +262,7 @@ def generate_blank_group(exdir_path, timestamps):
     visual = presentation.require_group("visual")
 
     blank = visual.require_group("blank")
-    blank.require_dataset("timestamps", timestamps)
+    blank.require_dataset("timestamps", data=timestamps)
 
 
 def generate_key_event_group(exdir_path, keys, timestamps):
@@ -285,8 +285,8 @@ def generate_key_event_group(exdir_path, keys, timestamps):
     presentation = stimulus.require_group("presentation")
     key_press = presentation.require_group("key_press")
 
-    key_press.require_dataset("timestamps", timestamps)
-    key_press.require_dataset("keys", keys)
+    key_press.require_dataset("timestamps", data=timestamps)
+    key_press.require_dataset("keys", data=keys)
 
 
 def generate_grating_stimulus_epoch(exdir_path, timestamps, durations, data):
@@ -307,9 +307,9 @@ def generate_grating_stimulus_epoch(exdir_path, timestamps, durations, data):
     epochs = exdir_file.require_group("epochs")
     stim_epoch = epochs.require_group("visual_stimulus")
     stim_epoch.attrs["type"] = "visual_stimulus"
-    stim_epoch.require_dataset("timestamps", timestamps)
-    stim_epoch.require_dataset("durations", durations)
-    stim_epoch.require_dataset("data", data)
+    stim_epoch.require_dataset("timestamps", data=timestamps)
+    stim_epoch.require_dataset("durations", data=durations)
+    stim_epoch.require_dataset("data", data=data)
 
 
 ###############################################################################
@@ -533,9 +533,9 @@ def generate_head_tracking_groups(exdir_path, tracking_data,
 
     for led, data in tracking_data.items():
         tracked_spot = position.require_group(led)
-        timestamps = tracked_spot.require_dataset("timestamps", data["t"])
-        tracked_spot.require_dataset("data",
-                                     np.column_stack((data["x"], data["y"])))
+        timestamps = tracked_spot.require_dataset("timestamps", data=data["t"])
+        tracked_spot.require_dataset(
+            "data", data=np.column_stack((data["x"], data["y"])))
 
 
 ###############################################################################

@@ -154,9 +154,9 @@ def generate_epochs(exdir_path, times, durations, **annotations):
     group = exdir_object.require_group('epochs')
     epo_group = group.require_group('Optogenetics')
     epo_group.attrs['num_samples'] = len(times)
-    dset = epo_group.require_dataset('timestamps', times)
+    dset = epo_group.require_dataset('timestamps', data=times)
     dset.attrs['num_samples'] = len(times)
-    dset = epo_group.require_dataset('durations', durations)
+    dset = epo_group.require_dataset('durations', data=durations)
     dset.attrs['num_samples'] = len(durations)
     attrs = epo_group.attrs.to_dict()
     if annotations:

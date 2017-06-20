@@ -11,10 +11,10 @@
     },
     "identifier": "alessio_implant_drive_L",
     "location": {
-        "alternatives": {
-            "HPCL": true,
-            "HPCR": true
-        },
+        "alternatives": [
+            "HPCL",
+            "HPCR"
+        ],
         "definition": "Describes the brain area of recording. HPCR: Hippocampus Right hemisphere, HPCL: Hippocampus  Left hemisphere, ",
         "value": "HPCR"
     },
@@ -30,14 +30,14 @@
         ]
     },
     "position_reference": {
-        "alternatives": {
-            "bregma": true,
-            "dura": true,
-            "lambda": true,
-            "longitudinal suture": true,
-            "skull": true,
-            "transverse sinus": true
-        },
+        "alternatives": [
+            "bregma",
+            "dura",
+            "lambda",
+            "longitudinal suture",
+            "skull",
+            "transverse sinus"
+        ],
         "definition": "By default position are specified by the coordinates of skull. Use this property for other definitions.",
         "value": [
             "lambda",
@@ -46,9 +46,9 @@
         ]
     },
     "ref_electrode_location": {
-        "alternatives": {
-            "Anterior to bregma": true
-        },
+        "alternatives": [
+            "Anterior to bregma"
+        ],
         "definition": "Describes the location of the reference electrode.",
         "value": "Anterior to bregma, right hemisphere"
     }

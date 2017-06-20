@@ -14,12 +14,12 @@
         "value": "Intan"
     },
     "model": {
-        "alternatives": {
-            "RHD2116": true,
-            "RHD2132": true,
-            "RHS2116": true,
-            "RHS2132": true
-        },
+        "alternatives": [
+            "RHD2116",
+            "RHD2132",
+            "RHS2116",
+            "RHS2132"
+        ],
         "definition": "The model name of this hardware item.",
         "value": ""
     },

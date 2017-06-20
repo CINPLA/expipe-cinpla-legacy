@@ -50,11 +50,11 @@
     },
     "identifier": "analysis_psth",
     "method": {
-        "alternatives": {
-            "discrete window": true,
-            "instantaneous spike rate": true,
-            "sliding window": true
-        },
+        "alternatives": [
+            "discrete window",
+            "instantaneous spike rate",
+            "sliding window"
+        ],
         "definition": "The method used for creating the PSTH.",
         "value": ""
     },
@@ -79,11 +79,11 @@
         "value": ""
     },
     "window_type": {
-        "alternatives": {
-            "alpha": true,
-            "gaussian": true,
-            "rectangular": true
-        },
+        "alternatives": [
+            "alpha",
+            "gaussian",
+            "rectangular"
+        ],
         "definition": "The kind of windowing function used to cerate the PSTH.",
         "value": ""
     }

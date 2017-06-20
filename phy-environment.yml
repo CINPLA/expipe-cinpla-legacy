@@ -15,6 +15,7 @@ dependencies:
   - jupyter
   - astropy
   - paramiko
+  - packaging
   - pip:
     - klusta
     - klustakwik2

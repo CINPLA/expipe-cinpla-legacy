@@ -34,10 +34,10 @@
         "value": ""
     },
     "mount": {
-        "alternatives": {
-            "C-Mount": true,
-            "CS-Mount": true
-        },
+        "alternatives": [
+            "C-Mount",
+            "CS-Mount"
+        ],
         "definition": "The type of mount.",
         "value": ""
     },
@@ -66,12 +66,12 @@
         "value": ""
     },
     "type": {
-        "alternatives": {
-            "FixedApperture": true,
-            "FixedFocus": true,
-            "Macro": true,
-            "Zoom": true
-        },
+        "alternatives": [
+            "FixedApperture",
+            "FixedFocus",
+            "Macro",
+            "Zoom"
+        ],
         "definition": "The type of objective.",
         "value": ""
     }
