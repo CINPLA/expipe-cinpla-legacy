@@ -1085,6 +1085,7 @@ class IntanPlugin(IPlugin):
             action.messages.extend(messages)
 
             if not no_run:
+                from scipy import signal
                 anas = intan_file.analog_signals[0].signal
                 fs = intan_file.sample_rate.magnitude
                 nchan = anas.shape[0]
@@ -1098,7 +1099,7 @@ class IntanPlugin(IPlugin):
                                                      fs=fs, filter_type='bandpass')
                 if filter_noise:
                     freq_range=[2000, 4000]
-                    fpre, Pxxpre = signal.welch(eap_pre, fs, nperseg=1024)
+                    fpre, Pxxpre = signal.welch(anas, fs, nperseg=1024)
                     avg_spectrum = np.mean(Pxxpre, axis=0)
                     fpeak = fpre[np.where((fpre>freq_range[0]) &
                                             (fpre<freq_range[1]))][np.argmax(
