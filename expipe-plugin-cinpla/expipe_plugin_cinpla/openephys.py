@@ -216,7 +216,6 @@ class OpenEphysPlugin(IPlugin):
                       )
         @click.option('-a', '--anatomy',
                       multiple=True,
-                      required=True,
                       type=(click.STRING, float),
                       help='The adjustment amount on given anatomical location in "um".',
                       )
@@ -284,8 +283,8 @@ class OpenEphysPlugin(IPlugin):
         def generate_openephys_action(action_id, openephys_path, no_local,
                                       anatomy, overwrite, no_files, no_modules,
                                       subject_id, user, prb_path, session, nchan,
-                                      location, spikes_source,
-                                      message, no_move, tag):
+                                      location, spikes_source, message, no_move,
+                                      tag):
             """Generate an open-ephys recording-action to database.
 
             COMMAND: open-ephys-directory"""
@@ -319,7 +318,7 @@ class OpenEphysPlugin(IPlugin):
             action = project.require_action(action_id)
             action.datetime = openephys_file.datetime
             action.type = 'Recording'
-            action.tags.extend(tag + ['open-ephys'])
+            action.tags.extend(list(tag) + ['open-ephys'])
             print('Registering subject id ' + subject_id)
             action.subjects = [subject_id]
             user = user or USER_PARAMS['user_name']
@@ -351,7 +350,10 @@ class OpenEphysPlugin(IPlugin):
                 headstage['model']['value'] = 'RHD2132'
                 action.require_module(name='hardware_intan_headstage',
                                       contents=headstage, overwrite=True)
-                register_depth(project, action, anatomy)
+                correct_depth = register_depth(project, action, anatomy)
+                if not correct_depth:
+                    print('Aborting registration!')
+                    return
 
                 for idx, m in enumerate(openephys_file.messages):
                     dtime = openephys_file.datetime + timedelta(seconds=m['time'])
@@ -372,10 +374,7 @@ class OpenEphysPlugin(IPlugin):
                         raise FileExistsError('The exdir path to this action "' +
                                               exdir_path + '" exists, use ' +
                                               'overwrite flag')
-                try:
-                    os.mkdir(op.dirname(exdir_path))
-                except Exception:
-                    pass
+                os.makedirs(op.dirname(exdir_path), exist_ok=True)
                 shutil.copy(prb_path, openephys_path)
                 openephys.convert(openephys_file,
                                   exdir_path=exdir_path)
