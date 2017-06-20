@@ -435,3 +435,26 @@ class OpenEphysPlugin(IPlugin):
             print('Converting to exdir')
             openephys.generate_spike_trains(exdir_path, openephys_file,
                                                 source='klusta')
+
+        @cli.command('read-messages')
+        @click.argument('openephys-path', type=click.Path(exists=True))
+        def generate_openephys_action(openephys_path):
+            """Read messages from open-ephys recording session.
+
+            COMMAND: open-ephys-directory"""
+            # TODO default none
+            from expipe_io_neuro import pyopenephys
+            import quantities as pq
+            import shutil
+            from datetime import datetime, timedelta
+            from .action_tools import register_depth
+            openephys_path = op.abspath(openephys_path)
+            openephys_dirname = openephys_path.split(os.sep)[-1]
+            project = expipe.get_project(USER_PARAMS['project_id'])
+            
+            openephys_file = pyopenephys.File(openephys_path)
+            messages = openephys_file.messages
+            
+            print('Open-ephys messages:')
+            for m in messages:
+                print('time: ', m['time'], ' message: ', m['message'])

@@ -823,13 +823,10 @@ class IntanPlugin(IPlugin):
                       type=click.STRING,
                       help='The experimenter performing the recording.',
                       )
-        @click.option('--left',
-                      type=click.FLOAT,
-                      help='The depth on left side in "mm".',
-                      )
-        @click.option('--right',
-                      type=click.FLOAT,
-                      help='The depth on right side in "mm".',
+        @click.option('-a', '--anatomy',
+                      multiple=True,
+                      type=(click.STRING, float),
+                      help='The adjustment amount on given anatomical location in "um".',
                       )
         @click.option('-l', '--location',
                       required=True,
@@ -876,7 +873,7 @@ class IntanPlugin(IPlugin):
                       type=click.STRING,
                       help='TTL source for stimulation triggers. e.g. intan-adc-0, ephys-dig-1',
                       )
-        @click.option('--rat-id',
+        @click.option('--subject-id',
                       type=click.STRING,
                       help='The id number of the rat.',
                       )
@@ -931,24 +928,29 @@ class IntanPlugin(IPlugin):
                       is_flag=True,
                       help='Run klusta on dataset.',
                       )
+        @click.option('-t', '--tag',
+                      multiple=True,
+                      type=click.STRING,
+                      help='Add tags to action.',
+                      )
         @click.option('-m', '--message',
                       multiple=True,
                       type=click.STRING,
                       help='Add message, use "text here" for sentences.',
                       )
         def register_process_intan_ephys_action(action_id, intan_ephys_path, no_temp,
-                                                 left, right, overwrite, no_convert,
-                                                 intan_sync, ephys_sync, shutter_events,
-                                                 rat_id, user, prb_path, session, nchan,
-                                                 location, pre_filter, filter_noise, remove_artifacts,
-                                                 klusta_filter, filter_low, no_modules,
-                                                 filter_high, common_ref, ground, message,
-                                                 split_probe, no_run,):
+                                                overwrite, no_convert, anatomy,
+                                                intan_sync, ephys_sync, shutter_events,
+                                                subject_id, user, prb_path, session, nchan,
+                                                location, pre_filter, filter_noise, remove_artifacts,
+                                                klusta_filter, filter_low, no_modules,
+                                                filter_high, common_ref, ground, message,
+                                                split_probe, no_run, tag):
             """Generate an intan (ephys) open-ephys (tracking) recording-action to database.
 
             COMMAND: intan-ephys-path"""
             from expipe_io_neuro import pyopenephys, pyintan
-            from datetime import datetime
+            from datetime import datetime, timedelta
             import numpy as np
             from .action_tools import register_depth
             intan_ephys_path = op.abspath(intan_ephys_path)
@@ -1022,7 +1024,7 @@ class IntanPlugin(IPlugin):
                     shutter_ttl = []
                 openephys_file.sync_tracking_from_events(shutter_ttl)
 
-            rat_id = rat_id or intan_ephys_dir.split('_')[0]
+            subject_id = subject_id or intan_ephys_dir.split('_')[0]
             session = session or intan_ephys_dir.split('_')[-1]
             if session.isdigit():
                 session = int(session)
@@ -1033,23 +1035,32 @@ class IntanPlugin(IPlugin):
             if action_id is None:
                 session_dtime = datetime.strftime(openephys_file.datetime,
                                                   '%d%m%y')
-                action_id = rat_id + '-' + session_dtime + '-%.2d' % session
+                action_id = subject_id + '-' + session_dtime + '-%.2d' % session
             print('Generating action', action_id)
             action = project.require_action(action_id)
             action.datetime = openephys_file.datetime
             action.type = 'Recording'
-            action.tags = {'open-ephys': 'true'}
-            print('Registering rat id ' + rat_id)
-            action.subjects = {rat_id: 'true'}
+            print(type(action.tags))
+            action.tags.extend(list(tag) + ['open-ephys'])
+            print('Registering subject id ' + subject_id)
+            action.subjects = [subject_id]
             user = user or USER_PARAMS['user_name']
+            if user is None:
+                raise ValueError('Please add user name')
+            if len(user) == 0:
+                raise ValueError('Please add user name')
             print('Registering user ' + user)
-            action.users = {user: 'true'}
+            action.users = [user]
             location = location or USER_PARAMS['location']
+            if location is None:
+                raise ValueError('Please add location')
+            if len(location) == 0:
+                raise ValueError('Please add location')
             assert location in POSSIBLE_LOCATIONS
             print('Registering location ' + location)
             action.location = location
-
-
+            messages = [{'message': m, 'user': user, 'datetime': datetime.now()}
+                        for m in message]
             if not no_modules:
                 if 'intanopenephys' not in TEMPLATES:
                     raise ValueError('Could not find "intanopenephys" in ' +
@@ -1061,12 +1072,17 @@ class IntanPlugin(IPlugin):
                 headstage['model']['value'] = 'RHS2132'
                 action.require_module(name='hardware_intan_headstage', contents=headstage,
                                       overwrite=True)
-                register_depth(project, action, left, right)
+                correct_depth = register_depth(project, action, anatomy)
+                if not correct_depth:
+                    print('Aborting registration!')
+                    return
 
                 for idx, m in enumerate(openephys_file.messages):
-                    message.apend({'time': m['time'],
-                                   'value': m['message']})
-                add_message(action, message)
+                    dtime = openephys_file.datetime + timedelta(seconds=float(m['time'].magnitude))
+                    messages.append({'datetime': dtime,
+                                    'message': m['message'],
+                                    'user': user})
+            action.messages.extend(messages)
 
             if not no_run:
                 anas = intan_file.analog_signals[0].signal
