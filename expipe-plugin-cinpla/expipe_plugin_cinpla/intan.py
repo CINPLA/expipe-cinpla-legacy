@@ -1102,7 +1102,7 @@ class IntanPlugin(IPlugin):
                     fpre, Pxxpre = signal.welch(anas[:4], fs, nperseg=1024)
                     avg_spectrum = np.mean(Pxxpre, axis=0)
                     fpeak = fpre[np.where((fpre>freq_range[0]) & (fpre<freq_range[1]))][np.argmax(
-                        avg_spectrum[np.where((fpre>freq_range[0]) & (fpre<freq_range[1]))])]
+                        avg_spectrum[np.where((fpre>freq_range[0]) & (fpre<freq_range[1]))])]*pq.Hz
                     stopband = [fpeak-150*pq.Hz, fpeak+150*pq.Hz]
                     anas = filter_analog_signals(anas, freq=stopband,
                                                  fs=fs, filter_type='bandstop', order=2)
