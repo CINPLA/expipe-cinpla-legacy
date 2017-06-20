@@ -13,7 +13,17 @@
     "flow": {
         "definition": "The angle of the implant, assuming leveled bregma and lambda, 0 degrees is vertical implantation",
         "unit": "ul/min",
-        "value": "0.05"
+        "value": [
+            0.05
+        ]
+    },
+    "hemisphere": {
+        "alternatives": {
+            "C, center": "between hemispheres",
+            "L, left": "left hemisphere",
+            "R, right": "right hemisphere"
+        },
+        "value": "C"
     },
     "identifier": "mikkel_injection_2",
     "injection_substance": {
@@ -44,11 +54,11 @@
         ]
     },
     "location": {
-        "alternatives": {
-            "MECL": true,
-            "MECR": true,
-            "MS": true
-        },
+        "alternatives": [
+            "MECL",
+            "MECR",
+            "MS"
+        ],
         "definition": "Describes the brain area of recording. MS: Medial Septum, MECR: Medial Entorhinal Cortex Right hemisphere, MECL: Medial Entorhinal Cortex Left hemisphere, ",
         "value": "MS"
     },
@@ -63,23 +73,15 @@
             6.8
         ]
     },
-    "hemisphere": {
-        "alternatives": {
-            "L, left": "left hemisphere",
-            "R, right": "right hemisphere",
-            "C, center": "between hemispheres"
-        },
-        "value": "C"
-    },
     "position_reference": {
-        "alternatives": {
-            "bregma": true,
-            "dura": true,
-            "lambda": true,
-            "longitudinal suture": true,
-            "skull": true,
-            "transverse sinus": true
-        },
+        "alternatives": [
+            "bregma",
+            "dura",
+            "lambda",
+            "longitudinal suture",
+            "skull",
+            "transverse sinus"
+        ],
         "definition": "By default position are specified by the coordinates of skull. Use this property for other definitions.",
         "value": [
             "bregma",

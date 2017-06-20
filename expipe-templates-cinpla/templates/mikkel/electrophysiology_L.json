@@ -22,9 +22,9 @@
     },
     "hemisphere": {
         "alternatives": {
+            "C, center": "between hemispheres",
             "L, left": "left hemisphere",
-            "R, right": "right hemisphere",
-            "C, center": "between hemispheres"
+            "R, right": "right hemisphere"
         },
         "value": "L"
     },
@@ -42,26 +42,26 @@
         "value": ""
     },
     "subtype": {
-        "alternatives": {
-            "dual electrode recording": true,
-            "multi electrode recording": true,
-            "single electrode recording": true
-        },
+        "alternatives": [
+            "dual electrode recording",
+            "multi electrode recording",
+            "single electrode recording"
+        ],
         "definition": "Subtype of this electrophysiological experiment.",
         "value": "multi electrode recording"
     },
     "type": {
-        "alternatives": {
-            "EEG": true,
-            "EKG": true,
-            "EMG": true,
-            "ERG": true,
-            "extracellular recording": true,
-            "intracellular recording": true,
-            "loose patch": true,
-            "patch clamp": true,
-            "whole cell patch": true
-        },
+        "alternatives": [
+            "EEG",
+            "EKG",
+            "EMG",
+            "ERG",
+            "extracellular recording",
+            "intracellular recording",
+            "loose patch",
+            "patch clamp",
+            "whole cell patch"
+        ],
         "value": "extracellular recording"
     }
 }

@@ -42,11 +42,11 @@
         "value": ""
     },
     "type": {
-        "alternatives": {
-            "dry": true,
-            "oil immersion": true,
-            "water immersion": true
-        },
+        "alternatives": [
+            "dry",
+            "oil immersion",
+            "water immersion"
+        ],
         "definition": "The type of objective used in a microscope. (e.g. water immersion, oil immersion, dry.)",
         "value": ""
     }

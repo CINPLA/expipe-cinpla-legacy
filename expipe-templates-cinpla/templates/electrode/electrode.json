@@ -53,24 +53,24 @@
         "value": ""
     },
     "type": {
-        "alternatives": {
-            "extracellular": true,
-            "injection": true,
-            "multi-electrode-array": true,
-            "multibarrel": true,
-            "patch": true,
-            "sharp": true,
-            "tetrode": true
-        },
+        "alternatives": [
+            "extracellular",
+            "injection",
+            "multi-electrode-array",
+            "multibarrel",
+            "patch",
+            "sharp",
+            "tetrode"
+        ],
         "definition": "The type of electrode.",
         "value": ""
     },
     "usage": {
-        "alternatives": {
-            "Channel": true,
-            "Ground": true,
-            "Reference": true
-        },
+        "alternatives": [
+            "Channel",
+            "Ground",
+            "Reference"
+        ],
         "definition": "Usage of electrode.",
         "value": ""
     }

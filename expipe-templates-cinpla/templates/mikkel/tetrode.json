@@ -26,7 +26,9 @@
         "definition": "Electrode impedance.",
         "uncertainty": "100",
         "unit": "k ohm",
-        "value": "150"
+        "value": [
+            150.0
+        ]
     },
     "manufacturer": {
         "definition": "The manufacturer of the electrodes if e.g. ordered from a company.",
@@ -46,22 +48,22 @@
         ]
     },
     "type": {
-        "alternatives": {
-            "extracellular": true,
-            "multi-electrode-array": true,
-            "multibarrel": true,
-            "patch": true,
-            "sharp": true
-        },
+        "alternatives": [
+            "extracellular",
+            "multi-electrode-array",
+            "multibarrel",
+            "patch",
+            "sharp"
+        ],
         "definition": "The type of electrode registration.",
         "value": "extracellular"
     },
     "usage": {
-        "alternatives": {
-            "Channel": true,
-            "Ground": true,
-            "Reference": true
-        },
+        "alternatives": [
+            "Channel",
+            "Ground",
+            "Reference"
+        ],
         "definition": "Usage of tetrode.",
         "value": "Channel"
     }

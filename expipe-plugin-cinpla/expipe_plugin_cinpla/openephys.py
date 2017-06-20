@@ -319,7 +319,7 @@ class OpenEphysPlugin(IPlugin):
             action = project.require_action(action_id)
             action.datetime = openephys_file.datetime
             action.type = 'Recording'
-            action.tags.update(tag + ['open-ephys'])
+            action.tags.extend(tag + ['open-ephys'])
             print('Registering subject id ' + subject_id)
             action.subjects = [subject_id]
             user = user or USER_PARAMS['user_name']

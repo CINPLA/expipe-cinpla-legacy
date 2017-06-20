@@ -29,22 +29,22 @@ def run_command(command_list, inp=None):
     return result
 
 
-def test_axona():#module_teardown_setup_project_setup):
-    # project = module_teardown_setup_project_setup
+def test_axona(module_teardown_setup_project_setup):
+    project = module_teardown_setup_project_setup
     #
     action_id = pytest.RAT_ID + '-311013-03'
-    # data_path = op.join(expipe.settings['data_path'],
-    #                     pytest.USER_PAR.project_id,
-    #                     action_id)
-    # if op.exists(data_path):
-    #     import shutil
-    #     shutil.rmtree(data_path)
+    data_path = op.join(expipe.settings['data_path'],
+                        pytest.USER_PAR.project_id,
+                        action_id)
+    if op.exists(data_path):
+        import shutil
+        shutil.rmtree(data_path)
     currdir = op.abspath(op.dirname(__file__))
     axona_filename = op.join(currdir, 'test_data', 'axona', 'DVH_2013103103.set')
-    # res = run_command(['register-axona', axona_filename,
-    #                      '--subject-id', pytest.RAT_ID,
-    #                      '-m', 'register-axona message',
-    #                      '-t', pytest.POSSIBLE_TAGS[0]], inp='y')
+    res = run_command(['register-axona', axona_filename,
+                         '--subject-id', pytest.RAT_ID,
+                         '-m', 'register-axona message',
+                         '-t', pytest.POSSIBLE_TAGS[0]], inp='y')
 
     run_command(['spikesort', action_id])
     run_command(['register-units', action_id,

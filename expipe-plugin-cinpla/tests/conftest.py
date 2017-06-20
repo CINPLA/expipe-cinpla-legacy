@@ -112,6 +112,9 @@ def setup_project_action():
                     project.require_module(name=name, contents={'test': 'cont'})
                 except NameError:
                     pass
-    project.delete_action(ACTION_ID)
+    try:
+        project.delete_action(ACTION_ID)
+    except NameError:
+        pass
     action = project.require_action(ACTION_ID)
     yield project, action

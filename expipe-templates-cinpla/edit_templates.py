@@ -17,6 +17,7 @@ def fix_list(value):
             return val
     return value
 
+
 def list_convert(value):
     result = value
     if isinstance(value, dict):
@@ -30,6 +31,8 @@ def list_convert(value):
             value['unit'] = value['units']
             del(value['units'])
             value['value'] = fix_list(value['value'])
+        elif all(val == 'true' for val in value.values()) or all(val == True for val in value.values()):
+            result = list(value.keys())
         else:
             for key, val in result.items():
                 result[key] = list_convert(val)

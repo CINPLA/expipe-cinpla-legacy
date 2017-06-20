@@ -42,20 +42,20 @@
         "value": ""
     },
     "sub_type": {
-        "alternatives": {
-            "Bessel": true,
-            "Butterworth": true
-        },
+        "alternatives": [
+            "Bessel",
+            "Butterworth"
+        ],
         "definition": "The type of filter.",
         "value": ""
     },
     "type": {
-        "alternatives": {
-            "Bandpass": true,
-            "Highpass": true,
-            "Lowpass": true,
-            "Notch": true
-        },
+        "alternatives": [
+            "Bandpass",
+            "Highpass",
+            "Lowpass",
+            "Notch"
+        ],
         "definition": "The type of filter.",
         "value": ""
     }

@@ -34,6 +34,7 @@ class OptoPlugin(IPlugin):
                       help='The anatomical brain-area of the optogenetic stimulus.',
                       )
         @click.option('-t', '--tag',
+                      multiple=True,
                       required=True,
                       type=click.Choice(['opto-inside', 'opto-outside', 'opto-train']),
                       help='The anatomical brain-area of the optogenetic stimulus.',
@@ -72,9 +73,8 @@ class OptoPlugin(IPlugin):
                                  POSSIBLE_BRAIN_AREAS)
             project = expipe.get_project(USER_PARAMS['project_id'])
             action = project.require_action(action_id)
-            tags = action.tags or {}
-            tags.update({tag: 'true', 'opto-' + brain_area: 'true'})
-            action.tags = tags
+
+            action.tags.extend(list(tag) + ['opto-' + brain_area])
             fr = action.require_filerecord()
             if not no_local:
                 exdir_path = _get_local_path(fr)

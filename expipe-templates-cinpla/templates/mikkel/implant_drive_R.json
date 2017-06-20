@@ -9,13 +9,21 @@
     "description": {
         "value": "Implantation of optetrodes in Medial Entorhinal Cortex and fibre optcis in Medial Septum."
     },
+    "hemisphere": {
+        "alternatives": {
+            "C, center": "between hemispheres",
+            "L, left": "left hemisphere",
+            "R, right": "right hemisphere"
+        },
+        "value": "R"
+    },
     "identifier": "mikkel_implant_drive_R",
     "location": {
-        "alternatives": {
-            "MECL": true,
-            "MECR": true,
-            "MS": true
-        },
+        "alternatives": [
+            "MECL",
+            "MECR",
+            "MS"
+        ],
         "definition": "Describes the brain area of recording. MS: Medial Septum, MECR: Medial Entorhinal Cortex Right hemisphere, MECL: Medial Entorhinal Cortex Left hemisphere, ",
         "value": "MECR"
     },
@@ -30,23 +38,15 @@
             " z"
         ]
     },
-    "hemisphere": {
-        "alternatives": {
-            "L, left": "left hemisphere",
-            "R, right": "right hemisphere",
-            "C, center": "between hemispheres"
-        },
-        "value": "R"
-    },
     "position_reference": {
-        "alternatives": {
-            "bregma": true,
-            "dura": true,
-            "lambda": true,
-            "longitudinal suture": true,
-            "skull": true,
-            "transverse sinus": true
-        },
+        "alternatives": [
+            "bregma",
+            "dura",
+            "lambda",
+            "longitudinal suture",
+            "skull",
+            "transverse sinus"
+        ],
         "definition": "By default position are specified by the coordinates of skull. Use this property for other definitions.",
         "value": [
             "lambda",
@@ -55,9 +55,9 @@
         ]
     },
     "ref_electrode_location": {
-        "alternatives": {
-            "Posterior to bregma": true
-        },
+        "alternatives": [
+            "Posterior to bregma"
+        ],
         "definition": "Describes the location of the reference electrode.",
         "value": "Posterior to bregma, right hemisphere"
     }
