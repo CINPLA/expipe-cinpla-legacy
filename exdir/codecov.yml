@@ -1,3 +1,0 @@
-ignore:
-  - "exdir/_version.py"
-  - "exdir/__init__.py"
