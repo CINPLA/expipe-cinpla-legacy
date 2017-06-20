@@ -57,7 +57,7 @@ def teardown_setup_project():
             if template.startswith('_inherit'):
                 name = '_'.join(template.split('_')[2:])
                 try:
-                    project.require_module(name=name, contents={'test': 'cont'})
+                    project.require_module(name=name, contents={'model': {'value': ''}})
                 except NameError:
                     pass
     action = project.require_action(ACTION_ID)
@@ -76,7 +76,7 @@ def module_teardown_setup_project_setup():
             if template.startswith('_inherit'):
                 name = '_'.join(template.split('_')[2:])
                 try:
-                    project.require_module(name=name, contents={'test': 'cont'})
+                    project.require_module(name=name, contents={'model': {'value': ''}})
                 except NameError:
                     pass
 

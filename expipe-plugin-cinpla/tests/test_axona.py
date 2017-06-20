@@ -50,4 +50,4 @@ def test_axona(module_teardown_setup_project_setup):
     run_command(['register-units', action_id,
                 '-m', 'register-units message',
                 '-t', pytest.POSSIBLE_TAGS[0],
-                '-t', pytest.POSSIBLE_TAGS[0]])
+                '-t', pytest.POSSIBLE_TAGS[1]])

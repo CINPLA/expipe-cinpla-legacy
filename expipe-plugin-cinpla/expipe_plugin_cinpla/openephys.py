@@ -283,8 +283,8 @@ class OpenEphysPlugin(IPlugin):
         def generate_openephys_action(action_id, openephys_path, no_local,
                                       anatomy, overwrite, no_files, no_modules,
                                       subject_id, user, prb_path, session, nchan,
-                                      location, spikes_source,
-                                      message, no_move, tag):
+                                      location, spikes_source, message, no_move,
+                                      tag):
             """Generate an open-ephys recording-action to database.
 
             COMMAND: open-ephys-directory"""
@@ -343,13 +343,13 @@ class OpenEphysPlugin(IPlugin):
                     raise ValueError('Could not find "openephys" in ' +
                                      'expipe_params.py TEMPLATES: "' +
                                      '{}"'.format(TEMPLATES.keys()))
-                # generate_templates(action, TEMPLATES['openephys'], overwrite,
-                #                    git_note=GIT_NOTE)
-                # headstage = action.require_module(
-                #     name='hardware_intan_headstage').to_dict()
-                # headstage['model']['value'] = 'RHD2132'
-                # action.require_module(name='hardware_intan_headstage',
-                #                       contents=headstage, overwrite=True)
+                generate_templates(action, TEMPLATES['openephys'], overwrite,
+                                   git_note=GIT_NOTE)
+                headstage = action.require_module(
+                    name='hardware_intan_headstage').to_dict()
+                headstage['model']['value'] = 'RHD2132'
+                action.require_module(name='hardware_intan_headstage',
+                                      contents=headstage, overwrite=True)
                 correct_depth = register_depth(project, action, anatomy)
                 if not correct_depth:
                     print('Aborting registration!')
@@ -374,10 +374,7 @@ class OpenEphysPlugin(IPlugin):
                         raise FileExistsError('The exdir path to this action "' +
                                               exdir_path + '" exists, use ' +
                                               'overwrite flag')
-                try:
-                    os.mkdir(op.dirname(exdir_path))
-                except Exception:
-                    pass
+                os.makedirs(op.dirname(exdir_path), exist_ok=True)
                 shutil.copy(prb_path, openephys_path)
                 openephys.convert(openephys_file,
                                   exdir_path=exdir_path)

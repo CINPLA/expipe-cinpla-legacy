@@ -90,21 +90,22 @@ def register_depth(project, action, anatomy=None):
         adjustdate = None
 
     answer = query_yes_no(
-        'Are the following values correct:' +
+        'Are the following values correct: ' +
         ', '.join('{} = {}'.format(key, val) for key, val in curr_depth.items()) +
-        'adjust date time = {}'.format(adjustdate))
+        ' adjust date time = {}'.format(adjustdate))
     if answer is False:
         print('Aborting depth registration')
-        return
+        return False
     modules_dict = action.modules.to_dict()
-    for key, val in curr_depth:
+    for key, val in curr_depth.items():
         name = mod_info[key]
         if not name in modules_dict:
             raise NameError('Failed to acquire electrophysiology module')
         mod = modules_dict[name]
         print('Registering depth ', key, ' = ', val)
-        mod['depth'][key] = val
+        mod['depth'] = val
         action.require_module(name=name, contents=mod, overwrite=True)
+    return True
 
 
 def _get_local_path(file_record, assert_exists=False, make=False):
