@@ -216,7 +216,6 @@ class OpenEphysPlugin(IPlugin):
                       )
         @click.option('-a', '--anatomy',
                       multiple=True,
-                      required=True,
                       type=(click.STRING, float),
                       help='The adjustment amount on given anatomical location in "um".',
                       )
@@ -319,7 +318,7 @@ class OpenEphysPlugin(IPlugin):
             action = project.require_action(action_id)
             action.datetime = openephys_file.datetime
             action.type = 'Recording'
-            action.tags.extend(tag + ['open-ephys'])
+            action.tags.extend(list(tag) + ['open-ephys'])
             print('Registering subject id ' + subject_id)
             action.subjects = [subject_id]
             user = user or USER_PARAMS['user_name']
@@ -344,14 +343,17 @@ class OpenEphysPlugin(IPlugin):
                     raise ValueError('Could not find "openephys" in ' +
                                      'expipe_params.py TEMPLATES: "' +
                                      '{}"'.format(TEMPLATES.keys()))
-                generate_templates(action, TEMPLATES['openephys'], overwrite,
-                                   git_note=GIT_NOTE)
-                headstage = action.require_module(
-                    name='hardware_intan_headstage').to_dict()
-                headstage['model']['value'] = 'RHD2132'
-                action.require_module(name='hardware_intan_headstage',
-                                      contents=headstage, overwrite=True)
-                register_depth(project, action, anatomy)
+                # generate_templates(action, TEMPLATES['openephys'], overwrite,
+                #                    git_note=GIT_NOTE)
+                # headstage = action.require_module(
+                #     name='hardware_intan_headstage').to_dict()
+                # headstage['model']['value'] = 'RHD2132'
+                # action.require_module(name='hardware_intan_headstage',
+                #                       contents=headstage, overwrite=True)
+                correct_depth = register_depth(project, action, anatomy)
+                if not correct_depth:
+                    print('Aborting registration!')
+                    return
 
                 for idx, m in enumerate(openephys_file.messages):
                     dtime = openephys_file.datetime + timedelta(seconds=m['time'])

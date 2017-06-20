@@ -89,14 +89,16 @@ command.::
 Drive adjustment
 ----------------
 
-The first time you want to adjust the depth ``X``, ``Y`` of a drive you need to
+The first time you want to adjust the brain-area ``X``, ``Y``
+(reffering to MODULES['electrophysiology']['X']) of a drive
+an amount of ``um`` you need to
 initialize an adjustment action with the command::
 
-  $ expipe adjust RAT --left X um --right Y um --date dd.mm.yyyyTHH:MM --init
+  $ expipe adjust RAT --anatomy X um --anatomy Y um --date dd.mm.yyyyTHH:MM --init
 
 When you have initialized and later make a new adjustment::
 
-  $ expipe adjust RAT --date dd.mm.yyyyTHH:MM --left X um --right Y um
+  $ expipe adjust RAT --date dd.mm.yyyyTHH:MM --anatomy X um --anatomy Y um
 
 Note that in stead of ``--date dd.mm.yyyyTHH:MM`` can use ``-d now``.
 

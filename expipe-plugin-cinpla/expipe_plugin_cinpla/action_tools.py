@@ -68,7 +68,7 @@ def deltadate(adjustdate, regdate):
 def register_depth(project, action, anatomy=None):
     regdate = action.datetime
     mod_info = MODULES['electrophysiology']
-    if anatomy is None:
+    if len(anatomy) == 0:
         assert len(action.subjects) == 1
         subject = action.subjects[0]
         try:
