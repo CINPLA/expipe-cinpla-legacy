@@ -6,6 +6,6 @@
 [subrepo]
 	remote = git@github.com:CINPLA/exdir.git
 	branch = dev
-	commit = 78939d3d7c02a0d970b815f5a4f72518dabd26f1
-	parent = c61182a7d2e622a26b30f4c3cf473354f3d43844
+	commit = 9b4e1194d9de03881b93a13516b91f6e05e888a9
+	parent = 781365b7aa86fd11944aa07cef75299e2194c473
 	cmdver = 0.3.0
