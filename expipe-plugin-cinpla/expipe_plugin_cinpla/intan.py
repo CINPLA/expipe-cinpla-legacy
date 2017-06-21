@@ -1084,6 +1084,7 @@ class IntanPlugin(IPlugin):
             action.messages.extend(messages)
 
             if not no_run:
+                from scipy import signal
                 anas = intan_file.analog_signals[0].signal
                 fs = intan_file.sample_rate.magnitude
                 nchan = anas.shape[0]
