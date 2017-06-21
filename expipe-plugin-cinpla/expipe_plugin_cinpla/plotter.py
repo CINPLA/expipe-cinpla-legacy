@@ -107,6 +107,8 @@ class Plotter:
         import exana.tracking as tr
         from .make_spatiality_overview import make_spatiality_overview
         raw_dir = self._analysis.require_raw('spatial_overview')
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
@@ -152,11 +154,13 @@ class Plotter:
         import matplotlib.gridspec as gridspec
         from mpl_toolkits.axes_grid1 import make_axes_locatable
         raw_dir = self._analysis.require_raw('occupancy')
-
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         fname = 'occupancy_map'
         fpath = op.join(raw_dir, fname)
-        if op.isdir(fpath):
-            os.removedirs(fpath)
+        print(fpath)
+        # if op.isdir(raw_dir):
+        #     os.removedirs(raw_dir)
         try:
             fig = plt.figure()
             gs = gridspec.GridSpec(20,9)
@@ -196,6 +200,8 @@ class Plotter:
             return
         from spatial_stim_overview import spatial_stim_overview
         raw_dir = self._analysis.require_raw('spatial_stim_overview')
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
@@ -238,6 +244,8 @@ class Plotter:
         import quantities as pq
         import neo
         raw_dir = self._analysis.require_raw('time_frequency')
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         for chx in self.chxs:
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
@@ -275,6 +283,8 @@ class Plotter:
         import quantities as pq
         import neo
         raw_dir = self._analysis.require_raw('power_spectrum_density')
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         for chx in self.chxs:
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
@@ -303,6 +313,8 @@ class Plotter:
         import quantities as pq
         import matplotlib.pyplot as plt
         raw_dir = self._analysis.require_raw('stimulation_statistics')
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
@@ -363,7 +375,8 @@ class Plotter:
         import warnings
         # from .signal_tools import downsample_250
         raw_dir = self._analysis.require_raw('spike_lfp_coherence')
-
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         starts = [self.blk.segments[0].t_start]
         stops = [self.blk.segments[0].t_stop]
         if self.epo is not None:
@@ -505,6 +518,9 @@ class Plotter:
         import matplotlib.pyplot as plt
         import matplotlib.gridspec as gridspec
         raw_dir = self._analysis.require_raw('spike_statistics')
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
+        
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
@@ -554,6 +570,8 @@ class Plotter:
             print("Could not find epoch of type 'visual_stimulus'")
             raise
         raw_dir = self._analysis.require_raw('orient_tuning_overview')
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         stim_off_epoch = st.make_stimulus_off_epoch(stim_epoch)
         off_rates = st.compute_spontan_rate(self.chxs, stim_off_epoch)
 
