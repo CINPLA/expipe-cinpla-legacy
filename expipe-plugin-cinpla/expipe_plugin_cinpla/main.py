@@ -207,6 +207,7 @@ class CinplaPlugin(IPlugin):
             """Transfer a dataset related to an expipe action
 
             COMMAND: action-id: Provide action id to find exdir path"""
+            from datetime import datetime
             assert server in expipe.config.settings
             server_dict = expipe.config.settings.get(server)
             if len(exclude) > 0 and len(include) > 0:
@@ -216,10 +217,12 @@ class CinplaPlugin(IPlugin):
             import shutil
             project = expipe.get_project(USER_PARAMS['project_id'])
             action = project.require_action(action_id)
-            action.messages.extend([{'message': m,
-                                     'user': user,
-                                     'datetime': datetime.now()}
-                                   for m in message])
+            user = USER_PARAMS['user_name']
+            if message is not None:
+                action.messages.extend([{'message': m,
+                                         'user': user,
+                                         'datetime': datetime.now()}
+                                         for m in message])
             fr = action.require_filerecord()
 
             host, user, pas, port = get_login(hostname=hostname,

@@ -157,43 +157,37 @@ class Plotter:
         fpath = op.join(raw_dir, fname)
         if op.isdir(fpath):
             os.removedirs(fpath)
-        # try:
-        fig = plt.figure()
-        gs = gridspec.GridSpec(20,9)
-        ax1 = fig.add_subplot(gs[:9, 3:6])
-        ax2 = fig.add_subplot(gs[11:, 3:6])
-        tr.plot_path(self.x, self.y, self.t,
-                          box_xlen=par['box_xlen'],
-                          box_ylen=par['box_ylen'],
-                          ax=ax1)
-        ax1.set_xlim([0, 1])
-        ax1.set_ylim([0, 1])
-        im, max_t = tr.plot_occupancy(self.x, self.y, self.t,
-                          binsize=par['spat_binsize'],
-                          box_xlen=par['box_xlen'],
-                          box_ylen=par['box_ylen'],
-                          ax=ax2)
-        divider = make_axes_locatable(ax2)
-        cax = divider.append_axes("bottom", size="5%", pad=0.05)
+        try:
+            fig = plt.figure()
+            gs = gridspec.GridSpec(20,9)
+            ax1 = fig.add_subplot(gs[:9, 3:6])
+            ax2 = fig.add_subplot(gs[11:, 3:6])
+            tr.plot_path(self.x, self.y, self.t,
+                            box_xlen=par['box_xlen'],
+                            box_ylen=par['box_ylen'],
+                            ax=ax1)
+            im, max_t = tr.plot_occupancy(self.x, self.y, self.t,
+                            binsize=par['spat_binsize'],
+                            box_xlen=par['box_xlen'],
+                            box_ylen=par['box_ylen'],
+                            ax=ax2)
+            divider = make_axes_locatable(ax2)
+            cax = divider.append_axes("bottom", size="5%", pad=0.05)
 
-        plt.colorbar(im, cax=cax)
-        cbar = fig.colorbar(im, cax = cax, ticks= [int(0), max_t], orientation='horizontal')
+            plt.colorbar(im, cax=cax)
+            cbar = fig.colorbar(im, cax = cax, ticks= [int(0), max_t], orientation='horizontal')
 
-        ax1.axis('tight')
-        ax2.axis('tight')
+            ax1.axis('tight')
+            ax2.axis('tight')
 
-        ax1.set_xticks([])
-        ax1.set_yticks([])
-        ax1.axes.xaxis.set_ticklabels([])
-        ax1.axes.yaxis.set_ticklabels([])
-        # ax2.axes.xaxis.set_ticklabels([])
-        # ax2.axes.yaxis.set_ticklabels([])
-        ax2.axis('off')
-
-
-        # except Exception as e:
-        #     with open(fpath + '.exception', 'w+') as f:
-        #         print(str(e), file=f)
+            ax1.set_xticks([])
+            ax1.set_yticks([])
+            ax1.axes.xaxis.set_ticklabels([])
+            ax1.axes.yaxis.set_ticklabels([])
+            ax2.axis('off')
+        except Exception as e:
+            with open(fpath + '.exception', 'w+') as f:
+                print(str(e), file=f)
         self.savefig(fpath, fig)
 
     def spatial_stim_overview(self):
@@ -514,7 +508,7 @@ class Plotter:
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
-                continue
+                continue            
             if not self._delete_figures(raw_dir, group_id):
                 continue
             print('Plotting spike statistics, ' +
