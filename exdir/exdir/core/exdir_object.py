@@ -168,18 +168,22 @@ class Object():
         if isinstance(validate_name, str):
             if validate_name == 'simple':
                 validate_name = filename_validation.thorough
+            elif validate_name == 'thorough':
+                validate_name = filename_validation.thorough
             elif validate_name == 'strict':
                 validate_name = filename_validation.strict
             elif validate_name == 'none':
                 validate_name = filename_validation.none
             else:
-                raise ValueError('IO name rule "' + validate_name + '" not recognized,' +
-                                 'name rule must be one of "strict", "simple", ' +
-                                 '"thorough", "none"')
+                raise ValueError(
+                    'IO name rule "{}" not recognized, '
+                    'name rule must be one of "strict", "simple", '
+                    '"thorough", "none"'.format(validate_name)
+                )
 
             warnings.warn(
-                "WARNING: validate_name should be set to one of the functions in " +
-                "the filename_validation module. " +
+                "WARNING: validate_name should be set to one of the functions in "
+                "the exdir.filename_validation module. "
                 "Defining naming rule by string is no longer supported."
             )
 
@@ -191,8 +195,7 @@ class Object():
 
     @property
     def attrs(self):
-        return Attribute(self, mode=Attribute.Mode.ATTRIBUTES,
-                         io_mode=self.io_mode)
+        return Attribute(self, mode=Attribute.Mode.ATTRIBUTES, io_mode=self.io_mode)
 
     @attrs.setter
     def attrs(self, value):
@@ -200,8 +203,7 @@ class Object():
 
     @property
     def meta(self):
-        return Attribute(self, mode=Attribute.Mode.METADATA,
-                         io_mode=self.io_mode)
+        return Attribute(self, mode=Attribute.Mode.METADATA, io_mode=self.io_mode)
 
     @property
     def attributes_filename(self):
@@ -219,18 +221,26 @@ class Object():
             raise FileExistsError("'{}' already exists in '{}'".format(name, self))
         directory_name.mkdir()
         return Raw(
-            self.root_directory,
-            self.parent_path,
-            name,
+            root_directory=self.root_directory,
+            parent_path=self.parent_path,
+            object_name=name,
             io_mode=self.io_mode
         )
 
     def require_raw(self, name):
+        from .raw import Raw
         directory_name = self.directory / name
         if directory_name.exists():
             if is_nonraw_object_directory(directory_name):
-                raise FileExistsError("Directory '" + directory_name + "' already exists, but is not raw.")
-            return directory_name
+                raise FileExistsError(
+                    "Directory '{}' already exists, but is not raw.".format(directory_name)
+                )
+            return Raw(
+                root_directory=self.root_directory,
+                parent_path=self.parent_path,
+                object_name=name,
+                io_mode=self.io_mode
+            )
 
         return self.create_raw(name)
 
