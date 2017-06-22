@@ -10,7 +10,7 @@ from .action_tools import (generate_templates, _get_local_path,
 from exana.misc.signal_tools import (create_klusta_prm, save_binary_format, apply_CAR,
                                      filter_analog_signals, ground_bad_channels,
                                      remove_stimulation_artifacts, duplicate_bad_channels,
-                                     extract_rising_edges)
+                                     extract_rising_edges, find_frequency_range)
 import quantities as pq
 import shutil
 import sys
@@ -1040,7 +1040,6 @@ class IntanPlugin(IPlugin):
             action = project.require_action(action_id)
             action.datetime = openephys_file.datetime
             action.type = 'Recording'
-            print(type(action.tags))
             action.tags.extend(list(tag) + ['open-ephys'])
             print('Registering subject id ' + subject_id)
             action.subjects = [subject_id]
@@ -1097,19 +1096,17 @@ class IntanPlugin(IPlugin):
                 if pre_filter:
                     anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
                                                      fs=fs, filter_type='bandpass')
+                
                 if filter_noise:
                     freq_range=[2000, 4000]
-                    fpre, Pxxpre = signal.welch(anas[:4], fs, nperseg=1024)
-                    avg_spectrum = np.mean(Pxxpre, axis=0)
-                    fpeak = fpre[np.where((fpre>freq_range[0]) & (fpre<freq_range[1]))][np.argmax(
-                        avg_spectrum[np.where((fpre>freq_range[0]) & (fpre<freq_range[1]))])]*pq.Hz
+                    fpeak = find_frequency_range(anas, intan_file.sample_rate, freq_range)
                     stopband = [fpeak-150*pq.Hz, fpeak+150*pq.Hz]
                     anas = filter_analog_signals(anas, freq=stopband,
                                                  fs=fs, filter_type='bandstop', order=2)
 
                 if len(ground) != 0:
                     ground = [int(g) for g in ground]
-                    anas = ground_bad_channels(anas, ground)
+                    anas = ground_bad_channels(anas, ground, copy_signal=False)
 
                 if split_probe is not None:
                     split_chans = np.arange(nchan)
@@ -1142,16 +1139,17 @@ class IntanPlugin(IPlugin):
                             trigger_ttl = openephys_file.digital_in_signals[0].times[trigger_chan]
                     else:
                         trigger_ttl = []
-                    anas, _ = remove_stimulation_artifacts(anas, intan_file.times, trigger_ttl, mode='zero')
+                    anas, _ = remove_stimulation_artifacts(anas, intan_file.times, trigger_ttl, 
+                                                           mode='zero', copy_signal=False)
 
                 if common_ref == 'car':
-                    anas, _ = apply_CAR(anas, car_type='mean', split_probe=split_probe)
+                    anas, _ = apply_CAR(anas, car_type='mean', split_probe=split_probe, copy_signal=False)
                 elif common_ref == 'cmr':
-                    anas, _ = apply_CAR(anas, car_type='median', split_probe=split_probe)
+                    anas, _ = apply_CAR(anas, car_type='median', split_probe=split_probe, copy_signal=False)
 
                 if len(ground) != 0:
                     duplicate = [int(g) for g in ground]
-                    anas = duplicate_bad_channels(anas, duplicate, prb_path)
+                    anas = duplicate_bad_channels(anas, duplicate, prb_path, copy_signal=False)
 
                 if action is not None:
                     prepro = {
@@ -1167,6 +1165,11 @@ class IntanPlugin(IPlugin):
                         'probe_split': (str(split_chans[:split_probe]) +
                                         str(split_chans[split_probe:]))
                     }
+                    if filter_noise:
+                        prepro['filter'].update({
+                            'filter_noise_low' : stopband[0],
+                            'filter_noise_high' : stopband[1]
+                        })
                     action.require_module(name='preprocessing', contents=prepro,
                                           overwrite=True)
 

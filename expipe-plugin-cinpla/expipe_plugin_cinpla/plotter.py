@@ -107,6 +107,8 @@ class Plotter:
         import exana.tracking as tr
         from .make_spatiality_overview import make_spatiality_overview
         raw_dir = self._analysis.require_raw('spatial_overview')
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
@@ -152,48 +154,44 @@ class Plotter:
         import matplotlib.gridspec as gridspec
         from mpl_toolkits.axes_grid1 import make_axes_locatable
         raw_dir = self._analysis.require_raw('occupancy')
-
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         fname = 'occupancy_map'
         fpath = op.join(raw_dir, fname)
-        if op.isdir(fpath):
-            os.removedirs(fpath)
-        # try:
-        fig = plt.figure()
-        gs = gridspec.GridSpec(20,9)
-        ax1 = fig.add_subplot(gs[:9, 3:6])
-        ax2 = fig.add_subplot(gs[11:, 3:6])
-        tr.plot_path(self.x, self.y, self.t,
-                          box_xlen=par['box_xlen'],
-                          box_ylen=par['box_ylen'],
-                          ax=ax1)
-        ax1.set_xlim([0, 1])
-        ax1.set_ylim([0, 1])
-        im, max_t = tr.plot_occupancy(self.x, self.y, self.t,
-                          binsize=par['spat_binsize'],
-                          box_xlen=par['box_xlen'],
-                          box_ylen=par['box_ylen'],
-                          ax=ax2)
-        divider = make_axes_locatable(ax2)
-        cax = divider.append_axes("bottom", size="5%", pad=0.05)
+        print(fpath)
+        # if op.isdir(raw_dir):
+        #     os.removedirs(raw_dir)
+        try:
+            fig = plt.figure()
+            gs = gridspec.GridSpec(20,9)
+            ax1 = fig.add_subplot(gs[:9, 3:6])
+            ax2 = fig.add_subplot(gs[11:, 3:6])
+            tr.plot_path(self.x, self.y, self.t,
+                            box_xlen=par['box_xlen'],
+                            box_ylen=par['box_ylen'],
+                            ax=ax1)
+            im, max_t = tr.plot_occupancy(self.x, self.y, self.t,
+                            binsize=par['spat_binsize'],
+                            box_xlen=par['box_xlen'],
+                            box_ylen=par['box_ylen'],
+                            ax=ax2)
+            divider = make_axes_locatable(ax2)
+            cax = divider.append_axes("bottom", size="5%", pad=0.05)
 
-        plt.colorbar(im, cax=cax)
-        cbar = fig.colorbar(im, cax = cax, ticks= [int(0), max_t], orientation='horizontal')
+            plt.colorbar(im, cax=cax)
+            cbar = fig.colorbar(im, cax = cax, ticks= [int(0), max_t], orientation='horizontal')
 
-        ax1.axis('tight')
-        ax2.axis('tight')
+            ax1.axis('tight')
+            ax2.axis('tight')
 
-        ax1.set_xticks([])
-        ax1.set_yticks([])
-        ax1.axes.xaxis.set_ticklabels([])
-        ax1.axes.yaxis.set_ticklabels([])
-        # ax2.axes.xaxis.set_ticklabels([])
-        # ax2.axes.yaxis.set_ticklabels([])
-        ax2.axis('off')
-
-
-        # except Exception as e:
-        #     with open(fpath + '.exception', 'w+') as f:
-        #         print(str(e), file=f)
+            ax1.set_xticks([])
+            ax1.set_yticks([])
+            ax1.axes.xaxis.set_ticklabels([])
+            ax1.axes.yaxis.set_ticklabels([])
+            ax2.axis('off')
+        except Exception as e:
+            with open(fpath + '.exception', 'w+') as f:
+                print(str(e), file=f)
         self.savefig(fpath, fig)
 
     def spatial_stim_overview(self):
@@ -202,6 +200,8 @@ class Plotter:
             return
         from spatial_stim_overview import spatial_stim_overview
         raw_dir = self._analysis.require_raw('spatial_stim_overview')
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
@@ -244,6 +244,8 @@ class Plotter:
         import quantities as pq
         import neo
         raw_dir = self._analysis.require_raw('time_frequency')
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         for chx in self.chxs:
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
@@ -281,6 +283,8 @@ class Plotter:
         import quantities as pq
         import neo
         raw_dir = self._analysis.require_raw('power_spectrum_density')
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         for chx in self.chxs:
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
@@ -309,6 +313,8 @@ class Plotter:
         import quantities as pq
         import matplotlib.pyplot as plt
         raw_dir = self._analysis.require_raw('stimulation_statistics')
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
@@ -369,7 +375,8 @@ class Plotter:
         import warnings
         # from .signal_tools import downsample_250
         raw_dir = self._analysis.require_raw('spike_lfp_coherence')
-
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         starts = [self.blk.segments[0].t_start]
         stops = [self.blk.segments[0].t_stop]
         if self.epo is not None:
@@ -511,10 +518,13 @@ class Plotter:
         import matplotlib.pyplot as plt
         import matplotlib.gridspec as gridspec
         raw_dir = self._analysis.require_raw('spike_statistics')
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
+        
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
-                continue
+                continue            
             if not self._delete_figures(raw_dir, group_id):
                 continue
             print('Plotting spike statistics, ' +
@@ -560,6 +570,8 @@ class Plotter:
             print("Could not find epoch of type 'visual_stimulus'")
             raise
         raw_dir = self._analysis.require_raw('orient_tuning_overview')
+        if type(raw_dir) is not str:
+            raw_dir = raw_dir.directory
         stim_off_epoch = st.make_stimulus_off_epoch(stim_epoch)
         off_rates = st.compute_spontan_rate(self.chxs, stim_off_epoch)
 

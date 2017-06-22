@@ -199,6 +199,7 @@ class CinplaPlugin(IPlugin):
             """Transfer a dataset related to an expipe action
 
             COMMAND: action-id: Provide action id to find exdir path"""
+            from datetime import datetime
             assert server in expipe.config.settings
             server_dict = expipe.config.settings.get(server)
             if len(exclude) > 0 and len(include) > 0:
