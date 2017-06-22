@@ -33,7 +33,7 @@ def convert(openephys_file, exdir_path):
     processing = exdir_file.require_group("processing")
     subject = general.require_group("subject")
 
-    target_folder = op.join(acquisition.directory, openephys_file.session)
+    target_folder = op.join(str(acquisition.directory), openephys_file.session)
     acquisition.attrs["openephys_session"] = openephys_file.session
     if openephys_file.rhythm:
         acquisition.attrs["acquisition_system"] = 'OpenEphys'
@@ -106,7 +106,7 @@ def generate_spike_trains(exdir_path, openephys_file, source='klusta'):
         exdir_file = exdir.File(exdir_path)
         acquisition = exdir_file["acquisition"]
         openephys_session = acquisition.attrs["openephys_session"]
-        openephys_directory = op.join(acquisition.directory, openephys_session)
+        openephys_directory = op.join(str(acquisition.directory), openephys_session)
         kwikfile = [f for f in os.listdir(openephys_directory) if f.endswith('_klusta.kwik')]
         if len(kwikfile) > 0:
             kwikfile = op.join(openephys_directory, kwikfile[0])

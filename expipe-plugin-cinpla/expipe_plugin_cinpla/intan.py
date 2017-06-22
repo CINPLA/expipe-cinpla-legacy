@@ -126,10 +126,10 @@ class IntanPlugin(IPlugin):
                 if acquisition.attrs['acquisition_system'] != 'Intan':
                     raise ValueError('No Intan aquisition system ' +
                                      'related to this action')
-                rhs_file = [f for f in os.listdir(acquisition.directory) if f.endswith('.rhs')][0]
-                rhs_path = op.join(acquisition.directory, rhs_file)
+                rhs_file = [f for f in os.listdir(str(acquisition.directory)) if f.endswith('.rhs')][0]
+                rhs_path = op.join(str(acquisition.directory), rhs_file)
                 intan_session = acquisition.attrs["intan_session"]
-                intan_base = op.join(acquisition.directory, intan_session)
+                intan_base = op.join(str(acquisition.directory), intan_session)
                 klusta_prm = op.abspath(intan_base) + '_klusta.prm'
                 prb_path = prb_path or _get_probe_file('intan', nchan=nchan,
                                                        spikesorter='klusta')
@@ -331,7 +331,7 @@ class IntanPlugin(IPlugin):
                     raise ValueError('No Open Ephys aquisition system ' +
                                      'related to this action')
                 openephys_session = acquisition.attrs["openephys_session"]
-                intan_ephys_path = op.join(acquisition.directory, openephys_session)
+                intan_ephys_path = op.join(str(acquisition.directory), openephys_session)
                 intan_ephys_base = op.join(intan_ephys_path, openephys_session)
                 rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
                 rhs_path = op.join(intan_ephys_path, rhs_file)
@@ -1096,7 +1096,7 @@ class IntanPlugin(IPlugin):
                 if pre_filter:
                     anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
                                                      fs=fs, filter_type='bandpass')
-                
+
                 if filter_noise:
                     freq_range=[2000, 4000]
                     fpeak = find_frequency_range(anas, intan_file.sample_rate, freq_range)
@@ -1139,7 +1139,7 @@ class IntanPlugin(IPlugin):
                             trigger_ttl = openephys_file.digital_in_signals[0].times[trigger_chan]
                     else:
                         trigger_ttl = []
-                    anas, _ = remove_stimulation_artifacts(anas, intan_file.times, trigger_ttl, 
+                    anas, _ = remove_stimulation_artifacts(anas, intan_file.times, trigger_ttl,
                                                            mode='zero', copy_signal=False)
 
                 if common_ref == 'car':
@@ -1260,7 +1260,7 @@ class IntanPlugin(IPlugin):
                     raise ValueError('No Intan aquisition system ' +
                                      'related to this action')
                 intan_session = acquisition.attrs["openephys_session"]
-                intan_path = op.join(acquisition.directory, intan_session)
+                intan_path = op.join(str(acquisition.directory), intan_session)
             prb_path = prb_path or _get_probe_file('intan', nchan=nchan,
                                                    spikesorter='klusta')
             intan_file = pyopenephys.File(intan_path, prb_path)

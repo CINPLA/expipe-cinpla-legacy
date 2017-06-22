@@ -124,7 +124,7 @@ class OpenEphysPlugin(IPlugin):
                     raise ValueError('No Open Ephys aquisition system ' +
                                      'related to this action')
                 openephys_session = acquisition.attrs["openephys_session"]
-                openephys_path = op.join(acquisition.directory, openephys_session)
+                openephys_path = op.join(str(acquisition.directory), openephys_session)
                 openephys_base = op.join(openephys_path, openephys_session)
                 klusta_prm = op.abspath(openephys_base) + '.prm'
                 prb_path = prb_path or _get_probe_file('oe', nchan=nchan,
@@ -429,7 +429,7 @@ class OpenEphysPlugin(IPlugin):
                     raise ValueError('No Open Ephys aquisition system ' +
                                      'related to this action')
                 openephys_session = acquisition.attrs["openephys_session"]
-                openephys_path = op.join(acquisition.directory, openephys_session)
+                openephys_path = op.join(str(acquisition.directory), openephys_session)
             prb_path = prb_path or _get_probe_file('oe', nchan=nchan,
                                                    spikesorter='klusta')
             openephys_file = pyopenephys.File(openephys_path, prb_path)

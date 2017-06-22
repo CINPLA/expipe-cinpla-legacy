@@ -24,7 +24,7 @@ else:
 def generate_axona_opto(exdir_path, io_channel=8, **annotations):
     exdir_object = exdir.File(exdir_path)
     session = exdir_object['acquisition'].attrs['axona_session']
-    param = extract_laser_pulse(op.join(exdir_object['acquisition'].directory,
+    param = extract_laser_pulse(op.join(str(exdir_object['acquisition'].directory),
                                         session))
     if annotations:
         param.update(annotations)
@@ -45,7 +45,7 @@ def generate_axona_opto(exdir_path, io_channel=8, **annotations):
 def generate_openephys_opto(exdir_path, io_channel, **attrs):
     exdir_object = exdir.File(exdir_path)
     session = exdir_object['acquisition'].attrs['openephys_session']
-    openephys_path = op.join(exdir_object['acquisition'].directory, session)
+    openephys_path = op.join(str(exdir_object['acquisition'].directory), session)
     param = extract_laser_pulse(openephys_path)
     openephys_file = pyopenephys.File(openephys_path)
     if attrs:

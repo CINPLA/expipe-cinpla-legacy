@@ -169,7 +169,7 @@ def create_notebook(exdir_path, channel_group=0):
     import exdir
     import json
     exob = exdir.File(exdir_path)
-    analysis_path = exob.require_group('analysis').directory
+    analysis_path = str(exob.require_group('analysis').directory)
     currdir = op.dirname(op.abspath(__file__))
     fname = op.join(currdir, 'template_notebook.ipynb')
     with open(fname, 'r') as infile:

@@ -35,7 +35,7 @@ def convert(axona_file, exdir_path):
     processing = exdir_file.require_group("processing")
     subject = general.require_group("subject")
 
-    target_folder = acquisition.require_raw(axona_file.session).directory
+    target_folder = str(acquisition.require_raw(axona_file.session).directory)
     acquisition.attrs["axona_session"] = axona_file.session
     acquisition.attrs["acquisition_system"] = 'Axona'
     related_files = glob.glob(os.path.join(axona_directory,
