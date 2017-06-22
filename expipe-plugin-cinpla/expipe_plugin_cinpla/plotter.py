@@ -66,9 +66,9 @@ class Plotter:
                                                          f_cut=par['f_cut'])
         self.x, self.y, self.t = self.x, self.y, self.t
         if len(self.seg.epochs) == 1:
-            self.epo = self.seg.epochs[0]
+            self.epoch = self.seg.epochs[0]
         else:
-            self.epo = None
+            self.epoch = None
         self._exdir_object = exdir.File(exdir_path)
         self._processing = self._exdir_object.require_group("processing")
         self._epochs = self._exdir_object.require_group("epochs")
@@ -106,7 +106,7 @@ class Plotter:
     def spatial_overview(self):
         import exana.tracking as tr
         from .make_spatiality_overview import make_spatiality_overview
-        raw_dir = self._analysis.require_raw('spatial_overview')
+        raw_dir = self._analysis.require_raw('spatial_overview').directory
         if type(raw_dir) is not str:
             raw_dir = raw_dir.directory
         for nr, chx in enumerate(self.chxs):
@@ -153,7 +153,7 @@ class Plotter:
         import matplotlib.pyplot as plt
         import matplotlib.gridspec as gridspec
         from mpl_toolkits.axes_grid1 import make_axes_locatable
-        raw_dir = self._analysis.require_raw('occupancy')
+        raw_dir = self._analysis.require_raw('occupancy').directory
         if type(raw_dir) is not str:
             raw_dir = raw_dir.directory
         fname = 'occupancy_map'
@@ -195,11 +195,11 @@ class Plotter:
         self.savefig(fpath, fig)
 
     def spatial_stim_overview(self):
-        if self.epo is None:
+        if self.epoch is None:
             print('There is no epochs related to this experiment')
             return
         from spatial_stim_overview import spatial_stim_overview
-        raw_dir = self._analysis.require_raw('spatial_stim_overview')
+        raw_dir = self._analysis.require_raw('spatial_stim_overview').directory
         if type(raw_dir) is not str:
             raw_dir = raw_dir.directory
         for nr, chx in enumerate(self.chxs):
@@ -226,7 +226,7 @@ class Plotter:
                 try:
                     fig, data = spatial_stim_overview(spiketrain=sptr,
                                                       analogsignals=anas,
-                                                      epoch=self.epo,
+                                                      epoch=self.epoch,
                                                       pos_x=self.x, pos_y=self.y,
                                                       pos_t=self.t, pos_ang=self.ang,
                                                       pos_ang_t=self.ang_t
@@ -243,7 +243,7 @@ class Plotter:
         from exana.time_frequency import plot_tfr
         import quantities as pq
         import neo
-        raw_dir = self._analysis.require_raw('time_frequency')
+        raw_dir = self._analysis.require_raw('time_frequency').directory
         if type(raw_dir) is not str:
             raw_dir = raw_dir.directory
         for chx in self.chxs:
@@ -257,9 +257,9 @@ class Plotter:
             for num, ana in enumerate(chx.analogsignals): # TODO write the correct channel
                 fname = '{} channelproxy {}'.format(chx.name, num).replace(" ", "_")
                 fpath = op.join(raw_dir, fname)
-                if self.epo is not None:
-                    epo_over = epoch_overview(self.epo,
-                                              np.median(np.diff(self.epo.times)))
+                if self.epoch is not None:
+                    epo_over = epoch_overview(self.epoch,
+                                              np.median(np.diff(self.epoch.times)))
                     if len(epo_over.times) > 15:
                         with open(fpath + '.exception', 'w+') as f:
                             print('Counted {} '.format(len(epo_over.times)) +
@@ -269,7 +269,7 @@ class Plotter:
                 else:
                     epo_over = None
                 try:
-                    fig = plot_tfr(ana, epo=epo_over, f0=3, flim=[0, 120],
+                    fig = plot_tfr(ana, epoch=epo_over, f0=3, flim=[0, 120],
                                    plot_ana=True)
                 except Exception as e:
                     with open(fpath + '.exception', 'w+') as f:
@@ -282,7 +282,7 @@ class Plotter:
         from exana.time_frequency import plot_psd
         import quantities as pq
         import neo
-        raw_dir = self._analysis.require_raw('power_spectrum_density')
+        raw_dir = self._analysis.require_raw('power_spectrum_density').directory
         if type(raw_dir) is not str:
             raw_dir = raw_dir.directory
         for chx in self.chxs:
@@ -305,14 +305,14 @@ class Plotter:
                 self.savefig(fpath, fig)
 
     def stimulation_statistics(self, ylim=[0, 30]):
-        if self.epo is None:
+        if self.epoch is None:
             print('There is no epochs related to this experiment')
             return
         from exana.stimulus import plot_psth
         from exana.stimulus import epoch_overview
         import quantities as pq
         import matplotlib.pyplot as plt
-        raw_dir = self._analysis.require_raw('stimulation_statistics')
+        raw_dir = self._analysis.require_raw('stimulation_statistics').directory
         if type(raw_dir) is not str:
             raw_dir = raw_dir.directory
         for nr, chx in enumerate(self.chxs):
@@ -330,14 +330,14 @@ class Plotter:
                 try:
                     fname = '{} {} stim macro'.format(chx.name, unit.name)
                     fpath = op.join(raw_dir, fname).replace(" ", "_")
-                    epo_over = epoch_overview(self.epo,
-                                              np.median(np.diff(self.epo.times)))
+                    epo_over = epoch_overview(self.epoch,
+                                              np.median(np.diff(self.epoch.times)))
                     t_start = -np.round(epo_over.durations[0])
                     t_stop = np.round(epo_over.durations[0])
                     binsize = (abs(t_start) + abs(t_stop)) / 100.
                     fig = plt.figure()
 
-                    plot_psth(sptr=sptr, epo=epo_over, t_start=t_start,
+                    plot_psth(sptr=sptr, epoch=epo_over, t_start=t_start,
                               t_stop=t_stop, output='counts', binsize=binsize,
                               fig=fig, ylim=ylim) # TODO does not manage to send ylim???
                     self.savefig(fpath, fig)
@@ -349,10 +349,10 @@ class Plotter:
                     fname = '{} {} stim micro'.format(chx.name, unit.name)
                     fpath = op.join(raw_dir, fname).replace(" ", "_")
                     fig = plt.figure()
-                    t_start = -np.round(self.epo.durations[0].rescale('ms')) * 3  # FIXME is milliseconds always good?
-                    t_stop = np.round(self.epo.durations[0].rescale('ms')) * 3
+                    t_start = -np.round(self.epoch.durations[0].rescale('ms')) * 3  # FIXME is milliseconds always good?
+                    t_stop = np.round(self.epoch.durations[0].rescale('ms')) * 3
                     binsize = (abs(t_start) + abs(t_stop)) / 100.
-                    plot_psth(sptr=sptr, epo=self.epo, t_start=t_start,
+                    plot_psth(sptr=sptr, epoch=self.epoch, t_start=t_start,
                               t_stop=t_stop, output='counts', binsize=binsize,
                               fig=fig)
                     self.savefig(fpath, fig)
@@ -374,17 +374,17 @@ class Plotter:
         import matplotlib.pyplot as plt
         import warnings
         # from .signal_tools import downsample_250
-        raw_dir = self._analysis.require_raw('spike_lfp_coherence')
+        raw_dir = self._analysis.require_raw('spike_lfp_coherence').directory
         if type(raw_dir) is not str:
             raw_dir = raw_dir.directory
         starts = [self.blk.segments[0].t_start]
         stops = [self.blk.segments[0].t_stop]
-        if self.epo is not None:
-            epo_over = epoch_overview(self.epo,
-                                      np.median(np.diff(self.epo.times)))
+        if self.epoch is not None:
+            epo_over = epoch_overview(self.epoch,
+                                      np.median(np.diff(self.epoch.times)))
             if len(epo_over) > 10:
                 epo_over = None
-                warnings.warn('More than 10 trains was found, skipping epo')
+                warnings.warn('More than 10 trains was found, skipping epoch')
 
             if epo_over is not None:
                 starts = starts + [t for t in epo_over.times]
@@ -517,14 +517,14 @@ class Plotter:
         from exana.statistics import correlogram, plot_isi_hist
         import matplotlib.pyplot as plt
         import matplotlib.gridspec as gridspec
-        raw_dir = self._analysis.require_raw('spike_statistics')
+        raw_dir = self._analysis.require_raw('spike_statistics').directory
         if type(raw_dir) is not str:
             raw_dir = raw_dir.directory
-        
+
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
-                continue            
+                continue
             if not self._delete_figures(raw_dir, group_id):
                 continue
             print('Plotting spike statistics, ' +
@@ -569,7 +569,7 @@ class Plotter:
         except ValueError:
             print("Could not find epoch of type 'visual_stimulus'")
             raise
-        raw_dir = self._analysis.require_raw('orient_tuning_overview')
+        raw_dir = self._analysis.require_raw('orient_tuning_overview').directory
         if type(raw_dir) is not str:
             raw_dir = raw_dir.directory
         stim_off_epoch = st.make_stimulus_off_epoch(stim_epoch)

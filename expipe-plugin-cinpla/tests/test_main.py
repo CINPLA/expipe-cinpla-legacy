@@ -36,8 +36,8 @@ def test_annotate(setup_project_action):
                                  '-m', 'second message'])
     if result.exit_code != 0:
         raise result.exception
-    assert action.tags[0] == pytest.POSSIBLE_TAGS[0]
-    assert action.tags[1] == pytest.POSSIBLE_TAGS[1]
+    assert all(tag in [pytest.POSSIBLE_TAGS[0], pytest.POSSIBLE_TAGS[1]]
+              for tag in action.tags)
     assert action.messages.messages[0]['message'] == 'first message'
     assert action.messages.messages[1]['message'] == 'second message'
     assert action.messages.messages[0]['user'] == pytest.USER_PAR.user_name

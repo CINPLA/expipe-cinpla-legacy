@@ -5,6 +5,8 @@ import click
 from click.testing import CliRunner
 import quantities as pq
 import os.path as op
+from expipe_plugin_cinpla.axona import AxonaPlugin
+from expipe_plugin_cinpla.main import CinplaPlugin
 
 expipe.ensure_testing()
 
@@ -14,10 +16,7 @@ expipe.ensure_testing()
 def cli(ctx):
     pass
 
-from expipe_plugin_cinpla.axona import AxonaPlugin
 AxonaPlugin().attach_to_cli(cli)
-
-from expipe_plugin_cinpla.main import CinplaPlugin
 CinplaPlugin().attach_to_cli(cli)
 
 

@@ -44,7 +44,7 @@ class CinplaPlugin(IPlugin):
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_local:
-                exdir_path = _get_local_path(fr)
+                exdir_path = _get_local_path(fr, assert_exists=True)
             else:
                 exdir_path = fr.server_path
             fname = create_notebook(exdir_path)

@@ -121,7 +121,7 @@ def _get_local_path(file_record, assert_exists=False, make=False):
     if not op.exists(local_path) and not assert_exists and make:
         os.makedirs(local_path)
     elif not op.exists(local_path) and assert_exists:
-        raise IOError('Path does not exist.')
+        raise IOError('Path "' + local_path + '" does not exist.')
     return local_path
 
 
@@ -167,10 +167,9 @@ def _get_probe_file(system, nchan, spikesorter='klusta'):
 
 def create_notebook(exdir_path, channel_group=0):
     import exdir
+    import json
     exob = exdir.File(exdir_path)
     analysis_path = exob.require_group('analysis').directory
-    import json
-    from pprint import pprint
     currdir = op.dirname(op.abspath(__file__))
     fname = op.join(currdir, 'template_notebook.ipynb')
     with open(fname, 'r') as infile:
