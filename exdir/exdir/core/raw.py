@@ -1,7 +1,7 @@
-from . import abstract_object
+from . import exdir_object as exob
 
 
-class Raw(abstract_object.AbstractObject):
+class Raw(exob.Object):
     """
     Raw objects are simple folders with any content.
 
@@ -12,9 +12,3 @@ class Raw(abstract_object.AbstractObject):
                                   parent_path=parent_path,
                                   object_name=object_name,
                                   io_mode=io_mode)
-
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self.__dict__ == other.__dict__
-
-        return False

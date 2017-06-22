@@ -12,6 +12,7 @@
 
 import pytest
 import os
+import pathlib
 
 from exdir.core import File, Group
 from exdir.core.exdir_object import _create_object_directory, is_nonraw_object_directory, DATASET_TYPENAME, FILE_TYPENAME
@@ -23,100 +24,101 @@ from conftest import remove
 
 
 def test_file_init(setup_teardown_folder):
-    no_exdir = os.path.join(pytest.TESTPATH, "no_exdir")
+    no_exdir = setup_teardown_folder[0] / "no_exdir"
 
     f = File(no_exdir, mode="w")
     f.close()
-    assert is_nonraw_object_directory(no_exdir + ".exdir")
-    remove(pytest.TESTFILE)
+    assert is_nonraw_object_directory(no_exdir.with_suffix(".exdir"))
+    remove(setup_teardown_folder[1])
 
-    f = File(pytest.TESTFILE, mode="w")
+    f = File(setup_teardown_folder[1], mode="w")
     f.close()
-    assert is_nonraw_object_directory(pytest.TESTFILE)
-    remove(pytest.TESTFILE)
+    assert is_nonraw_object_directory(setup_teardown_folder[1])
+    remove(setup_teardown_folder[1])
 
-    f = File(pytest.TESTFILE, mode="a")
+    f = File(setup_teardown_folder[1], mode="a")
     f.close()
-    assert is_nonraw_object_directory(pytest.TESTFILE)
-    remove(pytest.TESTFILE)
+    assert is_nonraw_object_directory(setup_teardown_folder[1])
+    remove(setup_teardown_folder[1])
 
-    f = File(pytest.TESTFILE, mode="a")
+    f = File(setup_teardown_folder[1], mode="a")
     f.close()
-    assert is_nonraw_object_directory(pytest.TESTFILE)
-    remove(pytest.TESTFILE)
+    assert is_nonraw_object_directory(setup_teardown_folder[1])
+    remove(setup_teardown_folder[1])
 
-    os.makedirs(pytest.TESTFILE)
+    setup_teardown_folder[1].mkdir(parents=True)
     with pytest.raises(FileExistsError):
-        f = File(pytest.TESTFILE, mode="w")
+        f = File(setup_teardown_folder[1], mode="w")
 
-    remove(pytest.TESTFILE)
+    remove(setup_teardown_folder[1])
 
-    _create_object_directory(pytest.TESTFILE, DATASET_TYPENAME)
+    _create_object_directory(pathlib.Path(setup_teardown_folder[1]), DATASET_TYPENAME)
     with pytest.raises(FileExistsError):
-        f = File(pytest.TESTFILE, mode="w")
+        f = File(setup_teardown_folder[1], mode="w")
 
-    remove(pytest.TESTFILE)
+    remove(setup_teardown_folder[1])
 
     with pytest.raises(IOError):
-        f = File(pytest.TESTFILE, mode="r")
+        f = File(setup_teardown_folder[1], mode="r")
     with pytest.raises(IOError):
-        f = File(pytest.TESTFILE, mode="r+")
+        f = File(setup_teardown_folder[1], mode="r+")
 
-    _create_object_directory(pytest.TESTFILE, FILE_TYPENAME)
+    _create_object_directory(pathlib.Path(setup_teardown_folder[1]), FILE_TYPENAME)
 
     with pytest.raises(FileExistsError):
-        f = File(pytest.TESTFILE, mode="w")
+        f = File(setup_teardown_folder[1], mode="w")
 
-    remove(pytest.TESTFILE)
+    remove(setup_teardown_folder[1])
 
-    _create_object_directory(pytest.TESTFILE, FILE_TYPENAME)
-    f = File(pytest.TESTFILE, mode="w", allow_remove=True)
-    remove(pytest.TESTFILE)
+    _create_object_directory(pathlib.Path(setup_teardown_folder[1]), FILE_TYPENAME)
+    f = File(setup_teardown_folder[1], mode="w", allow_remove=True)
+    remove(setup_teardown_folder[1])
 
-    _create_object_directory(pytest.TESTFILE, FILE_TYPENAME)
-
-    with pytest.raises(IOError):
-        f = File(pytest.TESTFILE, mode="w-")
+    _create_object_directory(pathlib.Path(setup_teardown_folder[1]), FILE_TYPENAME)
 
     with pytest.raises(IOError):
-        f = File(pytest.TESTFILE, mode="x")
+        f = File(setup_teardown_folder[1], mode="w-")
+
+    with pytest.raises(IOError):
+        f = File(setup_teardown_folder[1], mode="x")
 
     with pytest.raises(ValueError):
-        f = File(pytest.TESTFILE, mode="not existing")
+        f = File(setup_teardown_folder[1], mode="not existing")
 
 
 def test_create(setup_teardown_folder):
     """Mode 'w' opens file in overwrite mode."""
-    f = File(pytest.TESTFILE, 'w')
+    f = File(setup_teardown_folder[1], 'w')
     assert f
     f.create_group('foo')
     f.close()
 
-    f = File(pytest.TESTFILE, 'w', allow_remove=True)
+    f = File(setup_teardown_folder[1], 'w', allow_remove=True)
     assert 'foo' not in f
     f.close()
     with pytest.raises(FileExistsError):
-        f = File(pytest.TESTFILE, 'w')
+        f = File(setup_teardown_folder[1], 'w')
 
 
 def test_create_exclusive(setup_teardown_folder):
     """Mode 'w-' opens file in exclusive mode."""
 
-    f = File(pytest.TESTFILE, 'w-')
+    f = File(setup_teardown_folder[1], 'w-')
     assert f
     f.close()
     with pytest.raises(IOError):
-        File(pytest.TESTFILE, 'w-')
+        File(setup_teardown_folder[1], 'w-')
+
 
 def test_append(setup_teardown_folder):
     """Mode 'a' opens file in append/readwrite mode, creating if necessary."""
 
-    f = File(pytest.TESTFILE, 'a')
+    f = File(setup_teardown_folder[1], 'a')
     assert f
     f.create_group('foo')
     assert 'foo' in f
 
-    f = File(pytest.TESTFILE, 'a')
+    f = File(setup_teardown_folder[1], 'a')
     assert 'foo' in f
     f.create_group('bar')
     assert 'bar' in f
@@ -125,11 +127,11 @@ def test_append(setup_teardown_folder):
 def test_readonly(setup_teardown_folder):
     """Mode 'r' opens file in readonly mode."""
 
-    f = File(pytest.TESTFILE, 'w')
+    f = File(setup_teardown_folder[1], 'w')
     f.close()
     # TODO comment in when close is implemented
     # assert not f
-    f = File(pytest.TESTFILE, 'r')
+    f = File(setup_teardown_folder[1], 'r')
     assert f
     with pytest.raises(IOError):
         f.create_group('foo')
@@ -140,102 +142,104 @@ def test_readonly(setup_teardown_folder):
 def test_readwrite(setup_teardown_folder):
     """Mode 'r+' opens existing file in readwrite mode."""
 
-    f = File(pytest.TESTFILE, 'w')
+    f = File(setup_teardown_folder[1], 'w')
     f.create_group('foo')
     f.close()
-    f = File(pytest.TESTFILE, 'r+')
+    f = File(setup_teardown_folder[1], 'r+')
     assert 'foo' in f
     f.create_group('bar')
     assert 'bar' in f
     f.close()
 
+
 def test_nonexistent_file(setup_teardown_folder):
     """Modes 'r' and 'r+' do not create files."""
 
     with pytest.raises(IOError):
-        File(pytest.TESTFILE, 'r')
+        File(setup_teardown_folder[1], 'r')
     with pytest.raises(IOError):
-        File(pytest.TESTFILE, 'r+')
+        File(setup_teardown_folder[1], 'r+')
+
 
 def test_invalid_mode(setup_teardown_folder):
     """Invalid modes raise ValueError."""
     with pytest.raises(ValueError):
-        File(pytest.TESTFILE, 'Error mode')
+        File(setup_teardown_folder[1], 'Error mode')
+
 
 def test_file_close(setup_teardown_folder):
     """Closing a file."""
-    f = File(pytest.TESTFILE, mode="w")
+    f = File(setup_teardown_folder[1], mode="w")
     f.close()
 
 
 def test_validate_name_thorough(setup_teardown_folder):
     """Test naming rule thorough."""
-    f = File(pytest.TESTFILE, validate_name=fv.thorough)
+    f = File(setup_teardown_folder[0] / "test.exdir", validate_name=fv.thorough)
     f.close()
 
+    with pytest.raises(FileExistsError):
+        File(setup_teardown_folder[0] / "Test.exdir", validate_name=fv.thorough)
     with pytest.raises(NameError):
-        File(pytest.TESTFILE[:-7] + "T.exdir", validate_name=fv.thorough)
-        File(pytest.TESTFILE[:-7] + "#.exdir", validate_name=fv.thorough)
+        File(setup_teardown_folder[0] / "tes#.exdir", validate_name=fv.thorough)
 
 
 def test_validate_name_strict(setup_teardown_folder):
     """Test naming rule strict."""
-    f = File(pytest.TESTFILE, validate_name=fv.strict)
+    f = File(setup_teardown_folder[1], validate_name=fv.strict)
     f.close()
 
     with pytest.raises(NameError):
-        File(pytest.TESTFILE+"A" , validate_name=fv.strict)
-
+        File(setup_teardown_folder[1].with_suffix(".exdirA"), validate_name=fv.strict)
 
 
 def test_validate_name_error(setup_teardown_folder):
     """Test naming rule with error."""
 
     with pytest.raises(ValueError):
-        File(pytest.TESTFILE, validate_name='Error rule')
+        File(setup_teardown_folder[1], validate_name='Error rule')
 
 
 def test_validate_name_none(setup_teardown_folder):
     """Test naming rule with error."""
 
-    File(pytest.TESTFILE+"&()", validate_name=fv.none)
-
+    File(setup_teardown_folder[1].with_name("test&().exdir"), validate_name=fv.none)
 
 
 def test_opening_with_different_validate_name(setup_teardown_folder):
     """Test opening with wrong naming rule."""
 
-    f = File(pytest.TESTFILE, "w", validate_name=fv.none)
+    f = File(setup_teardown_folder[1], "w", validate_name=fv.none)
     f.create_group("AAA")
     f.close()
 
-    f = File(pytest.TESTFILE, "a", validate_name=fv.thorough)
-    with pytest.raises(NameError):
+    # TODO changing name validation should result in warning/error
+    f = File(setup_teardown_folder[1], "a", validate_name=fv.thorough)
+    with pytest.raises(FileExistsError):
         f.create_group("aaa")
     f.close()
 
 
-
-
 def test_contains(setup_teardown_file):
     """Root group (by itself) is contained."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     f.create_group("test")
 
-    assert "/" in  f
-    assert "/test" in  f
+    assert "/" in f
+    assert "/test" in f
 
 
 def test_create_group(setup_teardown_file):
     """Root group (by itself) is contained."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("/test")
 
     assert isinstance(grp, Group)
 
+
 def test_require_group(setup_teardown_file):
     """Root group (by itself) is contained."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
 
     grp = f.require_group("/foo")
     assert isinstance(grp, Group)
@@ -243,7 +247,7 @@ def test_require_group(setup_teardown_file):
 
 def test_open(setup_teardown_file):
     """thorough obj[name] opening."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("foo")
 
     grp2 = f["foo"]
@@ -260,28 +264,28 @@ def test_open_mode(setup_teardown_folder):
     # must exist
     for mode in ["r+", "r"]:
         with pytest.raises(IOError):
-            f = File(pytest.TESTFILE, mode)
+            f = File(setup_teardown_folder[1], mode)
     # create if not exist
     for mode in ["a", "w", "w-"]:
-        remove(pytest.TESTFILE)
-        f = File(pytest.TESTFILE, mode)
+        remove(setup_teardown_folder[1])
+        f = File(setup_teardown_folder[1], mode)
         f.require_dataset('dset', np.arange(10))
         f.attrs['can_overwrite'] = 42
         f.attrs['can_overwrite'] = 14
         f.require_group('mygroup')
 
-    remove(pytest.TESTFILE)
-    f = File(pytest.TESTFILE, 'w')
+    remove(setup_teardown_folder[1])
+    f = File(setup_teardown_folder[1], 'w')
     f.close()  # dummy close
     # read write if exist
-    f = File(pytest.TESTFILE, "r+")
+    f = File(setup_teardown_folder[1], "r+")
     f.require_group('mygroup')
     f.require_dataset('dset', np.arange(10))
     f.attrs['can_overwrite'] = 42
     f.attrs['can_overwrite'] = 14
 
     # read only, can not write
-    f = File(pytest.TESTFILE, 'r')
+    f = File(setup_teardown_folder[1], 'r')
     with pytest.raises(IOError):
         f.require_dataset('dset', np.arange(10))
         f.attrs['can_not_write'] = 42
@@ -289,7 +293,7 @@ def test_open_mode(setup_teardown_folder):
 
 
 def test_open_two_attrs(setup_teardown_file):
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
 
     f.attrs['can_overwrite'] = 42
     f.attrs['another_atribute'] = 14
@@ -301,7 +305,7 @@ def test_open_two_attrs(setup_teardown_file):
 # def test_context_manager(setup_teardown_folder):
 #     """File objects can be used in with statements."""
 
-#     no_exdir = os.path.join(pytest.TESTPATH, "no_exdir")
+#     no_exdir = pytest.TESTPATH / "no_exdir"
 
 #     with File(no_exdir, mode="w") as f:
 #         assert f
