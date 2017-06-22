@@ -39,15 +39,13 @@ def test_openephys_opto():#module_teardown_setup_project_setup):
     data_path = op.join(expipe.settings['data_path'],
                         pytest.USER_PAR.project_id,
                         action_id)
-    # if op.exists(data_path):
-    #     import shutil
-    #     shutil.rmtree(data_path)
-    # run_command(['register-openephys', openephys_path, '--no-move'], inp='y')
-    # run_command(['register-opto', action_id,
-    #              '--brain-area', 'MECL',
-    #              '--tag', 'opto-train',
-    #              '--message', 'opto message'])
-    # run_command(['process-openephys', action_id])
-    import shutil
-    shutil.rmtree(op.join(data_path, 'main.exdir', 'analysis'))
+    if op.exists(data_path):
+        import shutil
+        shutil.rmtree(data_path)
+    run_command(['register-openephys', openephys_path, '--no-move'], inp='y')
+    run_command(['register-opto', action_id,
+                 '--brain-area', 'MECL',
+                 '--tag', 'opto-train',
+                 '--message', 'opto message'])
+    run_command(['process-openephys', action_id])
     run_command(['analyse', action_id, '--all'])
