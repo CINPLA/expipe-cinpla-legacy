@@ -31,7 +31,7 @@ from .tools import (_read_python, _cut_to_same_len, _zeros_to_nan, clip_anas,
                     readHeader, loadSpikes, clip_digs, clip_times,
                     clip_tracking, find_nearest, get_number_of_records,
                     read_analog_continuous_signal, read_analog_binary_signals,
-                    _start_from_zero_time)
+                    _start_from_zero_time, assign_ttl)
 
 # TODO related files
 # TODO append .continuous files directly to file and memory map in the end
@@ -349,7 +349,7 @@ class File:
         elif self.osc:
             self._duration = self.tracking[0].times[0][-1] - self.tracking[0].times[0][0]
         else:
-            self._duration = []
+            self._duration = 0
 
         return self._duration
 
@@ -875,47 +875,118 @@ class File:
         else:
             print('Empty clipping times list.')
 
-    def sync_tracking_from_events(self, ttl_events):
-        '''
+    def sync_tracking_from_events(self, ttl_events, parallel=False, nprocesses=None):
+        """Synchronizes tracking timestamps with ttl signal provided.
 
-        :param ttl_events:
-        :return:
-        '''
+        Parameters
+        ----------
+        ttl_events : quantity np.array
+                     array with ttl timestamps
+        parallel: bool
+                  parallel processing or not
+        nprocesses: int
+                    number of parallel processes
+
+        Returns
+        -------
+        """
         positions = []
         times = []
+        ttl_id = []
 
         print('Syncing tracking timestamps')
-        for t, (pos, software_ts) in enumerate(zip(self.tracking[0].positions, self.tracking[0].times)):
-            # For each software ts find closest ttl_event
-            ts = np.zeros(len(software_ts))
-            ttl_idx = -1 * np.ones(len(software_ts), dtype='int64')
+        if not parallel:
+            for t, (pos, software_ts) in enumerate(zip(self.tracking[0].positions, self.tracking[0].times)):
+                timestamps, ttl_idxs = assign_ttl(software_ts, ttl_events)
 
-            for i, s_ts in enumerate(software_ts):
-                ts[i], ttl_idx[i] = find_nearest(ttl_events, s_ts)
+                order = np.argsort(ttl_idxs)
+                wrong_ts_idx = np.where(np.diff(order) <= 0)[0]
+                print('Reassigning incorrect ',
+                                len(wrong_ts_idx), ' out of ', len(software_ts))
+                if len(wrong_ts_idx) != 0:
+                    print('Reassigning incorrect ',
+                          len(wrong_ts_idx), ' out of ', len(software_ts))
+                    for i, w_ts in enumerate(wrong_ts_idx):
+                        val, idx = find_nearest(ttl_events, software_ts[w_ts], not_in_idx=np.unique(ttl_idxs))
+                        timestamps[w_ts] = val[0]
+                        ttl_idxs[w_ts] = idx[0].astype(int)
+                    wrong_ts_idx = np.where(np.diff(timestamps) == 0)[0]
+                    print('After final correction: ',
+                          len(wrong_ts_idx), ' out of ', len(software_ts))
 
-            # A late osc msg might result in an error -> find second closest timestamp in those cases
-            wrong_ts_idx = np.where(np.diff(ts) == 0)[0]
-            iteration = 1
-            max_iter = 10
-            while len(wrong_ts_idx) != 0 and iteration < max_iter:
-                print('Tracking source ', t, ' - Reassigning incorrect ',
-                      len(wrong_ts_idx), ' out of ', len(software_ts))
-                for i, w_ts in enumerate(wrong_ts_idx):
-                    val, idx = find_nearest(ttl_events, software_ts[w_ts], not_in_idx=np.unique(ttl_idx))
-                    ts[w_ts] = val[0]
-                    ttl_idx[w_ts] = idx[0]
-                iteration += 1
-                wrong_ts_idx = np.where(np.diff(ts) == 0)[0]
+                # substitute missing positions with nans
+                missed_ttl = np.ones(len(ttl_events), dtype=bool)
+                missed_ttl[ttl_idxs] = False
+                new_pos = np.zeros((pos.shape[0], len(ttl_events)))
+                new_pos[:, ttl_idxs]  = pos
+                new_pos[:, missed_ttl] = np.nan
 
-            # substitute missing positions with nans
-            missed_ttl = np.ones(len(ttl_events), dtype=bool)
-            missed_ttl[ttl_idx] = False
-            new_pos = np.zeros((pos.shape[0], len(ttl_events)))
-            new_pos[:, ttl_idx]  = pos
-            new_pos[:, missed_ttl] = np.nan
+                positions.append(new_pos)
+                times.append(ttl_events)
+                ttl_id.append(ttl_idxs)
+        else:
+            from joblib import Parallel, delayed
+            import multiprocessing
 
-            positions.append(new_pos)
-            times.append(ttl_events)
+            if nprocesses is None:
+                num_cores = multiprocessing.cpu_count()
+            else:
+                num_cores = nprocesses
+            # divide duration in num_cores (+ 1s to be sure to include all samples)
+            chunk_times = np.linspace(0,(self.duration+1*pq.s).rescale(pq.s).magnitude, num_cores+1)
+            chunks  = []
+            for i, start in enumerate(chunk_times[:-1]):
+                chunks.append([start, chunk_times[i+1]])
 
-        self.tracking[0].positions = positions
-        self.tracking[0].times = times
+            for t, (pos, software_ts) in enumerate(zip(self.tracking[0].positions, self.tracking[0].times)):
+                chunks_ts, chunks_ttl= [], []
+                for i, start in enumerate(chunk_times[:-1]):
+                    clip_ts = clip_times(software_ts, [start, chunk_times[i + 1]])
+                    clip_ttl = clip_times(ttl_events, [start, chunk_times[i + 1]])
+                    # print('chunk: ', i, ' clip_ts: ', clip_ts[0], clip_ts[-1], ' clip_ttl: ', clip_ttl[0], clip_ttl[-1])
+                    chunks_ts.append(clip_ts)
+                    chunks_ttl.append(clip_ttl)
+
+                results = Parallel(n_jobs=num_cores)(delayed(assign_ttl)(ts, ttl) for (ts, ttl) in zip(chunks_ts,
+                                                                                                       chunks_ttl))
+
+                timestamps, ttl_idxs = [], []
+                for ch, tt in enumerate(results):
+                    timestamps = np.append(timestamps, tt[0])
+                    chunk_start = np.where(ttl_events>=tt[0][0])[0][0]
+                    ttl_idxs = np.append(ttl_idxs, tt[1]+chunk_start).astype(int)
+
+                ttl_id.append(ttl_idxs)
+
+                # Correct wrong samples that might arise at boundaries
+                wrong_ts_idx = np.where(np.diff(ttl_idxs) <= 0)[0]
+                wrong_ts_idx += 1
+                wrong_pos_idxs = []
+                for w_ts in wrong_ts_idx:
+                    w_, w_id = find_nearest(software_ts, ttl_events[w_ts])
+                    wrong_pos_idxs.append(w_id.astype(int))
+
+                # #TODO remove right indeces
+                if len(wrong_ts_idx) != 0:
+                    print('Removing incorrect ', len(wrong_ts_idx), ' out of ', len(software_ts))
+                    ttl_idxs = np.delete(ttl_idxs, wrong_ts_idx)
+                    wrong_ts_idx = np.where(np.diff(ttl_idxs) <= 0)[0]
+                    print('After final correction: ',
+                          len(wrong_ts_idx), ' out of ', len(software_ts))
+
+                ttl_id.append(ttl_idxs)
+
+                # substitute missing positions with nans
+                missed_ttl = np.ones(len(ttl_events), dtype=bool)
+                missed_ttl[ttl_idxs] = False
+                new_pos = np.zeros((pos.shape[0], len(ttl_events)))
+                correct_pos = np.ones(pos.shape[1], dtype=bool)
+                correct_pos[wrong_pos_idxs] = False
+                new_pos[:, ttl_idxs] = pos[:, correct_pos]
+                new_pos[:, missed_ttl] = np.nan
+
+                positions.append(new_pos)
+                times.append(ttl_events)
+
+            self.tracking[0].positions = positions
+            self.tracking[0].times = times

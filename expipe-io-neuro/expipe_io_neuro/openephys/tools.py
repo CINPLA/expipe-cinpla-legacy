@@ -219,7 +219,7 @@ def clip_tracking(tracking, clipping_times, start_end):
     return track_clip, t_clip
 
 
-def clip_times(times, clipping_times, start_end):
+def clip_times(times, clipping_times, start_end='start'):
     '''
 
     :param times:
@@ -230,42 +230,17 @@ def clip_times(times, clipping_times, start_end):
     times.rescale(pq.s)
 
     if len(clipping_times) == 2:
-        idx = np.where((times > clipping_times[0]) & (times < clipping_times[1]))
+        idx = np.where((times > clipping_times[0]) & (times <= clipping_times[1]))
     elif len(clipping_times) ==  1:
         if start_end == 'start':
-            idx = np.where(times > clipping_times[0])
+            idx = np.where(times >= clipping_times[0])
         elif start_end == 'end':
-            idx = np.where(times < clipping_times[0])
+            idx = np.where(times <= clipping_times[0])
     else:
         raise AttributeError('clipping_times must be of length 1 or 2')
     times_clip = times[idx]
 
     return times_clip
-
-
-def find_nearest(array, value, n=1, not_in_idx=None):
-
-    if not_in_idx is None:
-        if n==1:
-            idx = (np.abs(array-value)).argmin()
-        else:
-            idx = (np.abs(array-value)).argsort()[:n]
-        return array[idx], idx
-    else:
-        if len(array) != 0:
-            left_idx = np.ones(len(array), dtype=bool)
-            left_idx[not_in_idx] = False
-            left_array=array[left_idx]
-            if n==1:
-                idx = (np.abs(left_array-value)).argmin()
-            else:
-                idx = (np.abs(left_array-value)).argsort()[:n]
-            val = left_array[idx]
-            idx = np.where(array==val)
-            return array[idx], idx
-        else:
-            print('Array length must be greater than 0')
-            return None, -1
 
 
 def loadSpikes(filepath):
@@ -490,3 +465,50 @@ def read_analog_continuous_signal(filepath, dtype=float, verbose=False,
         res['recordingNumber'] = np.array([], dtype=np.int)
 
     return res
+
+def find_nearest(array, value, n=1, greater_than=None, not_in_idx=None):
+
+    if not_in_idx is None:
+        if greater_than is None:
+            if n==1:
+                idx = (np.abs(array-value)).argmin()
+            else:
+                idx = (np.abs(array-value)).xargsort()[:n]
+        else:
+            if n==1:
+                for idx in (np.abs(array-value)).argsort()[:5]:
+                    if array[idx] > greater_than:
+                        return array[idx], idx
+                        break
+            else:
+                idx = (np.abs(array-value)).argsort()[:n]
+        return array[idx], idx
+    else:
+        if len(array) != 0:
+            left_idx = np.ones(len(array), dtype=bool)
+            left_idx[not_in_idx] = False
+            left_array=array[left_idx]
+            if len(left_array) != 0:
+                if n==1:
+                    idx = (np.abs(left_array-value)).argmin()
+                else:
+                    idx = (np.abs(left_array-value)).argsort()[:n]
+                val = left_array[idx]
+                idx = np.where(array==val)
+                return array[idx], idx
+            else:
+                return array, []
+        else:
+            print('Array length must be greater than 0')
+            return None, []
+
+def assign_ttl(soft_ts, ttl):
+    ts = np.zeros(len(soft_ts))
+    ttl_idx = -1 * np.ones(len(soft_ts), dtype='int64')
+
+    for i, s_ts in enumerate(soft_ts):
+        if i == 0:
+            ts[i], ttl_idx[i] = ttl[0], 0 #find_nearest(ttl, s_ts)
+        else:
+            ts[i], ttl_idx[i] = find_nearest(ttl, s_ts, greater_than=ts[i-1])
+    return ts, ttl_idx
