@@ -143,7 +143,7 @@ class ExdirIO(BaseIO):
     def write_unit_times(self, units, path, **annotations):
         channel_group = self._exdir_directory[path]
         if 'UnitTimes' in channel_group:
-            shutil.rmtree(channel_group['UnitTimes'].directory)
+            shutil.rmtree(str(channel_group['UnitTimes'].directory))
         unit_times_group = channel_group.require_group('UnitTimes')
         if annotations:
             unit_times_group.attrs = annotations

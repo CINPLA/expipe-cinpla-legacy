@@ -98,7 +98,7 @@ class ElectricalStimulationPlugin(IPlugin):
                 raise ValueError('No Intan aquisition system ' +
                                  'related to this action')
             openephys_session = acquisition.attrs["openephys_session"]
-            intan_ephys_path = op.join(acquisition.directory, openephys_session)
+            intan_ephys_path = op.join(str(acquisition.directory), openephys_session)
             intan_ephys_base = op.join(intan_ephys_path, openephys_session)
             rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
             rhs_path = op.join(intan_ephys_path, rhs_file)

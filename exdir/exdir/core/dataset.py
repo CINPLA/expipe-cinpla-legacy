@@ -19,12 +19,14 @@ class Dataset(exdir_object.Object):
     """
     def __init__(self, root_directory, parent_path, object_name, io_mode=None,
                  validate_name=None):
-        super(Dataset, self).__init__(root_directory=root_directory,
-                                      parent_path=parent_path,
-                                      object_name=object_name,
-                                      io_mode=io_mode,
-                                      validate_name=validate_name)
-        self.data_filename = os.path.join(self.directory, "data.npy")
+        super(Dataset, self).__init__(
+            root_directory=root_directory,
+            parent_path=parent_path,
+            object_name=object_name,
+            io_mode=io_mode,
+            validate_name=validate_name
+        )
+        self.data_filename = self.directory / "data.npy"
         self._data = None
         if self.io_mode == self.OpenMode.READ_ONLY:
             self._mmap_mode = "r"
@@ -59,7 +61,8 @@ class Dataset(exdir_object.Object):
                 result = np.full(shape, fillvalue, dtype=dtype)
 
         if result is not None:
-            np.save(self.data_filename, result)
+            # NOTE using str(filename) because of Python 3.5 and NumPy 1.11 support
+            np.save(str(self.data_filename), result)
 
             # TODO should we have this line?
             #      Might lead to bugs where we create data, but havent loaded it
@@ -68,11 +71,12 @@ class Dataset(exdir_object.Object):
 
 
     def __getitem__(self, args):
-        if not os.path.exists(self.data_filename):
+        if not self.data_filename.exists():
             return np.array([])
 
         if self._data is None:
-            self._data = np.load(self.data_filename, mmap_mode=self._mmap_mode)
+            # NOTE using str(filename) because of Python 3.5 and NumPy 1.11 support
+            self._data = np.load(str(self.data_filename), mmap_mode=self._mmap_mode)
 
         if len(self._data.shape) == 0:
             values = self._data
@@ -93,7 +97,7 @@ class Dataset(exdir_object.Object):
         if self.io_mode == self.OpenMode.READ_ONLY:
             raise IOError('Cannot write data to file in read only ("r") mode')
         if self._data is None:
-            self[:]
+            self[:]  # NOTE This ensures that the data is loaded
         self._data[args] = value
 
     @property
@@ -116,31 +120,11 @@ class Dataset(exdir_object.Object):
     def dtype(self):
         return self[:].dtype
 
-
-    def __eq__(self, other):
-        self[:]
-        if isinstance(other, self.__class__):
-            other[:]
-            if self.__dict__.keys() != other.__dict__.keys():
-                return False
-
-            for key in self.__dict__:
-                if key == "_data":
-                    if not np.array_equal(self.__dict__["_data"], other.__dict__["_data"]):
-                        return False
-                else:
-                    if self.__dict__[key] != other.__dict__[key]:
-                        return False
-            return True
-        else:
-            return False
-
     def __len__(self):
-         """ The size of the first axis.  TypeError if scalar."""
-         if len(self.shape) == 0:
-                raise TypeError("Attempt to take len() of scalar dataset")
-         return self.shape[0]
-
+        """ The size of the first axis.  TypeError if scalar."""
+        if len(self.shape) == 0:
+            raise TypeError("Attempt to take len() of scalar dataset")
+        return self.shape[0]
 
     def __iter__(self):
         """Iterate over the first axis.  TypeError if scalar.

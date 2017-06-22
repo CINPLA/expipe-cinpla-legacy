@@ -1,6 +1,6 @@
 # This file is part of Exdir, the Experimental Directory Structure.
 #
-# Copyright 2017 Simen Tennøe
+# Copyright 2017 Simen Tennøe, Svenn-Arne Dragly
 #
 # License: MIT, see "LICENSE" file for the full license terms.
 #
@@ -12,6 +12,8 @@
 
 import os
 import pytest
+import pathlib
+import numpy as np
 from collections.abc import KeysView, ValuesView, ItemsView
 
 from exdir.core import Group, File
@@ -20,14 +22,14 @@ from conftest import remove
 
 # tests for Group class
 def test_group_init(setup_teardown_folder):
-    group = Group(pytest.TESTDIR, "", "test_object", io_mode=None)
+    group = Group(setup_teardown_folder[2], pathlib.PurePosixPath(""), "test_object", io_mode=None)
 
-    assert group.root_directory == pytest.TESTDIR
+    assert group.root_directory == setup_teardown_folder[2]
     assert group.object_name == "test_object"
-    assert group.parent_path == ""
+    assert group.parent_path == pathlib.PurePosixPath("")
     assert group.io_mode is None
-    assert group.relative_path == os.path.join("", "test_object")
-    assert group.name == "/" + os.path.join("", "test_object")
+    assert group.relative_path == pathlib.PurePosixPath("test_object")
+    assert group.name == "/test_object"
 
 
 # New groups can be created via .create_group method
@@ -35,7 +37,7 @@ def test_group_init(setup_teardown_folder):
 def test_create_group(setup_teardown_file):
     """Simple .create_group call."""
 
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     grp2 = grp.create_group("a")
@@ -49,28 +51,35 @@ def test_create_group(setup_teardown_file):
 def test_create_group_absolute(setup_teardown_file):
     """Starting .create_group argument with /."""
 
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("/a")
 
     with pytest.raises(NotImplementedError):
         grp.create_group("/b")
 
 
+def test_create_existing_twice(exdir_tmpfile):
+    exdir_tmpfile.create_group("test")
+    with pytest.raises(FileExistsError):
+        exdir_tmpfile.create_group("test")
+
+
 # TODO update this test when it is implemented
 def test_create_intermediate(setup_teardown_file):
-    """Intermediate groups can be created automatically."""
-    f = setup_teardown_file
+    """intermediate groups can be created automatically."""
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
-    with pytest.raises(NotImplementedError):
-        grp.create_group("foo/bar/baz")
+    grp.create_group("foo/bar/baz")
+
+    assert grp["foo/bar/baz"]
 
     # assert grp.name == "/foo/bar/baz"
 
 
 def test_create_exception(setup_teardown_file):
     """Name conflict causes group creation to fail with IOError."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     grp.create_group("foo")
@@ -83,7 +92,7 @@ def test_create_exception(setup_teardown_file):
 # Feature: Groups can be auto-created, or opened via .require_group
 def test_open_existing(setup_teardown_file):
     """Existing group is opened and returned."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     grp2 = grp.create_group("foo")
@@ -91,12 +100,13 @@ def test_open_existing(setup_teardown_file):
     grp4 = grp.require_group("foo/")
 
     assert grp2 == grp3
+    assert grp2.name == grp4.name
     assert grp2 == grp4
 
 
 def test_create(setup_teardown_file):
     """Group is created if it doesn"t exist."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     grp2 = grp.require_group("foo")
@@ -106,7 +116,7 @@ def test_create(setup_teardown_file):
 
 def test_require_exception(setup_teardown_file):
     """Opening conflicting object results in TypeError."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     grp.create_dataset("foo", (1,))
@@ -115,12 +125,21 @@ def test_require_exception(setup_teardown_file):
         grp.require_group("foo")
 
 
+def test_set_item_intermediate(exdir_tmpfile):
+    group1 = exdir_tmpfile.create_group("group1")
+    group2 = group1.create_group("group2")
+    group3 = group2.create_group("group3")
+    exdir_tmpfile["group1/group2/group3/dataset"] = np.array([1, 2, 3])
+
+    assert np.array_equal(exdir_tmpfile["group1/group2/group3/dataset"].data, np.array([1, 2, 3]))
+
+
 # TODO uncomment when deletion is implemented
 # Feature: Objects can be unlinked via "del" operator
 # def test_delete(setup_teardown_file):
 #     """Object deletion via "del"."""
 #
-#     f = setup_teardown_file
+#     f = setup_teardown_file[3]
 #     grp = f.create_group("test")
 #     grp.create_group("foo")
 #
@@ -130,7 +149,7 @@ def test_require_exception(setup_teardown_file):
 #
 # def test_nonexisting(setup_teardown_file):
 #     """Deleting non-existent object raises KeyError."""
-#     f = setup_teardown_file
+#     f = setup_teardown_file[3]
 #     grp = f.create_group("test")
 #
 #     with pytest.raises(KeyError):
@@ -138,10 +157,10 @@ def test_require_exception(setup_teardown_file):
 #
 # def test_readonly_delete_exception(setup_teardown_file):
 #     """Deleting object in readonly file raises KeyError."""
-#     f = setup_teardown_file
+#     f = setup_teardown_file[3]
 #     f.close()
 #
-#     f = File(pytest.TESTFILE, "r")
+#     f = File(setup_teardown_folder[1], "r")
 #
 #     with pytest.raises(KeyError):
 #         del f["foo"]
@@ -151,7 +170,7 @@ def test_require_exception(setup_teardown_file):
 
 def test_open(setup_teardown_file):
     """Simple obj[name] opening."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
     grp2 = grp.create_group("foo")
 
@@ -159,6 +178,7 @@ def test_open(setup_teardown_file):
     grp4 = grp["foo/"]
 
     assert grp2 == grp3
+    assert grp2.name == grp4.name
     assert grp2 == grp4
 
     with pytest.raises(NotImplementedError):
@@ -166,7 +186,7 @@ def test_open(setup_teardown_file):
 
 def test_open_deep(setup_teardown_file):
     """Simple obj[name] opening."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
     grp2 = grp.create_group("a")
     grp3 = grp2.create_group("b")
@@ -179,7 +199,7 @@ def test_open_deep(setup_teardown_file):
 
 def test_nonexistent(setup_teardown_file):
     """Opening missing objects raises KeyError."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
 
     with pytest.raises(KeyError):
         f["foo"]
@@ -188,7 +208,7 @@ def test_nonexistent(setup_teardown_file):
 # Feature: The Python "in" builtin tests for containership
 def test_contains(setup_teardown_file):
     """'in' builtin works for containership."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     grp.create_group("b")
@@ -202,7 +222,7 @@ def test_contains(setup_teardown_file):
 
 def test_contains_deep(setup_teardown_file):
     """'in' builtin works for containership."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     grp2 = grp.create_group("a")
@@ -214,7 +234,7 @@ def test_contains_deep(setup_teardown_file):
 # TODO uncomment this when close is implemented
 # def test_exc(setup_teardown_file):
 #     """'in' on closed group returns False."""
-#     f = setup_teardown_file
+#     f = setup_teardown_file[3]
 
 #     f.create_group("a")
 #     f.close()
@@ -223,28 +243,28 @@ def test_contains_deep(setup_teardown_file):
 
 def test_empty(setup_teardown_file):
     """Empty strings work properly and aren"t contained."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
-    assert not "" in grp
+    assert "" not in grp
 
 def test_dot(setup_teardown_file):
     """Current group "." is always contained."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
 
-    assert "." in  f
+    assert "." in f
 
 def test_root(setup_teardown_file):
     """Root group (by itself) is contained."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     with pytest.raises(NotImplementedError):
-        assert "/" in  grp
+        assert "/" in grp
 
 def test_trailing_slash(setup_teardown_file):
     """Trailing slashes are unconditionally ignored."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     grp.create_group("a")
@@ -258,7 +278,7 @@ def test_trailing_slash(setup_teardown_file):
 # Feature: Standard Python 3 .keys, .values, etc. methods are available
 def test_keys(setup_teardown_file):
     """.keys provides a key view."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     grp.create_group("a")
@@ -271,7 +291,7 @@ def test_keys(setup_teardown_file):
 
 def test_values(setup_teardown_file):
     """.values provides a value view."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     grpa = grp.create_group("a")
@@ -284,7 +304,7 @@ def test_values(setup_teardown_file):
 
 def test_items(setup_teardown_file):
     """.items provides an item view."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     grpa = grp.create_group("a")
@@ -308,7 +328,7 @@ def test_items(setup_teardown_file):
 
 def test_iter(setup_teardown_file):
     """'for x in y' iteration."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     grp.create_group("a")
@@ -321,7 +341,7 @@ def test_iter(setup_teardown_file):
 
 def test_iter_zero(setup_teardown_file):
     """Iteration works properly for the case with no group members."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     lst = [x for x in grp]
@@ -332,7 +352,7 @@ def test_iter_zero(setup_teardown_file):
 
 def test_eq(setup_teardown_file):
     """Test equal."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     grp2 = grp.create_group("a")
@@ -344,7 +364,7 @@ def test_eq(setup_teardown_file):
 # Feature: Parent
 def test_eq(setup_teardown_file):
     """Test equal."""
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
     grp2 = grp.create_group("a")
@@ -357,7 +377,7 @@ def test_eq(setup_teardown_file):
 # Feature: Test different naming rules
 def test_validate_name_simple(setup_teardown_folder):
     """Test naming rule simple."""
-    f = File(pytest.TESTFILE, validate_name=fv.thorough)
+    f = File(setup_teardown_folder[1], validate_name=fv.thorough)
     grp = f.create_group("test")
 
     grp.create_group("abcdefghijklmnopqrstuvwxyz1234567890_-")
@@ -366,19 +386,19 @@ def test_validate_name_simple(setup_teardown_folder):
         grp.create_group("()")
 
     f.close()
-    remove(pytest.TESTFILE)
+    remove(setup_teardown_folder[1])
 
-    f = File(pytest.TESTFILE, validate_name=fv.thorough)
+    f = File(setup_teardown_folder[1], validate_name=fv.thorough)
     grp = f.create_group("test")
     grp.create_group("aa")
 
-    with pytest.raises(NameError):
+    with pytest.raises(FileExistsError):
         grp.create_group("AA")
 
 
 def test_validate_name_strict(setup_teardown_folder):
     """Test naming rule strict."""
-    f = File(pytest.TESTFILE, validate_name=fv.strict)
+    f = File(setup_teardown_folder[1], validate_name=fv.strict)
     f.create_group("abcdefghijklmnopqrstuvwxyz1234567890_-")
 
     with pytest.raises(NameError):
@@ -389,7 +409,7 @@ def test_validate_name_strict(setup_teardown_folder):
 
 def test_validate_name_none(setup_teardown_folder):
     """Test naming rule with error."""
-    f = File(pytest.TESTFILE, validate_name=fv.none)
+    f = File(setup_teardown_folder[1], validate_name=fv.none)
     f.create_group("abcdefghijklmnopqrstuvwxyz1234567890_-")
     f.create_group("ABNCUIY&z()(d()&")
 

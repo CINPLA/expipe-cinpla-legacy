@@ -61,19 +61,28 @@ class OptoPlugin(IPlugin):
                       type=click.STRING,
                       help='A unique identifier of the laser.',
                       )
+        @click.option('-u', '--user',
+                      type=click.STRING,
+                      help='The experimenter performing the annotation.',
+                      )
         def parse_optogenetics(action_id, brain_area, no_local, overwrite,
-                               io_channel, tag, message, laser_id):
+                               io_channel, tag, message, laser_id, user):
             """Parse optogenetics info to an action.
 
             COMMAND: action-id: Provide action id to find exdir path"""
             import exdir
+            from datetime import datetime
             # TODO deafault none
             if brain_area not in POSSIBLE_BRAIN_AREAS:
                 raise ValueError("brain_area must be either %s",
                                  POSSIBLE_BRAIN_AREAS)
             project = expipe.get_project(USER_PARAMS['project_id'])
             action = project.require_action(action_id)
-
+            user = user or USER_PARAMS['user_name']
+            if user is None:
+                raise ValueError('Please add user name')
+            if len(user) == 0:
+                raise ValueError('Please add user name')
             action.tags.extend(list(tag) + ['opto-' + brain_area])
             fr = action.require_filerecord()
             if not no_local:

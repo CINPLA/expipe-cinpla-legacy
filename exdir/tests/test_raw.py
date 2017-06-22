@@ -1,37 +1,50 @@
 import os
 import pytest
+import pathlib
 from exdir.core import Raw
 
 def test_raw_init(setup_teardown_folder):
-    raw = Raw(pytest.TESTDIR, "", "test_object", io_mode=None)
+    raw = Raw(setup_teardown_folder[2], pathlib.PurePosixPath(""), "test_object", io_mode=None)
 
-    assert raw.root_directory == pytest.TESTDIR
+    assert raw.root_directory == setup_teardown_folder[2]
     assert raw.object_name == "test_object"
-    assert raw.parent_path == ""
+    assert raw.parent_path == pathlib.PurePosixPath("")
     assert raw.io_mode is None
-    assert raw.relative_path == os.path.join("", "test_object")
-    assert raw.name == "/" + os.path.join("", "test_object")
+    assert raw.relative_path == pathlib.PurePosixPath("test_object")
+    assert raw.name == "/test_object"
 
 
 def test_create_raw(setup_teardown_file):
     """Simple .create_raw call."""
 
-    f = setup_teardown_file
+    f = setup_teardown_file[3]
     raw = f.create_raw("test")
 
     raw2 = f["test"]
 
+    assert (f.root_directory / "test").exists()
+
     assert raw == raw2
+
 
 def test_require_raw(setup_teardown_file):
     """Raw is created if it doesn"t exist."""
-    f = setup_teardown_file
+
+    f = setup_teardown_file[3]
     grp = f.create_group("test")
 
-    raw = grp.require_group("foo")
-    raw2 = grp.require_group("foo")
+    raw = grp.require_raw("foo")
+    raw2 = grp.require_raw("foo")
 
     raw3 = grp["foo"]
 
+    assert (f.root_directory / "test" / "foo").exists()
+
     assert raw == raw2
     assert raw == raw3
+
+
+def test_create_raw_twice(exdir_tmpfile):
+    exdir_tmpfile.create_raw("test")
+    with pytest.raises(FileExistsError):
+        exdir_tmpfile.create_raw("test")

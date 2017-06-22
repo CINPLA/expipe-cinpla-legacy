@@ -39,7 +39,7 @@ def convert(intan_file, exdir_path, copyfiles=True):
     acquisition.attrs["acquisition_system"] = 'Intan'
 
     if copyfiles:
-        target_folder = op.join(acquisition.directory, intan_file.session)
+        target_folder = op.join(str(acquisition.directory), intan_file.session)
         os.makedirs(target_folder)
         shutil.copy(intan_file._absolute_filename, target_folder)
 
@@ -119,7 +119,7 @@ def generate_spike_trains(exdir_path):
     exdir_file = exdir.File(exdir_path)
     acquisition = exdir_file["acquisition"]
     intan_session = acquisition.attrs["intan_session"]
-    intan_directory = op.join(acquisition.directory, intan_session)
+    intan_directory = op.join(str(acquisition.directory), intan_session)
     kwikfile = [f for f in os.listdir(intan_directory) if f.endswith('_klusta.kwik')][0]
     if len(kwikfile) > 0:
         kwikfile = op.join(intan_directory, kwikfile[0])

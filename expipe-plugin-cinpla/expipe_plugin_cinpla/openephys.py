@@ -124,7 +124,7 @@ class OpenEphysPlugin(IPlugin):
                     raise ValueError('No Open Ephys aquisition system ' +
                                      'related to this action')
                 openephys_session = acquisition.attrs["openephys_session"]
-                openephys_path = op.join(acquisition.directory, openephys_session)
+                openephys_path = op.join(str(acquisition.directory), openephys_session)
                 openephys_base = op.join(openephys_path, openephys_session)
                 klusta_prm = op.abspath(openephys_base) + '.prm'
                 prb_path = prb_path or _get_probe_file('oe', nchan=nchan,
@@ -356,10 +356,11 @@ class OpenEphysPlugin(IPlugin):
                     return
 
                 for idx, m in enumerate(openephys_file.messages):
-                    dtime = openephys_file.datetime + timedelta(seconds=m['time'])
+                    secs = float(m['time'].rescale('s').magnitude)
+                    dtime = openephys_file.datetime + timedelta(seconds=secs)
                     messages.append({'datetime': dtime,
-                                    'message': m['message'],
-                                    'user': user})
+                                     'message': m['message'],
+                                     'user': user})
             action.messages.extend(messages)
             if not no_files:
                 fr = action.require_filerecord()
@@ -428,7 +429,7 @@ class OpenEphysPlugin(IPlugin):
                     raise ValueError('No Open Ephys aquisition system ' +
                                      'related to this action')
                 openephys_session = acquisition.attrs["openephys_session"]
-                openephys_path = op.join(acquisition.directory, openephys_session)
+                openephys_path = op.join(str(acquisition.directory), openephys_session)
             prb_path = prb_path or _get_probe_file('oe', nchan=nchan,
                                                    spikesorter='klusta')
             openephys_file = pyopenephys.File(openephys_path, prb_path)
@@ -451,10 +452,10 @@ class OpenEphysPlugin(IPlugin):
             openephys_path = op.abspath(openephys_path)
             openephys_dirname = openephys_path.split(os.sep)[-1]
             project = expipe.get_project(USER_PARAMS['project_id'])
-            
+
             openephys_file = pyopenephys.File(openephys_path)
             messages = openephys_file.messages
-            
+
             print('Open-ephys messages:')
             for m in messages:
                 print('time: ', m['time'], ' message: ', m['message'])
