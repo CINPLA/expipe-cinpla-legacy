@@ -356,10 +356,11 @@ class OpenEphysPlugin(IPlugin):
                     return
 
                 for idx, m in enumerate(openephys_file.messages):
-                    dtime = openephys_file.datetime + timedelta(seconds=m['time'])
+                    secs = float(m['time'].rescale('s').magnitude)
+                    dtime = openephys_file.datetime + timedelta(seconds=secs)
                     messages.append({'datetime': dtime,
-                                    'message': m['message'],
-                                    'user': user})
+                                     'message': m['message'],
+                                     'user': user})
             action.messages.extend(messages)
             if not no_files:
                 fr = action.require_filerecord()
@@ -451,10 +452,10 @@ class OpenEphysPlugin(IPlugin):
             openephys_path = op.abspath(openephys_path)
             openephys_dirname = openephys_path.split(os.sep)[-1]
             project = expipe.get_project(USER_PARAMS['project_id'])
-            
+
             openephys_file = pyopenephys.File(openephys_path)
             messages = openephys_file.messages
-            
+
             print('Open-ephys messages:')
             for m in messages:
                 print('time: ', m['time'], ' message: ', m['message'])

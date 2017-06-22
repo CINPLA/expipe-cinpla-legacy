@@ -161,17 +161,9 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Transfer without tags etc.',
                       )
-        @click.option('--merge',
-                      is_flag=True,
-                      help='Merge with existing, overwriting equal files.',
-                      )
         @click.option('-r', '--recursive',
                       is_flag=True,
                       help='Recursive directory transfer.',
-                      )
-        @click.option('-m', '--message',
-                      type=click.STRING,
-                      help='Add message, use "text here" for sentences.',
                       )
         @click.option('-e', '--exclude',
                       multiple=True,
@@ -202,7 +194,7 @@ class CinplaPlugin(IPlugin):
                       help='Name of server as named in config.yaml. Default is "norstore"',
                       )
         def transfer(action_id, to_local, from_local, overwrite, no_trash,
-                     message, raw, exclude, include, merge, port, username,
+                     raw, exclude, include, port, username,
                      hostname, recursive, server):
             """Transfer a dataset related to an expipe action
 
@@ -216,10 +208,6 @@ class CinplaPlugin(IPlugin):
             import shutil
             project = expipe.get_project(USER_PARAMS['project_id'])
             action = project.require_action(action_id)
-            action.messages.extend([{'message': m,
-                                     'user': user,
-                                     'datetime': datetime.now()}
-                                   for m in message])
             fr = action.require_filerecord()
 
             host, user, pas, port = get_login(hostname=hostname,
