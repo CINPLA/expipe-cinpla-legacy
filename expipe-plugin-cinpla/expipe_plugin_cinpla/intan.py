@@ -184,9 +184,7 @@ class IntanPlugin(IPlugin):
                 if len(ground) != 0:
                     duplicate = [int(g) for g in ground]
                     anas = duplicate_bad_channels(anas, duplicate, prb_path)
-
                 save_binary_format(intan_base, anas)
-
                 if action is not None:
                     prepro = {
                         'common_ref': common_ref,
@@ -200,6 +198,11 @@ class IntanPlugin(IPlugin):
                         'probe_split': (str(split_chans[:split_probe]) +
                                         str(split_chans[split_probe:]))
                     }
+                    if filter_noise:
+                        prepro['filter'].update({
+                            'filter_noise_low' : stopband[0],
+                            'filter_noise_high' : stopband[1]
+                        })
                     action.require_module(name='preprocessing', contents=prepro,
                                           overwrite=True)
 
@@ -210,7 +213,6 @@ class IntanPlugin(IPlugin):
                     subprocess.check_output(['klusta', klusta_prm, '--overwrite'])
                 except subprocess.CalledProcessError as e:
                     raise Exception(e.output)
-
             if not no_convert:
                 print('Converting to exdir')
                 intan.generate_spike_trains(exdir_path, intan_file, source='klusta')
@@ -401,7 +403,7 @@ class IntanPlugin(IPlugin):
                             shutter_ttl = openephys_file.digital_in_signals[0].times[shutter_chan]
                     else:
                         shutter_ttl = []
-                    openephys_file.sync_tracking_from_events(shutter_ttl)
+                    openephys_file.sync_tracking_from_events(shutter_ttl, parallel=True)
 
             if not no_preprocess:
                 if not pre_filter and not klusta_filter:
@@ -476,7 +478,6 @@ class IntanPlugin(IPlugin):
                     subprocess.check_output(['klusta', klusta_prm, '--overwrite'])
                 except subprocess.CalledProcessError as e:
                     raise Exception(e.output)
-
             if not no_convert:
                 print('Converting to exdir')
                 openephys.generate_spike_trains(exdir_path, openephys_file, source='klusta')
@@ -493,15 +494,10 @@ class IntanPlugin(IPlugin):
                       type=click.STRING,
                       help='The experimenter performing the recording.',
                       )
-        @click.option('--left',
-                      required=True,
-                      type=click.FLOAT,
-                      help='The depth on left side in "mm".',
-                      )
-        @click.option('--right',
-                      required=True,
-                      type=click.FLOAT,
-                      help='The depth on right side in "mm".',
+        @click.option('-a', '--anatomy',
+                      multiple=True,
+                      type=(click.STRING, float),
+                      help='The adjustment amount on given anatomical location in "um".',
                       )
         @click.option('-l', '--location',
                       required=True,
@@ -529,9 +525,9 @@ class IntanPlugin(IPlugin):
                       is_flag=True,
                       help='Generate action without storing modules.',
                       )
-        @click.option('--rat-id',
+        @click.option('--subject-id',
                       type=click.STRING,
-                      help='The id number of the rat.',
+                      help='The id number of the subject.',
                       )
         @click.option('--prb-path',
                       type=click.STRING,
@@ -546,15 +542,24 @@ class IntanPlugin(IPlugin):
                       default=32,
                       help='Number of channels. Default = 32',
                       )
+        @click.option('-t', '--tag',
+                      multiple=True,
+                      type=click.STRING,
+                      help='Add tags to action.',
+                      )
         @click.option('-m', '--message',
                       multiple=True,
                       type=click.STRING,
                       help='Add message, use "text here" for sentences.',
                       )
+        @click.option('--no-move',
+                      is_flag=True,
+                      help='Do not delete open ephys directory after copying.',
+                      )
         def generate_intan_action(action_id, intan_filepath, no_local, left,
                                   right, overwrite, no_files, no_modules,
-                                  rat_id, user, prb_path, session, nchan,
-                                  location, message):
+                                  subject_id, user, prb_path, session, nchan,
+                                  location, message, tag, no_move):
             """Generate an intan recording-action to database.
 
             COMMAND: intan-filename"""
@@ -574,7 +579,7 @@ class IntanPlugin(IPlugin):
                               ' please provide one')
             intan_file = pyintan.File(rhs_path, prb_path)
 
-            rat_id = rat_id or intan_dir.split('_')[0]
+            subject_id = subject_id or intan_dir.split('_')[0]
             session = session or intan_dir.split('_')[-1]
             if session.isdigit():
                 session = int(session)
@@ -585,38 +590,49 @@ class IntanPlugin(IPlugin):
             if action_id is None:
                 session_dtime = datetime.strftime(intan_file.datetime,
                                                   '%d%m%y')
-                action_id = rat_id + '-' + session_dtime + '-%.2d' % session
+                action_id = subject_id + '-' + session_dtime + '-%.2d' % session
             print('Generating action', action_id)
             action = project.require_action(action_id)
             action.datetime = intan_file.datetime
             action.type = 'Recording'
-            action.tags = {'open-ephys': 'true'}
-            print('Registering rat id ' + rat_id)
-            action.subjects = {rat_id: 'true'}
+            action.tags.extend(list(tag) + ['intan'])
+            print('Registering subject id ' + subject_id)
+            action.subjects = [subject_id]
             user = user or USER_PARAMS['user_name']
+            if user is None:
+                raise ValueError('Please add user name')
+            if len(user) == 0:
+                raise ValueError('Please add user name')
             print('Registering user ' + user)
-            action.users = {user: 'true'}
+            action.users = [user]
             location = location or USER_PARAMS['location']
+            if location is None:
+                raise ValueError('Please add location')
+            if len(location) == 0:
+                raise ValueError('Please add location')
             assert location in POSSIBLE_LOCATIONS
             print('Registering location ' + location)
             action.location = location
-
+            messages = [{'message': m, 'user': user, 'datetime': datetime.now()}
+                        for m in message]
             if not no_modules:
-                if 'intanopenephys' not in TEMPLATES:
-                    raise ValueError('Could not find "intanopenephys" in ' +
+                if 'intan' not in TEMPLATES:
+                    raise ValueError('Could not find "intan" in ' +
                                      'expipe_params.py TEMPLATES: "' +
                                      '{}"'.format(TEMPLATES.keys()))
-                generate_templates(action, TEMPLATES['intanopenephys'], overwrite,
+                generate_templates(action, TEMPLATES['intan'], overwrite,
                                    git_note=GIT_NOTE)
-                headstage = action.require_module(name='hardware_intan_headstage').to_dict()
+                headstage = action.require_module(
+                    name='hardware_intan_headstage').to_dict()
                 headstage['model']['value'] = 'RHS2132'
-                action.require_module(name='hardware_intan_headstage', contents=headstage,
-                                      overwrite=True)
-                register_depth(project, action, left, right)
-                action.messages.extend([{'message': m,
-                                         'user': user,
-                                         'datetime': datetime.now()}
-                                       for m in message])
+                action.require_module(name='hardware_intan_headstage',
+                                      contents=headstage, overwrite=True)
+                correct_depth = register_depth(project, action, anatomy)
+                if not correct_depth:
+                    print('Aborting registration!')
+                    return
+
+            action.messages.extend(messages)
 
             if not no_files:
                 fr = action.require_filerecord()
@@ -631,15 +647,12 @@ class IntanPlugin(IPlugin):
                         raise FileExistsError('The exdir path to this action "' +
                                               exdir_path + '" exists, use ' +
                                               'overwrite flag')
-                try:
-                    os.mkdir(op.dirname(exdir_path))
-                except Exception:
-                    pass
-                # this will copy the entire folder containing the intan file as well
-                intan.convert(intan_file,
-                              exdir_path=exdir_path,
+                os.makedirs(op.dirname(exdir_path), exist_ok=True)
+                shutil.copy(prb_path, intan_path)
+                intan.convert(intan_file,exdir_path=exdir_path,
                               copyfiles=False)
-
+                if not no_move:
+                    shutil.rmtree(intan_path)
 
         @cli.command('register-intan-ephys')
         @click.argument('intan-ephys-path', type=click.Path(exists=True))
@@ -648,15 +661,10 @@ class IntanPlugin(IPlugin):
                       type=click.STRING,
                       help='The experimenter performing the recording.',
                       )
-        @click.option('--left',
-                      required=True,
-                      type=click.FLOAT,
-                      help='The depth on left side in "mm".',
-                      )
-        @click.option('--right',
-                      required=True,
-                      type=click.FLOAT,
-                      help='The depth on right side in "mm".',
+        @click.option('-a', '--anatomy',
+                      multiple=True,
+                      type=(click.STRING, float),
+                      help='The adjustment amount on given anatomical location in "um".',
                       )
         @click.option('-l', '--location',
                       required=True,
@@ -699,9 +707,9 @@ class IntanPlugin(IPlugin):
                       type=click.STRING,
                       help='Camera shutter TTL source. e.g. intan-adc-0, ephys-dig-1',
                       )
-        @click.option('--rat-id',
+        @click.option('--subject-id',
                       type=click.STRING,
-                      help='The id number of the rat.',
+                      help='The id number of the subject.',
                       )
         @click.option('--prb-path',
                       type=click.STRING,
@@ -716,16 +724,25 @@ class IntanPlugin(IPlugin):
                       default=32,
                       help='Number of channels. Default = 32',
                       )
+        @click.option('-t', '--tag',
+                      multiple=True,
+                      type=click.STRING,
+                      help='Add tags to action.',
+                      )
         @click.option('-m', '--message',
                       multiple=True,
                       type=click.STRING,
                       help='Add message, use "text here" for sentences.',
                       )
+        @click.option('--no-move',
+                      is_flag=True,
+                      help='Do not delete intan-openephys directory after copying.',
+                      )
         def generate_intan_ephys_action(action_id, intan_ephys_path, no_local, left,
                                         right, overwrite, no_files, no_modules,
                                         intan_sync, ephys_sync, shutter_events,
-                                        rat_id, user, prb_path, session, nchan,
-                                        location, message):
+                                        subject_id, user, prb_path, session, nchan,
+                                        location, message, tag, no_move):
             """Generate an intan (ephys) open-ephys (tracking) recording-action to database.
 
             COMMAND: intan-ephys-path"""
@@ -746,7 +763,7 @@ class IntanPlugin(IPlugin):
             openephys_file = pyopenephys.File(intan_ephys_path)
             intan_file = pyintan.File(rhs_path, prb_path)
 
-            rat_id = rat_id or intan_ephys_dir.split('_')[0]
+            subject_id = subject_id or intan_ephys_dir.split('_')[0]
             session = session or intan_ephys_dir.split('_')[-1]
             if session.isdigit():
                 session = int(session)
@@ -757,7 +774,7 @@ class IntanPlugin(IPlugin):
             if action_id is None:
                 session_dtime = datetime.strftime(openephys_file.datetime,
                                                   '%d%m%y')
-                action_id = rat_id + '-' + session_dtime + '-%.2d' % session
+                action_id = subject_id + '-' + session_dtime + '-%.2d' % session
             print('Generating action', action_id)
             action = project.require_action(action_id)
             action.datetime = openephys_file.datetime
@@ -818,18 +835,18 @@ class IntanPlugin(IPlugin):
                         raise FileExistsError('The exdir path to this action "' +
                                               exdir_path + '" exists, use ' +
                                               'overwrite flag')
-                try:
-                    os.mkdir(op.dirname(exdir_path))
-                except Exception:
-                    pass
+                os.makedirs(op.dirname(exdir_path), exist_ok=True)
                 shutil.copy(prb_path, intan_ephys_path)
-                # this will copy the entire folder containing the intan file as well
                 openephys.convert(openephys_file,
                                   exdir_path=exdir_path)
                 intan.convert(intan_file,
                               exdir_path=exdir_path,
                               copyfiles=False)
-
+                if spikes_source != 'none':
+                    openephys.generate_spike_trains(exdir_path, openephys_file,
+                                                    source=spikes_source)
+                if not no_move:
+                    shutil.rmtree(intan_ephys_path)
 
         @cli.command('register-process-intan-ephys')
         @click.argument('intan-ephys-path', type=click.Path(exists=True))
