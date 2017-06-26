@@ -730,7 +730,7 @@ class IntanPlugin(IPlugin):
 
             COMMAND: intan-ephys-path"""
             from expipe_io_neuro import pyopenephys, pyintan
-            from datetime import datetime
+            from datetime import datetime, timedelta
             import numpy as np
             from .action_tools import register_depth
             intan_ephys_path = op.abspath(intan_ephys_path)
@@ -762,17 +762,26 @@ class IntanPlugin(IPlugin):
             action = project.require_action(action_id)
             action.datetime = openephys_file.datetime
             action.type = 'Recording'
-            action.tags = {'open-ephys': 'true'}
-            print('Registering rat id ' + rat_id)
-            action.subjects = {rat_id: 'true'}
+            action.tags.extend(list(tag) + ['open-ephys'])
+            print('Registering subject id ' + subject_id)
+            action.subjects = [subject_id]
             user = user or USER_PARAMS['user_name']
+            if user is None:
+                raise ValueError('Please add user name')
+            if len(user) == 0:
+                raise ValueError('Please add user name')
             print('Registering user ' + user)
-            action.users = {user: 'true'}
+            action.users = [user]
             location = location or USER_PARAMS['location']
+            if location is None:
+                raise ValueError('Please add location')
+            if len(location) == 0:
+                raise ValueError('Please add location')
             assert location in POSSIBLE_LOCATIONS
             print('Registering location ' + location)
             action.location = location
-
+            messages = [{'message': m, 'user': user, 'datetime': datetime.now()}
+                        for m in message]
             if not no_modules:
                 if 'intanopenephys' not in TEMPLATES:
                     raise ValueError('Could not find "intanopenephys" in ' +
@@ -784,12 +793,17 @@ class IntanPlugin(IPlugin):
                 headstage['model']['value'] = 'RHS2132'
                 action.require_module(name='hardware_intan_headstage', contents=headstage,
                                       overwrite=True)
-                register_depth(project, action, left, right)
+                correct_depth = register_depth(project, action, anatomy)
+                if not correct_depth:
+                    print('Aborting registration!')
+                    return
 
                 for idx, m in enumerate(openephys_file.messages):
-                    message.apend({'time': m['time'],
-                                   'value': m['message']})
-                add_message(action, message)
+                    dtime = openephys_file.datetime + timedelta(seconds=float(m['time'].magnitude))
+                    messages.append({'datetime': dtime,
+                                     'message': m['message'],
+                                     'user': user})
+            action.messages.extend(messages)
 
             if not no_files:
                 fr = action.require_filerecord()
@@ -1022,7 +1036,7 @@ class IntanPlugin(IPlugin):
                         shutter_ttl = openephys_file.digital_in_signals[0].times[shutter_chan]
                 else:
                     shutter_ttl = []
-                openephys_file.sync_tracking_from_events(shutter_ttl)
+                openephys_file.sync_tracking_from_events(shutter_ttl, parallel=True)
 
             subject_id = subject_id or intan_ephys_dir.split('_')[0]
             session = session or intan_ephys_dir.split('_')[-1]
