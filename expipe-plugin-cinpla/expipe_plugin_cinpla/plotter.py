@@ -1,39 +1,27 @@
 import os
 import os.path as op
 import numpy as np
-import expipe.io
-from .action_tools import _get_local_path
-import expipe
-import sys
-sys.path.append(expipe.config.config_dir)
-if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
-    print('No config params file found, use "expipe' +
-          'copy-to-config expipe_params.py"')
-else:
-    from expipe_params import USER_PARAMS
-    from expipe_params import ANALYSIS_PARAMS as par
+import exdir
+import exana.tracking as tr
+import quantities as pq
+import neo
+import copy
 
 # TODO select channel_group, delete names with channel group if selected
 
 
 class Plotter:
-    def __init__(self, action_id, ext='.png', save_figs=True,
-                 close_fig=True, channel_group=None, no_local=False,
-                 overwrite=False, skip=False):
-        import exdir
-        import exana.tracking as tr
-        import quantities as pq
-        import neo
-        project = expipe.get_project(USER_PARAMS['project_id'])
-        action = project.require_action(action_id)
-        fr = action.require_filerecord()
-        if not no_local:
-            exdir_path = _get_local_path(fr)
-        else:
-            exdir_path = fr.server_path
+    def __init__(self, exdir_path, params, analysis_output, ext='.png',
+                 save_figs=True, close_fig=True, channel_group=None,
+                 no_local=False, overwrite=False, skip=False):
         print('Initializing plotting for {}'.format(exdir_path))
         if ext[0] != '.':
             ext = '.' + ext
+        self.analysis_output = copy.deepcopy(analysis_output)
+        for val_ch in self.analysis_output.values():
+            for val_un in val_ch.values():
+                val_un['analysis_output'] = {}
+        self.par = params
         self.overwrite = overwrite
         self.skip = skip
         self.ext = ext
@@ -45,7 +33,7 @@ class Plotter:
         self.chxs = self.blk.channel_indexes
         channel_groups = [chx.annotations['group_id'] for chx in self.chxs]
         self.channel_group = channel_group or channel_groups
-        assert isinstance(self.channel_group, list)
+        self.channel_group = list(self.channel_group)
         self.anas = [ana for ana in self.seg.analogsignals
                      if ana.sampling_rate == 250 * pq.Hz]
         exdir_group = exdir.File(exdir_path)
@@ -62,8 +50,8 @@ class Plotter:
         self.ang, self.ang_t = tr.head_direction(x1, y1, x2, y2, t1,
                                                  return_rad=False)
         self.x, self.y, self.t = tr.interp_filt_position(x, y, t,
-                                                         pos_fs=par['pos_fs'],
-                                                         f_cut=par['f_cut'])
+                                                         pos_fs=self.par['pos_fs'],
+                                                         f_cut=self.par['f_cut'])
         self.x, self.y, self.t = self.x, self.y, self.t
         if len(self.seg.epochs) == 1:
             self.epoch = self.seg.epochs[0]
@@ -105,11 +93,13 @@ class Plotter:
 
     def spatial_overview(self):
         import exana.tracking as tr
+        from exana.statistics import coeff_var
         from .make_spatiality_overview import make_spatiality_overview
         raw_dir = str(self._analysis.require_raw('spatial_overview').directory)
         os.makedirs(raw_dir, exist_ok=True)
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
+            group_name = 'channel_group_' + str(group_id)
             if group_id not in self.channel_group:
                 continue
             if not self._delete_figures(raw_dir, group_id):
@@ -122,30 +112,51 @@ class Plotter:
                 if unit.annotations['cluster_group'].lower() == 'noise':
                     continue
                 sptr = unit.spiketrains[0]
+                if sptr.name is None:
+                    sptr.name = 'cluster_{}'.format(sptr.annotations['cluster_id'])
+                sptr_name = sptr.name.replace(' ', '_').replace('#', '')
                 fname = '{} {}'.format(chx.name, unit.name).replace(" ", "_")
                 fpath = op.join(raw_dir, fname)
-                try:
-                    rate_map = tr.spatial_rate_map(self.x, self.y, self.t, sptr,
-                                                   binsize=par['spat_binsize'],
-                                                   box_xlen=par['box_xlen'],
-                                                   box_ylen=par['box_ylen'],
-                                                   mask_unvisited=False)
-                    G, acorr = tr.gridness(rate_map, return_acorr=True,
-                                           box_xlen=par['box_xlen'],
-                                           box_ylen=par['box_ylen'])
-                    fig = make_spatiality_overview(self.x, self.y, self.t, self.ang,
-                                                   self.ang_t, sptr=sptr,
-                                                   acorr=acorr, G=G,
-                                                   mask_unvisited=True,
-                                                   title=None,
-                                                   ang_binsize=par['ang_binsize'],
-                                                   rate_map=rate_map,
-                                                   spike_size=1.)
-                except Exception as e:
-                    with open(fpath + '.exception', 'w+') as f:
-                        print(str(e), file=f)
-                    continue
+
+                rate_map, rate_bins, _ = tr.spatial_rate_map( # NOTE assuming quadratic box
+                    self.x, self.y, self.t, sptr,
+                    binsize=self.par['spat_binsize'],
+                    box_xlen=self.par['box_xlen'],
+                    box_ylen=self.par['box_ylen'],
+                    mask_unvisited=True,
+                    return_bins=True)
+                G, acorr = tr.gridness(
+                    rate_map, return_acorr=True,
+                    box_xlen=self.par['box_xlen'],
+                    box_ylen=self.par['box_ylen'])
+                fig = make_spatiality_overview(
+                    self.x, self.y, self.t, self.ang,
+                    self.ang_t, sptr=sptr,
+                    acorr=acorr, G=G,
+                    mask_unvisited=True,
+                    title=None,
+                    ang_binsize=self.par['ang_binsize'],
+                    rate_map=rate_map,
+                    spike_size=1.)
                 self.savefig(fpath, fig)
+
+                ang_bin, ang_rate = tr.head_direction_rate(
+                    sptr, self.ang,
+                    self.ang_t,
+                    binsize=self.par['ang_binsize'])
+                mean_ang, mean_vec_len = tr.head_direction_stats(ang_bin,
+                                                                 ang_rate)
+                px = tr.prob_dist(self.x, self.y, rate_bins)
+                analysis_output = {
+                    'information_rate': tr.information_rate(rate_map, px),
+                    'field_maxrate': np.nanmax(rate_map) * pq.Hz,
+                    'sparsity': tr.sparsity(rate_map, px),
+                    'selectivity': tr.selectivity(rate_map, px),
+                    'coeff_var': float(coeff_var([sptr])[0]),
+                    'gridness': G,
+                    'hd_aveclen': mean_vec_len,
+                    'avg_rate': sptr.size / sptr.duration}
+                self.analysis_output[group_name][sptr_name]['analysis_output'].update(analysis_output)
 
     def occupancy(self):
         import exana.tracking as tr
@@ -165,13 +176,13 @@ class Plotter:
             ax1 = fig.add_subplot(gs[:9, 3:6])
             ax2 = fig.add_subplot(gs[11:, 3:6])
             tr.plot_path(self.x, self.y, self.t,
-                            box_xlen=par['box_xlen'],
-                            box_ylen=par['box_ylen'],
+                            box_xlen=self.par['box_xlen'],
+                            box_ylen=self.par['box_ylen'],
                             ax=ax1)
             im, max_t = tr.plot_occupancy(self.x, self.y, self.t,
-                            binsize=par['spat_binsize'],
-                            box_xlen=par['box_xlen'],
-                            box_ylen=par['box_ylen'],
+                            binsize=self.par['spat_binsize'],
+                            box_xlen=self.par['box_xlen'],
+                            box_ylen=self.par['box_ylen'],
                             ax=ax2)
             divider = make_axes_locatable(ax2)
             cax = divider.append_axes("bottom", size="5%", pad=0.05)
@@ -535,8 +546,8 @@ class Plotter:
                     gs = gridspec.GridSpec(2*nrc+4, 2*nrc+4)
                     plot_waveforms(sptr=sptr, color=color, fig=fig, gs=gs[:nrc+1, :nrc+1])
                     plot_amp_clusters([sptr], colors=[color], fig=fig, gs=gs[:nrc+1, nrc+2:])
-                    bin_width = par['corr_bin_width'].rescale('s').magnitude
-                    limit = par['corr_limit'].rescale('s').magnitude
+                    bin_width = self.par['corr_bin_width'].rescale('s').magnitude
+                    limit = self.par['corr_limit'].rescale('s').magnitude
                     count, bins = correlogram(t1=sptr.times.magnitude, t2=None,
                                               bin_width=bin_width, limit=limit,
                                               auto=True)
@@ -546,8 +557,8 @@ class Plotter:
                     ax_cor.set_xlim([-limit, limit])
 
                     ax_isi = fig.add_subplot(gs[nrc+3:, nrc+2:])
-                    plot_isi_hist(sptr.times, alpha=1, ax=ax_isi, binsize=par['isi_binsize'],
-                                  time_limit=par['isi_time_limit'], color=color, )
+                    plot_isi_hist(sptr.times, alpha=1, ax=ax_isi, binsize=self.par['isi_binsize'],
+                                  time_limit=self.par['isi_time_limit'], color=color, )
                     self.savefig(fpath, fig)
                 except Exception as e:
                     with open(fpath + '.exception', 'w+') as f:
