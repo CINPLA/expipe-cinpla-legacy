@@ -192,48 +192,48 @@ class Plotter:
                 print(str(e), file=f)
         self.savefig(fpath, fig)
 
-    def spatial_stim_overview(self):
-        if self.epoch is None:
-            print('There is no epochs related to this experiment')
-            return
-        from spatial_stim_overview import spatial_stim_overview
-        raw_dir = (self._analysis.require_raw('spatial_stim_overview').directory)
-        os.makedirs(raw_dir, exist_ok=True)
-        for nr, chx in enumerate(self.chxs):
-            group_id = chx.annotations['group_id']
-            if group_id not in self.channel_group:
-                continue
-            if not self._delete_figures(raw_dir, group_id):
-                continue
-            print('Plotting spatial stimulation overview, ' +
-                  'channel group {}'.format(group_id))
-            for u, unit in enumerate(chx.units):
-                if unit.annotations['cluster_group'].lower() == 'noise':
-                    continue
-                sptr = unit.spiketrains[0]
-                fname = '{} {}'.format(chx.name, unit.name).replace(" ", "_")
-                fpath = op.join(raw_dir, fname)
-                if group_id < 4:
-                    id_list = range(4)
-                else:
-                    id_list = range(4, 8)
-                anas = [ana for ana in self.seg.analogsignals
-                        if ana.channel_index.annotations['group_id'] in id_list
-                        and ana.sampling_rate == 250 * pq.Hz]
-                try:
-                    fig, data = spatial_stim_overview(spiketrain=sptr,
-                                                      analogsignals=anas,
-                                                      epoch=self.epoch,
-                                                      pos_x=self.x, pos_y=self.y,
-                                                      pos_t=self.t, pos_ang=self.ang,
-                                                      pos_ang_t=self.ang_t
-                                                      )
-                except Exception as e:
-                    with open(fpath + '.exception', 'w+') as f:
-                        print(str(e), file=f)
-                    continue
-                self.savefig(fpath, fig)
-                data.to_json(fpath + '.json', orient='index')
+    # def spatial_stim_overview(self):
+    #     if self.epoch is None:
+    #         print('There is no epochs related to this experiment')
+    #         return
+    #     from spatial_stim_overview import spatial_stim_overview
+    #     raw_dir = (self._analysis.require_raw('spatial_stim_overview').directory)
+    #     os.makedirs(raw_dir, exist_ok=True)
+    #     for nr, chx in enumerate(self.chxs):
+    #         group_id = chx.annotations['group_id']
+    #         if group_id not in self.channel_group:
+    #             continue
+    #         if not self._delete_figures(raw_dir, group_id):
+    #             continue
+    #         print('Plotting spatial stimulation overview, ' +
+    #               'channel group {}'.format(group_id))
+    #         for u, unit in enumerate(chx.units):
+    #             if unit.annotations['cluster_group'].lower() == 'noise':
+    #                 continue
+    #             sptr = unit.spiketrains[0]
+    #             fname = '{} {}'.format(chx.name, unit.name).replace(" ", "_")
+    #             fpath = op.join(raw_dir, fname)
+    #             if group_id < 4:
+    #                 id_list = range(4)
+    #             else:
+    #                 id_list = range(4, 8)
+    #             anas = [ana for ana in self.seg.analogsignals
+    #                     if ana.channel_index.annotations['group_id'] in id_list
+    #                     and ana.sampling_rate == 250 * pq.Hz]
+    #             try:
+    #                 fig, data = spatial_stim_overview(spiketrain=sptr,
+    #                                                   analogsignals=anas,
+    #                                                   epoch=self.epoch,
+    #                                                   pos_x=self.x, pos_y=self.y,
+    #                                                   pos_t=self.t, pos_ang=self.ang,
+    #                                                   pos_ang_t=self.ang_t
+    #                                                   )
+    #             except Exception as e:
+    #                 with open(fpath + '.exception', 'w+') as f:
+    #                     print(str(e), file=f)
+    #                 continue
+    #             self.savefig(fpath, fig)
+    #             data.to_json(fpath + '.json', orient='index')
 
     def tfr(self):
         from exana.stimulus import epoch_overview

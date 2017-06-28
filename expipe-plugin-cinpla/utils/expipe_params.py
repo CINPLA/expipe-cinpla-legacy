@@ -82,7 +82,7 @@ POSSIBLE_LOCATIONS = ['room2', 'room1']
 #  obligatory tags will be enforced uppon transfer, this is to ensure you
 #  have a minimum of tags for each action
 OBLIGATORY_TAGS = ['no', 'yes', 'maybe']
-POSSIBLE_TAGS = ['GC', 'PC', 'BC', 'SC', 'HD', 'TC', 'theta'] + OBLIGATORY_TAGS
+POSSIBLE_TAGS = ['GC', 'PC', 'BC', 'SC', 'HD', 'TC', 'theta', 'baseline'] + OBLIGATORY_TAGS
 
 #  thse are the templates you want to load to each suregery implantation
 #  procedure
@@ -143,8 +143,8 @@ ANALYSIS_PARAMS = {
 # this is personal user parameters
 USER_PARAMS = {
     'project_id': 'mikkel_septum_entorhinal',
-    'user_name': 'Mikkel Elle Lepperød',
-    'location': 'room2',
+    'user_name': 'Harry Plotter',
+    'location': 'Chamber of secrets',
     'laser_device': {'name': 'hardware_blue_laser', 'id': 4}
 }
 
