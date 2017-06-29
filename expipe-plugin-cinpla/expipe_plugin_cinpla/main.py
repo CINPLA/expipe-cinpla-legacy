@@ -105,11 +105,15 @@ class CinplaPlugin(IPlugin):
             if procedure not in ["implantation", "injection"]:
                 raise ValueError('procedure must be one of "implantation" ' +
                                  'or "injection"')
-            birthday = datetime.strptime(birthday, '%d.%m.%Y')
-            birthday = datetime.strftime(birthday, DTIME_FORMAT)
-            date = datetime.strptime(date, '%d.%m.%YT%H:%M')
             project = expipe.get_project(USER_PARAMS['project_id'])
             action = project.require_action(subject_id + '-surgery-' + procedure)
+            birthday = datetime.strftime(datetime.strptime(birthday, '%d.%m.%Y'),
+                                         DTIME_FORMAT)
+            if date == 'now':
+                date = datetime.now()
+            else:
+                date = datetime.strptime(date, '%d.%m.%YT%H:%M')
+            action.datetime = date
             action.location = 'Sterile surgery station'
             action.type = 'Surgery'
             action.tags = [procedure]
@@ -121,7 +125,6 @@ class CinplaPlugin(IPlugin):
                 raise ValueError('Please add user name')
             print('Registering user ' + user)
             action.users = [user]
-            action.datetime = date
             generate_templates(action, TEMPLATES['surgery_' + procedure],
                                overwrite, git_note=GIT_NOTE)
             modules_dict = action.modules.to_dict()
@@ -139,6 +142,46 @@ class CinplaPlugin(IPlugin):
             subject['weight'] = weight * pq.g
             action.require_module(name=MODULES['subject'], contents=subject,
                                   overwrite=True)
+
+        @cli.command('register-perfusion')
+        @click.argument('subject-id')
+        @click.option('--date', '-d',
+                      required=True,
+                      type=click.STRING,
+                      help='The date of the surgery format: "dd.mm.yyyyTHH:MM".',
+                      )
+        @click.option('--overwrite',
+                      is_flag=True,
+                      help='Overwrite modules or not.',
+                      )
+        @click.option('-u', '--user',
+                      type=click.STRING,
+                      help='The experimenter performing the surgery.',
+                      )
+        def generate_perfusion(subject_id, date, user, overwrite):
+            """Generate a perfusion action."""
+            import quantities as pq
+            from datetime import datetime
+            project = expipe.get_project(USER_PARAMS['project_id'])
+            action = project.require_action(subject_id + '-perfusion')
+            if date == 'now':
+                date = datetime.now()
+            else:
+                date = datetime.strptime(date, '%d.%m.%YT%H:%M')
+            action.datetime = date
+            action.location = 'Sterile surgery station'
+            action.type = 'Surgery'
+            action.tags = ['perfusion']
+            action.subjects = [subject_id]
+            user = user or USER_PARAMS['user_name']
+            if user is None:
+                raise ValueError('Please add user name')
+            if len(user) == 0:
+                raise ValueError('Please add user name')
+            print('Registering user ' + user)
+            action.users = [user]
+            generate_templates(action, TEMPLATES['perfusion'],
+                               overwrite, git_note=GIT_NOTE)
 
         @cli.command('transfer')
         @click.argument('action-id', type=click.STRING)
@@ -374,7 +417,6 @@ class CinplaPlugin(IPlugin):
             shutil.copytree(source, dest, ignore=exclude_dir)  # TODO write progress
             if move:
                 shutil.rmtree(source)
-
 
         @cli.command('spikesort')
         @click.argument('action-id', type=click.STRING)
@@ -663,10 +705,7 @@ class CinplaPlugin(IPlugin):
                     contents[name] = attrs
                 modname = 'channel_group_' + str(group_id)
                 chxs_contents[modname] = contents
-                action.require_module(name=modname,
-                                      contents=contents,
-                                      overwrite=kwargs['overwrite'])
-                print('Adding module ', modname)
+                print('Generating module ', modname)
             action.require_module('software_version_control_git',
                                   contents=GIT_NOTE,
                                   overwrite=kwargs['overwrite'])
@@ -680,24 +719,28 @@ class CinplaPlugin(IPlugin):
                                no_local=kwargs['no_local'],
                                overwrite=kwargs['overwrite'],
                                skip=kwargs['skip'])
-            if any(arg in kwargs['analysis'] for arg in ['stim_stat', 'all']):
-                plot.stimulation_statistics()
-            if any(arg in kwargs['analysis'] for arg in ['occupancy', 'all']):
-                plot.occupancy()
-            if any(arg in kwargs['analysis'] for arg in ['spatial', 'all']):
-                plot.spatial_overview()
-            if any(arg in kwargs['analysis'] for arg in ['spike_stat', 'all']):
-                plot.spike_statistics()
-            if any(arg in kwargs['analysis'] for arg in ['psd', 'all']):
-                plot.psd()
-            if any(arg in kwargs['analysis'] for arg in ['spike_lfp', 'all']):
-                plot.spike_lfp_coherence()
-            if any(arg in kwargs['analysis'] for arg in ['tfr']):
-                plot.tfr()
-            if any(arg in kwargs['analysis'] for arg in ['orient_tuning', 'all']):
-                plot.orient_tuning_overview()
-            for key, val in plot.analysis_output.items():
-                action.require_module(key, contents=val, overwrite=True)
+                if any(arg in kwargs['analysis'] for arg in ['stim_stat', 'all']):
+                    plot.stimulation_statistics()
+                if any(arg in kwargs['analysis'] for arg in ['occupancy', 'all']):
+                    plot.occupancy()
+                if any(arg in kwargs['analysis'] for arg in ['spatial', 'all']):
+                    plot.spatial_overview()
+                if any(arg in kwargs['analysis'] for arg in ['spike_stat', 'all']):
+                    plot.spike_statistics()
+                if any(arg in kwargs['analysis'] for arg in ['psd', 'all']):
+                    plot.psd()
+                if any(arg in kwargs['analysis'] for arg in ['spike_lfp', 'all']):
+                    plot.spike_lfp_coherence()
+                if any(arg in kwargs['analysis'] for arg in ['tfr']):
+                    plot.tfr()
+                if any(arg in kwargs['analysis'] for arg in ['orient_tuning', 'all']):
+                    plot.orient_tuning_overview()
+                for key, val in plot.analysis_output.items():
+                    action.require_module(key, contents=val, overwrite=True)
+            else:
+                for key, val in chxs_contents.items():
+                    action.require_module(key, contents=val,
+                                          overwrite=kwargs['overwrite'])
 
         @cli.command('group-analyse')
         @click.argument('action-id', type=click.STRING)
