@@ -767,7 +767,7 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Overwrite.',
                       )
-        def group_analysis(action_id, user, tag, overwrite,
+        def group_analysis(action_id, user, tag, overwrite, subject_id,
                            location):
             """Parse info about recorded units
 
@@ -784,6 +784,7 @@ class CinplaPlugin(IPlugin):
                 raise ValueError('Please add user name')
             analysis_action.users.append(user)
             analysis_action.tags = list(tag)
+            # TODO this is slow, can omit loading all the modules for each action
             for action in project.actions:
                 if action.type != 'Action-analysis':
                     continue
@@ -798,7 +799,7 @@ class CinplaPlugin(IPlugin):
                     if location != action.location:
                         continue
                 fr = action.require_filerecord()
-                name = action.id
+                name = action.id.rstrip('-analysis')
                 analysis_action.subjects.extend(list(action.subjects))
                 contents = {}
                 for key, val in action.modules.items():
