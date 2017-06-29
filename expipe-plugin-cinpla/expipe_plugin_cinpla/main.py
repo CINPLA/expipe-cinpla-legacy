@@ -745,7 +745,7 @@ class CinplaPlugin(IPlugin):
                       type=click.STRING,
                       help='Tags to sort the analysis.',
                       )
-        @click.option('-s', '--subject',
+        @click.option('-s', '--subject-id',
                       multiple=True,
                       type=click.STRING,
                       help='Subjects to sort the analysis.',
@@ -759,7 +759,8 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Overwrite.',
                       )
-        def generate_analysis(action_id, user, tag, overwrite):
+        def generate_analysis(action_id, user, tag, overwrite, subject_id,
+                              location):
             """Parse info about recorded units
 
             COMMAND: action-id: Provide action id to get action"""
@@ -773,26 +774,27 @@ class CinplaPlugin(IPlugin):
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
-            users = analysis_action.users or list()
-            if user not in users:
-                users.append(user)
-            analysis_action.users = users
-            subjects = {}
-            analysis_action.tags = tag
+            analysis_action.users.append(user)
+            analysis_action.tags = list(tag)
             for action in project.actions:
                 if action.type != 'Recording':
                     continue
-                if action.tags is None:
+                if len(action.tags) == 0:
                     raise ValueError('No tags in "' + action.id + '"')
-                if not any(t in tag for t in action.tags.keys()):
+                if not any(t in tag for t in action.tags):
                     continue
+                if subject_id:
+                    if not any(s in subject_id for s in action.subjects):
+                        continue
+                if location:
+                    if location != action.location:
+                        continue
                 fr = action.require_filerecord()
                 name = action.id
-                subjects.update(action.subjects)
+                analysis_action.subjects.extend(list(action.subjects))
                 contents = {}
                 for key, val in action.modules.items():
                     if 'channel_group' in key:
                         contents[key] = val
                 analysis_action.require_module(name=name, contents=contents,
                                                overwrite=overwrite)
-            analysis_action.subjects = subjects
