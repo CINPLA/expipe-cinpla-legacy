@@ -16,6 +16,7 @@
         "definition": "The stimulus modality like acoustic, haptic, light etc.",
         "value": ""
     },
+    "name": "stimulus_pulse",
     "output_channel": {
         "definition": "The physical output device (e.g. an analog output\tchannel, a monitor screen, the same loudspeaker, etc.). This\n\t      information can be used to explicitely express that several stimuli (that share the same OutputChannel) are jointly presented.",
         "value": ""

@@ -1,6 +1,7 @@
 {
     "definition": "Properties for describing an imaging experiment ranging from conventional light microscpoy to fMRI.",
     "identifier": "experiment_imaging",
+    "name": "experiment_imaging",
     "type": {
         "alternatives": [
             "REM",

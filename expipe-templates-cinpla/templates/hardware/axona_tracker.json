@@ -29,6 +29,7 @@
         "definition": "The model name of this hardware item.",
         "value": ""
     },
+    "name": "hardware_axona_tracker",
     "notes": {
         "value": ""
     },

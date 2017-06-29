@@ -45,6 +45,7 @@
         "definition": "Describes the place the local anaesthetic was applied.",
         "value": ""
     },
+    "name": "preparation_preparation",
     "ringers_solution": {
         "definition": "The Ringer solution used during preparation.",
         "value": ""

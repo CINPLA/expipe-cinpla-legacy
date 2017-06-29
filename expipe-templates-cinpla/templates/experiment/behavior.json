@@ -12,6 +12,7 @@
         "definition": "The number of individuals that are observed/investigated at the same time.",
         "value": ""
     },
+    "name": "experiment_behavior",
     "paradigm": {
         "definition": "The paradigm used in the experiment, e.g. Learning, navigation, etc...",
         "value": ""

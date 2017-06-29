@@ -36,6 +36,7 @@
         "definition": "Describes the brain area of recording.",
         "value": "HPCR"
     },
+    "name": "alessio_electrophysiology_R",
     "notes": {
         "value": ""
     },

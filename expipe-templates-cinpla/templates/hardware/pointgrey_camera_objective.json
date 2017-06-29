@@ -41,6 +41,7 @@
         "definition": "The type of mount.",
         "value": ""
     },
+    "name": "hardware_pointgrey_camera_objective",
     "numerical_aperture": {
         "definition": "The numerical aperture (N.A.) of the objective.",
         "value": ""

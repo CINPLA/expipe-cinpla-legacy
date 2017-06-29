@@ -33,6 +33,7 @@
         "definition": "The start date of time limited licence.",
         "value": ""
     },
+    "name": "software_openephys_gui",
     "owner": {
         "definition": "The owner of the software.",
         "value": ""

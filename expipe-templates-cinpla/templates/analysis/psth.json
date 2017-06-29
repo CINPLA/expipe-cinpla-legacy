@@ -58,6 +58,7 @@
         "definition": "The method used for creating the PSTH.",
         "value": ""
     },
+    "name": "analysis_psth",
     "paper_doi": {
         "definition": "If the results of this analysis have been published one can store the doi of the paper.",
         "value": ""

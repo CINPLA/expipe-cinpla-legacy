@@ -25,6 +25,7 @@
         "definition": "The model name of this hardware item.",
         "value": "pulse pal version 1"
     },
+    "name": "hardware_pulse_pal",
     "notes": {
         "value": ""
     },

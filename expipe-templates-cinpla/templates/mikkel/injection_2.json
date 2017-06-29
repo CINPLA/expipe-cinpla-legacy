@@ -62,6 +62,7 @@
         "definition": "Describes the brain area of recording. MS: Medial Septum, MECR: Medial Entorhinal Cortex Right hemisphere, MECL: Medial Entorhinal Cortex Left hemisphere, ",
         "value": "MS"
     },
+    "name": "mikkel_injection_2",
     "notes": {
         "value": "1 minute waiting before injection, 8 minute waiting after"
     },

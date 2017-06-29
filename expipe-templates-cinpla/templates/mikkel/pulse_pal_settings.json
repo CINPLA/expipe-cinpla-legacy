@@ -5,6 +5,7 @@
         "unit": "s",
         "value": ""
     },
+    "name": "mikkel_pulse_pal_settings",
     "notes": {
         "definition": "Notes specific for this stimulus session.",
         "value": ""

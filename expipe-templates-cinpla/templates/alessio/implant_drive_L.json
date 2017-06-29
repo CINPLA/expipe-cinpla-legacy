@@ -18,14 +18,15 @@
         "definition": "Describes the brain area of recording. HPCR: Hippocampus Right hemisphere, HPCL: Hippocampus  Left hemisphere, ",
         "value": "HPCR"
     },
+    "name": "alessio_implant_drive_L",
     "notes": {
         "value": ""
     },
     "position": {
         "unit": "mm",
         "value": [
-            -4.0,
-            3.1,
+            "-4.0",
+            "3.1",
             " z"
         ]
     },

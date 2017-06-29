@@ -27,14 +27,15 @@
         "definition": "Describes the brain area of recording. MS: Medial Septum, MECR: Medial Entorhinal Cortex Right hemisphere, MECL: Medial Entorhinal Cortex Left hemisphere, ",
         "value": "MECL"
     },
+    "name": "mikkel_implant_drive_L",
     "notes": {
         "value": ""
     },
     "position": {
         "unit": "mm",
         "value": [
-            4.5,
-            0.4,
+            "4.5",
+            "0.4",
             " z"
         ]
     },

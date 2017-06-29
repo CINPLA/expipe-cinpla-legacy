@@ -1,6 +1,7 @@
 {
     "definition": "Properties for describing an electrophysiological experiment.",
     "identifier": "experiment_electrophysiology",
+    "name": "experiment_electrophysiology",
     "subtype": {
         "alternatives": [
             "dual electrode recording",

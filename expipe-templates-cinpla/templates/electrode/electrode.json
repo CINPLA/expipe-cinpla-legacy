@@ -36,6 +36,7 @@
         "definition": "The Material the electrodes are made of e.g. glass. tungsten, steel ...",
         "value": ""
     },
+    "name": "electrode_electrode",
     "pull_parameter": {
         "definition": "The specific pull parameters like heat, trip velocity, heat and cooling duration etc..",
         "value": ""

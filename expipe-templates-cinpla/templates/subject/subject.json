@@ -41,6 +41,7 @@
         "definition": "If the subject has been labled in a specific\n         way. The lable can be described here.",
         "value": ""
     },
+    "name": "subject_subject",
     "population": {
         "definition": "The population this subject is offspring\n         of. This may be the bee hive, the ant colony,\n         etc.",
         "value": ""

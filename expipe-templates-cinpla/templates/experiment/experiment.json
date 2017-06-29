@@ -5,6 +5,7 @@
         "value": ""
     },
     "identifier": "experiment_experiment",
+    "name": "experiment_experiment",
     "project_id": {
         "definition": "The ID of the project this experiment belongs\n         to.",
         "value": ""

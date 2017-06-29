@@ -38,6 +38,7 @@
         "definition": "Describes the brain area of recording.",
         "value": "MECL"
     },
+    "name": "mikkel_electrophysiology_L",
     "notes": {
         "value": ""
     },

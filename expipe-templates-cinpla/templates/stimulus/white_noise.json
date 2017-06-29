@@ -25,6 +25,7 @@
         "definition": "The stimulus modality like acoustic, haptic, light etc.",
         "value": ""
     },
+    "name": "stimulus_white_noise",
     "offset_time": {
         "definition": "The temporal offset (with respect to the begin of the recorded trial) with which this stimulus was presented.",
         "value": ""

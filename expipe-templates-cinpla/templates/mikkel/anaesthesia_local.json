@@ -16,6 +16,7 @@
         "definition": "Describes the place the local anaesthetic was applied.",
         "value": "Skin covering dorsal part of head, around cut area."
     },
+    "name": "mikkel_anaesthesia_local",
     "notes": {
         "value": ""
     }

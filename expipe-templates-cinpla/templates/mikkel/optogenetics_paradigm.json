@@ -1,6 +1,7 @@
 {
     "definition": "Describing the stimulus paradigm for optogenetic stimulus.",
     "identifier": "mikkel_optogenetics_paradigm",
+    "name": "mikkel_optogenetics_paradigm",
     "notes": {
         "definition": "Notes specific for this stimulus session.",
         "value": ""

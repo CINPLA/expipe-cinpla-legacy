@@ -25,6 +25,7 @@
         "value": ""
     },
     "identifier": "recording_recording",
+    "name": "recording_recording",
     "start": {
         "definition": "The date and time at which the recording started in  (YYYY-MM-DD hh:mm:ss format).",
         "value": ""

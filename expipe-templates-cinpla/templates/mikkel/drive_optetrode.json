@@ -8,6 +8,7 @@
         "definition": "The manufacturer of the drive e.g. ordered from a company.",
         "value": "Axona made the chassie and tetrodes and optic fibre is assembled on site"
     },
+    "name": "mikkel_drive_optetrode",
     "notes": {
         "value": ""
     },

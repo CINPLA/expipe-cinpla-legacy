@@ -28,6 +28,7 @@
         "definition": "The scanner model name.",
         "value": ""
     },
+    "name": "hardware_scanner",
     "owner": {
         "definition": "The inventory number of the FilterSet.",
         "value": ""
