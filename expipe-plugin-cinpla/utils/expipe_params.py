@@ -82,7 +82,7 @@ POSSIBLE_LOCATIONS = ['room2', 'room1']
 #  obligatory tags will be enforced uppon transfer, this is to ensure you
 #  have a minimum of tags for each action
 OBLIGATORY_TAGS = ['no', 'yes', 'maybe']
-POSSIBLE_TAGS = ['GC', 'PC', 'BC', 'SC', 'HD', 'TC', 'theta'] + OBLIGATORY_TAGS
+POSSIBLE_TAGS = ['GC', 'PC', 'BC', 'SC', 'HD', 'TC', 'theta', 'baseline'] + OBLIGATORY_TAGS
 
 #  thse are the templates you want to load to each suregery implantation
 #  procedure
@@ -104,6 +104,11 @@ surgery_injection_templates = [
     'mikkel_subject', 'mikkel_injection_1',
     'mikkel_injection_2',
     '_inherit_environment_rat_housing',
+    '_inherit_mikkel_surgery_station_environment'
+]
+
+perfusion_templates = [
+    'mikkel_perfusion_procedure',
     '_inherit_mikkel_surgery_station_environment'
 ]
 
@@ -142,9 +147,9 @@ ANALYSIS_PARAMS = {
 
 # this is personal user parameters
 USER_PARAMS = {
-    'project_id': 'mikkel_septum_entorhinal',
-    'user_name': 'Mikkel Elle Lepperød',
-    'location': 'room2',
+    'project_id': 'apoptotic_aproach_to_voldemort',
+    'user_name': 'Harry Plotter',
+    'location': 'Chamber of secrets',
     'laser_device': {'name': 'hardware_blue_laser', 'id': 4}
 }
 
@@ -156,6 +161,7 @@ TEMPLATES = {
     'opto_openephys': opto_openephys_templates,
     'surgery_implantation': surgery_implantation_templates,
     'surgery_injection': surgery_injection_templates,
+    'perfusion': perfusion_templates,
     'adjustment': 'mikkel_drive_depth_adjustment'
 }
 
