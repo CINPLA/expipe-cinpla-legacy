@@ -767,8 +767,8 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Overwrite.',
                       )
-        def group_analysis(action_id, user, tag, overwrite):
-                              location):
+        def group_analysis(action_id, user, tag, overwrite,
+                           location):
             """Parse info about recorded units
 
             COMMAND: action-id: Provide action id to get action"""

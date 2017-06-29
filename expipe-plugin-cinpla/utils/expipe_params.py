@@ -104,12 +104,12 @@ surgery_injection_templates = [
     'mikkel_subject', 'mikkel_injection_1',
     'mikkel_injection_2',
     '_inherit_environment_rat_housing',
-    '_inherit_mikkel_surgery_station_environment'
+    '_inherit_environment_surgery_station'
 ]
 
 perfusion_templates = [
     'mikkel_perfusion_procedure',
-    '_inherit_mikkel_surgery_station_environment'
+    '_inherit_environment_surgery_station'
 ]
 
 # this is how you represent each unit when you use expipe register-units
