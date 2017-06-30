@@ -28,5 +28,6 @@
     "maintainer": {
         "definition": "The person who is responsible for the setup\n          maintanance.",
         "value": ""
-    }
+    },
+    "name": "setup_setup"
 }

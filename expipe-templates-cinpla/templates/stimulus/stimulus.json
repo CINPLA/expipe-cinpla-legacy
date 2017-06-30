@@ -37,6 +37,7 @@
         "definition": "Visual, acoustic, haptic, electrical, etc. stimulation.",
         "value": ""
     },
+    "name": "stimulus_stimulus",
     "position": {
         "definition": "The position of the stimulus on e.g the screen. Specified as a 2-tuple (x;y). By default this position refers to the top-left corner of the object or its bounding box.",
         "value": ""

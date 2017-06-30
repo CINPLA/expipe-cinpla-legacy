@@ -46,6 +46,7 @@
         "definition": "The model name of this hardware item.",
         "value": ""
     },
+    "name": "hardware_eyetracker",
     "owner": {
         "definition": "Who's the owner of the device.",
         "value": ""

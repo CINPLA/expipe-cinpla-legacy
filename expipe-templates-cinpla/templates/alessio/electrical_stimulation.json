@@ -10,6 +10,7 @@
         "value": ""
     },
     "modality": "electrical",
+    "name": "alessio_electrical_stimulation",
     "phase": {
         "definition": "The phase of each pulse.",
         "value": ""

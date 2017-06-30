@@ -22,6 +22,7 @@
         "definition": "Intesity of light during light phase.",
         "value": "> 100 lux"
     },
+    "name": "environment_rat_housing",
     "notes": {
         "value": ""
     },

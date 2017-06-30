@@ -9,6 +9,7 @@
         "definition": "The number of individuals that are observed/investigated at the same time.",
         "value": 1
     },
+    "name": "mikkel_behavior",
     "notes": {
         "value": ""
     },

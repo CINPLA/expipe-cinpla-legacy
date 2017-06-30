@@ -29,6 +29,7 @@
         "definition": "The stimulus modality like acoustic, haptic, visual etc.",
         "value": ""
     },
+    "name": "stimulus_grating",
     "orientation": {
         "definition": "The orientation of the grating in degrees.",
         "value": ""

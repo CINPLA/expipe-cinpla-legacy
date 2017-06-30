@@ -21,6 +21,7 @@
         "definition": "The objective model name.",
         "value": ""
     },
+    "name": "hardware_microscope_objective",
     "numerical_aperture": {
         "definition": "The numerical aperture (N.A.) of the objective.",
         "value": ""

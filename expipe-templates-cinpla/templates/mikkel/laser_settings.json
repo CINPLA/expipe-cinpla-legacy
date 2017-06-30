@@ -20,6 +20,7 @@
         "definition": "The hardware generating the laser pulse.",
         "value": "blue laser"
     },
+    "name": "mikkel_laser_settings",
     "registered": "2017-04-04T14:35:18.681Z",
     "setting": {
         "definition": "The actual manual laser intensity setting.",

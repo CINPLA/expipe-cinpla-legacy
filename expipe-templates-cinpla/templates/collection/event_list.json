@@ -5,6 +5,7 @@
         "value": ""
     },
     "identifier": "collection_event_list",
+    "name": "collection_event_list",
     "timestamp": {
         "definition": "The local datetime entry of the moment the event was\n         taken (YYYY-MM-DD hh:mm:ss format).",
         "value": ""

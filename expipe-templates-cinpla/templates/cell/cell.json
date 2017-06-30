@@ -47,6 +47,7 @@
         "definition": "The capacity of the cell.",
         "value": ""
     },
+    "name": "cell_cell",
     "recording_location": {
         "definition": "The recording location in the cell. E.g. axonal, dendritic,\n         somatic, ...",
         "value": ""

@@ -4,6 +4,7 @@
         "value": ""
     },
     "identifier": "experiment_psychophysics",
+    "name": "experiment_psychophysics",
     "paradigm": {
         "definition": "The experimental paradigm e.g. Two-alternative-forced-choice, Three-alternative-forced-choice.",
         "value": ""

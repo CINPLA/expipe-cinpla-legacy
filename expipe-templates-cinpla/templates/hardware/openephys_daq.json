@@ -17,6 +17,7 @@
         "definition": "The model name of this hardware item.",
         "value": "XEM6010 Xilinx Spartan-6 FPGA"
     },
+    "name": "hardware_openephys_daq",
     "owner": {
         "definition": "Who's the owner of the device.",
         "value": "Fyhn-Hafting"

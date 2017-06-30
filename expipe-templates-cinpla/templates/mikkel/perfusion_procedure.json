@@ -1,0 +1,47 @@
+{
+    "anaesthetic": {
+        "definition": "The drug used for anaesthesia.",
+        "value": "Isoflurane and Pentobarbital"
+    },
+    "anaesthetic_dose": {
+        "definition": "The dose of the used anaesthetic.",
+        "value": "1 L/M of Isoflurane until unconcious, then 0.7 mL Pentobarbital"
+    },
+    "buffer": {
+        "definition": "The fluid used to flush out blood vessels.",
+        "value": "0.9 % NaCl in H2O"
+    },
+    "description": {
+        "definition": "A textual description of the preparation.",
+        "value": "Deeply anesthetized animal is perfused in order to preserve brain tissue for imunohistochemical analysis."
+    },
+    "fixative": {
+        "definition": "The fluid used to fixate the tissue.",
+        "value": "4 % paraformaldehyde"
+    },
+    "flow_rate": {
+        "unit": "L/min",
+        "value": ""
+    },
+    "identifier": "mikkel_perfusion_procedure",
+    "name": "mikkel_perfusion_procedure",
+    "notes": {
+        "value": ""
+    },
+    "time_liver_clearing": {
+        "unit": "min",
+        "value": ""
+    },
+    "time_post_fixative": {
+        "unit": "h",
+        "value": ""
+    },
+    "time_stiffness": {
+        "unit": "min",
+        "value": ""
+    },
+    "time_true_fixation": {
+        "unit": "min",
+        "value": ""
+    }
+}

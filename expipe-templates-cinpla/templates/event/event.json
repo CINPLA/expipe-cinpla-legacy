@@ -5,6 +5,7 @@
         "value": ""
     },
     "identifier": "event_event",
+    "name": "event_event",
     "timestamp": {
         "definition": "The local datetime entry of the moment the event was\n         taken (YYYY-MM-DD hh:mm:ss format).",
         "value": ""

@@ -39,6 +39,7 @@
         "definition": "Intesity of light",
         "value": "minimal light from small lamp and desktop computer screen"
     },
+    "name": "environment_open_field_tracking",
     "notes": {
         "value": ""
     },

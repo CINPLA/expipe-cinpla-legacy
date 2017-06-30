@@ -104,7 +104,12 @@ surgery_injection_templates = [
     'mikkel_subject', 'mikkel_injection_1',
     'mikkel_injection_2',
     '_inherit_environment_rat_housing',
-    '_inherit_mikkel_surgery_station_environment'
+    '_inherit_environment_surgery_station'
+]
+
+perfusion_templates = [
+    'mikkel_perfusion_procedure',
+    '_inherit_environment_surgery_station'
 ]
 
 # this is how you represent each unit when you use expipe register-units
@@ -142,7 +147,7 @@ ANALYSIS_PARAMS = {
 
 # this is personal user parameters
 USER_PARAMS = {
-    'project_id': 'mikkel_septum_entorhinal',
+    'project_id': 'apoptotic_aproach_to_voldemort',
     'user_name': 'Harry Plotter',
     'location': 'Chamber of secrets',
     'laser_device': {'name': 'hardware_blue_laser', 'id': 4}
@@ -156,6 +161,7 @@ TEMPLATES = {
     'opto_openephys': opto_openephys_templates,
     'surgery_implantation': surgery_implantation_templates,
     'surgery_injection': surgery_injection_templates,
+    'perfusion': perfusion_templates,
     'adjustment': 'mikkel_drive_depth_adjustment'
 }
 

@@ -48,4 +48,4 @@ def test_openephys_opto():#module_teardown_setup_project_setup):
                  '--tag', 'opto-train',
                  '--message', 'opto message'])
     run_command(['process-openephys', action_id])
-    run_command(['analyse', action_id, '--all'])
+    run_command(['analyse', action_id, '-a', 'all'])

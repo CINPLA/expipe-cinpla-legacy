@@ -37,6 +37,7 @@
         "definition": "The membrane time constant.",
         "value": ""
     },
+    "name": "model_lif",
     "noise_amplitude": {
         "definition": "The amount of noise added.",
         "value": ""
