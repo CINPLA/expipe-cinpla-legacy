@@ -753,6 +753,11 @@ class CinplaPlugin(IPlugin):
                       type=click.STRING,
                       help='Tags to sort the analysis.',
                       )
+        @click.option('-a', '--actions',
+                      multiple=True,
+                      type=click.STRING,
+                      help='Actions to include in the analysis.',
+                      )
         @click.option('-s', '--subject-id',
                       multiple=True,
                       type=click.STRING,
@@ -768,7 +773,7 @@ class CinplaPlugin(IPlugin):
                       help='Overwrite.',
                       )
         def group_analysis(action_id, user, tag, overwrite, subject_id,
-                           location):
+                           location, actions):
             """Parse info about recorded units
 
             COMMAND: action-id: Provide action id to get action"""
