@@ -10,18 +10,15 @@ import copy
 # TODO select channel_group, delete names with channel group if selected
 
 
-class Plotter:
-    def __init__(self, exdir_path, params, analysis_output, ext='.png',
+class Analyser:
+    def __init__(self, exdir_path, params, unit_info, ext='.png',
                  save_figs=True, close_fig=True, channel_group=None,
                  no_local=False, overwrite=False, skip=False):
         print('Initializing plotting for {}'.format(exdir_path))
         if ext[0] != '.':
             ext = '.' + ext
-        self.analysis_output = copy.deepcopy(analysis_output)
-        for val_ch in self.analysis_output.values():
-            for val_un in val_ch.values():
-                val_un['analysis_output'] = {}
         self.par = params
+        self.unit_info = unit_info
         self.overwrite = overwrite
         self.skip = skip
         self.ext = ext
@@ -61,6 +58,7 @@ class Plotter:
         self._processing = self._exdir_object.require_group("processing")
         self._epochs = self._exdir_object.require_group("epochs")
         self._analysis = self._exdir_object.require_group("analysis")
+        self.analysis_output = self.generate_output_dict()
 
     def savefig(self, fname, fig, dpi=300):
         import matplotlib.pyplot as plt
@@ -74,6 +72,36 @@ class Plotter:
                     self.savefig(fname, fig, dpi=dpi-50)
         if self.close_fig:
             plt.close(fig)
+
+    def generate_output_dict(self):
+        analysis_output = {}
+        for chx in self.blk.channel_indexes:
+            contents = {}
+            group_id = chx.annotations['group_id']
+            if kwargs['channel_group'] is None:
+                pass
+            elif group_id not in kwargs['channel_group']:
+                continue
+            for unit in chx.units:
+                sptr = unit.spiketrains[0]
+                if sptr.annotations['cluster_group'].lower() == 'noise':
+                    continue
+                attrs = copy.deepcopy(self.unit_info)
+                attrs.update(sptr.annotations)
+                attrs['exdir_path'] = '/'.join([rec_action.id, 'main.exdir',
+                                                attrs['exdir_path'].lstrip('/')])
+                if sptr.name is None:
+                    sptr.name = 'cluster_{}'.format(sptr.annotations['cluster_id'])
+                name = sptr.name.replace(' ', '_').replace('#', '')
+                assert group_id == sptr.annotations['electrode_group_id']
+                contents[name] = attrs
+            modname = 'channel_group_' + str(group_id)
+            analysis_output[modname] = contents
+            print('Generating module ', modname)
+        for val_ch in analysis_output.values():
+            for val_un in val_ch.values():
+                val_un['analysis_output'] = {}
+        return analysis_output
 
     def _delete_figures(self, directory, channel_group):
         import glob
