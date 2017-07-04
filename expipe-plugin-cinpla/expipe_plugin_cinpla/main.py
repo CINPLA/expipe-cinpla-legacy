@@ -725,7 +725,7 @@ class CinplaPlugin(IPlugin):
                     plot.occupancy()
                 if any(arg in kwargs['analysis'] for arg in ['spatial', 'all']):
                     plot.spatial_overview()
-                if any(arg in kwargs['analysis'] for arg in ['spike_stat', 'all']):
+                if any(arg in kwargs['analysis'] for arg in ['spike-stat', 'all']):
                     plot.spike_statistics()
                 if any(arg in kwargs['analysis'] for arg in ['psd', 'all']):
                     plot.psd()
