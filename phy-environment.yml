@@ -32,3 +32,4 @@ dependencies:
     - xmljson
     - scp
     - send2trash
+    - packaging
