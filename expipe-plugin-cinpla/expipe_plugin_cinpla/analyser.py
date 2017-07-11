@@ -24,6 +24,7 @@ class Analyser:
         self.ext = ext
         self.save_figs = save_figs
         self.close_fig = close_fig
+        self.exdir_path = exdir_path.replace('\\', '/')
         io = neo.ExdirIO(exdir_path)
         self.blk = io.read_block()
         self.seg = self.blk.segments[0]
@@ -75,12 +76,12 @@ class Analyser:
 
     def generate_output_dict(self):
         analysis_output = {}
+        exdir_idx = self.exdir_path.split('/').index('main.exdir')
+        action_id = self.exdir_path.split('/')[exdir_idx - 2]
         for chx in self.blk.channel_indexes:
             contents = {}
             group_id = chx.annotations['group_id']
-            if kwargs['channel_group'] is None:
-                pass
-            elif group_id not in kwargs['channel_group']:
+            if group_id not in self.channel_group:
                 continue
             for unit in chx.units:
                 sptr = unit.spiketrains[0]
@@ -88,7 +89,8 @@ class Analyser:
                     continue
                 attrs = copy.deepcopy(self.unit_info)
                 attrs.update(sptr.annotations)
-                attrs['exdir_path'] = '/'.join([rec_action.id, 'main.exdir',
+
+                attrs['exdir_path'] = '/'.join([action_id, 'main.exdir',
                                                 attrs['exdir_path'].lstrip('/')])
                 if sptr.name is None:
                     sptr.name = 'cluster_{}'.format(sptr.annotations['cluster_id'])

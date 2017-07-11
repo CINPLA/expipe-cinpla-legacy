@@ -660,15 +660,20 @@ class CinplaPlugin(IPlugin):
             if len(user) == 0:
                 raise ValueError('Please add user name')
 
-            users = list(set(action.users))
+            users = list(set(rec_action.users))
             if user not in users:
                 users.append(user)
             action.users = users
             action.tags.extend(list(kwargs['tag']) + list(rec_action.tags))
+            action.location = rec_action.location or ''
+            action.datetime = rec_action.datetime or ''
+            subjects = rec_action.subjects or []
+            action.subjects.extend(list(subjects))
             action.messages.extend([{'message': m,
                                      'user': user,
                                      'datetime': datetime.now()}
                                    for m in kwargs['message']])
+            action.messages.extend(rec_action.messages.messages)
             fr = rec_action.require_filerecord()
             if not kwargs['no_local']:
                 exdir_path = _get_local_path(fr)
@@ -681,11 +686,11 @@ class CinplaPlugin(IPlugin):
                                   contents=ANALYSIS_PARAMS,
                                   overwrite=kwargs['overwrite'])
             an = Analyser(exdir_path, params=ANALYSIS_PARAMS,
-                           unit_info=UNIT_INFO,
-                           channel_group=kwargs['channel_group'],
-                           no_local=kwargs['no_local'],
-                           overwrite=kwargs['overwrite'],
-                           skip=kwargs['skip'])
+                          unit_info=UNIT_INFO,
+                          channel_group=kwargs['channel_group'],
+                          no_local=kwargs['no_local'],
+                          overwrite=kwargs['overwrite'],
+                          skip=kwargs['skip'])
             if any(arg in kwargs['analysis'] for arg in ['stim_stat', 'all']):
                 an.stimulation_statistics()
             if any(arg in kwargs['analysis'] for arg in ['occupancy', 'all']):
@@ -700,10 +705,10 @@ class CinplaPlugin(IPlugin):
                 an.spike_lfp_coherence()
             if any(arg in kwargs['analysis'] for arg in ['tfr']):
                 an.tfr()
-            if any(arg in kwargs['analysis'] for arg in ['orient_tuning', 'all']):
+            if any(arg in kwargs['analysis'] for arg in ['orient_tuning']):
                 an.orient_tuning_overview()
             for key, val in an.analysis_output.items():
-                action.require_module(key, contents=val, overwrite=overwrite)
+                action.require_module(key, contents=val, overwrite=kwargs['overwrite'])
 
         @cli.command('group-analyse')
         @click.argument('action-id', type=click.STRING)
