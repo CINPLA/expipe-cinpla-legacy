@@ -105,7 +105,7 @@ class Analyser:
                 val_un['analysis_output'] = {}
         return analysis_output
 
-    def _delete_figures(self, directory, channel_group):
+    def _check_and_delete_figs(self, directory, channel_group):
         import glob
         name = 'Channel_group_{}*'.format(channel_group)
         files = glob.glob(op.join(directory, name))
@@ -132,9 +132,10 @@ class Analyser:
             group_name = 'channel_group_' + str(group_id)
             if group_id not in self.channel_group:
                 continue
-            if not self._delete_figures(raw_dir, group_id):
-                continue
-            print('Plotting spatial overview, ' +
+            make_figs = True
+            if not self._check_and_delete_figs(raw_dir, group_id):
+                make_figs = False
+            print('Analysing spatial overview, ' +
                   'channel group {}'.format(group_id))
             for u, unit in enumerate(chx.units):
                 if unit.name is None:
@@ -159,16 +160,17 @@ class Analyser:
                     rate_map, return_acorr=True,
                     box_xlen=self.par['box_xlen'],
                     box_ylen=self.par['box_ylen'])
-                fig = make_spatiality_overview(
-                    self.x, self.y, self.t, self.ang,
-                    self.ang_t, sptr=sptr,
-                    acorr=acorr, G=G,
-                    mask_unvisited=True,
-                    title=None,
-                    ang_binsize=self.par['ang_binsize'],
-                    rate_map=rate_map,
-                    spike_size=1.)
-                self.savefig(fpath, fig)
+                if make_figs:
+                    fig = make_spatiality_overview(
+                        self.x, self.y, self.t, self.ang,
+                        self.ang_t, sptr=sptr,
+                        acorr=acorr, G=G,
+                        mask_unvisited=True,
+                        title=None,
+                        ang_binsize=self.par['ang_binsize'],
+                        rate_map=rate_map,
+                        spike_size=1.)
+                    self.savefig(fpath, fig)
 
                 ang_bin, ang_rate = tr.head_direction_rate(
                     sptr, self.ang,
@@ -244,7 +246,7 @@ class Analyser:
     #         group_id = chx.annotations['group_id']
     #         if group_id not in self.channel_group:
     #             continue
-    #         if not self._delete_figures(raw_dir, group_id):
+    #         if not self._check_and_delete_figs(raw_dir, group_id):
     #             continue
     #         print('Plotting spatial stimulation overview, ' +
     #               'channel group {}'.format(group_id))
@@ -287,7 +289,7 @@ class Analyser:
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
                 continue
-            if not self._delete_figures(raw_dir, group_id):
+            if not self._check_and_delete_figs(raw_dir, group_id):
                 continue
             print('Plotting time frequency representation, ' +
                   'channel group {}'.format(group_id))
@@ -325,7 +327,7 @@ class Analyser:
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
                 continue
-            if not self._delete_figures(raw_dir, group_id):
+            if not self._check_and_delete_figs(raw_dir, group_id):
                 continue
             print('Plotting power spectrum density, ' +
                   'channel group {}'.format(group_id))
@@ -354,7 +356,7 @@ class Analyser:
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
                 continue
-            if not self._delete_figures(raw_dir, group_id):
+            if not self._check_and_delete_figs(raw_dir, group_id):
                 continue
             print('Plotting stimulation statistics, ' +
                   'channel group {}'.format(group_id))
@@ -428,7 +430,7 @@ class Analyser:
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
                 continue
-            if not self._delete_figures(raw_dir, group_id):
+            if not self._check_and_delete_figs(raw_dir, group_id):
                 continue
             print('Plotting spike lfp coherence, ' +
                   'channel group {}'.format(group_id))
@@ -557,7 +559,7 @@ class Analyser:
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
                 continue
-            if not self._delete_figures(raw_dir, group_id):
+            if not self._check_and_delete_figs(raw_dir, group_id):
                 continue
             print('Plotting spike statistics, ' +
                   'channel group {}'.format(group_id))
@@ -611,7 +613,7 @@ class Analyser:
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
                 continue
-            if not self._delete_figures(raw_dir, group_id):
+            if not self._check_and_delete_figs(raw_dir, group_id):
                 continue
             for u, unit in enumerate(chx.units):
                 if unit.annotations.get('cluster_group') == 'Good':

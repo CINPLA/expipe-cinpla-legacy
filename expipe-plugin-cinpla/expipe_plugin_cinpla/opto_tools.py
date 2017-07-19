@@ -42,6 +42,22 @@ def generate_axona_opto(exdir_path, io_channel=8, **annotations):
     return param
 
 
+    def generate_axona_opto_from_cut(exdir_path, pulse_phasedur, io_channel=8):
+        exdir_object = exdir.File(exdir_path)
+        session = exdir_object['acquisition'].attrs['axona_session']
+        # get the data
+        elphys = exdir_object['processing']['electrophysiology']
+        group = elphys['channel_group_{}'.format(io_channel)]
+        timeseries = group['UnitTimes']['0']
+        times = pq.Quantity(timeseries['times'].data,
+                            timeseries['times'].attrs['unit'])
+        param = {'pulse_phasedur': pulse_phasedur}
+        durations = np.array([stim_duration.magnitude] * len(times)) * stim_duration.units
+        generate_epochs(exdir_path=exdir_path, times=times, durations=durations,
+                        start_time=timeseries.attrs['start_time'],
+                        stop_time=timeseries.attrs['stop_time'])
+
+
 def generate_openephys_opto(exdir_path, io_channel, **attrs):
     exdir_object = exdir.File(exdir_path)
     session = exdir_object['acquisition'].attrs['openephys_session']

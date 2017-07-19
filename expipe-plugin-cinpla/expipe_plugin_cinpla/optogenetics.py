@@ -18,7 +18,7 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
           'copy-to-config expipe_params.py"')
 else:
     from expipe_params import (USER_PARAMS, TEMPLATES, UNIT_INFO,
-                               POSSIBLE_BRAIN_AREAS)
+                               POSSIBLE_BRAIN_AREAS, POSSIBLE_OPTO_TAGS)
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
@@ -36,7 +36,7 @@ class OptoPlugin(IPlugin):
         @click.option('-t', '--tag',
                       multiple=True,
                       required=True,
-                      type=click.Choice(['opto-inside', 'opto-outside', 'opto-train']),
+                      type=click.Choice(POSSIBLE_OPTO_TAGS),
                       help='The anatomical brain-area of the optogenetic stimulus.',
                       )
         @click.option('-m', '--message',
@@ -65,8 +65,22 @@ class OptoPlugin(IPlugin):
                       type=click.STRING,
                       help='The experimenter performing the annotation.',
                       )
+        @click.option('--no-modules',
+                      is_flag=True,
+                      help='Do not upload any modules.',
+                      )
+        @click.option('--use-axona-cut',
+                      is_flag=True,
+                      help='Use Axona cut file for input registration.',
+                      )
+        @click.option('--pulse-phasedur',
+                      type=(float, str),
+                      help=('Duration of laser pulse with units e.g. 10 ms.' +
+                            ' Only relevant if using axona cut.'),
+                      )
         def parse_optogenetics(action_id, brain_area, no_local, overwrite,
-                               io_channel, tag, message, laser_id, user):
+                               io_channel, tag, message, laser_id, user,
+                               no_modules, use_axona_cut, pulse_phasedur):
             """Parse optogenetics info to an action.
 
             COMMAND: action-id: Provide action id to find exdir path"""
@@ -92,24 +106,28 @@ class OptoPlugin(IPlugin):
             exdir_object = exdir.File(exdir_path)
             if exdir_object['acquisition'].attrs['acquisition_system'] == 'Axona':
                 aq_sys = 'axona'
+                if use_axona_cut:
+                    assert pulse_phasedur is not None, 'You need to provide pulse_phasedur to use Axona cut'
+                    generate_axona_opto(exdir_path, pulse_phasedur, io_channel)
                 params = generate_axona_opto(exdir_path, io_channel)
             elif exdir_object['acquisition'].attrs['acquisition_system'] == 'OpenEphys':
                 aq_sys = 'openephys'
                 params = generate_openephys_opto(exdir_path, io_channel)
             else:
                 raise ValueError('Acquisition system not recognized')
-            params.update({'location': brain_area})
-            generate_templates(action, TEMPLATES['opto_' + aq_sys],
-                               overwrite, git_note=None)
-            populate_modules(action, params)
-            laser_id = laser_id or USER_PARAMS['laser_device'].get('id')
-            laser_name = USER_PARAMS['laser_device'].get('name')
-            assert laser_id is not None
-            assert laser_name is not None
-            laser = action.require_module(name=laser_name).to_dict()
-            laser['device_id'] = {'value': laser_id}
-            action.require_module(name=laser_name, contents=laser,
-                                  overwrite=True)
+            if not no_modules:
+                params.update({'location': brain_area})
+                generate_templates(action, TEMPLATES['opto_' + aq_sys],
+                                   overwrite, git_note=None)
+                populate_modules(action, params)
+                laser_id = laser_id or USER_PARAMS['laser_device'].get('id')
+                laser_name = USER_PARAMS['laser_device'].get('name')
+                assert laser_id is not None
+                assert laser_name is not None
+                laser = action.require_module(name=laser_name).to_dict()
+                laser['device_id'] = {'value': laser_id}
+                action.require_module(name=laser_name, contents=laser,
+                                      overwrite=True)
             action.messages.extend([{'message': m,
                                      'user': user,
                                      'datetime': datetime.now()}

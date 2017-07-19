@@ -673,18 +673,18 @@ class CinplaPlugin(IPlugin):
                                      'user': user,
                                      'datetime': datetime.now()}
                                    for m in kwargs['message']])
-            action.messages.extend(rec_action.messages.messages)
             fr = rec_action.require_filerecord()
             if not kwargs['no_local']:
                 exdir_path = _get_local_path(fr)
             else:
                 exdir_path = fr.server_path
-            action.require_module('software_version_control_git',
-                                  contents=GIT_NOTE,
-                                  overwrite=kwargs['overwrite'])
-            action.require_module('software_analysis_parameters',
-                                  contents=ANALYSIS_PARAMS,
-                                  overwrite=kwargs['overwrite'])
+            if not kwargs['skip']:
+                action.require_module('software_version_control_git',
+                                      contents=GIT_NOTE,
+                                      overwrite=kwargs['overwrite'])
+                action.require_module('software_analysis_parameters',
+                                      contents=ANALYSIS_PARAMS,
+                                      overwrite=kwargs['overwrite'])
             an = Analyser(exdir_path, params=ANALYSIS_PARAMS,
                           unit_info=UNIT_INFO,
                           channel_group=kwargs['channel_group'],
@@ -708,7 +708,21 @@ class CinplaPlugin(IPlugin):
             if any(arg in kwargs['analysis'] for arg in ['orient_tuning']):
                 an.orient_tuning_overview()
             for key, val in an.analysis_output.items():
-                action.require_module(key, contents=val, overwrite=kwargs['overwrite'])
+                try:
+                    action.require_module(key, contents=val,
+                                          overwrite=kwargs['overwrite'])
+                except Exception as e:
+                    fname = op.abspath(op.join('action_modules',
+                                               USER_PARAMS['project_id'],
+                                               action.id, key + '.json'))
+                    os.makedirs(op.dirname(fname), exist_ok=True)
+                    print('Got exception during module update of "' + key +
+                          '" stored in "' + fname + '"')
+                    print(e.output)
+                    import json
+                    with open(fname, 'w') as f:
+                        result = expipe.io.core.convert_quantities(val)
+                        json.dump(result, f, sort_keys=True, indent=4)
 
         @cli.command('group-analyse')
         @click.argument('action-id', type=click.STRING)

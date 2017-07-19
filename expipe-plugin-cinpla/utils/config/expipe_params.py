@@ -77,6 +77,7 @@ opto_axona_templates = [
 #  thse are e.g. the brain areas you investigate, this ensures that you
 #  register with with the same nomenclature for every recording
 POSSIBLE_BRAIN_AREAS = ['MECR', 'MECL', 'MS']
+POSSIBLE_OPTO_TAGS = ['opto-inside', 'opto-outside', 'opto-train']
 POSSIBLE_LOCATIONS = ['room2', 'room1']
 
 #  obligatory tags will be enforced uppon transfer, this is to ensure you
