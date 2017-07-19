@@ -1,12 +1,12 @@
 import expipe
 import subprocess
-import click
-from click.testing import CliRunner
 import quantities as pq
 import os
 import os.path as op
 from expipe_plugin_cinpla.main import CinplaPlugin
 import sys
+import logging
+import shlex
 import logging
 sys.path.append(expipe.config.config_dir)
 if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
@@ -38,39 +38,41 @@ logger.addHandler(fh)
 logger.addHandler(ch)
 
 
-@click.group()
-@click.pass_context
-def cli(ctx):
-    pass
 
+def run_shell_command(command_line):
+    if isinstance(command_line, str):
+        command_line_args = shlex.split(command_line)
+    elif isinstance(command_line, list):
+        command_line_args = command_line
+        command_line = ' '.join(command_line)
+    else:
+        raise TypeError('str or list')
 
-CinplaPlugin().attach_to_cli(cli)
+    logging.info('Subprocess: "' + command_line + '"')
 
+    try:
+        command_line_process = subprocess.Popen(
+            command_line_args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
 
-def run_command(command_list, inp=None):
-    result = CliRunner().invoke(cli, command_list, input=inp)
-    if result.exit_code != 0:
-        print(result.output)
-        raise result.exception
-    return result
+    except (OSError, CalledProcessError) as exception:
+        logger.info('Exception occured: ' + str(exception))
+        logger.info('Subprocess failed')
+        return False
+    else:
+        # no exception was raised
+        logger.info('Subprocess finished')
 
+    return True
 
-if __name__ == '__main__':
-    project = expipe.get_project(USER_PARAMS['project_id'])
-    for action in project.actions:
-        if action.type != 'Recording':
-            continue
-        print('Evaluating ', action.id)
-        try:
-            run_command(['analyse', action.id, '-a', 'all', '--skip'])
-        except PermissionError:
-            print('Permission error on ', action.id,
-                  'exception logged in "' + LOG_FILENAME + '"')
-            logger.exception('ACTION-ID: "' + action.id + '"')
-        except FileNotFoundError:
-            print('File not found on ', action.id,
-                  'exception logged in "' + LOG_FILENAME + '"')
-            logger.exception('ACTION-ID: "' + action.id + '"')
-        except Exception as e:
-            print('Got exception, logged in "' + LOG_FILENAME + '"')
-            logger.exception('ACTION-ID: "' + action.id + '"')
+project = expipe.get_project(USER_PARAMS['project_id'])
+for action in project.actions:
+    if action.type != 'Recording':
+        continue
+    # if 'no' in action.tags:
+    #     continue
+    print('Evaluating ', action.id)
+    run_shell_command(['expipe', 'analyse', action.id, '-a',
+                             'spatial', '--skip'])
