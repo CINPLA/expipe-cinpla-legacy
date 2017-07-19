@@ -539,7 +539,10 @@ class CinplaPlugin(IPlugin):
                 date = datetime.strptime(date, '%d.%m.%YT%H:%M')
             datestring = datetime.strftime(date, DTIME_FORMAT)
             project = expipe.get_project(USER_PARAMS['project_id'])
-            action = project.require_action(subject_id + '-adjustment')
+            if init:
+                action = project.require_action(subject_id + '-adjustment')
+            else:
+                action = project.get_action(subject_id + '-adjustment')
             action.type = 'Adjustment'
             action.subjects = [subject_id]
             user = user or USER_PARAMS['user_name']
@@ -554,9 +557,8 @@ class CinplaPlugin(IPlugin):
             if index is None and not init:
                 deltas = []
                 for name in action.modules.keys():
-                    if not name.endswith('adjustment'):
-                        continue
-                    deltas.append(int(name.split('_')[0]))
+                    if name.endswith('adjustment'):
+                        deltas.append(int(name.split('_')[0]))
                 index = max(deltas) + 1
             if init:
                 index = 0
