@@ -75,6 +75,7 @@ class OptoPlugin(IPlugin):
                       )
         @click.option('--pulse-phasedur',
                       nargs=2,
+                      default=(None, None),
                       type=(click.FLOAT, click.STRING),
                       help=('Duration of laser pulse with units e.g. 10 ms.' +
                             ' Only relevant if using axona cut.'),
@@ -109,9 +110,10 @@ class OptoPlugin(IPlugin):
             if exdir_object['acquisition'].attrs['acquisition_system'] == 'Axona':
                 aq_sys = 'axona'
                 if use_axona_cut:
-                    assert len(pulse_phasedur) == 2, (
-                        'You need to provide pulse phase duration, e.g.' +
-                        '"pulse-phasedur 10 ms" to use Axona cut')
+                    if pulse_phasedur == (None, None):
+                        raise ValueError (
+                            'You need to provide pulse phase duration, e.g.' +
+                            '"pulse-phasedur 10 ms" to use Axona cut')
                     pulse_phasedur = pq.Quantity(pulse_phasedur[0],
                                                  pulse_phasedur[1])
                     params = generate_axona_opto_from_cut(exdir_path,
