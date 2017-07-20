@@ -1,12 +1,8 @@
-import expipe
 import subprocess
-import quantities as pq
+import expipe
 import os
 import os.path as op
-from expipe_plugin_cinpla.main import CinplaPlugin
 import sys
-import logging
-import shlex
 import logging
 sys.path.append(expipe.config.config_dir)
 if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
@@ -30,42 +26,37 @@ fh.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 ch.setLevel(logging.ERROR)
 # create formatter and add it to the handlers
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
-ch.setFormatter(formatter)
+# formatter = logging.Formatter('%(asctime)s %(message)s')
+# fh.setFormatter(formatter)
+# ch.setFormatter(formatter)
 # add the handlers to the logger
 logger.addHandler(fh)
 logger.addHandler(ch)
 
 
-
 def run_shell_command(command_line):
     if isinstance(command_line, str):
-        command_line_args = shlex.split(command_line)
+        command_line_args = command_line.split(' ')
     elif isinstance(command_line, list):
         command_line_args = command_line
         command_line = ' '.join(command_line)
     else:
         raise TypeError('str or list')
-
-    logging.info('Subprocess: "' + command_line + '"')
-
+    logger.info(command_line)
+    command_line_process = subprocess.Popen(
+        command_line_args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT
+    )
     try:
-        command_line_process = subprocess.Popen(
-            command_line_args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        )
+        stdout, stderr =  command_line_process.communicate()
+        for line in stdout.decode().split('\n'):
+            logger.info(line)
+        if 'Error' in stdout.decode():
+            print('Error occured.')
+    except Exception as e:
+        logger.exception('Exception: ')
 
-    except (OSError, CalledProcessError) as exception:
-        logger.info('Exception occured: ' + str(exception))
-        logger.info('Subprocess failed')
-        return False
-    else:
-        # no exception was raised
-        logger.info('Subprocess finished')
-
-    return True
 
 project = expipe.get_project(USER_PARAMS['project_id'])
 for action in project.actions:
@@ -75,4 +66,4 @@ for action in project.actions:
     #     continue
     print('Evaluating ', action.id)
     run_shell_command(['expipe', 'analyse', action.id, '-a',
-                             'spatial', '--skip'])
+                       'spatial', '--skip'])
