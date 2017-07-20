@@ -503,6 +503,7 @@ class CinplaPlugin(IPlugin):
                       help='The date of the surgery format: "dd.mm.yyyyTHH:MM" or "now".',
                       )
         @click.option('-a', '--anatomy',
+                      nargs=2,
                       multiple=True,
                       required=True,
                       type=(click.STRING, int),

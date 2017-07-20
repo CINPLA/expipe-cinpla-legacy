@@ -8,7 +8,7 @@ from .action_tools import (generate_templates, _get_local_path, GIT_NOTE)
 from .opto_tools import (generate_epochs, generate_axona_opto, populate_modules,
                         extract_laser_pulse, read_pulse_pal_mat,
                         read_pulse_pal_xml, read_laser_intensity,
-                        generate_openephys_opto)
+                        generate_openephys_opto, generate_axona_opto_from_cut)
 import os
 import os.path as op
 import sys
@@ -45,9 +45,9 @@ class OptoPlugin(IPlugin):
                       help='Add message, use "text here" for sentences.',
                       )
         @click.option('--io-channel',
-                      default=4,
+                      default=8,
                       type=click.INT,
-                      help='TTL input channel.',
+                      help='TTL input channel. Default is 8 (axona tetrode 9)',
                       )
         @click.option('--no-local',
                       is_flag=True,
@@ -74,7 +74,8 @@ class OptoPlugin(IPlugin):
                       help='Use Axona cut file for input registration.',
                       )
         @click.option('--pulse-phasedur',
-                      type=(float, str),
+                      nargs=2,
+                      type=(click.FLOAT, click.STRING),
                       help=('Duration of laser pulse with units e.g. 10 ms.' +
                             ' Only relevant if using axona cut.'),
                       )
@@ -85,6 +86,7 @@ class OptoPlugin(IPlugin):
 
             COMMAND: action-id: Provide action id to find exdir path"""
             import exdir
+            import quantities as pq
             from datetime import datetime
             # TODO deafault none
             if brain_area not in POSSIBLE_BRAIN_AREAS:
@@ -107,9 +109,16 @@ class OptoPlugin(IPlugin):
             if exdir_object['acquisition'].attrs['acquisition_system'] == 'Axona':
                 aq_sys = 'axona'
                 if use_axona_cut:
-                    assert pulse_phasedur is not None, 'You need to provide pulse_phasedur to use Axona cut'
-                    generate_axona_opto(exdir_path, pulse_phasedur, io_channel)
-                params = generate_axona_opto(exdir_path, io_channel)
+                    assert len(pulse_phasedur) == 2, (
+                        'You need to provide pulse phase duration, e.g.' +
+                        '"pulse-phasedur 10 ms" to use Axona cut')
+                    pulse_phasedur = pq.Quantity(pulse_phasedur[0],
+                                                 pulse_phasedur[1])
+                    params = generate_axona_opto_from_cut(exdir_path,
+                                                          pulse_phasedur,
+                                                          io_channel)
+                else:
+                    params = generate_axona_opto(exdir_path, io_channel)
             elif exdir_object['acquisition'].attrs['acquisition_system'] == 'OpenEphys':
                 aq_sys = 'openephys'
                 params = generate_openephys_opto(exdir_path, io_channel)
