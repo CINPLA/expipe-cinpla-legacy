@@ -6,6 +6,26 @@ import exana.tracking as tr
 import quantities as pq
 import neo
 import copy
+import logging
+
+
+def get_logger(fname):
+    logger = logging.getLogger(__file__)
+    logger.setLevel(logging.DEBUG)
+    # create file handler which logs even debug messages
+    fh = logging.FileHandler(fname)
+    fh.setLevel(logging.DEBUG)
+    # create console handler with a higher log level
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.ERROR)
+    # create formatter and add it to the handlers
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+    # add the handlers to the logger
+    logger.addHandler(fh)
+    logger.addHandler(ch)
+    return logger
 
 # TODO select channel_group, delete names with channel group if selected
 
@@ -85,16 +105,17 @@ class Analyser:
                 continue
             for unit in chx.units:
                 sptr = unit.spiketrains[0]
-                if sptr.annotations['cluster_group'].lower() == 'noise':
+                cluster_group = unit.annotations.get('cluster_group') or 'noise'
+                if cluster_group.lower() == 'noise':
                     continue
                 attrs = copy.deepcopy(self.unit_info)
                 attrs.update(sptr.annotations)
 
                 attrs['exdir_path'] = '/'.join([action_id, 'main.exdir',
                                                 attrs['exdir_path'].lstrip('/')])
-                if sptr.name is None:
-                    sptr.name = 'cluster_{}'.format(sptr.annotations['cluster_id'])
-                name = sptr.name.replace(' ', '_').replace('#', '')
+                if unit.name is None:
+                    unit.name = 'cluster_{}'.format(unit.annotations['cluster_id'])
+                name = unit.name.replace(' ', '_').replace('#', '')
                 assert group_id == sptr.annotations['electrode_group_id']
                 contents[name] = attrs
             modname = 'channel_group_' + str(group_id)
@@ -138,15 +159,14 @@ class Analyser:
             print('Analysing spatial overview, ' +
                   'channel group {}'.format(group_id))
             for u, unit in enumerate(chx.units):
-                if unit.name is None:
-                    raise ValueError('unrecognized unit')
-                if unit.annotations['cluster_group'].lower() == 'noise':
+                cluster_group = unit.annotations.get('cluster_group') or 'noise'
+                if cluster_group.lower() == 'noise':
                     continue
+                if unit.name is None:
+                    unit.name = 'cluster_{}'.format(unit.annotations['cluster_id'])
                 sptr = unit.spiketrains[0]
-                if sptr.name is None:
-                    sptr.name = 'cluster_{}'.format(sptr.annotations['cluster_id'])
-                sptr_name = sptr.name.replace(' ', '_').replace('#', '')
-                fname = '{} {}'.format(chx.name, unit.name).replace(" ", "_")
+                unit_name = unit.name.replace(' ', '_').replace('#', '')
+                fname = '{} {}'.format(chx.name, unit_name).replace(" ", "_")
                 fpath = op.join(raw_dir, fname)
 
                 rate_map, rate_bins, _ = tr.spatial_rate_map( # NOTE assuming quadratic box
@@ -188,7 +208,7 @@ class Analyser:
                     'gridness': G,
                     'hd_aveclen': mean_vec_len,
                     'avg_rate': sptr.size / sptr.duration}
-                self.analysis_output[group_name][sptr_name]['analysis_output'].update(analysis_output)
+                self.analysis_output[group_name][unit_name]['analysis_output'].update(analysis_output)
 
     def occupancy(self):
         import exana.tracking as tr
@@ -196,6 +216,7 @@ class Analyser:
         import matplotlib.gridspec as gridspec
         from mpl_toolkits.axes_grid1 import make_axes_locatable
         raw_dir = str(self._analysis.require_raw('occupancy').directory)
+        logger = get_logger(op.join(raw_dir, 'exceptions.log'))
         os.makedirs(raw_dir, exist_ok=True)
         fname = 'occupancy_map'
         fpath = op.join(raw_dir, fname)
@@ -231,8 +252,7 @@ class Analyser:
             ax1.axes.yaxis.set_ticklabels([])
             ax2.axis('off')
         except Exception as e:
-            with open(fpath + '.exception', 'w+') as f:
-                print(str(e), file=f)
+            logger.exception('occupancy')
         self.savefig(fpath, fig)
 
     # def spatial_stim_overview(self):
@@ -251,8 +271,9 @@ class Analyser:
     #         print('Plotting spatial stimulation overview, ' +
     #               'channel group {}'.format(group_id))
     #         for u, unit in enumerate(chx.units):
-    #             if unit.annotations['cluster_group'].lower() == 'noise':
-    #                 continue
+    #             cluster_group = unit.annotations.get('cluster_group') or 'noise'
+                # if cluster_group.lower() == 'noise':
+                #     continue
     #             sptr = unit.spiketrains[0]
     #             fname = '{} {}'.format(chx.name, unit.name).replace(" ", "_")
     #             fpath = op.join(raw_dir, fname)
@@ -351,6 +372,7 @@ class Analyser:
         import quantities as pq
         import matplotlib.pyplot as plt
         raw_dir = str(self._analysis.require_raw('stimulation_statistics').directory)
+        logger = get_logger(op.join(raw_dir, 'exceptions.log'))
         os.makedirs(raw_dir, exist_ok=True)
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
@@ -361,41 +383,41 @@ class Analyser:
             print('Plotting stimulation statistics, ' +
                   'channel group {}'.format(group_id))
             for u, unit in enumerate(chx.units):
-                if unit.annotations['cluster_group'].lower() == 'noise':
+                cluster_group = unit.annotations.get('cluster_group') or 'noise'
+                if cluster_group.lower() == 'noise':
                     continue
                 sptr = unit.spiketrains[0]
-                try:
-                    fname = '{} {} stim macro'.format(chx.name, unit.name)
-                    fpath = op.join(raw_dir, fname).replace(" ", "_")
-                    epo_over = epoch_overview(self.epoch,
-                                              np.median(np.diff(self.epoch.times)))
-                    t_start = -np.round(epo_over.durations[0])
-                    t_stop = np.round(epo_over.durations[0])
-                    binsize = (abs(t_start) + abs(t_stop)) / 100.
-                    fig = plt.figure()
+                fname = '{} {} stim macro'.format(chx.name, unit.name)
+                fpath = op.join(raw_dir, fname).replace(" ", "_")
+                epo_over = epoch_overview(self.epoch,
+                                          np.median(np.diff(self.epoch.times)))
 
+                t_start = -np.round(epo_over.durations[0])
+                t_stop = np.round(epo_over.durations[0])
+                binsize = (abs(t_start) + abs(t_stop)) / 100.
+                fig = plt.figure()
+
+                try:
                     plot_psth(sptr=sptr, epoch=epo_over, t_start=t_start,
                               t_stop=t_stop, output='counts', binsize=binsize,
                               fig=fig, ylim=ylim) # TODO does not manage to send ylim???
                     self.savefig(fpath, fig)
                 except Exception as e:
-                    with open(fpath + '.exception', 'w+') as f:
-                        print(str(e), file=f)
+                    logger.exception('stim macro')
 
+                fname = '{} {} stim micro'.format(chx.name, unit.name)
+                fpath = op.join(raw_dir, fname).replace(" ", "_")
+                fig = plt.figure()
+                t_start = -np.round(self.epoch.durations[0].rescale('ms')) * 3  # FIXME is milliseconds always good?
+                t_stop = np.round(self.epoch.durations[0].rescale('ms')) * 3
+                binsize = (abs(t_start) + abs(t_stop)) / 100.
                 try:
-                    fname = '{} {} stim micro'.format(chx.name, unit.name)
-                    fpath = op.join(raw_dir, fname).replace(" ", "_")
-                    fig = plt.figure()
-                    t_start = -np.round(self.epoch.durations[0].rescale('ms')) * 3  # FIXME is milliseconds always good?
-                    t_stop = np.round(self.epoch.durations[0].rescale('ms')) * 3
-                    binsize = (abs(t_start) + abs(t_stop)) / 100.
                     plot_psth(sptr=sptr, epoch=self.epoch, t_start=t_start,
                               t_stop=t_stop, output='counts', binsize=binsize,
                               fig=fig)
                     self.savefig(fpath, fig)
                 except Exception as e:
-                    with open(fpath + '.exception', 'w+') as f:
-                        print(str(e), file=f)
+                    logger.exception('stim micro')
 
     def spike_lfp_coherence(self, xlim=[4, 16], color='b',
                             srch=[6, 10], show_max=False): # TODO plots everything twice
@@ -441,7 +463,8 @@ class Analyser:
                 id_list = range(4, 8)
 
             for u, unit in enumerate(chx.units):
-                if unit.annotations['cluster_group'].lower() == 'noise':
+                cluster_group = unit.annotations.get('cluster_group') or 'noise'
+                if cluster_group.lower() == 'noise':
                     continue
                 fig = plt.figure(figsize=(12 * len(starts), 20))
                 gs_main = gridspec.GridSpec(1, len(starts))
@@ -554,6 +577,7 @@ class Analyser:
         import matplotlib.pyplot as plt
         import matplotlib.gridspec as gridspec
         raw_dir = str(self._analysis.require_raw('spike_statistics').directory)
+        logger = get_logger(op.join(raw_dir, 'exceptions.log'))
         os.makedirs(raw_dir, exist_ok=True)
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
@@ -566,7 +590,8 @@ class Analyser:
             for u, unit in enumerate(chx.units):
                 if unit.name is None:
                     raise ValueError('unrecognized unit')
-                if unit.annotations['cluster_group'].lower() == 'noise':
+                cluster_group = unit.annotations.get('cluster_group') or 'noise'
+                if cluster_group.lower() == 'noise':
                     continue
                 sptr = unit.spiketrains[0]
 
@@ -593,8 +618,7 @@ class Analyser:
                                   time_limit=self.par['isi_time_limit'], color=color, )
                     self.savefig(fpath, fig)
                 except Exception as e:
-                    with open(fpath + '.exception', 'w+') as f:
-                        print(str(e), file=f)
+                    logger.exception('spike statistics')
 
     def orient_tuning_overview(self):
         import exana.stimulus as st
