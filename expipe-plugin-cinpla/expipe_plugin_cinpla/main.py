@@ -711,21 +711,18 @@ class CinplaPlugin(IPlugin):
             if any(arg in kwargs['analysis'] for arg in ['orient_tuning']):
                 an.orient_tuning_overview()
             for key, val in an.analysis_output.items():
-                try:
-                    action.require_module(key, contents=val,
-                                          overwrite=kwargs['overwrite'])
-                except Exception as e:
-                    fname = op.abspath(op.join('action_modules',
-                                               USER_PARAMS['project_id'],
-                                               action.id, key + '.json'))
-                    os.makedirs(op.dirname(fname), exist_ok=True)
-                    print('Got exception during module update of "' + key +
-                          '" stored in "' + fname + '"')
-                    print(e.output)
-                    import json
-                    with open(fname, 'w') as f:
-                        result = expipe.io.core.convert_quantities(val)
-                        json.dump(result, f, sort_keys=True, indent=4)
+                action.require_module(key, contents=val,
+                                      overwrite=True)
+                    # fname = op.abspath(op.join('action_modules',
+                    #                            USER_PARAMS['project_id'],
+                    #                            action.id, key + '.json'))
+                    # os.makedirs(op.dirname(fname), exist_ok=True)
+                    # print('Got exception during module update of "' + key +
+                    #       '" stored in "' + fname + '"')
+                    # import json
+                    # with open(fname, 'w') as f:
+                    #     result = expipe.io.core.convert_quantities(val)
+                    #     json.dump(result, f, sort_keys=True, indent=4)
 
         @cli.command('group-analyse')
         @click.argument('action-id', type=click.STRING)
