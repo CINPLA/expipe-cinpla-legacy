@@ -68,9 +68,14 @@ class AxonaPlugin(IPlugin):
                       type=click.STRING,
                       help='Add tags to action.',
                       )
+        @click.option('--get_inp',
+                      is_flag=True,
+                      help='Use Axona input ".inp.',
+                      )
         def generate_axona_action(action_id, axona_filename, anatomy, user,
                                   no_local, overwrite, no_files, no_modules,
-                                  subject_id, location, message, tag):
+                                  subject_id, location, message, tag,
+                                  get_inp):
             """Generate an axona recording-action to database.
 
             COMMAND: axona-filename"""
@@ -146,11 +151,11 @@ class AxonaPlugin(IPlugin):
                 axona.generate_analog_signals(exdir_path, axona_file)
                 axona.generate_spike_trains(exdir_path, axona_file)
                 axona.generate_units(exdir_path, axona_file)
-                try:
+                if get_inp:
                     axona.generate_inp(exdir_path, axona_file)
-                except OSError:
+                else:
                     import warnings
-                    warnings.warn('Unable to register ".inp".')
+                    warnings.warn('Not registering Axona ".inp".')
                 axona.generate_clusters(exdir_path, axona_file)
             time_string = exdir.File(exdir_path).attrs['session_start_time']
             dtime = datetime.strptime(time_string, '%Y-%m-%dT%H:%M:%S')
