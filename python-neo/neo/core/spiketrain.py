@@ -34,11 +34,11 @@ def check_has_dimensions_time(*values):
     '''
     errmsgs = []
     for value in values:
-        dim = value.dimensionality
-        if (len(dim) != 1 or list(dim.values())[0] != 1 or
-                not isinstance(list(dim.keys())[0], pq.UnitTime)):
+        try:
+            value.rescale('s')
+        except ValueError:
             errmsgs.append("value %s has dimensions %s, not [time]" %
-                           (value, dim.simplified))
+                           (value, value.dimensionality.simplified))
     if errmsgs:
         raise ValueError("\n".join(errmsgs))
 
@@ -214,7 +214,7 @@ class SpikeTrain(BaseNeo, pq.Quantity):
         '''
         if  len(times)!=0 and waveforms is not None and len(times) != waveforms.shape[0]: #len(times)!=0 has been used to workaround a bug occuring during neo import)
             raise ValueError("the number of waveforms should be equal to the number of spikes")
-        
+
         # Make sure units are consistent
         # also get the dimensionality now since it is much faster to feed
         # that to Quantity rather than a unit
