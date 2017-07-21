@@ -234,7 +234,7 @@ class CinplaPlugin(IPlugin):
                       help='Name of server as named in config.yaml. Default is "norstore"',
                       )
         def transfer(action_id, to_local, from_local, overwrite, no_trash,
-                     raw, exclude, include, port, username,
+                     exclude, include, port, username,
                      hostname, recursive, server):
             """Transfer a dataset related to an expipe action
 
