@@ -1,0 +1,18 @@
+{
+    "adjustment": {
+        "unit": "um",
+        "value": ""
+    },
+    "date": "dd.mm.yyyy:HH:MM",
+    "definition": "Adjustment length of drive",
+    "depth": {
+        "unit": "mm",
+        "value": ""
+    },
+    "experimenter": "",
+    "identifier": "malin_drive_depth_adjustment",
+    "location": "Left, Right",
+    "notes": {
+        "value": ""
+    }
+}

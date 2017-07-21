@@ -1,0 +1,55 @@
+{
+    "birthday": {
+        "definition": "The birthday. Age can be inferred from the date of recording.",
+        "value": "dd.mm.yyyy:HH:MM"
+    },
+    "cell_line": {
+        "definition": "Cell line of the subject.",
+        "value": ""
+    },
+    "definition": "Describing the subject which underwent the experiment.",
+    "developmental_stage": {
+        "definition": "The developemtal stage of the subject. E.g. 'embroyonal', 'adult', 'larval' etc.",
+        "value": "adult"
+    },
+    "gender": {
+        "definition": "Male or female?",
+        "value": "Male"
+    },
+    "genus": {
+        "definition": "The Genus of the studied subject.",
+        "value": "Rattus"
+    },
+    "health_status": {
+        "definition": "Information about the health status of this subject.",
+        "value": "Healthy"
+    },
+    "identifier": "malin_subject",
+    "label": {
+        "definition": "If the subject has been labled in a specific way. The lable can be described here.",
+        "value": ""
+    },
+    "notes": {
+        "value": ""
+    },
+    "population": {
+        "definition": "The population this subject is offspring of. This may be the bee hive, the ant colony, etc.",
+        "value": "locally bred"
+    },
+    "species": {
+        "definition": "The scientific name of the species e.g. Apis mellifera, Homo sapiens.",
+        "value": "Rattus norvegicus"
+    },
+    "strain": {
+        "definition": "The strain the subject was taken from. E.g. a specific genetic variation etc.",
+        "value": "Long Evans"
+    },
+    "trivial_name": {
+        "definition": "The trivial name of the species like Honeybee, Human.",
+        "value": "Rat"
+    },
+    "weight": {
+        "unit": "g",
+        "value": ""
+    }
+}

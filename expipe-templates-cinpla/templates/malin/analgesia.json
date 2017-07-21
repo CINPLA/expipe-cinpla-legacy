@@ -1,0 +1,19 @@
+{
+    "analgesic": {
+        "definition": "The drug used for analgesia.",
+        "value": "Temgesic"
+    },
+    "analgesic_dose": {
+        "unit": "mL",
+        "value": 0.15
+    },
+    "definition": "Analgesia , during surgery.",
+    "description": {
+        "definition": "A textual description of the preparation.",
+        "value": "Analgesics"
+    },
+    "identifier": "malin_analgesia",
+    "notes": {
+        "value": ""
+    }
+}

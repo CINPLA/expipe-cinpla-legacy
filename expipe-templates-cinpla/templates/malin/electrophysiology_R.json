@@ -1,0 +1,72 @@
+{
+    "channel_groups": {
+        "definition": "Which channel groups are associated with this electrophysiological procedure",
+        "value": [
+            4.0,
+            5.0,
+            6.0,
+            7.0
+        ]
+    },
+    "definition": "Describing electrophysiology in the expirimental setup.",
+    "depth": {
+        "unit": "mm",
+        "value": ""
+    },
+    "depth_reference": {
+        "alternatives": {
+            "dura": true,
+            "skull": true,
+            "value": "dura"
+        }
+    },
+    "hemisphere": {
+        "alternatives": {
+            "C, center": "between hemispheres",
+            "L, left": "left hemisphere",
+            "R, right": "right hemisphere"
+        },
+        "value": "R"
+    },
+    "identifier": "malin_electrophysiology_R",
+    "location": {
+        "alternatives": {
+            "V1ML": "Primary visual cortex, monocular area, left hemisphere",
+            "V1MR": "Primary visual cortex, monocular area, right hemisphere",
+            "V1BL": "Primary visual cortex, binocular area, left hemisphere",
+            "V1BR": "Primary visual cortex, binocular area, right hemisphere",
+            "V2LL": "Secondary visual cortex, lateral area, left hemisphere",
+            "V2LR": "Secondary visual cortex, lateral area, right hemisphere",
+            "V2ML": "Secondary visual cortex, medial area, left hemisphere",
+            "V2MR": "Secondary visual cortex, medial area, right hemisphere"
+        },
+        "definition": "Describes the brain area of recording.",
+        "value": "",
+    },
+    "notes": {
+        "value": ""
+    },
+    "subtype": {
+        "alternatives": [
+            "dual electrode recording",
+            "multi electrode recording",
+            "single electrode recording"
+        ],
+        "definition": "Subtype of this electrophysiological experiment.",
+        "value": "multi electrode recording"
+    },
+    "type": {
+        "alternatives": [
+            "EEG",
+            "EKG",
+            "EMG",
+            "ERG",
+            "extracellular recording",
+            "intracellular recording",
+            "loose patch",
+            "patch clamp",
+            "whole cell patch"
+        ],
+        "value": "extracellular recording"
+    }
+}

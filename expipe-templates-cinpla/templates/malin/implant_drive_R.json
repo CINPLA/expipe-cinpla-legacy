@@ -1,0 +1,62 @@
+{
+    "angle": {
+        "unit": "deg",
+        "value": [
+            15.0
+        ]
+    },
+    "definition": "Describing an implantation procedure of a micro drive and flexDrive.",
+    "description": {
+        "value": "Implantation of microdrives or flexDrives in the Visual Cortex."
+    },
+    "hemisphere": {
+        "alternatives": {
+            "C, center": "between hemispheres",
+            "L, left": "left hemisphere",
+            "R, right": "right hemisphere"
+        },
+        "value": "R"
+    },
+    "identifier": "malin_implant_drive_R",
+    "location": {
+        "alternatives": {
+            "V1ML":"Primary visual cortex, monocular area, left hemisphere",
+            "V1MR":"Primary visual cortex, monocular area, right hemisphere",
+            "V1BL":"Primary visual cortex, binocular area, left hemisphere",
+            "V1BR":"Primary visual cortex, binocular area, right hemisphere",
+            "V2LL":"Secondary visual cortex, lateral area, left hemisphere",
+            "V2LR":"Secondary visual cortex, lateral area, right hemisphere",
+            "V2ML":"Secondary visual cortex, medial area, left hemisphere",
+            "V2MR":"Secondary visual cortex, medial area, right hemisphere"
+        },
+        "definition":"Describes the brain area of implantation",
+        "value": "",
+    },
+    "notes": {
+        "value": ""
+    },
+    "position": {
+        "unit": "mm",
+        "value": ""
+    },
+    "position_reference": {
+        "alternatives": [
+            "bregma",
+            "dura",
+            "lambda",
+            "longitudinal suture",
+            "skull",
+            "transverse sinus"
+        ],
+        "definition": "By default position are specified by the coordinates of skull. Use this property for other definitions.",
+        "value": "lambda"
+
+    },
+    "ref_electrode_location": {
+        "alternatives": [
+            "Posterior to bregma"
+        ],
+        "definition": "Describes the location of the reference electrode.",
+        "value": "Posterior to bregma, right hemisphere"
+    }
+}

@@ -1,0 +1,18 @@
+{
+    "anaesthetic": {
+        "definition": "The drug used for anaesthesia.",
+        "value": "Isoflurane"
+    },
+    "anaesthetic_dose": {
+        "definition": "The dose of the used anaesthetic.",
+        "value": "1 L/M at 1.5 with a small amount of ventilation"
+    },
+    "description": {
+        "definition": "A textual description of the preparation.",
+        "value": "Anaesthetics"
+    },
+    "identifier": "malin_anaesthesia",
+    "notes": {
+        "value": ""
+    }
+}

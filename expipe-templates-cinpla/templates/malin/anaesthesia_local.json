@@ -1,0 +1,22 @@
+{
+    "description": {
+        "definition": "A textual description of the preparation.",
+        "value": "Local anaesthetics"
+    },
+    "identifier": "malin_anaesthesia_local",
+    "local_anaesthetic": {
+        "definition": "The drug that was used for local anaesthesia.",
+        "value": "Marcain"
+    },
+    "local_anaesthetic_dose": {
+        "unit": "mL",
+        "value": 0.08
+    },
+    "local_anaesthetic_location": {
+        "definition": "Describes the place the local anaesthetic was applied.",
+        "value": "Skin covering dorsal part of head, around cut area."
+    },
+    "notes": {
+        "value": ""
+    }
+}
