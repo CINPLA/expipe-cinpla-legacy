@@ -201,10 +201,6 @@ class CinplaPlugin(IPlugin):
                       is_flag=True,
                       help='Overwrite data or not.',
                       )
-        @click.option('--raw',
-                      is_flag=True,
-                      help='Transfer without tags etc.',
-                      )
         @click.option('-r', '--recursive',
                       is_flag=True,
                       help='Recursive directory transfer.',
@@ -302,11 +298,6 @@ class CinplaPlugin(IPlugin):
                     sftp_client.remove(server_data + '.tar')
             elif from_local:
                 local_data = op.dirname(_get_local_path(fr, assert_exists=True))
-                if not raw:
-                    tags = action.tags or list()
-                    if len(OBLIGATORY_TAGS) > 0:
-                        if sum([tag in tags for tag in OBLIGATORY_TAGS]) != 1:
-                            raise ValueError('Tags are not approved, please revise')
                 if recursive:
                     scp_client.get(server_data, local_data, recursive=True)
                     try:
