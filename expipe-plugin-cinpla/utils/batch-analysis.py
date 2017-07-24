@@ -59,6 +59,7 @@ def run_shell_command(command_line):
 
 
 project = expipe.get_project(USER_PARAMS['project_id'])
+# your code
 for action in project.actions:
     if action.type != 'Recording':
         continue
@@ -67,3 +68,4 @@ for action in project.actions:
     print('Evaluating ', action.id)
     run_shell_command(['expipe', 'analyse', action.id, '-a',
                        'spatial', '--skip'])
+    expipe.io.core.refresh_token()
