@@ -20,10 +20,9 @@
         "definition": "A description of the movement of the subject, oberved by the experimenter.",
         "alternatives": {
             "S": "Sessile",
-            "M": "movement",
-
+            "M": "movement"
         },
-        "value": "",
+        "value": ""
     },
     "protocol_info": {
         "definition": "Additional information to the task protocol undertaken by the subject.",

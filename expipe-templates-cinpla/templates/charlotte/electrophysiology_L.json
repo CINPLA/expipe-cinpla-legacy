@@ -1,6 +1,6 @@
 {
     "channel_groups": {
-        "definition": "Which channel groups are associated with this electrophysiological procedure",
+        "definition": "Which channel groups are associated with this electrophysiological measurement",
         "value": [
             4.0,
             5.0,
@@ -26,23 +26,19 @@
             "L, left": "left hemisphere",
             "R, right": "right hemisphere"
         },
-        "value": "R"
+        "value": "L"
     },
-    "identifier": "malin_electrophysiology_R",
+    "identifier": "charlotte_electrophysiology_L",
     "location": {
         "alternatives": {
-            "V1ML": "Primary visual cortex, monocular area, left hemisphere",
-            "V1MR": "Primary visual cortex, monocular area, right hemisphere",
-            "V1BL": "Primary visual cortex, binocular area, left hemisphere",
-            "V1BR": "Primary visual cortex, binocular area, right hemisphere",
-            "V2LL": "Secondary visual cortex, lateral area, left hemisphere",
-            "V2LR": "Secondary visual cortex, lateral area, right hemisphere",
-            "V2ML": "Secondary visual cortex, medial area, left hemisphere",
-            "V2MR": "Secondary visual cortex, medial area, right hemisphere"
+            "MECL": "Medial entorhinal cortex left hemisphere",
+            "MECR": "Medial entorhinal cortex right hemisphere",
+            "MS": "Medial septum"
         },
         "definition": "Describes the brain area of recording.",
-        "value": ""
+        "value": "MECL"
     },
+    "name": "charlotte_electrophysiology_L",
     "notes": {
         "value": ""
     },

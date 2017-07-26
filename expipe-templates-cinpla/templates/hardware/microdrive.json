@@ -1,0 +1,23 @@
+{
+    "definition": "Describing a micro drive.",
+    "description": {
+        "value": "A micro drive is the holder of four tetrodes originally designed for Axona setup."
+    },
+    "identifier": "hardware_microdrive",
+    "manufacturer": {
+        "definition": "The manufacturer of the drive e.g. ordered from a company.",
+        "value": "Axona made the chassie, tetrodes are assembled on site"
+    },
+    "name": "hardware_microdrive",
+    "notes": {
+        "value": ""
+    },
+    "registration_type": {
+        "definition": "The type of registration.",
+        "value": "extracellular"
+    },
+    "tetrode_count": {
+        "definition": "Number of tetrodes in drive.",
+        "value": 4
+    }
+}
