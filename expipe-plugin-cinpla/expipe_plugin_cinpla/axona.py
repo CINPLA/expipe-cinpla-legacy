@@ -72,10 +72,14 @@ class AxonaPlugin(IPlugin):
                       is_flag=True,
                       help='Use Axona input ".inp.',
                       )
+        @click.option('-y', '--yes',
+                      is_flag=True,
+                      help='Yes to depth registering query.',
+                      )
         def generate_axona_action(action_id, axona_filename, anatomy, user,
                                   no_local, overwrite, no_files, no_modules,
                                   subject_id, location, message, tag,
-                                  get_inp):
+                                  get_inp, yes):
             """Generate an axona recording-action to database.
 
             COMMAND: axona-filename"""
@@ -129,7 +133,7 @@ class AxonaPlugin(IPlugin):
             if not no_modules:
                 generate_templates(action, TEMPLATES['axona'], overwrite,
                                    git_note=GIT_NOTE)
-                register_depth(project, action, anatomy)
+                register_depth(project, action, anatomy, yes=yes)
 
             if not no_files:
                 fr = action.require_filerecord()

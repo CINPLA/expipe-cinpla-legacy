@@ -5,6 +5,7 @@ import os.path as op
 from distutils.util import strtobool
 import sys
 import os
+import numpy as np
 from ._version import get_versions
 
 sys.path.append(expipe.config.config_dir)
@@ -65,7 +66,7 @@ def deltadate(adjustdate, regdate):
     return delta
 
 
-def register_depth(project, action, anatomy=None):
+def register_depth(project, action, anatomy=None, yes=False):
     regdate = action.datetime
     mod_info = MODULES['electrophysiology']
     if len(anatomy) == 0:
@@ -88,14 +89,14 @@ def register_depth(project, action, anatomy=None):
     else:
         curr_depth = {key: val * pq.mm for key, val in anatomy}
         adjustdate = None
-
-    answer = query_yes_no(
-        'Are the following values correct: ' +
-        ', '.join('{} = {}'.format(key, val) for key, val in curr_depth.items()) +
-        ' adjust date time = {}'.format(adjustdate))
-    if answer is False:
-        print('Aborting depth registration')
-        return False
+    if not yes:
+        answer = query_yes_no(
+            'Are the following values correct: ' +
+            ', '.join('{} = {}'.format(key, val) for key, val in curr_depth.items()) +
+            ' adjust date time = {}'.format(adjustdate))
+        if not answer:
+            print('Aborting depth registration')
+            return False
     modules_dict = action.modules.to_dict()
     for key, val in curr_depth.items():
         name = mod_info[key]
@@ -103,6 +104,8 @@ def register_depth(project, action, anatomy=None):
             raise NameError('Failed to acquire electrophysiology module')
         mod = modules_dict[name]
         print('Registering depth ', key, ' = ', val)
+        if np.isnan(val):
+            val = 'NaN'
         mod['depth'] = val
         action.require_module(name=name, contents=mod, overwrite=True)
     return True
