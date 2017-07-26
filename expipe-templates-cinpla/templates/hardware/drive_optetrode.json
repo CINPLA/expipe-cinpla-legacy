@@ -3,12 +3,12 @@
     "description": {
         "value": "Optetrode - combined tetrodes and optic fibre in a micro drive."
     },
-    "identifier": "mikkel_drive_optetrode",
+    "identifier": "hardware_drive_optetrode",
     "manufacturer": {
         "definition": "The manufacturer of the drive e.g. ordered from a company.",
         "value": "Axona made the chassie and tetrodes and optic fibre is assembled on site"
     },
-    "name": "mikkel_drive_optetrode",
+    "name": "hardware_drive_optetrode",
     "notes": {
         "value": ""
     },

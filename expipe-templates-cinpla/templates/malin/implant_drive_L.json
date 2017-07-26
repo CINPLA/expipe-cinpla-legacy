@@ -27,7 +27,7 @@
             "V2LL": "Secondary visual cortex, lateral area, left hemisphere",
             "V2LR": "Secondary visual cortex, lateral area, right hemisphere",
             "V2ML": "Secondary visual cortex, medial area, left hemisphere",
-            "V2MR": "Secondary visual cortex, medial area, right hemisphere",
+            "V2MR": "Secondary visual cortex, medial area, right hemisphere"
         },
         "definition":"Describes the brain area of implantation",
         "value": ""

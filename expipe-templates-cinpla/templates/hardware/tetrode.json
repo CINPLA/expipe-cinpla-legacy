@@ -21,7 +21,7 @@
             17.0
         ]
     },
-    "identifier": "mikkel_tetrode",
+    "identifier": "hardware_tetrode",
     "impedance": {
         "definition": "Electrode impedance.",
         "uncertainty": "100",
@@ -38,7 +38,7 @@
         "definition": "The Material the electrodes are made of e.g. glass. tungsten, steel ...",
         "value": "10 % platinum, 90 % iridium"
     },
-    "name": "mikkel_tetrode",
+    "name": "hardware_tetrode",
     "notes": {
         "value": ""
     },
