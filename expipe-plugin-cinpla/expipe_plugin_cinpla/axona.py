@@ -126,10 +126,10 @@ class AxonaPlugin(IPlugin):
             assert location in POSSIBLE_LOCATIONS
             print('Registering location ' + location)
             action.location = location
-            action.messages.extend([{'message': m,
-                                     'user': user,
-                                     'datetime': datetime.now()}
-                                   for m in message])
+            action.messages = [{'message': m,
+                                 'user': user,
+                                 'datetime': datetime.now()}
+                               for m in message]
             if not no_modules:
                 generate_templates(action, TEMPLATES['axona'], overwrite,
                                    git_note=GIT_NOTE)
