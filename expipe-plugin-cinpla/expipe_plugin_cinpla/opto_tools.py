@@ -13,12 +13,9 @@ import platform
 from .action_tools import generate_templates
 from expipe_io_neuro import pyopenephys
 import glob
-import sys; sys.path.append(expipe.config.config_dir)
-if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
-    print('No config params file found, use ' +
-          '"expipe copy-to-config expipe_params.py"')
-else:
-    from expipe_params import USER_PARAMS
+from .pytools import load_parameters
+
+PAR = load_parameters()
 
 
 def generate_axona_opto(exdir_path, io_channel=8, **annotations):

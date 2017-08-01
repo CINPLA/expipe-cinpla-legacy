@@ -3,23 +3,18 @@ import os
 import os.path as op
 from expipecli.utils import IPlugin
 import click
+import sys
 from .action_tools import (generate_templates, _get_local_path, create_notebook,
                            GIT_NOTE, nwb_main_groups)
-import sys
-sys.path.append(expipe.config.config_dir)
-if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
-    print('No config params file found, use "expipe' +
-          'copy-to-config expipe_params.py"')
-else:
-    from expipe_params import (USER_PARAMS, TEMPLATES, UNIT_INFO, POSSIBLE_TAGS,
-                              POSSIBLE_LOCATIONS, OBLIGATORY_TAGS, MODULES,
-                              ANALYSIS_PARAMS)
+from .pytools import deep_update, load_python_module, load_parameters
+
+PAR = load_parameters()
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
 
 class CinplaPlugin(IPlugin):
-    """Create the `expipe parse-axona` command for neuro recordings."""
+    """Create the `expipe command` for neuro recordings."""
     def attach_to_cli(self, cli):
         @cli.command('generate-notebook')
         @click.argument('action-id', type=click.STRING)
@@ -41,7 +36,7 @@ class CinplaPlugin(IPlugin):
 
             COMMAND: action-id: Provide action id to find exdir path
             """
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_local:
@@ -105,7 +100,7 @@ class CinplaPlugin(IPlugin):
             if procedure not in ["implantation", "injection"]:
                 raise ValueError('procedure must be one of "implantation" ' +
                                  'or "injection"')
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(subject_id + '-surgery-' + procedure)
             birthday = datetime.strftime(datetime.strptime(birthday, '%d.%m.%Y'),
                                          DTIME_FORMAT)
@@ -118,18 +113,18 @@ class CinplaPlugin(IPlugin):
             action.type = 'Surgery'
             action.tags = [procedure]
             action.subjects = [subject_id]
-            user = user or USER_PARAMS['user_name']
+            user = user or PAR.USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
             print('Registering user ' + user)
             action.users = [user]
-            generate_templates(action, TEMPLATES['surgery_' + procedure],
+            generate_templates(action, PAR.TEMPLATES['surgery_' + procedure],
                                overwrite, git_note=GIT_NOTE)
             modules_dict = action.modules.to_dict()
             for key, val in anatomy:
-                name = MODULES[procedure][key]
+                name = PAR.MODULES[procedure][key]
                 mod = modules_dict[name]
                 assert 'position' in mod
                 assert isinstance(mod['position'], pq.Quantity)
@@ -137,10 +132,10 @@ class CinplaPlugin(IPlugin):
                 mod['position'][2] = pq.Quantity(val, 'mm')
                 action.require_module(name=name, contents=mod, overwrite=True)
 
-            subject = action.require_module(name=MODULES['subject']).to_dict()  # TODO standard name?
+            subject = action.require_module(name=PAR.MODULES['subject']).to_dict()  # TODO standard name?
             subject['birthday']['value'] = birthday
             subject['weight'] = weight * pq.g
-            action.require_module(name=MODULES['subject'], contents=subject,
+            action.require_module(name=PAR.MODULES['subject'], contents=subject,
                                   overwrite=True)
 
         @cli.command('register-perfusion')
@@ -162,7 +157,7 @@ class CinplaPlugin(IPlugin):
             """Generate a perfusion action."""
             import quantities as pq
             from datetime import datetime
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(subject_id + '-perfusion')
             if date == 'now':
                 date = datetime.now()
@@ -173,14 +168,14 @@ class CinplaPlugin(IPlugin):
             action.type = 'Surgery'
             action.tags = ['perfusion']
             action.subjects = [subject_id]
-            user = user or USER_PARAMS['user_name']
+            user = user or PAR.USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
             print('Registering user ' + user)
             action.users = [user]
-            generate_templates(action, TEMPLATES['perfusion'],
+            generate_templates(action, PAR.TEMPLATES['perfusion'],
                                overwrite, git_note=GIT_NOTE)
 
         @cli.command('transfer')
@@ -247,7 +242,7 @@ class CinplaPlugin(IPlugin):
             from .ssh_tools import get_login, login, ssh_execute, untar
             import tarfile
             import shutil
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
 
@@ -376,7 +371,7 @@ class CinplaPlugin(IPlugin):
             """Transfer a dataset related to an expipe action
             COMMAND: action-id: Provide action id to find exdir path"""
             import shutil
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if to_local:
@@ -430,7 +425,7 @@ class CinplaPlugin(IPlugin):
             ch.setLevel(logging.DEBUG)
             logger.addHandler(ch)
 
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_local:
@@ -451,7 +446,7 @@ class CinplaPlugin(IPlugin):
         @click.argument('action-id', type=click.STRING)
         @click.option('--tag', '-t',
                       multiple=True,
-                      type=click.Choice(POSSIBLE_TAGS),
+                      type=click.Choice(PAR.POSSIBLE_TAGS),
                       help='The tag to be applied to the action.',
                       )
         @click.option('--message', '-m',
@@ -468,9 +463,9 @@ class CinplaPlugin(IPlugin):
 
             COMMAND: action-id: Provide action id to get action"""
             from datetime import datetime
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(action_id)
-            user = user or USER_PARAMS['user_name']
+            user = user or PAR.USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
@@ -530,14 +525,14 @@ class CinplaPlugin(IPlugin):
             else:
                 date = datetime.strptime(date, '%d.%m.%YT%H:%M')
             datestring = datetime.strftime(date, DTIME_FORMAT)
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             if init:
                 action = project.require_action(subject_id + '-adjustment')
             else:
                 action = project.get_action(subject_id + '-adjustment')
             action.type = 'Adjustment'
             action.subjects = [subject_id]
-            user = user or USER_PARAMS['user_name']
+            user = user or PAR.USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
@@ -556,7 +551,7 @@ class CinplaPlugin(IPlugin):
                 index = 0
                 surgery = project.get_action(subject_id + '-surgery-implantation')
                 sdict = surgery.modules.to_dict()
-                prev_depth = {key: sdict[MODULES['implantation'][key]]['position'][2]
+                prev_depth = {key: sdict[PAR.MODULES['implantation'][key]]['position'][2]
                               for key, _ in anatomy}
                 for key, depth in prev_depth.items():
                     if not isinstance(depth, pq.Quantity):
@@ -568,7 +563,7 @@ class CinplaPlugin(IPlugin):
                 prev_dict = action.require_module(name=prev_name).to_dict()
                 prev_depth = {key: prev_dict['depth'][key] for key, _ in anatomy}
             name = '{:03d}_adjustment'.format(index)
-            module = action.require_module(template=TEMPLATES['adjustment'],
+            module = action.require_module(template=PAR.TEMPLATES['adjustment'],
                                            name=name, overwrite=overwrite)
 
             curr_depth = {key: round(prev_depth[key] + val * pq.um, 3)
@@ -617,7 +612,7 @@ class CinplaPlugin(IPlugin):
                       )
         @click.option('--tag', '-t',
                       multiple=True,
-                      type=click.Choice(POSSIBLE_TAGS),
+                      type=click.Choice(PAR.POSSIBLE_TAGS),
                       help='The anatomical brain-area of the optogenetic stimulus.',
                       )
         @click.option('-m', '--message',
@@ -644,11 +639,11 @@ class CinplaPlugin(IPlugin):
             from .analyser import Analyser
             from datetime import datetime
             if len(kwargs['channel_group']) == 0: kwargs['channel_group'] = None
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(kwargs['action_id'] + '-analysis')
             rec_action = project.require_action(kwargs['action_id'])
             action.type = 'Action-analysis'
-            user = kwargs['user'] or USER_PARAMS['user_name']
+            user = kwargs['user'] or PAR.USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
@@ -672,15 +667,14 @@ class CinplaPlugin(IPlugin):
                 exdir_path = _get_local_path(fr)
             else:
                 exdir_path = fr.server_path
-            if not kwargs['skip']:
-                action.require_module('software_version_control_git',
-                                      contents=GIT_NOTE,
-                                      overwrite=kwargs['overwrite'])
-                action.require_module('software_analysis_parameters',
-                                      contents=ANALYSIS_PARAMS,
-                                      overwrite=kwargs['overwrite'])
-            an = Analyser(exdir_path, params=ANALYSIS_PARAMS,
-                          unit_info=UNIT_INFO,
+            action.require_module('software_version_control_git',
+                                  contents=GIT_NOTE,
+                                  overwrite=(kwargs['overwrite'] or kwargs['skip']))
+            action.require_module('software_analysis_parameters',
+                                  contents=PAR.ANALYSIS_PARAMS,
+                                  overwrite=(kwargs['overwrite'] or kwargs['skip']))
+            an = Analyser(exdir_path, params=PAR.ANALYSIS_PARAMS,
+                          unit_info=PAR.UNIT_INFO,
                           channel_group=kwargs['channel_group'],
                           no_local=kwargs['no_local'],
                           overwrite=kwargs['overwrite'],
@@ -711,10 +705,15 @@ class CinplaPlugin(IPlugin):
                 an.orient_tuning_overview()
             # TODO deep update!!!
             for key, val in an.analysis_output.items():
-                action.require_module(key, contents=val,
+                try:
+                    mod = action.get_module(key).to_dict()
+                except NameError:
+                    mod = {}
+                deep_update(mod, val)
+                action.require_module(key, contents=mod,
                                       overwrite=True)
                     # fname = op.abspath(op.join('action_modules',
-                    #                            USER_PARAMS['project_id'],
+                    #                            PAR.USER_PARAMS['project_id'],
                     #                            action.id, key + '.json'))
                     # os.makedirs(op.dirname(fname), exist_ok=True)
                     # print('Got exception during module update of "' + key +
@@ -760,11 +759,11 @@ class CinplaPlugin(IPlugin):
 
             COMMAND: action-id: Provide action id to get action"""
             from datetime import datetime
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             analysis_action = project.require_action(action_id)
 
             analysis_action.type = 'Group-analysis'
-            user = user or USER_PARAMS['user_name']
+            user = user or PAR.USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:

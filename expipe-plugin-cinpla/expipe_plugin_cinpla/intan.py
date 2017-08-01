@@ -4,6 +4,9 @@ import os
 import os.path as op
 from expipecli.utils import IPlugin
 import click
+import quantities as pq
+import shutil
+import sys
 from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
 from .action_tools import (generate_templates, _get_local_path,
                            _get_probe_file, GIT_NOTE)
@@ -11,16 +14,9 @@ from exana.misc.signal_tools import (create_klusta_prm, save_binary_format, appl
                                      filter_analog_signals, ground_bad_channels,
                                      remove_stimulation_artifacts, duplicate_bad_channels,
                                      extract_rising_edges, find_frequency_range)
-import quantities as pq
-import shutil
-import sys
-sys.path.append(expipe.config.config_dir)
-if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
-    print('No config params file found, use "expipe' +
-          'copy-to-config expipe_params.py"')
-else:
-    from expipe_params import (USER_PARAMS, TEMPLATES, UNIT_INFO,
-                               POSSIBLE_LOCATIONS)
+from .pytools import load_parameters
+
+PAR = load_parameters()
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
@@ -113,7 +109,7 @@ class IntanPlugin(IPlugin):
             action = None
             if exdir_path is None:
                 import exdir
-                project = expipe.get_project(USER_PARAMS['project_id'])
+                project = expipe.get_project(PAR.USER_PARAMS['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:
@@ -319,7 +315,7 @@ class IntanPlugin(IPlugin):
             action = None
             if exdir_path is None:
                 import exdir
-                project = expipe.get_project(USER_PARAMS['project_id'])
+                project = expipe.get_project(PAR.USER_PARAMS['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:
@@ -571,7 +567,7 @@ class IntanPlugin(IPlugin):
             intan_dir = intan_path.split(os.sep)[-1]
             rhs_file = [f for f in os.listdir(intan_path) if f.endswith('.rhs')][0]
             rhs_path = op.join(intan_path, rhs_file)
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
                                                    spikesorter='klusta')
             if prb_path is None:
@@ -598,29 +594,29 @@ class IntanPlugin(IPlugin):
             action.tags.extend(list(tag) + ['intan'])
             print('Registering subject id ' + subject_id)
             action.subjects = [subject_id]
-            user = user or USER_PARAMS['user_name']
+            user = user or PAR.USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
             print('Registering user ' + user)
             action.users = [user]
-            location = location or USER_PARAMS['location']
+            location = location or PAR.USER_PARAMS['location']
             if location is None:
                 raise ValueError('Please add location')
             if len(location) == 0:
                 raise ValueError('Please add location')
-            assert location in POSSIBLE_LOCATIONS
+            assert location in PAR.POSSIBLE_LOCATIONS
             print('Registering location ' + location)
             action.location = location
             messages = [{'message': m, 'user': user, 'datetime': datetime.now()}
                         for m in message]
             if not no_modules:
-                if 'intan' not in TEMPLATES:
+                if 'intan' not in PAR.TEMPLATES:
                     raise ValueError('Could not find "intan" in ' +
-                                     'expipe_params.py TEMPLATES: "' +
-                                     '{}"'.format(TEMPLATES.keys()))
-                generate_templates(action, TEMPLATES['intan'], overwrite,
+                                     'expipe_params.py PAR.TEMPLATES: "' +
+                                     '{}"'.format(PAR.TEMPLATES.keys()))
+                generate_templates(action, PAR.TEMPLATES['intan'], overwrite,
                                    git_note=GIT_NOTE)
                 headstage = action.require_module(
                     name='hardware_intan_headstage').to_dict()
@@ -754,7 +750,7 @@ class IntanPlugin(IPlugin):
             intan_ephys_dir = intan_ephys_path.split(os.sep)[-1]
             rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
             rhs_path = op.join(intan_ephys_path, rhs_file)
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
                                                    spikesorter='klusta')
             if prb_path is None:
@@ -782,29 +778,29 @@ class IntanPlugin(IPlugin):
             action.tags.extend(list(tag) + ['open-ephys'])
             print('Registering subject id ' + subject_id)
             action.subjects = [subject_id]
-            user = user or USER_PARAMS['user_name']
+            user = user or PAR.USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
             print('Registering user ' + user)
             action.users = [user]
-            location = location or USER_PARAMS['location']
+            location = location or PAR.USER_PARAMS['location']
             if location is None:
                 raise ValueError('Please add location')
             if len(location) == 0:
                 raise ValueError('Please add location')
-            assert location in POSSIBLE_LOCATIONS
+            assert location in PAR.POSSIBLE_LOCATIONS
             print('Registering location ' + location)
             action.location = location
             messages = [{'message': m, 'user': user, 'datetime': datetime.now()}
                         for m in message]
             if not no_modules:
-                if 'intanopenephys' not in TEMPLATES:
+                if 'intanopenephys' not in PAR.TEMPLATES:
                     raise ValueError('Could not find "intanopenephys" in ' +
-                                     'expipe_params.py TEMPLATES: "' +
-                                     '{}"'.format(TEMPLATES.keys()))
-                generate_templates(action, TEMPLATES['intanopenephys'], overwrite,
+                                     'expipe_params.py PAR.TEMPLATES: "' +
+                                     '{}"'.format(PAR.TEMPLATES.keys()))
+                generate_templates(action, PAR.TEMPLATES['intanopenephys'], overwrite,
                                    git_note=GIT_NOTE)
                 headstage = action.require_module(name='hardware_intan_headstage').to_dict()
                 headstage['model']['value'] = 'RHS2132'
@@ -988,7 +984,7 @@ class IntanPlugin(IPlugin):
             intan_ephys_dir = intan_ephys_path.split(os.sep)[-1]
             rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
             rhs_path = op.join(intan_ephys_path, rhs_file)
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
                                                    spikesorter='klusta')
             if prb_path is None:
@@ -1074,29 +1070,29 @@ class IntanPlugin(IPlugin):
             action.tags.extend(list(tag) + ['open-ephys'])
             print('Registering subject id ' + subject_id)
             action.subjects = [subject_id]
-            user = user or USER_PARAMS['user_name']
+            user = user or PAR.USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
             print('Registering user ' + user)
             action.users = [user]
-            location = location or USER_PARAMS['location']
+            location = location or PAR.USER_PARAMS['location']
             if location is None:
                 raise ValueError('Please add location')
             if len(location) == 0:
                 raise ValueError('Please add location')
-            assert location in POSSIBLE_LOCATIONS
+            assert location in PAR.POSSIBLE_LOCATIONS
             print('Registering location ' + location)
             action.location = location
             messages = [{'message': m, 'user': user, 'datetime': datetime.now()}
                         for m in message]
             if not no_modules:
-                if 'intanopenephys' not in TEMPLATES:
+                if 'intanopenephys' not in PAR.TEMPLATES:
                     raise ValueError('Could not find "intanopenephys" in ' +
-                                     'expipe_params.py TEMPLATES: "' +
-                                     '{}"'.format(TEMPLATES.keys()))
-                generate_templates(action, TEMPLATES['intanopenephys'], overwrite,
+                                     'expipe_params.py PAR.TEMPLATES: "' +
+                                     '{}"'.format(PAR.TEMPLATES.keys()))
+                generate_templates(action, PAR.TEMPLATES['intanopenephys'], overwrite,
                                    git_note=GIT_NOTE)
                 headstage = action.require_module(name='hardware_intan_headstage').to_dict()
                 headstage['model']['value'] = 'RHS2132'
@@ -1278,7 +1274,7 @@ class IntanPlugin(IPlugin):
             import numpy as np
             if intan_path is None:
                 import exdir
-                project = expipe.get_project(USER_PARAMS['project_id'])
+                project = expipe.get_project(PAR.USER_PARAMS['project_id'])
                 action = project.require_action(action_id)
                 fr = action.require_filerecord()
                 if not no_local:

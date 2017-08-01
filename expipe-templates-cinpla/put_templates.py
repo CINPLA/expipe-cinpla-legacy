@@ -4,7 +4,7 @@ import os.path as op
 import json
 import quantities as pq
 
-########################### DANGER DELETES ALL TEMPLATES #######################
+########################### DANGER DELETES ALL PAR.TEMPLATES #######################
 expipe.io.core.FirebaseBackend("/templates").set({})
 expipe.io.core.FirebaseBackend("/templates_contents").set({})
 ################################################################################

@@ -2,22 +2,16 @@ import expipe
 import expipe.io
 from expipecli.utils import IPlugin
 import click
-from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
-
-from .action_tools import (generate_templates, _get_local_path, GIT_NOTE,
-                            _get_probe_file)
-from .electro_tools import (generate_electrical_info, populate_modules)
-
 import os
 import os.path as op
 import sys
-sys.path.append(expipe.config.config_dir)
-if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
-    print('No config params file found, use "expipe' +
-          'copy-to-config expipe_params.py"')
-else:
-    from expipe_params import (USER_PARAMS, TEMPLATES, UNIT_INFO,
-                               POSSIBLE_BRAIN_AREAS)
+from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
+from .action_tools import (generate_templates, _get_local_path, GIT_NOTE,
+                            _get_probe_file)
+from .electro_tools import (generate_electrical_info, populate_modules)
+from .pytools import load_parameters
+
+PAR = load_parameters()
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
@@ -78,7 +72,7 @@ class ElectricalStimulationPlugin(IPlugin):
             import exdir
             from expipe_io_neuro import pyintan, pyopenephys
             # TODO deafault none
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             # tags = action.tags or {}
             # if tags is not None:
@@ -169,7 +163,7 @@ class ElectricalStimulationPlugin(IPlugin):
 
             trigger_param, channel_param = generate_electrical_info(exdir_path, intan_file, openephys_file,
                                                                     trigger_chan, stim_trigger=trigger_sig)
-            generate_templates(action, TEMPLATES['electrical_stimulation'],
+            generate_templates(action, PAR.TEMPLATES['electrical_stimulation'],
                                overwrite, git_note=None)
 
             trigger_param.update(channel_param)

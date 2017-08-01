@@ -3,22 +3,17 @@ import expipe.io
 from expipecli.utils import IPlugin
 import click
 from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
-
+import os
+import os.path as op
+import sys
 from .action_tools import (generate_templates, _get_local_path, GIT_NOTE)
 from .opto_tools import (generate_epochs, generate_axona_opto, populate_modules,
                         extract_laser_pulse, read_pulse_pal_mat,
                         read_pulse_pal_xml, read_laser_intensity,
                         generate_openephys_opto, generate_axona_opto_from_cut)
-import os
-import os.path as op
-import sys
-sys.path.append(expipe.config.config_dir)
-if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
-    print('No config params file found, use "expipe' +
-          'copy-to-config expipe_params.py"')
-else:
-    from expipe_params import (USER_PARAMS, TEMPLATES, UNIT_INFO,
-                               POSSIBLE_BRAIN_AREAS, POSSIBLE_OPTO_TAGS)
+from .pytools import load_parameters
+
+PAR = load_parameters()
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
@@ -30,13 +25,13 @@ class OptoPlugin(IPlugin):
         @click.argument('action-id', type=click.STRING)
         @click.option('--brain-area',
                       required=True,
-                      type=click.Choice(POSSIBLE_BRAIN_AREAS),
+                      type=click.Choice(PAR.POSSIBLE_BRAIN_AREAS),
                       help='The anatomical brain-area of the optogenetic stimulus.',
                       )
         @click.option('-t', '--tag',
                       multiple=True,
                       required=True,
-                      type=click.Choice(POSSIBLE_OPTO_TAGS),
+                      type=click.Choice(PAR.POSSIBLE_OPTO_TAGS),
                       help='The anatomical brain-area of the optogenetic stimulus.',
                       )
         @click.option('-m', '--message',
@@ -90,12 +85,12 @@ class OptoPlugin(IPlugin):
             import quantities as pq
             from datetime import datetime
             # TODO deafault none
-            if brain_area not in POSSIBLE_BRAIN_AREAS:
+            if brain_area not in PAR.POSSIBLE_BRAIN_AREAS:
                 raise ValueError("brain_area must be either %s",
-                                 POSSIBLE_BRAIN_AREAS)
-            project = expipe.get_project(USER_PARAMS['project_id'])
+                                 PAR.POSSIBLE_BRAIN_AREAS)
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(action_id)
-            user = user or USER_PARAMS['user_name']
+            user = user or PAR.USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
@@ -128,11 +123,11 @@ class OptoPlugin(IPlugin):
                 raise ValueError('Acquisition system not recognized')
             if not no_modules:
                 params.update({'location': brain_area})
-                generate_templates(action, TEMPLATES['opto_' + aq_sys],
+                generate_templates(action, PAR.TEMPLATES['opto_' + aq_sys],
                                    overwrite, git_note=None)
                 populate_modules(action, params)
-                laser_id = laser_id or USER_PARAMS['laser_device'].get('id')
-                laser_name = USER_PARAMS['laser_device'].get('name')
+                laser_id = laser_id or PAR.USER_PARAMS['laser_device'].get('id')
+                laser_name = PAR.USER_PARAMS['laser_device'].get('name')
                 assert laser_id is not None
                 assert laser_name is not None
                 laser = action.require_module(name=laser_name).to_dict()
@@ -160,7 +155,7 @@ class OptoPlugin(IPlugin):
 
             COMMAND: action-id: Provide action id to find exdir path"""
             import exdir
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_local:

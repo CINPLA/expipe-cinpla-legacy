@@ -43,10 +43,10 @@ def test_axona(module_teardown_setup_project_setup):
     res = run_command(['register-axona', axona_filename,
                          '--subject-id', pytest.RAT_ID,
                          '-m', 'register-axona message',
-                         '-t', pytest.POSSIBLE_TAGS[0]], inp='y')
+                         '-t', pytest.PAR.POSSIBLE_TAGS[0]], inp='y')
 
     run_command(['spikesort', action_id])
     run_command(['register-units', action_id,
                 '-m', 'register-units message',
-                '-t', pytest.POSSIBLE_TAGS[0],
-                '-t', pytest.POSSIBLE_TAGS[1]])
+                '-t', pytest.PAR.POSSIBLE_TAGS[0],
+                '-t', pytest.PAR.POSSIBLE_TAGS[1]])

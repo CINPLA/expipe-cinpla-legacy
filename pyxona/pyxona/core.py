@@ -356,7 +356,12 @@ class File:
         for channel_group_filename in channel_group_filenames:
             # increment before, because channel_groups start at 1
             basename, extension = os.path.splitext(channel_group_filename)
-            channel_group_id = int(extension[1:]) - 1
+            try:
+                channel_group_id = int(extension[1:]) - 1
+            except ValueError as e:
+                warnings.warn(str(e) + ' Unable to load channel group "' +
+                              channel_group_filename + '".')
+                continue
             with open(channel_group_filename, "rb") as f:
                 channel_group_attrs = parse_header_and_leave_cursor(f)
                 num_chans = channel_group_attrs["num_chans"]
@@ -618,7 +623,7 @@ class File:
                     if line.lstrip().startswith('Exact_cut_for'):
                         break
                 lines = f.read()
-                lines = lines.replace("\n", "").strip()
+                lines = lines.rstrip()
                 indices = []
                 try:
                     indices += [int(b) for b in lines.split(' ')
