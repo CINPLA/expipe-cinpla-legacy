@@ -685,22 +685,31 @@ class CinplaPlugin(IPlugin):
                           no_local=kwargs['no_local'],
                           overwrite=kwargs['overwrite'],
                           skip=kwargs['skip'])
-            if any(arg in kwargs['analysis'] for arg in ['stim_stat', 'all']):
+            if any(arg in kwargs['analysis'] for arg in ['stim-stat', 'all']):
+                print('Analysing stimulation statistics.')
                 an.stimulation_statistics()
             if any(arg in kwargs['analysis'] for arg in ['occupancy', 'all']):
+                print('Analysing occupancy.')
                 an.occupancy()
             if any(arg in kwargs['analysis'] for arg in ['spatial', 'all']):
+                print('Analysing spatial statistics.')
                 an.spatial_overview()
-            if any(arg in kwargs['analysis'] for arg in ['spike_stat', 'all']):
+            if any(arg in kwargs['analysis'] for arg in ['spike-stat', 'all']):
+                print('Analysing spike statistics.')
                 an.spike_statistics()
             if any(arg in kwargs['analysis'] for arg in ['psd', 'all']):
+                print('Analysing stimulation statistics.')
                 an.psd()
-            if any(arg in kwargs['analysis'] for arg in ['spike_lfp', 'all']):
+            if any(arg in kwargs['analysis'] for arg in ['spike-lfp', 'all']):
+                print('Analysing spike LFP relations.')
                 an.spike_lfp_coherence()
             if any(arg in kwargs['analysis'] for arg in ['tfr']):
+                print('Analysing TFR.')
                 an.tfr()
-            if any(arg in kwargs['analysis'] for arg in ['orient_tuning']):
+            if any(arg in kwargs['analysis'] for arg in ['orient-tuning']):
+                print('Analysing orientation tuning.')
                 an.orient_tuning_overview()
+            # TODO deep update!!!
             for key, val in an.analysis_output.items():
                 action.require_module(key, contents=val,
                                       overwrite=True)
