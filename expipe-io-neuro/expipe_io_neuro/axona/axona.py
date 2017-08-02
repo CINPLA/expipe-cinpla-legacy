@@ -41,7 +41,8 @@ def convert(axona_file, exdir_path):
     related_files = glob.glob(os.path.join(axona_directory,
                                            '*' + axona_file.session + '*'))
     for filename in related_files:
-        shutil.copy(filename, target_folder)
+        if not os.path.isdir(filename):
+            shutil.copy(filename, target_folder)
 
     print("Copied files matching *", axona_file.session + "*", "to",
           target_folder)
