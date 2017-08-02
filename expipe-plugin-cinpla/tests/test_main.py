@@ -30,13 +30,13 @@ def test_annotate(setup_project_action):
     project, action = setup_project_action
     runner = CliRunner()
     result = runner.invoke(cli, ['annotate', pytest.ACTION_ID,
-                                 '--tag', pytest.POSSIBLE_TAGS[0],
-                                 '-t', pytest.POSSIBLE_TAGS[1],
+                                 '--tag', pytest.PAR.POSSIBLE_TAGS[0],
+                                 '-t', pytest.PAR.POSSIBLE_TAGS[1],
                                  '--message', 'first message',
                                  '-m', 'second message'])
     if result.exit_code != 0:
         raise result.exception
-    assert all(tag in [pytest.POSSIBLE_TAGS[0], pytest.POSSIBLE_TAGS[1]]
+    assert all(tag in [pytest.PAR.POSSIBLE_TAGS[0], pytest.PAR.POSSIBLE_TAGS[1]]
               for tag in action.tags)
     assert action.messages.messages[0]['message'] == 'first message'
     assert action.messages.messages[1]['message'] == 'second message'

@@ -5,12 +5,7 @@ from expipecli.utils import IPlugin
 import click
 from .action_tools import (generate_templates, _get_local_path, GIT_NOTE)
 import sys
-sys.path.append(expipe.config.config_dir)
-if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
-    print('No config params file found, use "expipe' +
-          'copy-to-config expipe_params.py"')
-else:
-    from expipe_params import USER_PARAMS, TEMPLATES, UNIT_INFO, POSSIBLE_LOCATIONS
+from .pytools import load_parameters
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
@@ -94,7 +89,7 @@ class AxonaPlugin(IPlugin):
                 print("Sorry, we need an Axona .set file not " +
                       "'{}'.".format(axona_filename))
                 return
-            project = expipe.get_project(USER_PARAMS['project_id'])
+            project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             subject_id = subject_id or axona_filename.split(os.sep)[-2]
             axona_file = pyxona.File(axona_filename)
             if action_id is None:
@@ -111,19 +106,19 @@ class AxonaPlugin(IPlugin):
             print('Registering action id ' + action_id)
             print('Registering subject id ' + subject_id)
             action.subjects = [subject_id]
-            user = user or USER_PARAMS['user_name']
+            user = user or PAR.USER_PARAMS['user_name']
             if user is None:
                 raise ValueError('Please add user name')
             if len(user) == 0:
                 raise ValueError('Please add user name')
             print('Registering user ' + user)
             action.users = [user]
-            location = location or USER_PARAMS['location']
+            location = location or PAR.USER_PARAMS['location']
             if location is None:
                 raise ValueError('Please add location')
             if len(location) == 0:
                 raise ValueError('Please add location')
-            assert location in POSSIBLE_LOCATIONS
+            assert location in PAR.POSSIBLE_LOCATIONS
             print('Registering location ' + location)
             action.location = location
             action.messages = [{'message': m,
@@ -131,7 +126,7 @@ class AxonaPlugin(IPlugin):
                                  'datetime': datetime.now()}
                                for m in message]
             if not no_modules:
-                generate_templates(action, TEMPLATES['axona'], overwrite,
+                generate_templates(action, PAR.TEMPLATES['axona'], overwrite,
                                    git_note=GIT_NOTE)
                 register_depth(project, action, anatomy, yes=yes)
 
@@ -172,7 +167,7 @@ class AxonaPlugin(IPlugin):
         #     COMMAND: axona-filename"""
         #     import pyxona
         #     import exdir
-        #     project = expipe.get_project(USER_PARAMS['project_id'])
+        #     project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         #
         #
         #     for action in project.actions:

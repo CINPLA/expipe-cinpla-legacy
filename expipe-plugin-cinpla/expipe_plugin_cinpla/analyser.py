@@ -386,6 +386,8 @@ class Analyser:
                 cluster_group = unit.annotations.get('cluster_group') or 'noise'
                 if cluster_group.lower() == 'noise':
                     continue
+                if unit.name is None:
+                    unit.name = 'cluster_{}'.format(unit.annotations['cluster_id'])
                 sptr = unit.spiketrains[0]
                 fname = '{} {} stim macro'.format(chx.name, unit.name)
                 fpath = op.join(raw_dir, fname).replace(" ", "_")
@@ -466,6 +468,8 @@ class Analyser:
                 cluster_group = unit.annotations.get('cluster_group') or 'noise'
                 if cluster_group.lower() == 'noise':
                     continue
+                if unit.name is None:
+                    unit.name = 'cluster_{}'.format(unit.annotations['cluster_id'])
                 fig = plt.figure(figsize=(12 * len(starts), 20))
                 gs_main = gridspec.GridSpec(1, len(starts))
 
@@ -585,14 +589,14 @@ class Analyser:
                 continue
             if not self._check_and_delete_figs(raw_dir, group_id):
                 continue
-            print('Plotting spike statistics, ' +
+            print('Analysing spike statistics, ' +
                   'channel group {}'.format(group_id))
             for u, unit in enumerate(chx.units):
-                if unit.name is None:
-                    raise ValueError('unrecognized unit')
                 cluster_group = unit.annotations.get('cluster_group') or 'noise'
                 if cluster_group.lower() == 'noise':
                     continue
+                if unit.name is None:
+                    unit.name = 'cluster_{}'.format(unit.annotations['cluster_id'])
                 sptr = unit.spiketrains[0]
 
                 try:

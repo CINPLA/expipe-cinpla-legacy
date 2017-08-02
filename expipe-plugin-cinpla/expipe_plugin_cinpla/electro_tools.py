@@ -6,12 +6,9 @@ import quantities as pq
 import expipe
 from datetime import datetime
 from expipe_io_neuro import pyopenephys, pyintan
-import sys; sys.path.append(expipe.config.config_dir)
-if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
-    print('No config params file found, use ' +
-          '"expipe copy-to-config expipe_params.py"')
-else:
-    from expipe_params import USER_PARAMS
+from .pytools import load_parameters
+
+PAR = load_parameters()
 
 
 def generate_epochs(exdir_path, triggers, trigger_params, channel_params, stim_signals, **annotations):

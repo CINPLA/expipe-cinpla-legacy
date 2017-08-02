@@ -9,9 +9,9 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     print('No config params file found, use "expipe' +
           'copy-to-config expipe_params.py"')
 else:
-    from expipe_params import (USER_PARAMS, TEMPLATES, UNIT_INFO, POSSIBLE_TAGS,
-                               POSSIBLE_LOCATIONS, OBLIGATORY_TAGS, MODULES,
-                               ANALYSIS_PARAMS)
+    from expipe_params import (PAR.USER_PARAMS, PAR.TEMPLATES, PAR.UNIT_INFO, PAR.POSSIBLE_TAGS,
+                               PAR.POSSIBLE_LOCATIONS, OBLIGATORY_TAGS, PAR.MODULES,
+                               PAR.ANALYSIS_PARAMS)
 
 LOG_FILENAME = '/tmp/exception.log'
 if op.exists(LOG_FILENAME):
@@ -58,7 +58,7 @@ def run_shell_command(command_line):
         logger.exception('Exception: ')
 
 
-project = expipe.get_project(USER_PARAMS['project_id'])
+project = expipe.get_project(PAR.USER_PARAMS['project_id'])
 # your code
 for action in project.actions:
     if action.type != 'Recording':

@@ -76,14 +76,14 @@ opto_axona_templates = [
 
 #  thse are e.g. the brain areas you investigate, this ensures that you
 #  register with with the same nomenclature for every recording
-POSSIBLE_BRAIN_AREAS = ['MECR', 'MECL', 'MS']
-POSSIBLE_OPTO_TAGS = ['opto-inside', 'opto-outside', 'opto-train']
-POSSIBLE_LOCATIONS = ['room2', 'room1']
+PAR.POSSIBLE_BRAIN_AREAS = ['MECR', 'MECL', 'MS']
+PAR.POSSIBLE_OPTO_TAGS = ['opto-inside', 'opto-outside', 'opto-train']
+PAR.POSSIBLE_LOCATIONS = ['room2', 'room1']
 
 #  obligatory tags will be enforced uppon transfer, this is to ensure you
 #  have a minimum of tags for each action
 OBLIGATORY_TAGS = ['no', 'yes', 'maybe']
-POSSIBLE_TAGS = ['GC', 'PC', 'BC', 'SC', 'HD', 'TC', 'theta', 'baseline'] + OBLIGATORY_TAGS
+PAR.POSSIBLE_TAGS = ['GC', 'PC', 'BC', 'SC', 'HD', 'TC', 'theta', 'baseline'] + OBLIGATORY_TAGS
 
 #  thse are the templates you want to load to each suregery implantation
 #  procedure
@@ -114,7 +114,7 @@ perfusion_templates = [
 ]
 
 # this is how you represent each unit when you use expipe register-units
-UNIT_INFO = {
+PAR.UNIT_INFO = {
     'info_waveform': {
         'alternatives': {
             'BS': 'definition: broad spiking waveform (putative excitatory)',
@@ -128,7 +128,7 @@ UNIT_INFO = {
 }
 
 # these are the analysis parameters you pass to exana
-ANALYSIS_PARAMS = {
+PAR.ANALYSIS_PARAMS = {
     'speed_filter': 5 * pq.m / pq.s,
     'pos_fs': 100 * pq.Hz,
     'f_cut': 6 * pq.Hz,
@@ -147,7 +147,7 @@ ANALYSIS_PARAMS = {
 }
 
 # this is personal user parameters
-USER_PARAMS = {
+PAR.USER_PARAMS = {
     'project_id': 'apoptotic_aproach_to_voldemort',
     'user_name': 'Harry Plotter',
     'location': 'Chamber of secrets',
@@ -155,7 +155,7 @@ USER_PARAMS = {
 }
 
 # this is a placeholder for all your templates
-TEMPLATES = {
+PAR.TEMPLATES = {
     'axona': axona_templates,
     'opto_axona': opto_axona_templates,
     'openephys': openephys_templates,
@@ -166,7 +166,7 @@ TEMPLATES = {
     'adjustment': 'mikkel_drive_depth_adjustment'
 }
 
-MODULES = {
+PAR.MODULES = {
     'electrophysiology': {'mecl': 'mikkel_electrophysiology_L',
                           'mecr': 'mikkel_electrophysiology_R'},
     'implantation': {'mecl': 'mikkel_implant_drive_L',

@@ -7,13 +7,9 @@ import sys
 import os
 import numpy as np
 from ._version import get_versions
+from .pytools import load_parameters
 
-sys.path.append(expipe.config.config_dir)
-if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
-    print('No config params file found, use "expipe' +
-          'copy-to-config expipe_params.py"')
-else:
-    from expipe_params import USER_PARAMS, MODULES
+PAR = load_parameters()
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
@@ -68,7 +64,7 @@ def deltadate(adjustdate, regdate):
 
 def register_depth(project, action, anatomy=None, yes=False):
     regdate = action.datetime
-    mod_info = MODULES['electrophysiology']
+    mod_info = PAR.MODULES['electrophysiology']
     if len(anatomy) == 0:
         assert len(action.subjects) == 1
         subject = action.subjects[0]
@@ -145,7 +141,7 @@ def generate_templates(action, action_templates, overwrite, git_note=None):
             if template.startswith('_inherit'):
                 name = '_'.join(template.split('_')[2:])
                 contents = {'_inherits': '/project_modules/' +
-                                         USER_PARAMS['project_id'] + '/' +
+                                         PAR.USER_PARAMS['project_id'] + '/' +
                                          name}
                 action.require_module(name=name, contents=contents,
                                       overwrite=overwrite)

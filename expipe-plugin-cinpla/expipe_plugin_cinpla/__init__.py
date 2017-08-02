@@ -5,6 +5,7 @@ from .intan import IntanPlugin
 from .visual_stimulus import VisualStimulusPlugin
 # from .intan import IntanPlugin
 from .optogenetics import OptoPlugin
+from .envs import EnvironmentPlugin
 from.electrical_stimulation import ElectricalStimulationPlugin
 from .make_spatiality_overview import make_spatiality_overview
 from ._version import get_versions

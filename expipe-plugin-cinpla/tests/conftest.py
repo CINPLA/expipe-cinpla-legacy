@@ -10,12 +10,12 @@ expipe.ensure_testing()
 sys.path.append(expipe.config.config_dir)
 if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     raise IOError('No "expipe_params.py" found.')
-from expipe_params import (USER_PARAMS, TEMPLATES, UNIT_INFO, POSSIBLE_TAGS,
-                           POSSIBLE_LOCATIONS, OBLIGATORY_TAGS)
+from expipe_params import (PAR.USER_PARAMS, PAR.TEMPLATES, PAR.UNIT_INFO, PAR.POSSIBLE_TAGS,
+                           PAR.POSSIBLE_LOCATIONS, OBLIGATORY_TAGS)
 
-# TODO ADD ALL TEMPLATES
+# TODO ADD ALL PAR.TEMPLATES
 
-PROJECT_ID = USER_PARAMS['project_id']
+PROJECT_ID = PAR.USER_PARAMS['project_id']
 ACTION_ID = 'action-plugin-test'
 MODULE_ID = 'module-plugin-test'
 RAT_ID = 'test-rat'
@@ -26,8 +26,8 @@ def pytest_namespace():
             "ACTION_ID": ACTION_ID,
             "MODULE_ID": MODULE_ID,
             "RAT_ID": RAT_ID,
-            "USER_PAR": USER_PARAMS,
-            "POSSIBLE_TAGS": POSSIBLE_TAGS,
+            "USER_PAR": PAR.USER_PARAMS,
+            "PAR.POSSIBLE_TAGS": PAR.POSSIBLE_TAGS,
             "OBLIGATORY_TAGS": OBLIGATORY_TAGS}
 
 
@@ -52,7 +52,7 @@ def teardown_setup_project():
     except NameError:
         pass
     project = expipe.require_project(PROJECT_ID)
-    for key, val in TEMPLATES.items():
+    for key, val in PAR.TEMPLATES.items():
         for template in val:
             if template.startswith('_inherit'):
                 name = '_'.join(template.split('_')[2:])
@@ -71,7 +71,7 @@ def module_teardown_setup_project_setup():
     except NameError:
         pass
     project = expipe.require_project(PROJECT_ID)
-    for key, val in TEMPLATES.items():
+    for key, val in PAR.TEMPLATES.items():
         for template in val:
             if template.startswith('_inherit'):
                 name = '_'.join(template.split('_')[2:])
@@ -104,7 +104,7 @@ def module_teardown_setup_project_setup():
 @pytest.fixture
 def setup_project_action():
     project = expipe.require_project(PROJECT_ID)
-    for key, val in TEMPLATES.items():
+    for key, val in PAR.TEMPLATES.items():
         for template in val:
             if template.startswith('_inherit'):
                 name = '_'.join(template.split('_')[2:])
