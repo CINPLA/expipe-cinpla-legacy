@@ -15,7 +15,6 @@ import sys
 from traceback import format_exception
 
 import click
-from six import exec_
 import glob
 
 from .utils import discover_plugins, IPlugin

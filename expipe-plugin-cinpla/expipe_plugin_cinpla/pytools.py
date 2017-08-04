@@ -44,8 +44,13 @@ def give_empty_attrs(obj, *attrs):
 
 
 def load_parameters():
-    settings = load_settings()
-    PAR = load_python_module(settings['current']['parameters_path'])
+    try:
+        settings = load_settings()
+        PAR = load_python_module(settings['current']['parameters_path'])
+    except AssertionError:
+        class Dummy:
+            pass
+        PAR = Dummy
     give_empty_attrs(PAR,
                      'POSSIBLE_TAGS',
                      'POSSIBLE_LOCATIONS',
