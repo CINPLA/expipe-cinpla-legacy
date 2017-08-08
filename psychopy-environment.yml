@@ -1,5 +1,6 @@
 name: psychopy
 dependencies:
+  - python=2.7
   - pillow
   - lxml
   - openpyxl
@@ -30,9 +31,7 @@ dependencies:
   - packaging
   - future
   - pyopengl
-  - cryptography>=1.9
   - pip:
-    - pyglet
     - opencv-python
     - moviepy
     - requests[security]
@@ -47,14 +46,15 @@ dependencies:
     - pycircstat
     - quantities
     - pyrebase
-    - pyqt5==5.7.1
-    - sip==4.19
     - pycodestyle
     - xmljson
     - klusta
     - scp
     - send2trash
+    # - pyglet
+    # - psychopy
 
+# conda install -c cogsci psychopy
 # sudo apt install libsdl1.2-dev gtk2.0
 # git clone https://github.com/psychopy/psychopy.git
 # source activate psychopy
