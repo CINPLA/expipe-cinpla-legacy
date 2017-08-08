@@ -30,6 +30,7 @@ dependencies:
   - packaging
   - future
   - pyopengl
+  - cryptography>=1.9
   - pip:
     - pyglet
     - opencv-python
