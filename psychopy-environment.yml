@@ -54,7 +54,6 @@ dependencies:
     - klusta
     - scp
     - send2trash
-    - wxpython
 
 # sudo apt install libsdl1.2-dev gtk2.0
 # git clone https://github.com/psychopy/psychopy.git
