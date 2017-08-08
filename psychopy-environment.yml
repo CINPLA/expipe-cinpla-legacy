@@ -1,61 +1,14 @@
 name: psychopy
+channels:
+  - cogsci
 dependencies:
   - python=2.7
-  - pillow
-  - lxml
-  - openpyxl
-  - xlrd
-  - configobj
-  - gevent
-  - greenlet
-  - msgpack-python
-  - psutil
-  - pytables
-  - cffi
-  - six
-  - numpy
-  - matplotlib
-  - scipy
-  - cython
   - pandas
-  - seaborn
-  - pyyaml
-  - pytest
-  - nose
-  - jupyter
-  - astropy
-  - click
-  - h5py
-  - paramiko
-  - tqdm
-  - packaging
-  - future
-  - pyopengl
-  - pip:
-    - opencv-python
-    - moviepy
-    - requests[security]
-    - pyosf
-    - pysoundcard
-    - pysoundfile
-    - pyserial
-    - pyparallel
-    - egi
-    - psychopy_ext
-    - python-bidi
-    - pycircstat
-    - quantities
-    - pyrebase
-    - pycodestyle
-    - xmljson
-    - klusta
-    - scp
-    - send2trash
-    # - pyglet
-    # - psychopy
+  - requests
+  - wxpython
+  - psychopy
+  - xlrd
+  pip:
+    - pygame
 
 # conda install -c cogsci psychopy
-# sudo apt install libsdl1.2-dev gtk2.0
-# git clone https://github.com/psychopy/psychopy.git
-# source activate psychopy
-# cd psychopy && python setup.py develop
