@@ -55,22 +55,21 @@ class Analyser:
         self.anas = [ana for ana in self.seg.analogsignals
                      if ana.sampling_rate == 250 * pq.Hz]
         exdir_group = exdir.File(exdir_path)
+        if 'tracking' in exdir_group['processing']:
+            position_group = exdir_group['processing']['tracking']['camera_0']['Position']
+            x1, y1, t1 = tr.get_raw_position(position_group['led_0'])
+            try:
+                x2, y2, t2 = tr.get_raw_position(position_group['led_1'])
+            except KeyError:
+                x2, y2, t2 = x1, y1, t1
+                print("Only found one tracking led..")
 
-        position_group = exdir_group['processing']['tracking']['camera_0']['Position']
-        x1, y1, t1 = tr.get_raw_position(position_group['led_0'])
-        try:
-            x2, y2, t2 = tr.get_raw_position(position_group['led_1'])
-        except KeyError:
-            x2, y2, t2 = x1, y1, t1
-            print("Only found one tracking led..")
-
-        x, y, t = tr.select_best_position(x1, y1, t1, x2, y2, t2)
-        self.ang, self.ang_t = tr.head_direction(x1, y1, x2, y2, t1,
-                                                 return_rad=False)
-        self.x, self.y, self.t = tr.interp_filt_position(x, y, t,
-                                                         pos_fs=self.par['pos_fs'],
-                                                         f_cut=self.par['f_cut'])
-        self.x, self.y, self.t = self.x, self.y, self.t
+            x, y, t = tr.select_best_position(x1, y1, t1, x2, y2, t2)
+            self.ang, self.ang_t = tr.head_direction(x1, y1, x2, y2, t1,
+                                                     return_rad=False)
+            self.x, self.y, self.t = tr.interp_filt_position(x, y, t,
+                                                             pos_fs=self.par['pos_fs'],
+                                                             f_cut=self.par['f_cut'])
         if len(self.seg.epochs) == 1:
             self.epoch = self.seg.epochs[0]
         else:
@@ -365,7 +364,7 @@ class Analyser:
 
     def stimulation_statistics(self, ylim=[0, 30]):
         if self.epoch is None:
-            print('There is no epochs related to this experiment')
+            print('There are no epochs related to this experiment')
             return
         from exana.stimulus import plot_psth
         from exana.stimulus import epoch_overview
