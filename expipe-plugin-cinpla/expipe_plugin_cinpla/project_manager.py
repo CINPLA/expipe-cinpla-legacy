@@ -4,6 +4,7 @@ import os.path as op
 import click
 import yaml
 import warnings
+from .pytools import load_parameters
 
 settings_file = op.join(expipe.config.config_dir, 'cinpla_config.yaml')
 if not op.exists(settings_file):
@@ -11,6 +12,8 @@ if not op.exists(settings_file):
                   ' "expipe env create project-id -p path-to-params-file"')
 
 DTIME_FORMAT = expipe.io.core.datetime_format
+
+PAR = load_parameters()
 
 default_settings = {
     'current': {
@@ -34,6 +37,22 @@ def attach_to_cli(cli):
                 'project_id': project_id}})
         with open(settings_file, "w") as f:
             yaml.dump(current_settings, f, default_flow_style=False)
+
+    @cli.command('list')
+    @click.argument('what', type=click.Choice(['dir', 'actions']))
+    def generate_notebook(what):
+        """
+        Provide action id to find exdir path
+
+        COMMAND: action-id: Provide action id to find exdir path
+        """
+        from pprint import pprint
+        project = expipe.get_project(PAR.USER_PARAMS['project_id'])
+        path = expipe.settings['data_path']
+        if what == 'dir':
+            pprint(os.listdir(path))
+        elif what == 'actions':
+            pprint(project.actions.keys())
 
     @cli.command('create')
     @click.argument('project-id', type=click.STRING)
