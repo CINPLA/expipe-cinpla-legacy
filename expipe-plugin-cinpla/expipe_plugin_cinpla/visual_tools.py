@@ -307,9 +307,12 @@ def generate_grating_stimulus_epoch(exdir_path, timestamps, durations, data):
     epochs = exdir_file.require_group("epochs")
     stim_epoch = epochs.require_group("visual_stimulus")
     stim_epoch.attrs["type"] = "visual_stimulus"
-    stim_epoch.require_dataset("timestamps", data=timestamps)
-    stim_epoch.require_dataset("durations", data=durations)
-    stim_epoch.require_dataset("data", data=data)
+    times = stim_epoch.require_dataset('timestamps', data=timestamps)
+    times.attrs['num_samples'] = len(timestamps)
+    durations = stim_epoch.require_dataset('durations', data=durations)
+    durations.attrs['num_samples'] = len(durations)
+    data = stim_epoch.require_dataset('data', data=data)
+    data.attrs['num_samples'] = len(data)
 
 
 ###############################################################################
