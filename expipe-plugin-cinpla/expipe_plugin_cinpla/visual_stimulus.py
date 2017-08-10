@@ -63,6 +63,7 @@ def attach_to_cli(cli):
 
     @cli.command('register-psychopy')
     @click.argument('action-id', type=click.STRING)
+    @click.argument('psyexp-path', type=click.Path(exists=True))
     @click.option('--overwrite',
                   is_flag=True,
                   help='Overwrite modules or not.',
@@ -72,35 +73,38 @@ def attach_to_cli(cli):
                   type=click.INT,
                   help='Channel recieving timestamps, open ephys IO board.',
                   )
-    def generate_epoch_openephys(action_id, overwrite, io_channel):
+    def generate_epoch_openephys(action_id, psyexp_path, overwrite,
+                                 io_channel):
         # TODO: check overwrite
         """Generates stimulus groups and epoch based on axona inp epoch.
 
         COMMAND: action-id: Provide action id to find exdir path"""
         from expipe_io_neuro import psychopyio
+        assert psyexp_path.endswith('.psyexp')
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
         fr = action.require_filerecord()
         exdir_path = _get_local_path(fr)
 
-        grating = psychopyio.parse_psychopy_openephys(exdir_path, io_channel)
-        # keys = get_key_press_events(exdir_object["epochs/axona_inp"])
-
-        # generate stimulus groups
-        generate_blank_group(exdir_path, grating["blank"]["timestamps"])
-        # generate_key_event_group(exdir_path, keys["keys"], keys["timestamps"])
-        generate_grating_stimulus_group(exdir_path,
-                                        grating["grating"]["timestamps"],
-                                        grating["grating"]["data"])
-                                        # grating["grating"]["mode"])
-
-        # generate stimulus epoch
-        generate_grating_stimulus_epoch(exdir_path,
-                                        grating["grating"]["timestamps"],
-                                        grating['durations'],
-                                        grating["grating"]["data"])
-
-        print("successfully created stimulus groups and epoch.")
+        grating = psychopyio.parse_psychopy_openephys(exdir_path, psyexp_path,
+                                                      io_channel)
+        # # keys = get_key_press_events(exdir_object["epochs/axona_inp"])
+        #
+        # # generate stimulus groups
+        # generate_blank_group(exdir_path, grating["blank"]["timestamps"])
+        # # generate_key_event_group(exdir_path, keys["keys"], keys["timestamps"])
+        # generate_grating_stimulus_group(exdir_path,
+        #                                 grating["grating"]["timestamps"],
+        #                                 grating["grating"]["data"])
+        #                                 # grating["grating"]["mode"])
+        #
+        # # generate stimulus epoch
+        # generate_grating_stimulus_epoch(exdir_path,
+        #                                 grating["grating"]["timestamps"],
+        #                                 grating['durations'],
+        #                                 grating["grating"]["data"])
+        #
+        # print("successfully created stimulus groups and epoch.")
 
     @cli.command('register-bonsai-tracking')
     @click.argument('action-id', type=click.STRING)

@@ -7,6 +7,7 @@ import os
 import warnings
 import glob
 from expipe_io_neuro import pyopenephys
+import shutil
 
 
 def csv_to_dict(fname):
@@ -71,22 +72,55 @@ def read_psychopy_log(logpath, return_dict=False):
         return grating_on, grating_off, durations
 
 
+def read_xml(path):
+    from xmljson import yahoo as yh
+    from xml.etree.ElementTree import fromstring
+    with open(op.join(path)) as f:
+        xmldata = f.read()
+        data = yh.data(fromstring(xmldata))
+    return data
 
-def parse_psychopy_openephys(exdir_path, io_channel):
+
+def list_dict_get(list_dict, name):
+    assert isinstance(list_dict, list)
+    result = [val['val'] for val in list_dict if val['name'] == name]
+    if len(result) == 1:
+        return result[0]
+    elif len(result) == 0:
+        return
+    else:
+        raise ValueError('unable to get "' + name + '"')
+
+
+def parse_psychopy_openephys(exdir_path, psyexp_path, io_channel):
+    action_id = op.split(op.dirname(exdir_path))[-1]
     exdir_object = exdir.File(exdir_path)
     session = exdir_object['acquisition'].attrs['openephys_session']
     openephys_path = op.join(str(exdir_object['acquisition'].directory),
                              session)
-    psycho_paths = glob.glob(op.join(openephys_path, '*_psychopy_*'))
-    assert len(psycho_paths) == 3, 'Did not found psychopy related files.'
-    psycho_path = op.splitext(psycho_paths[0])[0]
+    settings = read_xml(psyexp_path)['PsychoPy2experiment']
+    exp_name = list_dict_get(settings['Settings']['Param'], 'expName')
+    psycho_data_path = op.join(op.dirname(psyexp_path), 'data')
+    psycho_search = op.join(psycho_data_path, '{}_{}_*'.format(action_id,
+                                                               exp_name))
+    psycho_paths = glob.glob(psycho_search)
+    if len(psycho_paths) != 3:
+        raise ValueError('Did not found psychopy related files searching ' +
+                         ' for "{}". '.format(psycho_search) +
+                         'Please make sure the psychopy file names begins ' +
+                         'with the correct "action-id" by using this as ' +
+                         'the "participant" name in psychopy.')
+    psycho_basepath = op.splitext(psycho_paths[0])[0]
     psycho_exts = [op.splitext(path)[-1] for path in psycho_paths]
     expected_exts = ['.log', '.csv', '.psydat']
     if not set(psycho_exts) == set(expected_exts):
         missing = [ext for ext in expected_exts if not ext in psycho_exts]
         raise ValueError('Missing file types "{}" in folder'.format(missing))
-    csvdata = csv_to_dict(psycho_path + '.csv')
-    stim_on, stim_off, durations = read_psychopy_log(psycho_path + '.log')
+    psycho_paths.append(psyexp_path)
+    for path in psycho_paths:
+        shutil.copy2(path, openephys_path)
+    csvdata = csv_to_dict(psycho_basepath + '.csv')
+    stim_on, stim_off, durations = read_psychopy_log(psycho_basepath + '.log')
     if not len(stim_on) == len(csvdata['ori']):
         raise ValueError('Inconsistency in number of orientations and ' +
                          'stimulus onsets')
@@ -112,10 +146,10 @@ def parse_psychopy_openephys(exdir_path, io_channel):
         'durations': durations
     }
     return grating
-    # generate_epochs(exdir_path=exdir_path, times=times, durations=durations,
-    #                 data=csvdata['ori'], name='Psychopy',
-    #                 epoch_type='visual_stimulus',
-    #                 start_time=0 * pq.s, stop_time=openephys_file.duration)
+    generate_epochs(exdir_path=exdir_path, times=times, durations=durations,
+                    data=csvdata['ori'], name='Psychopy',
+                    epoch_type='visual_stimulus',
+                    start_time=0 * pq.s, stop_time=openephys_file.duration)
 
 
 # def generate_epochs(exdir_path, times, durations, data=None, name=None,
@@ -141,6 +175,6 @@ def parse_psychopy_openephys(exdir_path, io_channel):
 
 
 if __name__ == '__main__':
-    exdir_path = '/home/mikkel/Dropbox/scripting/python/expipe/psychopy/Ephys_data/\
-1871-200717-03/main.exdir'
-    parse_psychopy_openephys(exdir_path, 7)
+    exdir_path = '/media/norstore/server/malin_cobra/1871-200717-03/main.exdir'
+    psyexp_path = '/home/mikkel/Dropbox/scripting/python/expipe/psychopy/psychopymalinegen/testMil.psyexp'
+    parse_psychopy_openephys(exdir_path, psyexp_path, 7)

@@ -48,7 +48,8 @@ def attach_to_cli(cli):
         """
         from pprint import pprint
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
-        path = expipe.settings['data_path']
+        path = op.join(expipe.settings['data_path'],
+                       PAR.USER_PARAMS['project_id'])
         if what == 'dir':
             pprint(os.listdir(path))
         elif what == 'actions':
