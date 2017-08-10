@@ -53,6 +53,7 @@ def read_psychopy_log(logpath, return_dict=False):
     start_time = min(min(grating_on), min(grating_off)) * pq.s
     grating_on = sorted(set(grating_on)) * pq.s - start_time
     grating_off = sorted(set(grating_off)) * pq.s - start_time
+    assert grating_off[-1] < grating_on[-1], 'Inconsistency, code needs revision'
     if len(grating_off) == len(grating_on) - 1:
         avg_dur = np.mean(grating_off - grating_on[:-1])
         final_off = round(grating_on[-1] + avg_dur, 4)
