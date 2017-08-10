@@ -88,23 +88,23 @@ def attach_to_cli(cli):
 
         grating = psychopyio.parse_psychopy_openephys(exdir_path, psyexp_path,
                                                       io_channel)
-        # # keys = get_key_press_events(exdir_object["epochs/axona_inp"])
-        #
-        # # generate stimulus groups
-        # generate_blank_group(exdir_path, grating["blank"]["timestamps"])
-        # # generate_key_event_group(exdir_path, keys["keys"], keys["timestamps"])
-        # generate_grating_stimulus_group(exdir_path,
-        #                                 grating["grating"]["timestamps"],
-        #                                 grating["grating"]["data"])
-        #                                 # grating["grating"]["mode"])
-        #
-        # # generate stimulus epoch
-        # generate_grating_stimulus_epoch(exdir_path,
-        #                                 grating["grating"]["timestamps"],
-        #                                 grating['durations'],
-        #                                 grating["grating"]["data"])
-        #
-        # print("successfully created stimulus groups and epoch.")
+        # keys = get_key_press_events(exdir_object["epochs/axona_inp"])
+
+        # generate stimulus groups
+        generate_blank_group(exdir_path, grating["blank"]["timestamps"])
+        # generate_key_event_group(exdir_path, keys["keys"], keys["timestamps"])
+        generate_grating_stimulus_group(exdir_path,
+                                        grating["grating"]["timestamps"],
+                                        grating["grating"]["data"])
+                                        # grating["grating"]["mode"])
+
+        # generate stimulus epoch
+        generate_grating_stimulus_epoch(exdir_path,
+                                        grating["grating"]["timestamps"],
+                                        grating['durations'],
+                                        grating["grating"]["data"])
+
+        print("successfully created stimulus groups and epoch.")
 
     @cli.command('register-bonsai-tracking')
     @click.argument('action-id', type=click.STRING)
