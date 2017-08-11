@@ -57,10 +57,7 @@ def attach_to_cli(cli):
 
     @cli.command('create')
     @click.argument('project-id', type=click.STRING)
-    @click.option('-p', '--params-path',
-                  type=click.Path(exists=True),
-                  help='Path to parameters file.',
-                  )
+    @click.argument('params-path', type=click.Path(exists=True))
     @click.option('-a', '--activate',
                   is_flag=True,
                   help='Activate the project.',
