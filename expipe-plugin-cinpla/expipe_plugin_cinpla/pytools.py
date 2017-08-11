@@ -4,6 +4,7 @@ import imp
 import expipe
 import os.path as op
 import yaml
+import warnings
 
 
 def deep_update(d, other):
@@ -16,6 +17,8 @@ def deep_update(d, other):
 
 
 def load_python_module(module_path):
+    if not op.exists(module_path):
+        raise FileExistsError('Path "' + module_path + '" does not exist.')
     directory, modname = op.split(module_path)
     modname, _ = op.splitext(modname)
     file, path, descr = imp.find_module(modname, [directory])
@@ -48,6 +51,12 @@ def load_parameters():
         settings = load_settings()
         PAR = load_python_module(settings['current']['parameters_path'])
     except AssertionError:
+        class Dummy:
+            pass
+        PAR = Dummy
+    except FileExistsError:
+        warnings.warn('Unable to load parameters file "' +
+                      settings['current']['parameters_path'] + '".')
         class Dummy:
             pass
         PAR = Dummy
