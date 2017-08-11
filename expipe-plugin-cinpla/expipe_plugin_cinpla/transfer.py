@@ -15,6 +15,8 @@ if not op.exists(settings_file):
 
 DTIME_FORMAT = expipe.io.core.datetime_format
 
+PAR = load_parameters()
+
 
 def attach_to_cli(cli):
     @cli.command('copy-to-config')
