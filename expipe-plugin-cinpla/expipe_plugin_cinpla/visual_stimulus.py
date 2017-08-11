@@ -15,7 +15,8 @@ from .visual_tools import (get_grating_stimulus_events, get_key_press_events,
                            parse_bonsai_head_tracking_file,
                            copy_bonsai_raw_data,
                            organize_bonsai_tracking_files,
-                           generate_head_tracking_groups)
+                           generate_head_tracking_groups,
+                           parse_psychopy_openephys)
 from .pytools import load_parameters
 
 PAR = load_parameters()
@@ -38,7 +39,7 @@ def attach_to_cli(cli):
         import exdir
 
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
-        action = project.require_action(action_id)
+        action = project.get_action(action_id)
         fr = action.require_filerecord()
         exdir_path = _get_local_path(fr)
         exdir_object = exdir.File(exdir_path)
@@ -79,15 +80,13 @@ def attach_to_cli(cli):
         """Generates stimulus groups and epoch based on axona inp epoch.
 
         COMMAND: action-id: Provide action id to find exdir path"""
-        from expipe_io_neuro import psychopyio
         assert psyexp_path.endswith('.psyexp')
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
-        action = project.require_action(action_id)
+        action = project.get_action(action_id)
         fr = action.require_filerecord()
         exdir_path = _get_local_path(fr)
 
-        grating = psychopyio.parse_psychopy_openephys(exdir_path, psyexp_path,
-                                                      io_channel)
+        grating = parse_psychopy_openephys(action, psyexp_path, io_channel)
         # keys = get_key_press_events(exdir_object["epochs/axona_inp"])
 
         # generate stimulus groups

@@ -1,6 +1,73 @@
 import numpy as np
 import quantities as pq
 import exdir
+import expipe
+from datetime import datetime
+from expipe_io_neuro import psychopyio, pyopenephys
+import os.path as op
+import glob
+import shutil
+
+
+def parse_psychopy_openephys(action, psyexp_path, io_channel):
+    exdir_path = action.require_filerecord().local_path
+    exdir_object = exdir.File(exdir_path)
+    session = exdir_object['acquisition'].attrs['openephys_session']
+    openephys_path = op.join(str(exdir_object['acquisition'].directory),
+                             session)
+    settings = psychopyio.read_xml(psyexp_path)['PsychoPy2experiment']
+    exp_name = psychopyio.list_dict_get(settings['Settings']['Param'], 'expName')
+    psycho_data_path = op.join(op.dirname(psyexp_path), 'data')
+    session = action.id.split('-')[-1]
+    datestr = datetime.strftime(action.datetime, '%Y_%b_%d')
+    assert len(action.subjects) == 1, 'Unable to find subject info in action.'
+    psycho_search = '{}-{}_*-{}_{}*'.format(action.subjects[0], datestr,
+                                           session, exp_name)
+    psycho_paths = glob.glob(op.join(psycho_data_path, psycho_search))
+    if len(psycho_paths) == 0: # try searching in openephys_path
+        psycho_paths = glob.glob(op.join(openephys_path, psycho_search))
+    if len(psycho_paths) != 3:
+        raise ValueError('Did not found psychopy related files searching ' +
+                         ' for "{}". '.format(psycho_search) +
+                         'Please make sure the psychopy file names begins ' +
+                         'with the correct "action-id" by using this as ' +
+                         'the "participant" name in psychopy.')
+    psycho_basepath = op.splitext(psycho_paths[0])[0]
+    psycho_exts = [op.splitext(path)[-1] for path in psycho_paths]
+    expected_exts = ['.log', '.csv', '.psydat']
+    if not set(psycho_exts) == set(expected_exts):
+        missing = [ext for ext in expected_exts if not ext in psycho_exts]
+        raise ValueError('Missing file types "{}" in folder'.format(missing))
+    psycho_paths.append(psyexp_path)
+    for path in psycho_paths:
+        shutil.copy2(path, openephys_path)
+    csvdata = psychopyio.csv_to_dict(psycho_basepath + '.csv')
+    stim_on, stim_off, durations = psychopyio.read_psychopy_log(psycho_basepath + '.log')
+    if not len(stim_on) == len(csvdata['ori']):
+        raise ValueError('Inconsistency in number of orientations and ' +
+                         'stimulus onsets')
+    openephys_file = pyopenephys.File(openephys_path)
+    times = openephys_file.digital_in_signals[0].times[io_channel]
+    if len(times) == 0:
+        raise ValueError('No recorded TTL signals on io channel ' +
+                         str(io_channel))
+    rel_times = times - times[0]
+    if not all(abs(psy_t - oe_t) < 0.01 for psy_t, oe_t in zip(stim_on, rel_times)):
+        raise ValueError('Inconsistency in timestamps from psychopy and' +
+                         ' timestamps from paralell port to open ephys.')
+    blanks = np.hstack((0, times + durations)).magnitude * pq.s
+    grating = {
+        'grating': {
+            'timestamps': times,
+            'data': csvdata['ori'],
+            # 'mode': csvdata['']
+        },
+        'blank': {
+            'timestamps': blanks
+        },
+        'durations': durations
+    }
+    return grating
 
 
 ###############################################################################
