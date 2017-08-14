@@ -3,6 +3,7 @@ import os
 import os.path as op
 import click
 import sys
+import warnings
 from .action_tools import (generate_templates, _get_local_path, create_notebook,
                            GIT_NOTE)
 from .pytools import deep_update, load_python_module, load_parameters
@@ -431,15 +432,11 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='The experimenter performing the surgery.',
                   )
-    @click.option('--weight',
+    @click.option('-w', '--weight',
                   required=True,
-                  type=click.FLOAT,
-                  help='The weight of the subject in grams.',
-                  )
-    @click.option('--birthday',
-                  required=True,
-                  type=click.STRING,
-                  help='The birthday of the subject, format: "dd.mm.yyyy".',
+                  nargs=2,
+                  type=(click.FLOAT, click.STRING),
+                  help='The weight of the subject with unit i.e. <200 g> (ommit <>).',
                   )
     @click.option('-p', '--position',
                   required=True,
@@ -447,8 +444,12 @@ def attach_to_cli(cli):
                   callback=validate_position,
                   help='The position e.g. <mecl,x,y,z,mm> (ommit <>).',
                   )
-    def generate_surgery(subject_id, procedure, date, user, weight, birthday,
-                         overwrite, position):
+    @click.option('-a', '--angle',
+                  type=click.FLOAT,
+                  help='The angle of implantation/injection.',
+                  )
+    def generate_surgery(subject_id, procedure, date, user, weight,
+                         overwrite, position, angle):
         """Generate a surgery action."""
         # TODO give depth if implantation
         import quantities as pq
@@ -458,8 +459,6 @@ def attach_to_cli(cli):
                              'or "injection"')
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(subject_id + '-surgery-' + procedure)
-        birthday = datetime.strftime(datetime.strptime(birthday, '%d.%m.%Y'),
-                                     DTIME_FORMAT)
         if date == 'now':
             date = datetime.now()
         else:
@@ -487,11 +486,106 @@ def attach_to_cli(cli):
             print('Registering position ' +
                   '{}: x={}, y={}, z={} {}'.format(key, x, y, z, unit))
             mod['position'] = pq.Quantity([x, y, z], unit)
+            if angle is not None:
+                raise NotImplementedError
+            # mod['angle'] = pq.Quantity(angle[0], angle[1]) # TODO
             action.require_module(name=name, contents=mod, overwrite=True)
 
-        subject = action.require_module(name=PAR.MODULES['subject']).to_dict()  # TODO standard name?
-        subject['birthday']['value'] = birthday
-        subject['weight'] = weight * pq.g
+        subject = {'_inherits': '/action_modules/' +
+                                'subjects-registry/' +
+                                subject_id}
+        subject['weight'] = pq.Quantity(weight[0], weight[1])
+        action.require_module(name=PAR.MODULES['subject'], contents=subject,
+                              overwrite=True)
+
+    @cli.command('register-subject')
+    @click.argument('subject-id')
+    @click.option('--overwrite',
+                  is_flag=True,
+                  help='Overwrite modules or not.',
+                  )
+    @click.option('-u', '--user',
+                  type=click.STRING,
+                  help='The experimenter performing the surgery.',
+                  )
+    @click.option('--birthday',
+                  required=True,
+                  type=click.STRING,
+                  help='The birthday of the subject, format: "dd.mm.yyyy".',
+                  )
+    @click.option('--cell_line',
+                  required=True,
+                  type=click.Choice(PAR.POSSIBLE_CELL_LINES),
+                  help='Cell line of the subject.',
+                  )
+    @click.option('--developmental_stage',
+                  type=click.STRING,
+                  help='',
+                  )
+    @click.option('--gender',
+                  type=click.STRING,
+                  help='',
+                  )
+    @click.option('--genus',
+                  type=click.STRING,
+                  help='',
+                  )
+    @click.option('--health_status',
+                  type=click.STRING,
+                  help='',
+                  )
+    @click.option('--label',
+                  type=click.STRING,
+                  help='',
+                  )
+    @click.option('--population',
+                  type=click.STRING,
+                  help='',
+                  )
+    @click.option('--species',
+                  type=click.STRING,
+                  help='',
+                  )
+    @click.option('--strain',
+                  type=click.STRING,
+                  help='',
+                  )
+    @click.option('--trivial_name',
+                  type=click.STRING,
+                  help='',
+                  )
+    @click.option('--weight',
+                  type=click.STRING,
+                  help='',
+                  )
+    def generate_subject(subject_id, overwrite, user, **kwargs):
+        """Generate a surgery action."""
+        # TODO give depth if implantation
+        import quantities as pq
+        from datetime import datetime
+        project = expipe.require_project('subjects-registry')
+        action = project.require_action(subject_id)
+        kwargs['birthday'] = datetime.strftime(
+            datetime.strptime(kwargs['birthday'], '%d.%m.%Y'), DTIME_FORMAT)
+        action.datetime = datetime.now()
+        action.type = 'Info'
+        action.subjects = [subject_id]
+
+        subject = action.require_module(template=PAR.MODULES['subject'],
+                                        overwrite=overwrite).to_dict()
+        for key, val in kwargs.items():
+            if isinstance(val, (str, float, int)):
+                subject[key]['value'] = val
+            elif isinstance(val, tuple):
+                subject[key] = pq.Quantity(val[0], val[1])
+            elif isinstance(val, type(None)):
+                pass
+            else:
+                raise TypeError('Not recognized type ' + str(type(val)))
+        for key, val in subject.items():
+            if isinstance(val, dict):
+                if len(val.get('value')) == 0:
+                    warnings.warn('No value registered for ' + key)
         action.require_module(name=PAR.MODULES['subject'], contents=subject,
                               overwrite=True)
 

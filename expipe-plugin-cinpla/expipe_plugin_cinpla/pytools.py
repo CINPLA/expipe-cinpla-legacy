@@ -65,5 +65,6 @@ def load_parameters():
                      'POSSIBLE_LOCATIONS',
                      'POSSIBLE_OPTO_TAGS',
                      'POSSIBLE_BRAIN_AREAS',
-                     'POSSIBLE_LOCATIONS')
+                     'POSSIBLE_LOCATIONS',
+                     'POSSIBLE_CELL_LINES')
     return PAR
