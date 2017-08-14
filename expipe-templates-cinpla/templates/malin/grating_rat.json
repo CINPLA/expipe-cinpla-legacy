@@ -5,19 +5,16 @@
     },
     "definition": "Properties to describe Grating stimuli.",
     "drifting_velocity": {
-        "definition": "In case of a constantly drifting grating, the temporal frequency",
         "unit": "Hz",
         "value": "4"
     },
-    "duration_stim": {
-        "definition": "The duration of the stimulus in seconds.",
-        "unit": "sec",
+    "duration_mlg": {
+        "unit": "s",
         "value": ""
     },
-    "duration_mlg": {
-      "definition": "The duration of the mean luminance grey",
-      "unit": "sec",
-      "value": ""
+    "duration_stim": {
+        "unit": "s",
+        "value": ""
     },
     "function": {
         "definition": "The function of the described stimulus. E.g. if the white noise constituted the carrier.",
@@ -36,6 +33,7 @@
         "definition": "The stimulus modality like acoustic, haptic, visual etc.",
         "value": "visual"
     },
+    "name": "malin_grating_rat",
     "orientation": {
         "definition": "The orientation of the grating in degrees.",
         "value": "0-360"

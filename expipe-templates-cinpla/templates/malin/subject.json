@@ -29,6 +29,7 @@
         "definition": "If the subject has been labled in a specific way. The lable can be described here.",
         "value": ""
     },
+    "name": "malin_subject",
     "notes": {
         "value": ""
     },

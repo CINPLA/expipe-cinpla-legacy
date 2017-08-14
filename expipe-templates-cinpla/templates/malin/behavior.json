@@ -1,4 +1,12 @@
 {
+    "Activity": {
+        "alternatives": {
+            "M": "movement",
+            "S": "Sessile"
+        },
+        "definition": "A description of the movement of the subject, oberved by the experimenter.",
+        "value": ""
+    },
     "definition": "Describing the type of behavior that was assesed in experimental setup.",
     "environment": {
         "definition": "The environment in which the experiments were conducted. Classical environments are e.g. the Y-maze or T-maze. Some environments are called enriched also reduced or even natural.",
@@ -9,20 +17,13 @@
         "definition": "The number of individuals that are observed/investigated at the same time.",
         "value": 1
     },
+    "name": "malin_behavior",
     "notes": {
         "value": ""
     },
     "paradigm": {
         "definition": "The paradigm used in the experiment, e.g. Learning, navigation, etc...",
         "value": "exploring"
-    },
-    "Activity": {
-        "definition": "A description of the movement of the subject, oberved by the experimenter.",
-        "alternatives": {
-            "S": "Sessile",
-            "M": "movement"
-        },
-        "value": ""
     },
     "protocol_info": {
         "definition": "Additional information to the task protocol undertaken by the subject.",

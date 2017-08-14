@@ -17,6 +17,17 @@
             20
         ]
     },
+    "glass_pipette_diameter": {
+        "unit": "um",
+        "value": [
+            15.0,
+            20.0
+        ]
+    },
+    "glass_pipette_puller_manufacturer": {
+        "definition": "The manufacturer of the P-30 micropipette puller.",
+        "value": "Sutter Instrument Company"
+    },
     "hemisphere": {
         "alternatives": {
             "C, center": "between hemispheres",
@@ -55,16 +66,16 @@
     },
     "location": {
         "alternatives": {
-          "V1MR":"Primary visual cortex, monocular area, right hemisphere",
-          "V1BR":"Primary visual cortex, binocular area, right hemisphere",
-          "V2LR":"Secondary visual cortex, lateral area, right hemisphere",
-          "V2MR":"Secondary visual cortex, medial area, right hemisphere",
-          "dLGNR": "Dorsal lateral geniculate nucleus, right hemisphere"
-          },
-
+            "V1BR": "Primary visual cortex, binocular area, right hemisphere",
+            "V1MR": "Primary visual cortex, monocular area, right hemisphere",
+            "V2LR": "Secondary visual cortex, lateral area, right hemisphere",
+            "V2MR": "Secondary visual cortex, medial area, right hemisphere",
+            "dLGNR": "Dorsal lateral geniculate nucleus, right hemisphere"
+        },
         "definition": "Describes the brain area of recording",
         "value": ""
     },
+    "name": "malin_injection_R",
     "notes": {
         "value": "1 minute waiting before injection, 10 minute waiting after"
     },
@@ -83,16 +94,5 @@
         ],
         "definition": "By default position are specified by the coordinates of skull. Use this property for other definitions.",
         "value": ""
-    },
-    "glass_pipette_puller_manufacturer": {
-        "definition": "The manufacturer of the P-30 micropipette puller.",
-        "value": "Sutter Instrument Company"
-    },
-    "glass_pipette_diameter": {
-        "unit": "um",
-        "value": [
-            15.0,
-            20.0
-        ]
     }
 }

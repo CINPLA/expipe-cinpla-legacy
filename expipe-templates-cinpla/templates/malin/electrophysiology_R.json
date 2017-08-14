@@ -31,10 +31,10 @@
     "identifier": "malin_electrophysiology_R",
     "location": {
         "alternatives": {
-            "V1ML": "Primary visual cortex, monocular area, left hemisphere",
-            "V1MR": "Primary visual cortex, monocular area, right hemisphere",
             "V1BL": "Primary visual cortex, binocular area, left hemisphere",
             "V1BR": "Primary visual cortex, binocular area, right hemisphere",
+            "V1ML": "Primary visual cortex, monocular area, left hemisphere",
+            "V1MR": "Primary visual cortex, monocular area, right hemisphere",
             "V2LL": "Secondary visual cortex, lateral area, left hemisphere",
             "V2LR": "Secondary visual cortex, lateral area, right hemisphere",
             "V2ML": "Secondary visual cortex, medial area, left hemisphere",
@@ -43,6 +43,7 @@
         "definition": "Describes the brain area of recording.",
         "value": ""
     },
+    "name": "malin_electrophysiology_R",
     "notes": {
         "value": ""
     },
