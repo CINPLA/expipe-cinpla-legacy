@@ -318,7 +318,6 @@ def attach_to_cli(cli):
         if any(arg in kwargs['analysis'] for arg in ['orient-tuning']):
             print('Analysing orientation tuning.')
             an.orient_tuning_overview()
-        # TODO deep update!!!
         for key, val in an.analysis_output.items():
             try:
                 mod = action.get_module(key).to_dict()
