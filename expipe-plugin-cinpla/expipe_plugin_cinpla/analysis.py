@@ -14,7 +14,9 @@ DTIME_FORMAT = expipe.io.core.datetime_format
 
 
 def attach_to_cli(cli):
-    @cli.command('generate-notebook')
+    @cli.command('generate-notebook',
+                 short_help=("Make a notebook from template and put it in" +
+                             " the analysis directory of respective action."))
     @click.argument('action-id', type=click.STRING)
     @click.option('--no_local',
                   is_flag=True,
@@ -29,11 +31,6 @@ def attach_to_cli(cli):
                   help='Store temporary on local drive.',
                   )
     def generate_notebook(action_id, channel_group, no_local, run):
-        """
-        Provide action id to find exdir path
-
-        COMMAND: action-id: Provide action id to find exdir path
-        """
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
         fr = action.require_filerecord()
@@ -46,7 +43,7 @@ def attach_to_cli(cli):
             import subprocess
             subprocess.run(['jupyter', 'notebook', fname])
 
-    @cli.command('analyse')
+    @cli.command('analyse', short_help='Analyse a dataset.')
     @click.argument('action-id', type=click.STRING)
     @click.option('--channel-group',
                   multiple=True,
@@ -87,9 +84,6 @@ def attach_to_cli(cli):
                   help='Skip previously generated files.',
                   )
     def analysis(**kwargs):
-        """Analyse a dataset
-
-        COMMAND: action-id: Provide action id to find exdir path"""
         from .analysis_tools import Analyser
         from datetime import datetime
         if len(kwargs['channel_group']) == 0: kwargs['channel_group'] = None
@@ -176,7 +170,9 @@ def attach_to_cli(cli):
                 #     result = expipe.io.core.convert_quantities(val)
                 #     json.dump(result, f, sort_keys=True, indent=4)
 
-    @cli.command('group-analyse')
+    @cli.command('group-analyse',
+                 short_help=('Search and generate an analysis-action that' +
+                             ' represents and points to multiple dataset.'))
     @click.argument('action-id', type=click.STRING)
     @click.option('-u', '--user',
                   type=click.STRING,
@@ -208,9 +204,6 @@ def attach_to_cli(cli):
                   )
     def group_analysis(action_id, user, tags, overwrite, subjects,
                        locations, actions):
-        """Parse info about recorded units
-
-        COMMAND: action-id: Provide action id to get action"""
         from datetime import datetime
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         analysis_action = project.require_action(action_id)
@@ -250,16 +243,13 @@ def attach_to_cli(cli):
             analysis_action.require_module(name=name, contents=contents,
                                            overwrite=overwrite)
 
-    @cli.command('spikesort')
+    @cli.command('spikesort', short_help='Spikesort with klustakwik.')
     @click.argument('action-id', type=click.STRING)
     @click.option('--no-local',
                   is_flag=True,
                   help='Store temporary on local drive.',
                   )
     def spikesort(action_id, no_local):
-        """Spikesort with klustakwik
-
-        COMMAND: action-id: Provide action id to find exdir path"""
         import numpy as np
         from phycontrib.neo.model import NeoModel
         import logging

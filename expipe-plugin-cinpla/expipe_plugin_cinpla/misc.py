@@ -26,7 +26,7 @@ def validate_position(ctx, param, position):
 
 
 def attach_to_cli(cli):
-    @cli.command('annotate')
+    @cli.command('annotate', short_help='Parse info about recorded units')
     @click.argument('action-id', type=click.STRING)
     @click.option('--tag', '-t',
                   multiple=True,
@@ -43,9 +43,6 @@ def attach_to_cli(cli):
                   help='The experimenter performing the annotation.',
                   )
     def annotate(action_id, tag, message, user):
-        """Parse info about recorded units
-
-        COMMAND: action-id: Provide action id to get action"""
         from datetime import datetime
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
@@ -65,7 +62,7 @@ def attach_to_cli(cli):
                                for m in message])
         action.tags.extend(tag)
 
-    @cli.command('adjust')
+    @cli.command('adjust', short_help='Parse info about drive depth adjustment')
     @click.argument('subject-id',  type=click.STRING)
     @click.option('-d', '--date',
                   required=True,
@@ -97,9 +94,6 @@ def attach_to_cli(cli):
                   )
     def generate_adjustment(subject_id, date, anatomy, user, index, init,
                             overwrite):
-        """Parse info about drive depth adjustment
-
-        COMMAND: subject-id: ID of the subject."""
         import numpy as np
         import quantities as pq
         from .action_tools import query_yes_no
@@ -176,7 +170,7 @@ def attach_to_cli(cli):
         content['git_note'] = GIT_NOTE
         action.require_module(name=name, contents=content, overwrite=True)
 
-    @cli.command('register-surgery')
+    @cli.command('register-surgery', short_help='Generate a surgery action.')
     @click.argument('subject-id')
     @click.option('--date', '-d',
                   required=True,
@@ -214,7 +208,6 @@ def attach_to_cli(cli):
                   )
     def generate_surgery(subject_id, procedure, date, user, weight,
                          overwrite, position, angle):
-        """Generate a surgery action."""
         # TODO tag sucject as active
         import quantities as pq
         from datetime import datetime
@@ -265,7 +258,7 @@ def attach_to_cli(cli):
         subject_action = subjects_project.require_action(subject_id)
         subject_action.tags.append('surgery')
 
-    @cli.command('register-subject')
+    @cli.command('register-subject', short_help='Register a subject to the "subjects-registry" project.')
     @click.argument('subject-id')
     @click.option('--overwrite',
                   is_flag=True,
@@ -327,7 +320,6 @@ def attach_to_cli(cli):
                   help='The weight of the animal.',
                   )
     def generate_subject(subject_id, overwrite, user, **kwargs):
-        """Generate a surgery action."""
         import quantities as pq
         from datetime import datetime
         project = expipe.require_project('subjects-registry')
@@ -356,7 +348,9 @@ def attach_to_cli(cli):
         action.require_module(name=PAR.MODULES['subject'], contents=subject,
                               overwrite=True)
 
-    @cli.command('register-perfusion')
+    @cli.command('register-perfusion',
+                 short_help=('Generate a perfusion action. ' +
+                             'Also tags the subject as perfused.'))
     @click.argument('subject-id')
     @click.option('--date', '-d',
                   required=True,
@@ -378,7 +372,6 @@ def attach_to_cli(cli):
                   help='The weight of the animal.',
                   )
     def generate_perfusion(subject_id, date, user, overwrite, weight):
-        """Generate a perfusion action."""
         import quantities as pq
         from datetime import datetime
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])

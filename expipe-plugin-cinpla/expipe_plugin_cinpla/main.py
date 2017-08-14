@@ -15,43 +15,43 @@ from . import analysis
 
 class CinplaPlugin(IPlugin):
     def attach_to_cli(self, cli):
-        @cli.group()
+        @cli.group(short_help='Tools to select project parameters pluss more helpful environment tools.')
         @click.help_option('-h', '--help')
         @click.pass_context
         def project(ctx):
             pass
 
-        @cli.group()
+        @cli.group(short_help='Tools related to optogenetics.')
         @click.help_option('-h', '--help')
         @click.pass_context
         def opto(ctx):
             pass
 
-        @cli.group()
+        @cli.group(short_help='Tools related to Open Ephys.')
         @click.help_option('-h', '--help')
         @click.pass_context
         def openephys(ctx):
             pass
 
-        @cli.group()
+        @cli.group(short_help='Tools related to Intan.')
         @click.help_option('-h', '--help')
         @click.pass_context
         def intan(ctx):
             pass
 
-        @cli.group()
+        @cli.group(short_help='Tools related to Axona.')
         @click.help_option('-h', '--help')
         @click.pass_context
         def axona(ctx):
             pass
 
-        @cli.group()
+        @cli.group(short_help='Tools related to the combination of Open Ephys and Intan.')
         @click.help_option('-h', '--help')
         @click.pass_context
         def intan_ephys(ctx):
             pass
 
-        @cli.group()
+        @cli.group(short_help='Tools related to visual stimulation.')
         @click.help_option('-h', '--help')
         @click.pass_context
         def visual(ctx):
