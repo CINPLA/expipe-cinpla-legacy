@@ -1,0 +1,65 @@
+{
+    "angle": {
+        "unit": "deg",
+        "value": [
+            15.0
+        ]
+    },
+    "definition": "Describing an implantation procedure of a micro drive.",
+    "description": {
+        "value": "Implantation of optetrodes in Medial Entorhinal Cortex and fibre optcis in Medial Septum."
+    },
+    "hemisphere": {
+        "alternatives": {
+            "C, center": "between hemispheres",
+            "L, left": "left hemisphere",
+            "R, right": "right hemisphere"
+        },
+        "value": "L"
+    },
+    "identifier": "mikkel_implant_drive_mecl",
+    "location": {
+        "alternatives": [
+            "MECL",
+            "MECR",
+            "MS"
+        ],
+        "definition": "Describes the brain area of recording. MS: Medial Septum, MECR: Medial Entorhinal Cortex Right hemisphere, MECL: Medial Entorhinal Cortex Left hemisphere, ",
+        "value": "MECL"
+    },
+    "name": "mikkel_implant_drive_mecl",
+    "notes": {
+        "value": "Indexes refer to x,y,z respectively"
+    },
+    "position": {
+        "unit": "mm",
+        "value": [
+            "x",
+            "y",
+            "z"
+        ]
+    },
+    "position_reference": {
+        "alternatives": [
+            "bregma",
+            "dura",
+            "lambda",
+            "longitudinal suture",
+            "skull",
+            "transverse sinus"
+        ],
+        "definition": "By default position are specified by the coordinates of skull. Use this property for other definitions.",
+        "value": {
+            "x": "lambda",
+            "y": "transverse sinus",
+            "z": "dura"
+        }
+    },
+    "ref_electrode_location": {
+        "alternatives": [
+            "Anterior to bregma"
+        ],
+        "definition": "Describes the location of the reference electrode.",
+        "value": "Anterior to bregma, left hemisphere"
+    }
+}
