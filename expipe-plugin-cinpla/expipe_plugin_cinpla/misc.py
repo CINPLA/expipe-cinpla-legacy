@@ -12,6 +12,18 @@ PAR = load_parameters()
 DTIME_FORMAT = expipe.io.core.datetime_format
 
 
+def validate_position(ctx, param, position):
+    try:
+        out = []
+        for pos in position:
+            key, x, y, z, unit = pos.split(',', 5)
+            out.append((key, float(x), float(y), float(z), unit))
+        return tuple(out)
+    except ValueError:
+        raise click.BadParameter('Position need to be comma separated i.e ' +
+                                 '<key,x,y,z,unit> (ommit <>).')
+
+
 def attach_to_cli(cli):
     @cli.command('generate-notebook')
     @click.argument('action-id', type=click.STRING)
@@ -430,14 +442,14 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='The birthday of the subject, format: "dd.mm.yyyy".',
                   )
-    @click.option('-a', '--anatomy',
-                  multiple=True,
+    @click.option('-p', '--position',
                   required=True,
-                  type=(click.STRING, float),
-                  help='The adjustment amount on given anatomical location in "um".',
+                  multiple=True,
+                  callback=validate_position,
+                  help='The position e.g. <mecl,x,y,z,mm> (ommit <>).',
                   )
     def generate_surgery(subject_id, procedure, date, user, weight, birthday,
-                         overwrite, anatomy):
+                         overwrite, position):
         """Generate a surgery action."""
         # TODO give depth if implantation
         import quantities as pq
@@ -468,13 +480,14 @@ def attach_to_cli(cli):
         generate_templates(action, PAR.TEMPLATES['surgery_' + procedure],
                            overwrite, git_note=GIT_NOTE)
         modules_dict = action.modules.to_dict()
-        for key, val in anatomy:
+        for key, x, y, z, unit in position:
             name = PAR.MODULES[procedure][key]
-            mod = modules_dict[name]
+            mod = action.require_module(template=name, overwrite=overwrite).to_dict()
             assert 'position' in mod
             assert isinstance(mod['position'], pq.Quantity)
-            print('Registering depth ', key, ' = ', val)
-            mod['position'][2] = pq.Quantity(val, 'mm')
+            print('Registering position ' +
+                  '{}: x={}, y={}, z={} {}'.format(key, x, y, z, unit))
+            mod['position'] = pq.Quantity([x, y, z], unit)
             action.require_module(name=name, contents=mod, overwrite=True)
 
         subject = action.require_module(name=PAR.MODULES['subject']).to_dict()  # TODO standard name?
