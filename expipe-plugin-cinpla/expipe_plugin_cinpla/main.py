@@ -10,6 +10,7 @@ from . import axona as _axona
 from . import intan_ephys as _intan_ephys
 from . import electrical_stimulation
 from . import visual_stimulus
+from . import analysis
 
 
 class CinplaPlugin(IPlugin):
@@ -56,6 +57,7 @@ class CinplaPlugin(IPlugin):
         def visual(ctx):
             pass
 
+        analysis.attach_to_cli(cli)
         visual_stimulus.attach_to_cli(visual)
         project_manager.attach_to_cli(project)
         misc.attach_to_cli(cli)
