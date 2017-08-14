@@ -22,7 +22,7 @@ def validate_position(ctx, param, position):
         return tuple(out)
     except ValueError:
         raise click.BadParameter('Position need to be comma separated i.e ' +
-                                 '<key,x,y,z,unit> (ommit <>).')
+                                 '<key,x,y,z,physical_unit> (ommit <>).')
 
 
 def attach_to_cli(cli):
@@ -261,6 +261,9 @@ def attach_to_cli(cli):
         subject['weight'] = pq.Quantity(weight[0], weight[1])
         action.require_module(name=PAR.MODULES['subject'], contents=subject,
                               overwrite=True)
+        subjects_project = expipe.require_project('subjects-registry')
+        subject_action = subjects_project.require_action(subject_id)
+        subject_action.tags.append('surgery')
 
     @cli.command('register-subject')
     @click.argument('subject-id')
@@ -270,7 +273,7 @@ def attach_to_cli(cli):
                   )
     @click.option('-u', '--user',
                   type=click.STRING,
-                  help='The experimenter performing the surgery.',
+                  help='The experimenter performing the registration.',
                   )
     @click.option('--birthday',
                   required=True,
@@ -284,47 +287,47 @@ def attach_to_cli(cli):
                   )
     @click.option('--developmental_stage',
                   type=click.STRING,
-                  help='',
+                  help="The developemtal stage of the subject. E.g. 'embroyonal', 'adult', 'larval' etc.",
                   )
     @click.option('--gender',
                   type=click.STRING,
-                  help='',
+                  help='Male or female?',
                   )
     @click.option('--genus',
                   type=click.STRING,
-                  help='',
+                  help='The Genus of the studied subject. E.g "rattus"',
                   )
     @click.option('--health_status',
                   type=click.STRING,
-                  help='',
+                  help='Information about the health status of this subject.',
                   )
     @click.option('--label',
                   type=click.STRING,
-                  help='',
+                  help='If the subject has been labled in a specific way. The lable can be described here.',
                   )
     @click.option('--population',
                   type=click.STRING,
-                  help='',
+                  help='The population this subject is offspring of. This may be the bee hive, the ant colony, etc.',
                   )
     @click.option('--species',
                   type=click.STRING,
-                  help='',
+                  help='The scientific name of the species e.g. Apis mellifera, Homo sapiens.',
                   )
     @click.option('--strain',
                   type=click.STRING,
-                  help='',
+                  help='The strain the subject was taken from. E.g. a specific genetic variation etc.',
                   )
     @click.option('--trivial_name',
                   type=click.STRING,
-                  help='',
+                  help='The trivial name of the species like Honeybee, Human.',
                   )
     @click.option('--weight',
-                  type=click.STRING,
-                  help='',
+                  nargs=2,
+                  type=(click.FLOAT, click.STRING),
+                  help='The weight of the animal.',
                   )
     def generate_subject(subject_id, overwrite, user, **kwargs):
         """Generate a surgery action."""
-        # TODO give depth if implantation
         import quantities as pq
         from datetime import datetime
         project = expipe.require_project('subjects-registry')
@@ -368,10 +371,14 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='The experimenter performing the surgery.',
                   )
-    def generate_perfusion(subject_id, date, user, overwrite):
+    @click.option('--weight',
+                  nargs=2,
+                  type=(click.FLOAT, click.STRING),
+                  default=(None, None),
+                  help='The weight of the animal.',
+                  )
+    def generate_perfusion(subject_id, date, user, overwrite, weight):
         """Generate a perfusion action."""
-        # TODO tag animal as dead
-        # TODO move animal stuff in own file
         import quantities as pq
         from datetime import datetime
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
@@ -394,3 +401,13 @@ def attach_to_cli(cli):
         action.users = [user]
         generate_templates(action, PAR.TEMPLATES['perfusion'],
                            overwrite, git_note=GIT_NOTE)
+        subject = {'_inherits': '/action_modules/' +
+                                'subjects-registry/' +
+                                subject_id}
+        if weight != (None, None):
+            subject['weight'] = pq.Quantity(weight[0], weight[1])
+        action.require_module(name=PAR.MODULES['subject'], contents=subject,
+                              overwrite=True)
+        subjects_project = expipe.require_project('subjects-registry')
+        subject_action = subjects_project.require_action(subject_id)
+        subject_action.tags.append('surgery')
