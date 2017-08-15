@@ -1,54 +1,19 @@
-from expipecli.utils.misc import lazy_import
-import sys
+from .imports import *
 
-@lazy_import
-def expipe():
-    import expipe
-    return expipe
-
-@lazy_import
-def Mapping():
-    from collections import Mapping
-    return Mapping
-
-@lazy_import
-def datetime():
-    from datetime import datetime
-    return datetime
-
-@lazy_import
-def os():
-    import os
-    return os
-
-@lazy_import
-def json():
-    import json
-    return json
-
-@lazy_import
-def yaml():
-    import yaml
-    return yaml
-
-@lazy_import
-def imp():
-    import imp
-    return imp
-
-@lazy_import
-def deepcopy():
-    from copy import deepcopy
-    return deepcopy
+settings_file_path = os.path.join(os.path.expanduser('~'), '.config', 'expipe',
+                             'cinpla_config.yaml')
+if not os.path.exists(settings_file_path):
+    warnings.warn('No config file found, import errors will occur, please ' +
+                  'use "expipe env create project-id -p path-to-params-file"')
 
 
 def deep_update(d, other):
     for k, v in other.items():
         d_v = d.get(k)
-        if isinstance(v, Mapping) and isinstance(d_v, Mapping):
+        if isinstance(v, collections.Mapping) and isinstance(d_v, collections.Mapping):
             deep_update(d_v, v)
         else:
-            d[k] = deepcopy(v)
+            d[k] = copy.deepcopy(v)
 
 
 def load_python_module(module_path):
@@ -68,9 +33,8 @@ def load_python_module(module_path):
 
 
 def load_settings():
-    settings_file = os.path.join(expipe.config.config_dir, 'cinpla_config.yaml')
-    assert os.path.exists(settings_file)
-    with open(settings_file, "r") as f:
+    assert os.path.exists(settings_file_path)
+    with open(settings_file_path, "r") as f:
         settings = yaml.load(f)
     return settings
 

@@ -1,5 +1,6 @@
-import click
+import expipe_plugin_cinpla
 from expipecli.utils.plugin import IPlugin
+from .imports import *
 from . import cli_misc
 from . import cli_analysis
 from . import cli_project_manager
@@ -11,6 +12,13 @@ from . import cli_intan
 from . import cli_intan_ephys
 from . import cli_visual_stimulus
 from . import cli_electrical_stimulation
+
+
+def reveal():
+    """
+    This imports all plugins when loading expipe-cli.
+    """
+    pass
 
 
 class CinplaPlugin(IPlugin):

@@ -1,13 +1,6 @@
 from .imports import *
 from ._version import get_versions
-from .pytools import load_parameters
-
-
-settings_file = os.path.join(os.path.expanduser('~'), '.config', 'expipe',
-                             'cinpla_config.yaml')
-if not os.path.exists(settings_file):
-    warnings.warn('No config file found, import errors will occur, please use' +
-                  ' "expipe env create project-id -p path-to-params-file"')
+from .pytools import settings_file_path
 
 default_settings = {
     'current': {
@@ -21,15 +14,15 @@ def attach_to_cli(cli):
     @cli.command('activate')
     @click.argument('project-id', type=click.STRING)
     def activate(project_id):
-        assert os.path.exists(settings_file)
-        with open(settings_file, "r") as f:
+        assert os.path.exists(settings_file_path)
+        with open(settings_file_path, "r") as f:
             current_settings = yaml.load(f)
         params_path = current_settings[project_id]['parameters_path']
         current_settings.update({
             'current': {
                 'parameters_path': params_path,
                 'project_id': project_id}})
-        with open(settings_file, "w") as f:
+        with open(settings_file_path, "w") as f:
             yaml.dump(current_settings, f, default_flow_style=False)
 
     @cli.command('list')
@@ -51,8 +44,8 @@ def attach_to_cli(cli):
                   help='Activate the project.',
                   )
     def create(project_id, params_path, activate):
-        if os.path.exists(settings_file):
-            with open(settings_file, "r") as f:
+        if os.path.exists(settings_file_path):
+            with open(settings_file_path, "r") as f:
                 current_settings = yaml.load(f)
         else:
             current_settings = default_settings
@@ -65,12 +58,12 @@ def attach_to_cli(cli):
                 'current': {'parameters_path': params_path,
                             'project_id': project_id},
             })
-        with open(settings_file, "w") as f:
+        with open(settings_file_path, "w") as f:
             yaml.dump(current_settings, f, default_flow_style=False)
 
     @cli.command('which')
     def which():
-        assert os.path.exists(settings_file)
-        with open(settings_file, "r") as f:
+        assert os.path.exists(settings_file_path)
+        with open(settings_file_path, "r") as f:
             current_settings = yaml.load(f)
         pprint.pprint(current_settings['current'])

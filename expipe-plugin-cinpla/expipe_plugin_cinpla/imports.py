@@ -1,6 +1,6 @@
 import click
 from expipecli.utils.misc import lazy_import
-from . import pytools
+
 
 @lazy_import
 def pd():
@@ -175,8 +175,8 @@ def warnings():
 
 @lazy_import
 def PAR():
-    PAR = pytools.load_parameters()
-    return PAR
+    from .pytools import load_parameters
+    return load_parameters()
 
 @lazy_import
 def yaml():
@@ -187,3 +187,13 @@ def yaml():
 def pprint():
     import pprint
     return pprint
+
+@lazy_import
+def imp():
+    import imp
+    return imp
+
+@lazy_import
+def collections():
+    import collections
+    return collections
