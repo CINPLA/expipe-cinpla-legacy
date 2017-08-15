@@ -13,10 +13,10 @@ Code from http://eli.thegreenplace.net/2012/08/07/fundamental-concepts-of-plugin
 
 import imp
 import os
-import os.path as op
-import glob
+from pkg_resources import load_entry_point
 from six import with_metaclass
 import platform
+import sys
 
 from .misc import _fullname
 
@@ -61,35 +61,17 @@ def get_plugin(name):
 
 def discover_plugins():
     import subprocess
-    paths = os.environ['PATH'].split(os.pathsep)
-    exs = []
+    path = os.path.dirname(sys.executable)
     if platform.system() == "Windows":
         ext = '.exe'
     else:
         ext = ''
-    for path in paths:
-        exs.extend(glob.glob(op.join(path, 'plugin-expipe*' + ext)))
-    if len(exs) == 0:
+    executables = [exe + ext for exe in os.listdir(path)
+                   if exe.startswith('plugin-expipe')]
+    if len(executables) == 0:
         return IPluginRegistry.plugins
     # TODO reveal plugin module in a non ugly way
-    for executable in exs:
-        process = subprocess.check_output(executable, shell=True)
-        text = str(process)
-        if text.startswith("b'"):
-            text = text[2:]
-        for output in text.split('\\n'):
-            output = output.strip('\\r')
-            if output.endswith('.py') and op.exists(output):
-                directory, modname = op.split(output)
-                modname, _ = op.splitext(modname)
-                file, path, descr = imp.find_module(modname, [directory])
-                if file:
-                    # Loading the module registers the plugin in
-                    # IPluginRegistry.
-                    try:
-                        mod = imp.load_module(modname, file, path, descr)  # noqa
-                    except Exception as e:  # pragma: no cover
-                        raise e
-                    finally:
-                        file.close()
+    for executable in executables:
+        module = imp.load_source(executable, os.path.join(path, executable))
+        load_entry_point(module.__requires__, 'console_scripts', executable)()
     return IPluginRegistry.plugins
