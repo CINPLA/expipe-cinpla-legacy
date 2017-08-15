@@ -185,5 +185,5 @@ def yaml():
 
 @lazy_import
 def pprint():
-    from pprint import pprint
+    import pprint
     return pprint

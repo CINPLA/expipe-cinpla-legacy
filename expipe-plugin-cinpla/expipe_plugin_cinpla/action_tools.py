@@ -1,62 +1,6 @@
-from expipecli.utils.misc import lazy_import
+from .imports import *
 from ._version import get_versions
 from .pytools import load_parameters
-import sys
-
-@lazy_import
-def expipe():
-    import expipe
-    return expipe
-
-@lazy_import
-def exdir():
-    import exdir
-    return exdir
-
-@lazy_import
-def datetime():
-    from datetime import datetime
-    return datetime
-
-@lazy_import
-def pq():
-    import quantities as pq
-    return pq
-
-@lazy_import
-def np():
-    import numpy as np
-    return np
-
-@lazy_import
-def os():
-    import os
-    return os
-
-@lazy_import
-def json():
-    import json
-    return json
-
-@lazy_import
-def platform():
-    import platform
-    return platform
-
-@lazy_import
-def timedelta():
-    from datetime import timedelta
-    return timedelta
-
-@lazy_import
-def strtobool():
-    from distutils.util import strtobool
-    return strtobool
-
-@lazy_import
-def PAR():
-    PAR = load_parameters()
-    return PAR
 
 nwb_main_groups = ['acquisition', 'analysis', 'processing', 'epochs',
                    'general']

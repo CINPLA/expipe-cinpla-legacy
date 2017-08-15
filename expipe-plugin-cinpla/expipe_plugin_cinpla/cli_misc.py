@@ -1,38 +1,5 @@
-from expipecli.utils.misc import lazy_import
-from .action_tools import (generate_templates, _get_local_path, create_notebook,
-                           get_git_info, query_yes_no)
-from .pytools import deep_update, load_python_module, load_parameters
-import click
-
-@lazy_import
-def expipe():
-    import expipe
-    return expipe
-
-@lazy_import
-def warnings():
-    import warnings
-    return warnings
-
-@lazy_import
-def datetime():
-    from datetime import datetime
-    return datetime
-
-@lazy_import
-def pq():
-    import quantities as pq
-    return pq
-
-@lazy_import
-def np():
-    import numpy as np
-    return np
-
-@lazy_import
-def PAR():
-    PAR = load_parameters()
-    return PAR
+from .imports import *
+from .action_tools import generate_templates, get_git_info, query_yes_no
 
 
 def validate_position(ctx, param, position):

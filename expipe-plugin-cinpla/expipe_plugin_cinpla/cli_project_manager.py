@@ -39,9 +39,9 @@ def attach_to_cli(cli):
         path = os.path.join(expipe.settings['data_path'],
                        PAR.USER_PARAMS['project_id'])
         if what == 'dir':
-            pprint(os.listdir(path))
+            pprint.pprint(os.listdir(path))
         elif what == 'actions':
-            pprint(project.actions.keys())
+            pprint.pprint(project.actions.keys())
 
     @cli.command('create')
     @click.argument('project-id', type=click.STRING)
@@ -73,5 +73,4 @@ def attach_to_cli(cli):
         assert os.path.exists(settings_file)
         with open(settings_file, "r") as f:
             current_settings = yaml.load(f)
-        from pprint import pprint
-        pprint(current_settings['current'])
+        pprint.pprint(current_settings['current'])
