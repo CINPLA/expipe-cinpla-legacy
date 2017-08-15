@@ -16,7 +16,6 @@ import os
 import os.path as op
 import glob
 from six import with_metaclass
-import subprocess
 import platform
 
 from .misc import _fullname
@@ -61,6 +60,7 @@ def get_plugin(name):
 #------------------------------------------------------------------------------
 
 def discover_plugins():
+    import subprocess
     paths = os.environ['PATH'].split(os.pathsep)
     exs = []
     if platform.system() == "Windows":
