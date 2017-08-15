@@ -170,7 +170,7 @@ def expipe():
 
 @lazy_import
 def warnings():
-    from warnings import warnings
+    import warnings
     return warnings
 
 @lazy_import
