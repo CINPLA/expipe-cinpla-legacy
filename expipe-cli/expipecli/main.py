@@ -8,15 +8,10 @@
 # Imports
 #------------------------------------------------------------------------------
 
-import logging
 import os
 import os.path as op
 import sys
-from traceback import format_exception
-
 import click
-import glob
-
 from .utils import discover_plugins, IPlugin
 
 
