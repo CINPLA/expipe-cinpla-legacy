@@ -57,6 +57,7 @@ def deltadate(adjustdate, regdate):
 
 
 def register_depth(project, action, anatomy=None, yes=False):
+    DTIME_FORMAT = expipe.io.core.datetime_format
     regdate = action.datetime
     mod_info = PAR.MODULES['electrophysiology']
     if len(anatomy) == 0:
