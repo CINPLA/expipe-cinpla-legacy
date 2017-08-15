@@ -13,6 +13,7 @@ Code from http://eli.thegreenplace.net/2012/08/07/fundamental-concepts-of-plugin
 
 import imp
 import os
+import glob
 from pkg_resources import load_entry_point
 from six import with_metaclass
 import platform
@@ -60,18 +61,23 @@ def get_plugin(name):
 #------------------------------------------------------------------------------
 
 def discover_plugins():
-    import subprocess
-    path = os.path.dirname(sys.executable)
+    paths = os.environ['PATH'].split(os.pathsep)
     if platform.system() == "Windows":
-        ext = '.exe'
+        ext = '-script.py'
     else:
         ext = ''
-    executables = [exe + ext for exe in os.listdir(path)
-                   if exe.startswith('plugin-expipe')]
+    executables = []
+    for path in paths:
+        if os.path.exists(path):
+            executables.extend([os.path.join(path, exe)
+                                for exe in os.listdir(path)
+                                if exe.startswith('plugin-expipe')
+                                and exe.endswith(ext)])
     if len(executables) == 0:
         return IPluginRegistry.plugins
-    # TODO reveal plugin module in a non ugly way
-    for executable in executables:
-        module = imp.load_source(executable, os.path.join(path, executable))
-        load_entry_point(module.__requires__, 'console_scripts', executable)()
+    for path in executables:
+        executable = os.path.split(path)[-1]
+        module = imp.load_source(executable, path)
+        load_entry_point(module.__requires__, 'console_scripts',
+                         executable.replace(ext, ''))()
     return IPluginRegistry.plugins
