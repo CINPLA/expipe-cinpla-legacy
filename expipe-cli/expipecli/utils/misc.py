@@ -35,31 +35,31 @@ class _LazyImport(object):
     """Class representing a lazy import."""
 
     def __init__(self, name, loader, namespace=None):
-        self._lazy_target = _LazyImport
-        self._lazy_name = name
-        self._lazy_loader = loader
-        self._lazy_namespace = namespace
+        self._esky_lazy_target = _LazyImport
+        self._esky_lazy_name = name
+        self._esky_lazy_loader = loader
+        self._esky_lazy_namespace = namespace
 
-    def _lazy_load(self):
-        if self._lazy_target is _LazyImport:
-            self._lazy_target = self._lazy_loader()
-            ns = self._lazy_namespace
+    def _esky_lazy_load(self):
+        if self._esky_lazy_target is _LazyImport:
+            self._esky_lazy_target = self._esky_lazy_loader()
+            ns = self._esky_lazy_namespace
             if ns is not None:
                 try:
-                    if ns[self._lazy_name] is self:
-                        ns[self._lazy_name] = self._lazy_target
+                    if ns[self._esky_lazy_name] is self:
+                        ns[self._esky_lazy_name] = self._esky_lazy_target
                 except KeyError:
                     pass
 
-    def __getattribute__(self,attr):
+    def __getattribute__(self, attr):
         try:
-            return object.__getattribute__(self,attr)
+            return object.__getattribute__(self, attr)
         except AttributeError:
-            if self._lazy_target is _LazyImport:
-                self._lazy_load()
-            return getattr(self._lazy_target,attr)
+            if self._esky_lazy_target is _LazyImport:
+                self._esky_lazy_load()
+            return getattr(self._esky_lazy_target, attr)
 
-    def __nonzero__(self):
-        if self._lazy_target is _LazyImport:
-            self._lazy_load()
-        return bool(self._lazy_target)
+    def __bool__(self):
+        if self._esky_lazy_target is _LazyImport:
+            self._esky_lazy_load()
+        return bool(self._esky_lazy_target)
