@@ -1,16 +1,38 @@
-import expipe
-import os
-import os.path as op
-import click
-import sys
-import warnings
+from expipecli.utils.misc import lazy_import
 from .action_tools import (generate_templates, _get_local_path, create_notebook,
-                           GIT_NOTE)
+                           get_git_info, query_yes_no)
 from .pytools import deep_update, load_python_module, load_parameters
+import click
 
-PAR = load_parameters()
+@lazy_import
+def expipe():
+    import expipe
+    return expipe
 
-DTIME_FORMAT = expipe.io.core.datetime_format
+@lazy_import
+def warnings():
+    import warnings
+    return warnings
+
+@lazy_import
+def datetime():
+    from datetime import datetime
+    return datetime
+
+@lazy_import
+def pq():
+    import quantities as pq
+    return pq
+
+@lazy_import
+def np():
+    import numpy as np
+    return np
+
+@lazy_import
+def PAR():
+    PAR = load_parameters()
+    return PAR
 
 
 def validate_position(ctx, param, position):
@@ -43,7 +65,6 @@ def attach_to_cli(cli):
                   help='The experimenter performing the annotation.',
                   )
     def annotate(action_id, tag, message, user):
-        from datetime import datetime
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
         user = user or PAR.USER_PARAMS['user_name']
@@ -94,10 +115,7 @@ def attach_to_cli(cli):
                   )
     def generate_adjustment(subject_id, date, anatomy, user, index, init,
                             overwrite):
-        import numpy as np
-        import quantities as pq
-        from .action_tools import query_yes_no
-        from datetime import datetime
+        DTIME_FORMAT = expipe.io.core.datetime_format
         if date == 'now':
             date = datetime.now()
         else:
@@ -167,7 +185,7 @@ def attach_to_cli(cli):
         content['adjustment'] = curr_adjustment
         content['experimenter'] = user
         content['date'] = datestring
-        content['git_note'] = GIT_NOTE
+        content['git_note'] = get_git_info()
         action.require_module(name=name, contents=content, overwrite=True)
 
     @cli.command('register-surgery', short_help='Generate a surgery action.')
@@ -209,8 +227,6 @@ def attach_to_cli(cli):
     def generate_surgery(subject_id, procedure, date, user, weight,
                          overwrite, position, angle):
         # TODO tag sucject as active
-        import quantities as pq
-        from datetime import datetime
         if procedure not in ["implantation", "injection"]:
             raise ValueError('procedure must be one of "implantation" ' +
                              'or "injection"')
@@ -233,7 +249,7 @@ def attach_to_cli(cli):
         print('Registering user ' + user)
         action.users = [user]
         generate_templates(action, PAR.TEMPLATES['surgery_' + procedure],
-                           overwrite, git_note=GIT_NOTE)
+                           overwrite, git_note=get_git_info())
         modules_dict = action.modules.to_dict()
         for key, x, y, z, unit in position:
             name = PAR.MODULES[procedure][key]
@@ -320,8 +336,6 @@ def attach_to_cli(cli):
                   help='The weight of the animal.',
                   )
     def generate_subject(subject_id, overwrite, user, **kwargs):
-        import quantities as pq
-        from datetime import datetime
         project = expipe.require_project('subjects-registry')
         action = project.require_action(subject_id)
         kwargs['birthday'] = datetime.strftime(
@@ -372,8 +386,6 @@ def attach_to_cli(cli):
                   help='The weight of the animal.',
                   )
     def generate_perfusion(subject_id, date, user, overwrite, weight):
-        import quantities as pq
-        from datetime import datetime
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(subject_id + '-perfusion')
         if date == 'now':
@@ -393,7 +405,7 @@ def attach_to_cli(cli):
         print('Registering user ' + user)
         action.users = [user]
         generate_templates(action, PAR.TEMPLATES['perfusion'],
-                           overwrite, git_note=GIT_NOTE)
+                           overwrite, git_note=get_git_info())
         subject = {'_inherits': '/action_modules/' +
                                 'subjects-registry/' +
                                 subject_id}

@@ -1,10 +1,4 @@
-import paramiko
-import os
-import os.path as op
-from tqdm import tqdm
-from scp import SCPClient
-import getpass
-import tarfile
+from .imports import *
 
 
 def ssh_execute(ssh, command):
@@ -31,7 +25,7 @@ def untar(fname, prefix):
                 yield tarinfo
 
     tar = tarfile.open(fname)
-    dest = op.splitext(fname)[-0]
+    dest = os.path.splitext(fname)[-0]
     tar.extractall(dest, get_members(tar, prefix))
     tar.close()
 
@@ -113,9 +107,9 @@ def login(hostname, username, password, port):
 
 def scp_put(scp_client, source, dest=None, serverpath=None):
 
-    source = op.abspath(source)
+    source = os.path.abspath(source)
     dest_name = source.split(os.sep)[-1]
-    dest_path = op.join(serverpath, dest_name)
+    dest_path = os.path.join(serverpath, dest_name)
 
     print('Transferring', source, ' to ', dest_path)
     scp_client.put(source, dest_path, recursive=True)
@@ -124,12 +118,12 @@ def scp_put(scp_client, source, dest=None, serverpath=None):
 
 def scp_get(scp_client, source, dest=None, serverpath=None):
     if serverpath is None:
-        serverpath = op.split(source)[0]
+        serverpath = os.path.split(source)[0]
     else:
-        source = op.join(serverpath, source)
+        source = os.path.join(serverpath, source)
     if dest is None:
-        dest_name = op.split(source)[-1]
-        dest_path = op.join(os.getcwd(), dest_name)
+        dest_name = os.path.split(source)[-1]
+        dest_path = os.path.join(os.getcwd(), dest_name)
 
     print('Transferring', source, ' to ', dest_path)
     scp_client.get(source, dest_path, recursive=True)

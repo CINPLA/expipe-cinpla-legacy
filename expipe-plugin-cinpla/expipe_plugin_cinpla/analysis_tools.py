@@ -1,12 +1,5 @@
-import os
-import os.path as op
-import numpy as np
-import exdir
-import exana.tracking as tr
-import quantities as pq
-import neo
-import copy
-import logging
+from expipecli.utils.misc import lazy_import
+from .imports import *
 
 
 def get_logger(fname):
@@ -34,6 +27,18 @@ class Analyser:
     def __init__(self, exdir_path, params, unit_info, ext='.png',
                  save_figs=True, close_fig=True, channel_group=None,
                  no_local=False, overwrite=False, skip=False):
+        import matplotlib.pyplot as plt
+        from matplotlib.ticker import MaxNLocator
+        import matplotlib.lines as mlines
+        import matplotlib.gridspec as gridspec
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+        import exana.tracking as tr
+        import exana.stimulus as st
+        import exana.time_frequency as tf
+        from exana.waveform import (plot_amp_clusters, plot_waveforms)
+        from exana.statistics import correlogram, plot_isi_hist, coeff_var
+        from exana.misc.tools import normalize
+        from .make_spatiality_overview import make_spatiality_overview
         print('Initializing plotting for {}'.format(exdir_path))
         if ext[0] != '.':
             ext = '.' + ext
@@ -81,7 +86,6 @@ class Analyser:
         self.analysis_output = self.generate_output_dict()
 
     def savefig(self, fname, fig, dpi=300):
-        import matplotlib.pyplot as plt
         if self.save_figs:
             if self.ext == '.pdf':
                 fig.savefig(fname + self.ext, bbox_inches='tight')
@@ -126,9 +130,8 @@ class Analyser:
         return analysis_output
 
     def _check_and_delete_figs(self, directory, channel_group):
-        import glob
         name = 'Channel_group_{}*'.format(channel_group)
-        files = glob.glob(op.join(directory, name))
+        files = glob.glob(os.path.join(directory, name))
         if len(files) > 0:
             if self.overwrite:
                 pass
@@ -142,9 +145,6 @@ class Analyser:
         return True
 
     def spatial_overview(self):
-        import exana.tracking as tr
-        from exana.statistics import coeff_var
-        from .make_spatiality_overview import make_spatiality_overview
         raw_dir = str(self._analysis.require_raw('spatial_overview').directory)
         os.makedirs(raw_dir, exist_ok=True)
         for nr, chx in enumerate(self.chxs):
@@ -166,7 +166,7 @@ class Analyser:
                 sptr = unit.spiketrains[0]
                 unit_name = unit.name.replace(' ', '_').replace('#', '')
                 fname = '{} {}'.format(chx.name, unit_name).replace(" ", "_")
-                fpath = op.join(raw_dir, fname)
+                fpath = os.path.join(raw_dir, fname)
 
                 rate_map, rate_bins, _ = tr.spatial_rate_map( # NOTE assuming quadratic box
                     self.x, self.y, self.t, sptr,
@@ -210,17 +210,13 @@ class Analyser:
                 self.analysis_output[group_name][unit_name]['analysis_output'].update(analysis_output)
 
     def occupancy(self):
-        import exana.tracking as tr
-        import matplotlib.pyplot as plt
-        import matplotlib.gridspec as gridspec
-        from mpl_toolkits.axes_grid1 import make_axes_locatable
         raw_dir = str(self._analysis.require_raw('occupancy').directory)
-        logger = get_logger(op.join(raw_dir, 'exceptions.log'))
+        logger = get_logger(os.path.join(raw_dir, 'exceptions.log'))
         os.makedirs(raw_dir, exist_ok=True)
         fname = 'occupancy_map'
-        fpath = op.join(raw_dir, fname)
+        fpath = os.path.join(raw_dir, fname)
         print(fpath)
-        # if op.isdir(raw_dir):
+        # if os.path.isdir(raw_dir):
         #     os.removedirs(raw_dir)
         try:
             fig = plt.figure()
@@ -275,7 +271,7 @@ class Analyser:
                 #     continue
     #             sptr = unit.spiketrains[0]
     #             fname = '{} {}'.format(chx.name, unit.name).replace(" ", "_")
-    #             fpath = op.join(raw_dir, fname)
+    #             fpath = os.path.join(raw_dir, fname)
     #             if group_id < 4:
     #                 id_list = range(4)
     #             else:
@@ -299,10 +295,6 @@ class Analyser:
     #             data.to_json(fpath + '.json', orient='index')
 
     def tfr(self):
-        from exana.stimulus import epoch_overview
-        from exana.time_frequency import plot_tfr
-        import quantities as pq
-        import neo
         raw_dir = str(self._analysis.require_raw('time_frequency').directory)
         os.makedirs(raw_dir, exist_ok=True)
         for chx in self.chxs:
@@ -315,9 +307,9 @@ class Analyser:
                   'channel group {}'.format(group_id))
             for num, ana in enumerate(chx.analogsignals): # TODO write the correct channel
                 fname = '{} channelproxy {}'.format(chx.name, num).replace(" ", "_")
-                fpath = op.join(raw_dir, fname)
+                fpath = os.path.join(raw_dir, fname)
                 if self.epoch is not None:
-                    epo_over = epoch_overview(self.epoch,
+                    epo_over = st.epoch_overview(self.epoch,
                                               np.median(np.diff(self.epoch.times)))
                     if len(epo_over.times) > 15:
                         with open(fpath + '.exception', 'w+') as f:
@@ -328,7 +320,7 @@ class Analyser:
                 else:
                     epo_over = None
                 try:
-                    fig = plot_tfr(ana, epoch=epo_over, f0=3, flim=[0, 120],
+                    fig = tf.plot_tfr(ana, epoch=epo_over, f0=3, flim=[0, 120],
                                    plot_ana=True)
                 except Exception as e:
                     with open(fpath + '.exception', 'w+') as f:
@@ -337,10 +329,6 @@ class Analyser:
                 self.savefig(fpath, fig)
 
     def psd(self):
-        from exana.stimulus import epoch_overview
-        from exana.time_frequency import plot_psd
-        import quantities as pq
-        import neo
         raw_dir = str(self._analysis.require_raw('power_spectrum_density').directory)
         os.makedirs(raw_dir, exist_ok=True)
         for chx in self.chxs:
@@ -353,9 +341,9 @@ class Analyser:
                   'channel group {}'.format(group_id))
             for num, ana in enumerate(chx.analogsignals): # TODO write the correct channel
                 fname = '{} channelproxy {}_psd'.format(chx.name, num).replace(" ", "_")
-                fpath = op.join(raw_dir, fname)
+                fpath = os.path.join(raw_dir, fname)
                 try:
-                    ax = plot_psd(ana, xlim=[0, 100], nperseg=2048)
+                    ax = tf.plot_psd(ana, xlim=[0, 100], nperseg=2048)
                 except Exception as e:
                     with open(fpath + '.exception', 'w+') as f:
                         print(str(e), file=f)
@@ -366,12 +354,8 @@ class Analyser:
         if self.epoch is None:
             print('There are no epochs related to this experiment')
             return
-        from exana.stimulus import plot_psth
-        from exana.stimulus import epoch_overview
-        import quantities as pq
-        import matplotlib.pyplot as plt
         raw_dir = str(self._analysis.require_raw('stimulation_statistics').directory)
-        logger = get_logger(op.join(raw_dir, 'exceptions.log'))
+        logger = get_logger(os.path.join(raw_dir, 'exceptions.log'))
         os.makedirs(raw_dir, exist_ok=True)
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
@@ -389,8 +373,8 @@ class Analyser:
                     unit.name = 'cluster_{}'.format(unit.annotations['cluster_id'])
                 sptr = unit.spiketrains[0]
                 fname = '{} {} stim macro'.format(chx.name, unit.name)
-                fpath = op.join(raw_dir, fname).replace(" ", "_")
-                epo_over = epoch_overview(self.epoch,
+                fpath = os.path.join(raw_dir, fname).replace(" ", "_")
+                epo_over = st.epoch_overview(self.epoch,
                                           np.median(np.diff(self.epoch.times)))
 
                 t_start = -np.round(epo_over.durations[0])
@@ -399,7 +383,7 @@ class Analyser:
                 fig = plt.figure()
 
                 try:
-                    plot_psth(sptr=sptr, epoch=epo_over, t_start=t_start,
+                    st.plot_psth(sptr=sptr, epoch=epo_over, t_start=t_start,
                               t_stop=t_stop, output='counts', binsize=binsize,
                               fig=fig, ylim=ylim) # TODO does not manage to send ylim???
                     self.savefig(fpath, fig)
@@ -407,13 +391,13 @@ class Analyser:
                     logger.exception('stim macro')
 
                 fname = '{} {} stim micro'.format(chx.name, unit.name)
-                fpath = op.join(raw_dir, fname).replace(" ", "_")
+                fpath = os.path.join(raw_dir, fname).replace(" ", "_")
                 fig = plt.figure()
                 t_start = -np.round(self.epoch.durations[0].rescale('ms')) * 3  # FIXME is milliseconds always good?
                 t_stop = np.round(self.epoch.durations[0].rescale('ms')) * 3
                 binsize = (abs(t_start) + abs(t_stop)) / 100.
                 try:
-                    plot_psth(sptr=sptr, epoch=self.epoch, t_start=t_start,
+                    st.plot_psth(sptr=sptr, epoch=self.epoch, t_start=t_start,
                               t_stop=t_stop, output='counts', binsize=binsize,
                               fig=fig)
                     self.savefig(fpath, fig)
@@ -422,24 +406,13 @@ class Analyser:
 
     def spike_lfp_coherence(self, xlim=[4, 16], color='b',
                             srch=[6, 10], show_max=False): # TODO plots everything twice
-        from exana.time_frequency import plot_spike_psd, plot_psd
-        from exana.misc.tools import normalize
-        from matplotlib import gridspec
-        import matplotlib.lines as mlines
-        from matplotlib.ticker import MaxNLocator
-        import elephant as el
-        from exana.stimulus import epoch_overview
-        import quantities as pq
-        import neo
-        import matplotlib.pyplot as plt
-        import warnings
         # from .signal_tools import downsample_250
         raw_dir = str(self._analysis.require_raw('spike_lfp_coherence').directory)
         os.makedirs(raw_dir, exist_ok=True)
         starts = [self.blk.segments[0].t_start]
         stops = [self.blk.segments[0].t_stop]
         if self.epoch is not None:
-            epo_over = epoch_overview(self.epoch,
+            epo_over = st.epoch_overview(self.epoch,
                                       np.median(np.diff(self.epoch.times)))
             if len(epo_over) > 10:
                 epo_over = None
@@ -473,7 +446,7 @@ class Analyser:
                 gs_main = gridspec.GridSpec(1, len(starts))
 
                 fname = '{} {}'.format(chx.name, unit.name)
-                fpath = op.join(raw_dir, fname).replace(" ", "_")
+                fpath = os.path.join(raw_dir, fname).replace(" ", "_")
 
                 ylim_sptr_spec = []
                 ylim_ana_spec = []
@@ -516,7 +489,7 @@ class Analyser:
                         3, 1, subplot_spec=gs_main[0, plot_num])
 
                     ax_sptr_spec = fig.add_subplot(gs[0])
-                    plot_spike_psd([sptr], xlim=xlim,
+                    tf.plot_spike_psd([sptr], xlim=xlim,
                                    mark_max=False, NFFT=6000, title=None,
                                    xlabel=None, color=color, ax=ax_sptr_spec,
                                    ylabel=None, ylim=None)
@@ -529,7 +502,7 @@ class Analyser:
                     # lfp psd
                     # TODO select proper lfp signal
                     ax_ana_spec = fig.add_subplot(gs[1])
-                    plot_psd(sliced_anas, color=color, xlim=xlim,
+                    tf.plot_psd(sliced_anas, color=color, xlim=xlim,
                              mark_max=False, nperseg=2048, ylim=None,
                              fcn=lambda inp: normalize(inp, mode='zscore'),
                              title=None, ax=ax_ana_spec, xlabel=False,
@@ -575,12 +548,8 @@ class Analyser:
                 self.savefig(fpath, fig)
 
     def spike_statistics(self, color='b'):
-        from exana.waveform import (plot_amp_clusters, plot_waveforms)
-        from exana.statistics import correlogram, plot_isi_hist
-        import matplotlib.pyplot as plt
-        import matplotlib.gridspec as gridspec
         raw_dir = str(self._analysis.require_raw('spike_statistics').directory)
-        logger = get_logger(op.join(raw_dir, 'exceptions.log'))
+        logger = get_logger(os.path.join(raw_dir, 'exceptions.log'))
         os.makedirs(raw_dir, exist_ok=True)
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
@@ -600,7 +569,7 @@ class Analyser:
 
                 try:
                     fname = '{} {}'.format(chx.name, unit.name)
-                    fpath = op.join(raw_dir, fname).replace(" ", "_")
+                    fpath = os.path.join(raw_dir, fname).replace(" ", "_")
                     fig = plt.figure()
                     nrc = sptr.waveforms.shape[1]
                     gs = gridspec.GridSpec(2*nrc+4, 2*nrc+4)
@@ -624,7 +593,6 @@ class Analyser:
                     logger.exception('spike statistics')
 
     def orient_tuning_overview(self):
-        import exana.stimulus as st
         try:
             stim_epoch = st.get_epoch(self.seg.epochs, "visual_stimulus")
         except ValueError:
@@ -651,11 +619,11 @@ class Analyser:
                     off_rate = off_rates[chx.name][unit_id]
 
                     fname = 'raster {} Unit {}'.format(chx.name, u)
-                    fpath = op.join(raw_dir, fname).replace(" ", "_")
+                    fpath = os.path.join(raw_dir, fname).replace(" ", "_")
                     fig = st.orient_raster_plots(trials)
                     self.savefig(fpath, fig)
 
                     fname = 'tuning {} Unit {}'.format(chx.name, u)
-                    fpath = op.join(raw_dir, fname).replace(" ", "_")
+                    fpath = os.path.join(raw_dir, fname).replace(" ", "_")
                     fig = st.plot_tuning_overview(trials, off_rate)
                     self.savefig(fpath, fig)

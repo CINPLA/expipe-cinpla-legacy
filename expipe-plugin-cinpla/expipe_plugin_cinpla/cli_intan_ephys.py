@@ -1,24 +1,5 @@
-import expipe
-import expipe.io
-import os
-import os.path as op
-from expipecli.utils import IPlugin
-import click
-import quantities as pq
-import shutil
-import sys
-from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
-from .action_tools import (generate_templates, _get_local_path,
-                           _get_probe_file, GIT_NOTE)
-from exana.misc.signal_tools import (create_klusta_prm, save_binary_format, apply_CAR,
-                                     filter_analog_signals, ground_bad_channels,
-                                     remove_stimulation_artifacts, duplicate_bad_channels,
-                                     extract_rising_edges, find_frequency_range)
-from .pytools import load_parameters
-
-PAR = load_parameters()
-
-DTIME_FORMAT = expipe.io.core.datetime_format
+from .imports import *
+from . import action_tools
 
 
 def attach_to_cli(cli):
@@ -114,18 +95,16 @@ def attach_to_cli(cli):
       """Generate a klusta .dat and .prm files from openephys directory.
 
       COMMAND: action-id"""
-      import numpy as np
       if not no_klusta:
           import klusta
           import klustakwik2
       action = None
       if exdir_path is None:
-          import exdir
           project = expipe.get_project(PAR.USER_PARAMS['project_id'])
           action = project.require_action(action_id)
           fr = action.require_filerecord()
           if not no_local:
-              exdir_path = _get_local_path(fr)
+              exdir_path = action_tools._get_local_path(fr)
           else:
               exdir_path = fr.server_path
           exdir_file = exdir.File(exdir_path)
@@ -135,13 +114,13 @@ def attach_to_cli(cli):
               raise ValueError('No Open Ephys aquisition system ' +
                                'related to this action')
           openephys_session = acquisition.attrs["openephys_session"]
-          intan_ephys_path = op.join(str(acquisition.directory), openephys_session)
-          intan_ephys_base = op.join(intan_ephys_path, openephys_session)
+          intan_ephys_path = os.path.join(str(acquisition.directory), openephys_session)
+          intan_ephys_base = os.path.join(intan_ephys_path, openephys_session)
           rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
-          rhs_path = op.join(intan_ephys_path, rhs_file)
-          klusta_prm = op.abspath(intan_ephys_base) + '_klusta.prm'
+          rhs_path = os.path.join(intan_ephys_path, rhs_file)
+          klusta_prm = os.path.abspath(intan_ephys_base) + '_klusta.prm'
 
-          prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
+          prb_path = prb_path or action_tools._get_probe_file(system='intan', nchan=nchan,
                                                  spikesorter='klusta')
           if prb_path is None:
               raise IOError('No probefile found in expipe config directory,' +
@@ -156,7 +135,7 @@ def attach_to_cli(cli):
               assert len(intan_sync) == 2
               intan_chan = int(intan_sync[1])
               if intan_sync[0] == 'adc':
-                  intan_clip_times = extract_rising_edges(intan_file.adc_signals[0].signal[intan_chan],
+                  intan_clip_times = sig_tools.extract_rising_edges(intan_file.adc_signals[0].signal[intan_chan],
                                                           intan_file.times)
               elif intan_sync[0] == 'dig':
                   intan_clip_times = intan_file.digital_in_signals[0].times[intan_chan]
@@ -196,7 +175,7 @@ def attach_to_cli(cli):
 
               if shutter_sys == 'intan':
                   if shutter_sig == 'adc':
-                      shutter_ttl = extract_rising_edges(intan_file.adc_signals[0].signal[shutter_chan],
+                      shutter_ttl = sig_tools.extract_rising_edges(intan_file.adc_signals[0].signal[shutter_chan],
                                                        intan_file.times)
                   elif shutter_sig == 'dig':
                       shutter_ttl = intan_file.digital_in_signals[0].times[shutter_chan]
@@ -215,48 +194,47 @@ def attach_to_cli(cli):
           anas = intan_file.analog_signals[0].signal
           fs = openephys_file.sample_rate.magnitude
           nchan = anas.shape[0]
-          create_klusta_prm(intan_ephys_base, prb_path, nchan,
+          sig_tools.create_klusta_prm(intan_ephys_base, prb_path, nchan,
                             fs=fs, klusta_filter=klusta_filter,
                             filter_low=filter_low,
                             filter_high=filter_high)
           if pre_filter:
-              anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
+              anas = sig_tools.filter_analog_signals(anas, freq=[filter_low, filter_high],
                                            fs=fs, filter_type='bandpass')
           if filter_noise:
               freq_range=[2000, 4000]
-              fpre, Pxxpre = signal.welch(eap_pre, fs, nperseg=1024)
+              fpre, Pxxpre = scipy.signal.welch(eap_pre, fs, nperseg=1024)
               avg_spectrum = np.mean(Pxxpre, axis=0)
               fpeak = fpre[np.where((fpre>freq_range[0]) &
                                       (fpre<freq_range[1]))][np.argmax(
                                        avg_spectrum[np.where((fpre>freq_range[0]) & (fpre<freq_range[1]))])]
               stopband = [fpeak-150*pq.Hz, fpeak+150*pq.Hz]
-              anas = filter_analog_signals(anas, freq=stopband,
+              anas = sig_tools.filter_analog_signals(anas, freq=stopband,
                                            fs=fs, filter_type='bandstop', order=2)
           if len(ground) != 0:
               ground = [int(g) for g in ground]
-              anas = ground_bad_channels(anas, ground)
+              anas = sig_tools.ground_bad_channels(anas, ground)
 
           if split_probe is not None:
               split_chans = np.arange(nchan)
               if split_probe != nchan / 2:
-                  import warnings
                   warnings.warn('The split probe is not dividing the number' +
                                 ' of channels in two')
               print('Splitting probe in channels \n"' +
                     str(split_chans[:split_probe]) + '"\nand\n"' +
                     str(split_chans[split_probe:]) + '"')
           if common_ref == 'car':
-              anas, _ = apply_CAR(anas, car_type='mean',
+              anas, _ = sig_tools.apply_CAR(anas, car_type='mean',
                                   split_probe=split_probe)
           elif common_ref == 'cmr':
-              anas, _ = apply_CAR(anas, car_type='median',
+              anas, _ = sig_tools.apply_CAR(anas, car_type='median',
                                   split_probe=split_probe)
 
           if len(ground) != 0:
               duplicate = [int(g) for g in ground]
-              anas = duplicate_bad_channels(anas, duplicate, prb_path)
+              anas = sig_tools.duplicate_bad_channels(anas, duplicate, prb_path)
 
-          save_binary_format(intan_ephys_base, anas)
+          sig_tools.save_binary_format(intan_ephys_base, anas)
           if action is not None:
               prepro = {
                   'common_ref': common_ref,
@@ -275,7 +253,6 @@ def attach_to_cli(cli):
 
       if not no_klusta:
           print('Running klusta')
-          import subprocess
           try:
               subprocess.check_output(['klusta', klusta_prm, '--overwrite'])
           except subprocess.CalledProcessError as e:
@@ -380,16 +357,12 @@ def attach_to_cli(cli):
       """Generate an intan (ephys) open-ephys (tracking) recording-action to database.
 
       COMMAND: intan-ephys-path"""
-      from expipe_io_neuro import pyopenephys, pyintan
-      from datetime import datetime, timedelta
-      import numpy as np
-      from .action_tools import register_depth
-      intan_ephys_path = op.abspath(intan_ephys_path)
+      intan_ephys_path = os.path.abspath(intan_ephys_path)
       intan_ephys_dir = intan_ephys_path.split(os.sep)[-1]
       rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
-      rhs_path = op.join(intan_ephys_path, rhs_file)
+      rhs_path = os.path.join(intan_ephys_path, rhs_file)
       project = expipe.get_project(PAR.USER_PARAMS['project_id'])
-      prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
+      prb_path = prb_path or action_tools._get_probe_file(system='intan', nchan=nchan,
                                              spikesorter='klusta')
       if prb_path is None:
           raise IOError('No probefile found in expipe config directory,' +
@@ -438,13 +411,13 @@ def attach_to_cli(cli):
               raise ValueError('Could not find "intanopenephys" in ' +
                                'expipe_params.py PAR.TEMPLATES: "' +
                                '{}"'.format(PAR.TEMPLATES.keys()))
-          generate_templates(action, PAR.TEMPLATES['intanopenephys'], overwrite,
-                             git_note=GIT_NOTE)
+          action_tools.generate_templates(action, PAR.TEMPLATES['intanopenephys'], overwrite,
+                             git_note=action_tools.get_git_info())
           headstage = action.require_module(name='hardware_intan_headstage').to_dict()
           headstage['model']['value'] = 'RHS2132'
           action.require_module(name='hardware_intan_headstage', contents=headstage,
                                 overwrite=True)
-          correct_depth = register_depth(project, action, anatomy)
+          correct_depth = action_tools.register_depth(project, action, anatomy)
           if not correct_depth:
               print('Aborting registration!')
               return
@@ -459,17 +432,17 @@ def attach_to_cli(cli):
       if not no_files:
           fr = action.require_filerecord()
           if not no_local:
-              exdir_path = _get_local_path(fr)
+              exdir_path = action_tools._get_local_path(fr)
           else:
               exdir_path = fr.server_path
-          if op.exists(exdir_path):
+          if os.path.exists(exdir_path):
               if overwrite:
                   shutil.rmtree(exdir_path)
               else:
                   raise FileExistsError('The exdir path to this action "' +
                                         exdir_path + '" exists, use ' +
                                         'overwrite flag')
-          os.makedirs(op.dirname(exdir_path), exist_ok=True)
+          os.makedirs(os.path.dirname(exdir_path), exist_ok=True)
           shutil.copy(prb_path, intan_ephys_path)
           openephys.convert(openephys_file,
                             exdir_path=exdir_path)
@@ -614,16 +587,12 @@ def attach_to_cli(cli):
       """Generate an intan (ephys) open-ephys (tracking) recording-action to database.
 
       COMMAND: intan-ephys-path"""
-      from expipe_io_neuro import pyopenephys, pyintan
-      from datetime import datetime, timedelta
-      import numpy as np
-      from .action_tools import register_depth
-      intan_ephys_path = op.abspath(intan_ephys_path)
+      intan_ephys_path = os.path.abspath(intan_ephys_path)
       intan_ephys_dir = intan_ephys_path.split(os.sep)[-1]
       rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
-      rhs_path = op.join(intan_ephys_path, rhs_file)
+      rhs_path = os.path.join(intan_ephys_path, rhs_file)
       project = expipe.get_project(PAR.USER_PARAMS['project_id'])
-      prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
+      prb_path = prb_path or action_tools._get_probe_file(system='intan', nchan=nchan,
                                              spikesorter='klusta')
       if prb_path is None:
           raise IOError('No probefile found in expipe config directory,' +
@@ -638,7 +607,7 @@ def attach_to_cli(cli):
           assert len(intan_sync) == 2
           intan_chan = int(intan_sync[1])
           if intan_sync[0] == 'adc':
-              intan_clip_times = extract_rising_edges(intan_file.adc_signals[0].signal[intan_chan],
+              intan_clip_times = sig_tools.extract_rising_edges(intan_file.adc_signals[0].signal[intan_chan],
                                                       intan_file.times)
           elif intan_sync[0] == 'dig':
               intan_clip_times = intan_file.digital_in_signals[0].times[intan_chan]
@@ -678,7 +647,7 @@ def attach_to_cli(cli):
 
           if shutter_sys == 'intan':
               if shutter_sig == 'adc':
-                  shutter_ttl = extract_rising_edges(intan_file.adc_signals[0].signal[shutter_chan],
+                  shutter_ttl = sig_tools.extract_rising_edges(intan_file.adc_signals[0].signal[shutter_chan],
                                                      intan_file.times)
               elif shutter_sig == 'dig':
                   shutter_ttl = intan_file.digital_in_signals[0].times[shutter_chan]
@@ -730,13 +699,13 @@ def attach_to_cli(cli):
               raise ValueError('Could not find "intanopenephys" in ' +
                                'expipe_params.py PAR.TEMPLATES: "' +
                                '{}"'.format(PAR.TEMPLATES.keys()))
-          generate_templates(action, PAR.TEMPLATES['intanopenephys'], overwrite,
-                             git_note=GIT_NOTE)
+          action_tools.generate_templates(action, PAR.TEMPLATES['intanopenephys'], overwrite,
+                             git_note=action_tools.get_git_info())
           headstage = action.require_module(name='hardware_intan_headstage').to_dict()
           headstage['model']['value'] = 'RHS2132'
           action.require_module(name='hardware_intan_headstage', contents=headstage,
                                 overwrite=True)
-          correct_depth = register_depth(project, action, anatomy)
+          correct_depth = action_tools.register_depth(project, action, anatomy)
           if not correct_depth:
               print('Aborting registration!')
               return
@@ -749,34 +718,32 @@ def attach_to_cli(cli):
       action.messages.extend(messages)
 
       if not no_run:
-          from scipy import signal
           anas = intan_file.analog_signals[0].signal
           fs = intan_file.sample_rate.magnitude
           nchan = anas.shape[0]
-          fname = op.join(intan_ephys_path, intan_ephys_dir)
-          klusta_prm = create_klusta_prm(fname, prb_path, nchan, fs=fs,
+          fname = os.path.join(intan_ephys_path, intan_ephys_dir)
+          klusta_prm = sig_tools.create_klusta_prm(fname, prb_path, nchan, fs=fs,
                                          klusta_filter=klusta_filter,
                                          filter_low=filter_low,
                                          filter_high=filter_high)
           if pre_filter:
-              anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
+              anas = sig_tools.filter_analog_signals(anas, freq=[filter_low, filter_high],
                                                fs=fs, filter_type='bandpass')
 
           if filter_noise:
               freq_range=[2000, 4000]
-              fpeak = find_frequency_range(anas, intan_file.sample_rate, freq_range)
+              fpeak = sig_tools.find_frequency_range(anas, intan_file.sample_rate, freq_range)
               stopband = [fpeak-150*pq.Hz, fpeak+150*pq.Hz]
-              anas = filter_analog_signals(anas, freq=stopband,
+              anas = sig_tools.filter_analog_signals(anas, freq=stopband,
                                            fs=fs, filter_type='bandstop', order=2)
 
           if len(ground) != 0:
               ground = [int(g) for g in ground]
-              anas = ground_bad_channels(anas, ground, copy_signal=False)
+              anas = sig_tools.ground_bad_channels(anas, ground, copy_signal=False)
 
           if split_probe is not None:
               split_chans = np.arange(nchan)
               if split_probe != nchan / 2:
-                  import warnings
                   warnings.warn('The split probe is not dividing the number' +
                                 ' of channels in two')
               print('Splitting probe in channels \n"' +
@@ -795,7 +762,7 @@ def attach_to_cli(cli):
 
               if trigger_sys == 'intan':
                   if trigger_sig == 'adc':
-                      trigger_ttl = extract_rising_edges(intan_file.adc_signals[0].signal[trigger_chan],
+                      trigger_ttl = sig_tools.extract_rising_edges(intan_file.adc_signals[0].signal[trigger_chan],
                                                          intan_file.times)
                   elif trigger_sig == 'dig':
                       trigger_ttl = intan_file.digital_in_signals[0].times[trigger_chan]
@@ -804,17 +771,17 @@ def attach_to_cli(cli):
                       trigger_ttl = openephys_file.digital_in_signals[0].times[trigger_chan]
               else:
                   trigger_ttl = []
-              anas, _ = remove_stimulation_artifacts(anas, intan_file.times, trigger_ttl,
+              anas, _ = sig_tools.remove_stimulation_artifacts(anas, intan_file.times, trigger_ttl,
                                                      mode='zero', copy_signal=False)
 
           if common_ref == 'car':
-              anas, _ = apply_CAR(anas, car_type='mean', split_probe=split_probe, copy_signal=False)
+              anas, _ = sig_tools.apply_CAR(anas, car_type='mean', split_probe=split_probe, copy_signal=False)
           elif common_ref == 'cmr':
-              anas, _ = apply_CAR(anas, car_type='median', split_probe=split_probe, copy_signal=False)
+              anas, _ = sig_tools.apply_CAR(anas, car_type='median', split_probe=split_probe, copy_signal=False)
 
           if len(ground) != 0:
               duplicate = [int(g) for g in ground]
-              anas = duplicate_bad_channels(anas, duplicate, prb_path, copy_signal=False)
+              anas = sig_tools.duplicate_bad_channels(anas, duplicate, prb_path, copy_signal=False)
 
           if action is not None:
               prepro = {
@@ -838,10 +805,9 @@ def attach_to_cli(cli):
               action.require_module(name='preprocessing', contents=prepro,
                                     overwrite=True)
 
-          save_binary_format(fname, anas)
+          sig_tools.save_binary_format(fname, anas)
 
           print('Running klusta')
-          import subprocess
           try:
               subprocess.check_output(['klusta', klusta_prm, '--overwrite'])
           except subprocess.CalledProcessError as e:
@@ -850,11 +816,11 @@ def attach_to_cli(cli):
       if not no_convert:
           fr = action.require_filerecord()
           if not no_temp:
-              exdir_path = _get_local_path(fr)
+              exdir_path = action_tools._get_local_path(fr)
           else:
               exdir_path = fr.local_path
 
-          if op.exists(exdir_path):
+          if os.path.exists(exdir_path):
               if overwrite:
                   shutil.rmtree(exdir_path)
               else:
@@ -862,7 +828,7 @@ def attach_to_cli(cli):
                                         exdir_path + '" exists, use ' +
                                         'overwrite flag')
           try:
-              os.mkdir(op.dirname(exdir_path))
+              os.mkdir(os.path.dirname(exdir_path))
           except Exception:
               pass
           shutil.copy(prb_path, intan_ephys_path)

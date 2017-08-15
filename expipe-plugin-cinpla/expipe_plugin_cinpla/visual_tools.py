@@ -1,39 +1,31 @@
-import numpy as np
-import quantities as pq
-import exdir
-import expipe
-from datetime import datetime
-from expipe_io_neuro import psychopyio, pyopenephys
-import os.path as op
-import glob
-import shutil
+from .imports import *
 
 
 def parse_psychopy_openephys(action, psyexp_path, io_channel):
     exdir_path = action.require_filerecord().local_path
     exdir_object = exdir.File(exdir_path)
     session = exdir_object['acquisition'].attrs['openephys_session']
-    openephys_path = op.join(str(exdir_object['acquisition'].directory),
+    openephys_path = os.path.join(str(exdir_object['acquisition'].directory),
                              session)
     settings = psychopyio.read_xml(psyexp_path)['PsychoPy2experiment']
     exp_name = psychopyio.list_dict_get(settings['Settings']['Param'], 'expName')
-    psycho_data_path = op.join(op.dirname(psyexp_path), 'data')
+    psycho_data_path = os.path.join(os.path.dirname(psyexp_path), 'data')
     session = action.id.split('-')[-1]
     datestr = datetime.strftime(action.datetime, '%Y_%b_%d')
     assert len(action.subjects) == 1, 'Unable to find subject info in action.'
     psycho_search = '{}-{}_*-{}_{}*'.format(action.subjects[0], datestr,
                                            session, exp_name)
-    psycho_paths = glob.glob(op.join(psycho_data_path, psycho_search))
+    psycho_paths = glob.glob(os.path.join(psycho_data_path, psycho_search))
     if len(psycho_paths) == 0: # try searching in openephys_path
-        psycho_paths = glob.glob(op.join(openephys_path, psycho_search))
+        psycho_paths = glob.glob(os.path.join(openephys_path, psycho_search))
     if len(psycho_paths) != 3:
         raise ValueError('Did not found psychopy related files searching ' +
                          ' for "{}". '.format(psycho_search) +
                          'Please make sure the psychopy file names begins ' +
                          'with the correct "action-id" by using this as ' +
                          'the "participant" name in psychopy.')
-    psycho_basepath = op.splitext(psycho_paths[0])[0]
-    psycho_exts = [op.splitext(path)[-1] for path in psycho_paths]
+    psycho_basepath = os.path.splitext(psycho_paths[0])[0]
+    psycho_exts = [os.path.splitext(path)[-1] for path in psycho_paths]
     expected_exts = ['.log', '.csv', '.psydat']
     if not set(psycho_exts) == set(expected_exts):
         missing = [ext for ext in expected_exts if not ext in psycho_exts]
@@ -386,11 +378,6 @@ def generate_grating_stimulus_epoch(exdir_path, timestamps, durations, data):
 #                           Bonsai parsing
 ###############################################################################
 def copy_bonsai_raw_data(exdir_path, axona_filename):
-    import os
-    import glob
-    import shutil
-    import pyxona
-
     axona_file = pyxona.File(axona_filename)
     exdir_file = exdir.File(exdir_path)
     acquisition = exdir_file.require_group("acquisition")
@@ -420,9 +407,6 @@ def organize_bonsai_tracking_files(filepath):
     out : dict
         dictionary of tracking filenames and keylogs
     """
-
-    import os
-    import glob
     csv_files = glob.glob(os.path.join(filepath, "*.csv"))
     filenames = {}
     i = 0
@@ -529,8 +513,6 @@ def parse_bonsai_head_tracking_file(filepath):
     out : dict
         dictionary with position and time data
     """
-    import os
-    import pandas as pd
     filename, extension = os.path.splitext(filepath)
 
     if extension != ".csv":

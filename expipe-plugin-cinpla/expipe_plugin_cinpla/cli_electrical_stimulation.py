@@ -1,19 +1,6 @@
-import expipe
-import expipe.io
-from expipecli.utils import IPlugin
-import click
-import os
-import os.path as op
-import sys
-from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
-from .action_tools import (generate_templates, _get_local_path, GIT_NOTE,
-                            _get_probe_file)
+from .imports import *
+from . import action_tools
 from .electro_tools import (generate_electrical_info, populate_modules)
-from .pytools import load_parameters
-
-PAR = load_parameters()
-
-DTIME_FORMAT = expipe.io.core.datetime_format
 
 
 def attach_to_cli(cli):
@@ -68,6 +55,7 @@ def attach_to_cli(cli):
         COMMAND: action-id: Provide action id to find exdir path"""
 
         import exdir
+        import expipe
         from expipe_io_neuro import pyintan, pyopenephys
         # TODO deafault none
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
@@ -78,7 +66,7 @@ def attach_to_cli(cli):
         #     action.tags = tags
         fr = action.require_filerecord()
         if not no_local:
-            exdir_path = _get_local_path(fr)
+            exdir_path = action_tools._get_local_path(fr)
         else:
             exdir_path = fr.server_path
         exdir_object = exdir.File(exdir_path)
@@ -90,12 +78,12 @@ def attach_to_cli(cli):
             raise ValueError('No Intan aquisition system ' +
                              'related to this action')
         openephys_session = acquisition.attrs["openephys_session"]
-        intan_ephys_path = op.join(str(acquisition.directory), openephys_session)
-        intan_ephys_base = op.join(intan_ephys_path, openephys_session)
+        intan_ephys_path = os.path.join(str(acquisition.directory), openephys_session)
+        intan_ephys_base = os.path.join(intan_ephys_path, openephys_session)
         rhs_file = [f for f in os.listdir(intan_ephys_path) if f.endswith('.rhs')][0]
-        rhs_path = op.join(intan_ephys_path, rhs_file)
+        rhs_path = os.path.join(intan_ephys_path, rhs_file)
 
-        prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
+        prb_path = prb_path or action_tools._get_probe_file(system='intan', nchan=nchan,
                                                spikesorter='klusta')
         if prb_path is None:
             raise IOError('No probefile found in expipe config directory,' +
@@ -161,7 +149,7 @@ def attach_to_cli(cli):
 
         trigger_param, channel_param = generate_electrical_info(exdir_path, intan_file, openephys_file,
                                                                 trigger_chan, stim_trigger=trigger_sig)
-        generate_templates(action, PAR.TEMPLATES['electrical_stimulation'],
+        action_tools.generate_templates(action, PAR.TEMPLATES['electrical_stimulation'],
                            overwrite, git_note=None)
 
         trigger_param.update(channel_param)

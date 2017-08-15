@@ -1,24 +1,5 @@
-import expipe
-import expipe.io
-import os
-import os.path as op
-from expipecli.utils import IPlugin
-import click
-import quantities as pq
-import shutil
-import sys
-from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
-from .action_tools import (generate_templates, _get_local_path,
-                           _get_probe_file, GIT_NOTE)
-from exana.misc.signal_tools import (create_klusta_prm, save_binary_format, apply_CAR,
-                                     filter_analog_signals, ground_bad_channels,
-                                     remove_stimulation_artifacts, duplicate_bad_channels,
-                                     extract_rising_edges, find_frequency_range)
-from .pytools import load_parameters
-
-PAR = load_parameters()
-
-DTIME_FORMAT = expipe.io.core.datetime_format
+from .imports import *
+from . import action_tools
 
 
 def attach_to_cli(cli):
@@ -100,18 +81,16 @@ def attach_to_cli(cli):
         """Generate a klusta .dat and .prm files from intan rhs.
 
         COMMAND: action-id"""
-        import numpy as np
         if not no_klusta:
             import klusta
             import klustakwik2
         action = None
         if exdir_path is None:
-            import exdir
             project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_local:
-                exdir_path = _get_local_path(fr)
+                exdir_path = action_tools._get_local_path(fr)
             else:
                 exdir_path = fr.server_path
             exdir_file = exdir.File(exdir_path)
@@ -121,11 +100,11 @@ def attach_to_cli(cli):
                 raise ValueError('No Intan aquisition system ' +
                                  'related to this action')
             rhs_file = [f for f in os.listdir(str(acquisition.directory)) if f.endswith('.rhs')][0]
-            rhs_path = op.join(str(acquisition.directory), rhs_file)
+            rhs_path = os.path.join(str(acquisition.directory), rhs_file)
             intan_session = acquisition.attrs["intan_session"]
-            intan_base = op.join(str(acquisition.directory), intan_session)
-            klusta_prm = op.abspath(intan_base) + '_klusta.prm'
-            prb_path = prb_path or _get_probe_file('intan', nchan=nchan,
+            intan_base = os.path.join(str(acquisition.directory), intan_session)
+            klusta_prm = os.path.abspath(intan_base) + '_klusta.prm'
+            prb_path = prb_path or action_tools._get_probe_file('intan', nchan=nchan,
                                                    spikesorter='klusta')
             if prb_path is None:
                 raise IOError('No probefile found in expipe config directory,' +
@@ -140,12 +119,12 @@ def attach_to_cli(cli):
             anas = intan_file.analog_signals[0].signal
             fs = intan_file.sample_rate.magnitude
             nchan = anas.shape[0]
-            klusta_prm =  create_klusta_prm(intan_base, prb_path, nchan,
+            klusta_prm =  sig_tools.create_klusta_prm(intan_base, prb_path, nchan,
                               fs=fs, klusta_filter=klusta_filter,
                               filter_low=filter_low,
                               filter_high=filter_high)
             if pre_filter:
-                anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
+                anas = sig_tools.filter_analog_signals(anas, freq=[filter_low, filter_high],
                                              fs=fs, filter_type='bandpass')
             if filter_noise:
                 freq_range=[2000, 4000]
@@ -155,30 +134,29 @@ def attach_to_cli(cli):
                                         (fpre<freq_range[1]))][np.argmax(
                                          avg_spectrum[np.where((fpre>freq_range[0]) & (fpre<freq_range[1]))])]
                 stopband = [fpeak-150*pq.Hz, fpeak+150*pq.Hz]
-                anas = filter_analog_signals(anas, freq=stopband,
+                anas = sig_tools.filter_analog_signals(anas, freq=stopband,
                                              fs=fs, filter_type='bandstop', order=2)
             if len(ground) != 0:
                 ground = [int(g) for g in ground]
-                anas = ground_bad_channels(anas, ground)
+                anas = sig_tools.ground_bad_channels(anas, ground)
             if split_probe is not None:
                 split_chans = np.arange(nchan)
                 if split_probe != nchan / 2:
-                    import warnings
                     warnings.warn('The split probe is not dividing the number' +
                                   ' of channels in two')
                 print('Splitting probe in channels \n"' +
                       str(split_chans[:split_probe]) + '"\nand\n"' +
                       str(split_chans[split_probe:]) + '"')
             if common_ref == 'car':
-                anas, _ = apply_CAR(anas, car_type='mean',
+                anas, _ = sig_tools.apply_CAR(anas, car_type='mean',
                                     split_probe=split_probe)
             elif common_ref == 'cmr':
-                anas, _ = apply_CAR(anas, car_type='median',
+                anas, _ = sig_tools.apply_CAR(anas, car_type='median',
                                     split_probe=split_probe)
             if len(ground) != 0:
                 duplicate = [int(g) for g in ground]
-                anas = duplicate_bad_channels(anas, duplicate, prb_path)
-            save_binary_format(intan_base, anas)
+                anas = sig_tools.duplicate_bad_channels(anas, duplicate, prb_path)
+            sig_tools.save_binary_format(intan_base, anas)
             if action is not None:
                 prepro = {
                     'common_ref': common_ref,
@@ -202,7 +180,6 @@ def attach_to_cli(cli):
 
         if not no_klusta:
             print('Running klusta')
-            import subprocess
             try:
                 subprocess.check_output(['klusta', klusta_prm, '--overwrite'])
             except subprocess.CalledProcessError as e:
@@ -290,16 +267,12 @@ def attach_to_cli(cli):
         """Generate an intan recording-action to database.
 
         COMMAND: intan-filename"""
-        from expipe_io_neuro import pyintan
-        from datetime import datetime
-        import numpy as np
-        from .action_tools import register_depth
-        intan_path = op.abspath(intan_filepath)
+        intan_path = os.path.abspath(intan_filepath)
         intan_dir = intan_path.split(os.sep)[-1]
         rhs_file = [f for f in os.listdir(intan_path) if f.endswith('.rhs')][0]
-        rhs_path = op.join(intan_path, rhs_file)
+        rhs_path = os.path.join(intan_path, rhs_file)
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
-        prb_path = prb_path or _get_probe_file(system='intan', nchan=nchan,
+        prb_path = prb_path or action_tools._get_probe_file(system='intan', nchan=nchan,
                                                spikesorter='klusta')
         if prb_path is None:
             raise IOError('No probefile found in expipe config directory,' +
@@ -347,14 +320,14 @@ def attach_to_cli(cli):
                 raise ValueError('Could not find "intan" in ' +
                                  'expipe_params.py PAR.TEMPLATES: "' +
                                  '{}"'.format(PAR.TEMPLATES.keys()))
-            generate_templates(action, PAR.TEMPLATES['intan'], overwrite,
-                               git_note=GIT_NOTE)
+            action_tools.generate_templates(action, PAR.TEMPLATES['intan'], overwrite,
+                               git_note=action_tools.get_git_info())
             headstage = action.require_module(
                 name='hardware_intan_headstage').to_dict()
             headstage['model']['value'] = 'RHS2132'
             action.require_module(name='hardware_intan_headstage',
                                   contents=headstage, overwrite=True)
-            correct_depth = register_depth(project, action, anatomy)
+            correct_depth = action_tools.register_depth(project, action, anatomy)
             if not correct_depth:
                 print('Aborting registration!')
                 return
@@ -364,17 +337,17 @@ def attach_to_cli(cli):
         if not no_files:
             fr = action.require_filerecord()
             if not no_local:
-                exdir_path = _get_local_path(fr)
+                exdir_path = action_tools._get_local_path(fr)
             else:
                 exdir_path = fr.server_path
-            if op.exists(exdir_path):
+            if os.path.exists(exdir_path):
                 if overwrite:
                     shutil.rmtree(exdir_path)
                 else:
                     raise FileExistsError('The exdir path to this action "' +
                                           exdir_path + '" exists, use ' +
                                           'overwrite flag')
-            os.makedirs(op.dirname(exdir_path), exist_ok=True)
+            os.makedirs(os.path.dirname(exdir_path), exist_ok=True)
             shutil.copy(prb_path, intan_path)
             intan.convert(intan_file,exdir_path=exdir_path,
                           copyfiles=False)
@@ -409,14 +382,12 @@ def attach_to_cli(cli):
         """Convert klusta spikes to exdir.
 
         COMMAND: action-id"""
-        import numpy as np
         if intan_path is None:
-            import exdir
             project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_local:
-                exdir_path = _get_local_path(fr)
+                exdir_path = action_tools._get_local_path(fr)
             else:
                 exdir_path = fr.server_path
             exdir_file = exdir.File(exdir_path)
@@ -425,8 +396,8 @@ def attach_to_cli(cli):
                 raise ValueError('No Intan aquisition system ' +
                                  'related to this action')
             intan_session = acquisition.attrs["openephys_session"]
-            intan_path = op.join(str(acquisition.directory), intan_session)
-        prb_path = prb_path or _get_probe_file('intan', nchan=nchan,
+            intan_path = os.path.join(str(acquisition.directory), intan_session)
+        prb_path = prb_path or action_tools._get_probe_file('intan', nchan=nchan,
                                                spikesorter='klusta')
         intan_file = pyopenephys.File(intan_path, prb_path)
         print('Converting to exdir')

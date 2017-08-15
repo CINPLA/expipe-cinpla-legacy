@@ -1,27 +1,77 @@
-import quantities as pq
-from datetime import timedelta, datetime
-import expipe
-import os.path as op
-from distutils.util import strtobool
-import sys
-import os
-import numpy as np
+from expipecli.utils.misc import lazy_import
 from ._version import get_versions
 from .pytools import load_parameters
+import sys
 
-PAR = load_parameters()
+@lazy_import
+def expipe():
+    import expipe
+    return expipe
 
-DTIME_FORMAT = expipe.io.core.datetime_format
+@lazy_import
+def exdir():
+    import exdir
+    return exdir
 
-GIT_NOTE = {
-    'registered': datetime.strftime(datetime.now(), DTIME_FORMAT),
-    'note': 'Registered with the expipe cinpla plugin',
-    'expipe-plugin-cinpla-version': get_versions()['version'],
-    'expipe-version': expipe.__version__
-}
+@lazy_import
+def datetime():
+    from datetime import datetime
+    return datetime
+
+@lazy_import
+def pq():
+    import quantities as pq
+    return pq
+
+@lazy_import
+def np():
+    import numpy as np
+    return np
+
+@lazy_import
+def os():
+    import os
+    return os
+
+@lazy_import
+def json():
+    import json
+    return json
+
+@lazy_import
+def platform():
+    import platform
+    return platform
+
+@lazy_import
+def timedelta():
+    from datetime import timedelta
+    return timedelta
+
+@lazy_import
+def strtobool():
+    from distutils.util import strtobool
+    return strtobool
+
+@lazy_import
+def PAR():
+    PAR = load_parameters()
+    return PAR
 
 nwb_main_groups = ['acquisition', 'analysis', 'processing', 'epochs',
                    'general']
+
+
+def get_git_info():
+    DTIME_FORMAT = expipe.io.core.datetime_format
+
+    GIT_NOTE = {
+        'registered': datetime.strftime(datetime.now(), DTIME_FORMAT),
+        'note': 'Registered with the expipe cinpla plugin',
+        'expipe-plugin-cinpla-version': get_versions()['version'],
+        'expipe-version': expipe.__version__
+    }
+    return GIT_NOTE
 
 
 def query_yes_no(question, default="yes"):
@@ -113,13 +163,12 @@ def _get_local_path(file_record, assert_exists=False, make=False):
     :param file_record:
     :return:
     '''
-    import platform
     folder_name = 'expipe_temp_storage'
-    local_path = file_record.local_path or op.join(os.path.expanduser('~'),
+    local_path = file_record.local_path or os.path.join(os.path.expanduser('~'),
                                                    folder_name, path)
-    if not op.exists(local_path) and not assert_exists and make:
+    if not os.path.exists(local_path) and not assert_exists and make:
         os.makedirs(local_path)
-    elif not op.exists(local_path) and assert_exists:
+    elif not os.path.exists(local_path) and assert_exists:
         raise IOError('Path "' + local_path + '" does not exist.')
     return local_path
 
@@ -158,24 +207,22 @@ def generate_templates(action, action_templates, overwrite, git_note=None):
 def _get_probe_file(system, nchan, spikesorter='klusta'):
     # TODO add naming convention for openeophys (oe) and intan (intan) - argument 'oe' or 'intan'
     fname = 'tetrodes' + str(nchan) + 'ch-' + spikesorter + '-' + system + '.prb'
-    prb_path = op.join(expipe.config.config_dir, fname)
-    if not op.exists(prb_path):
+    prb_path = os.path.join(expipe.config.config_dir, fname)
+    if not os.path.exists(prb_path):
         prb_path = None
     return prb_path
 
 
 def create_notebook(exdir_path, channel_group=0):
-    import exdir
-    import json
     exob = exdir.File(exdir_path)
     analysis_path = str(exob.require_group('analysis').directory)
-    currdir = op.dirname(op.abspath(__file__))
-    fname = op.join(currdir, 'template_notebook.ipynb')
+    currdir = os.path.dirname(os.path.abspath(__file__))
+    fname = os.path.join(currdir, 'template_notebook.ipynb')
     with open(fname, 'r') as infile:
         notebook = json.load(infile)
     notebook['cells'][0]['source'] = ['exdir_path = r"{}"\n'.format(exdir_path),
                                       'channel_group = {}'.format(channel_group)]
-    fnameout = op.join(analysis_path, 'analysis_notebook.ipynb')
+    fnameout = os.path.join(analysis_path, 'analysis_notebook.ipynb')
     print('Generating notebook "' + fnameout + '"')
     with open(fnameout, 'w') as outfile:
             json.dump(notebook, outfile,

@@ -1,21 +1,6 @@
-import expipe
-import expipe.io
-from expipecli.utils import IPlugin
-import click
-from expipe_io_neuro import pyopenephys, openephys, pyintan, intan, axona
-import os
-import os.path as op
-import sys
-from .action_tools import (generate_templates, _get_local_path, GIT_NOTE)
-from .opto_tools import (generate_epochs, generate_axona_opto, populate_modules,
-                        extract_laser_pulse, read_pulse_pal_mat,
-                        read_pulse_pal_xml, read_laser_intensity,
-                        generate_openephys_opto, generate_axona_opto_from_cut)
-from .pytools import load_parameters
-
-PAR = load_parameters()
-
-DTIME_FORMAT = expipe.io.core.datetime_format
+from .imports import *
+from . import action_tools
+from . import opto_tools
 
 
 def attach_to_cli(cli):
@@ -79,9 +64,6 @@ def attach_to_cli(cli):
         """Parse optogenetics info to an action.
 
         COMMAND: action-id: Provide action id to find exdir path"""
-        import exdir
-        import quantities as pq
-        from datetime import datetime
         # TODO deafault none
         if brain_area not in PAR.POSSIBLE_BRAIN_AREAS:
             raise ValueError("brain_area must be either %s",
@@ -96,7 +78,7 @@ def attach_to_cli(cli):
         action.tags.extend(list(tag) + ['opto-' + brain_area])
         fr = action.require_filerecord()
         if not no_local:
-            exdir_path = _get_local_path(fr)
+            exdir_path = action_tools._get_local_path(fr)
         else:
             exdir_path = fr.server_path
         exdir_object = exdir.File(exdir_path)
@@ -109,21 +91,21 @@ def attach_to_cli(cli):
                         '"pulse-phasedur 10 ms" to use Axona cut')
                 pulse_phasedur = pq.Quantity(pulse_phasedur[0],
                                              pulse_phasedur[1])
-                params = generate_axona_opto_from_cut(exdir_path,
+                params = opto_tools.generate_axona_opto_from_cut(exdir_path,
                                                       pulse_phasedur,
                                                       io_channel)
             else:
-                params = generate_axona_opto(exdir_path, io_channel)
+                params = opto_tools.generate_axona_opto(exdir_path, io_channel)
         elif exdir_object['acquisition'].attrs['acquisition_system'] == 'OpenEphys':
             aq_sys = 'openephys'
-            params = generate_openephys_opto(exdir_path, io_channel)
+            params = opto_tools.generate_openephys_opto(exdir_path, io_channel)
         else:
             raise ValueError('Acquisition system not recognized')
         if not no_modules:
             params.update({'location': brain_area})
-            generate_templates(action, PAR.TEMPLATES['opto_' + aq_sys],
+            action_tools.generate_templates(action, PAR.TEMPLATES['opto_' + aq_sys],
                                overwrite, git_note=None)
-            populate_modules(action, params)
+            opto_tools.populate_modules(action, params)
             laser_id = laser_id or PAR.USER_PARAMS['laser_device'].get('id')
             laser_name = PAR.USER_PARAMS['laser_device'].get('name')
             assert laser_id is not None
@@ -152,20 +134,19 @@ def attach_to_cli(cli):
         """Parse optogenetics info to an action.
 
         COMMAND: action-id: Provide action id to find exdir path"""
-        import exdir
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
         fr = action.require_filerecord()
         if not no_local:
-            exdir_path = _get_local_path(fr)
+            exdir_path = action_tools._get_local_path(fr)
         else:
             exdir_path = fr.server_path
         exdir_object = exdir.File(exdir_path)
         if exdir_object['acquisition'].attrs['acquisition_system'] == 'Axona':
             aq_sys = 'axona'
-            params = generate_axona_opto(exdir_path, io_channel)
+            params = opto_tools.generate_axona_opto(exdir_path, io_channel)
         elif exdir_object['acquisition'].attrs['acquisition_system'] == 'OpenEphys':
             aq_sys = 'openephys'
-            params = generate_openephys_opto(exdir_path, io_channel)
+            params = opto_tools.generate_openephys_opto(exdir_path, io_channel)
         else:
             raise ValueError('Acquisition system not recognized')

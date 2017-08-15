@@ -1,5 +1,9 @@
 import quantities as pq
-
+import matplotlib.pyplot as plt
+import exana.tracking as tr
+import numpy as np
+from exana.misc.plot import simpleaxis
+import math
 
 file_params = {
     'speed_filter': 5 * pq.m / pq.s,
@@ -51,11 +55,6 @@ def make_spatiality_overview(x, y, t, angles, t_angles, sptr, acorr=None,
     -------
     out : fig
     """
-    import matplotlib.pyplot as plt
-    import exana.tracking as tr
-    import numpy as np
-    from exana.misc.plot import simpleaxis
-    import math
     par = params or file_params
     if acorr is None:
         rate_map = tr.spatial_rate_map(x, y, t, sptr, binsize=par['spat_binsize'],

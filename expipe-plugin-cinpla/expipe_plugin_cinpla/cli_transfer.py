@@ -1,28 +1,12 @@
-import expipe
-import os
-import os.path as op
-import click
-import sys
-import warnings
-from .action_tools import (generate_templates, _get_local_path,
-                           GIT_NOTE, nwb_main_groups)
-from .pytools import deep_update, load_python_module, load_parameters
-
-settings_file = op.join(expipe.config.config_dir, 'cinpla_config.yaml')
-if not op.exists(settings_file):
-    warnings.warn('No config file found, import errors will occur, please use' +
-                  ' "expipe env create project-id -p path-to-params-file"')
-
-DTIME_FORMAT = expipe.io.core.datetime_format
-
-PAR = load_parameters()
+from .ssh_tools import get_login, login, ssh_execute, untar
+from . import action_tools
+from .imports import *
 
 
 def attach_to_cli(cli):
     @cli.command('copy-to-config', short_help='Copy file to expipe config directory')
     @click.argument('filename', type=click.Path(exists=True))
     def copy_to_config(filename):
-        import shutil
         shutil.copy(filename, expipe.config.config_dir)
 
     @cli.command('transfer', short_help='Transfer a dataset related to an expipe action.')
@@ -49,12 +33,12 @@ def attach_to_cli(cli):
                   )
     @click.option('-e', '--exclude',
                   multiple=True,
-                  type=click.Choice(nwb_main_groups),
+                  type=click.Choice(action_tools.nwb_main_groups),
                   help='Omit raw data, acquisition etc..',
                   )
     @click.option('-i', '--include',
                   multiple=True,
-                  type=click.Choice(nwb_main_groups),
+                  type=click.Choice(action_tools.nwb_main_groups),
                   help='Only select which folders to include.',
                   )
     @click.option('--port',
@@ -78,14 +62,10 @@ def attach_to_cli(cli):
     def transfer(action_id, to_local, from_local, overwrite, no_trash,
                  exclude, include, port, username,
                  hostname, recursive, server):
-        from datetime import datetime
         assert server in expipe.config.settings
         server_dict = expipe.config.settings.get(server)
         if len(exclude) > 0 and len(include) > 0:
             raise IOError('You can only use exlude or include')
-        from .ssh_tools import get_login, login, ssh_execute, untar
-        import tarfile
-        import shutil
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
         fr = action.require_filerecord()
@@ -98,10 +78,10 @@ def attach_to_cli(cli):
                                                    username=user,
                                                    password=pas, port=port)
         serverpath = expipe.config.settings[server]['data_path']
-        server_data = op.dirname(op.join(serverpath, fr.exdir_path))
+        server_data = os.path.dirname(os.path.join(serverpath, fr.exdir_path))
         server_data = server_data.replace('\\', '/')
         if to_local:
-            local_data = op.dirname(_get_local_path(fr, make=True))
+            local_data = os.path.dirname(action_tools._get_local_path(fr, make=True))
             if recursive:
                 scp_client.get(server_data, local_data, recursive=True)
                 try:
@@ -119,7 +99,7 @@ def attach_to_cli(cli):
                 for ex in exclude:
                     exclude_statement += '--exclude=' + ex + ' '
                 if len(include) > 0:
-                    for ex in nwb_main_groups:
+                    for ex in action_tools.nwb_main_groups:
                         if ex not in include:
                             exclude_statement += '--exclude=' + ex + ' '
                 ssh_execute(ssh, "tar" + exclude_statement + "-cf " +
@@ -136,7 +116,7 @@ def attach_to_cli(cli):
                 os.remove(local_data + '.tar')
                 sftp_client.remove(server_data + '.tar')
         elif from_local:
-            local_data = op.dirname(_get_local_path(fr, assert_exists=True))
+            local_data = os.path.dirname(action_tools._get_local_path(fr, assert_exists=True))
             if recursive:
                 scp_client.get(server_data, local_data, recursive=True)
                 try:
@@ -177,7 +157,6 @@ def attach_to_cli(cli):
                     print('local data "' + local_data +
                           '" sent to trash.')
                 except Exception:
-                    import warnings
                     warnings.warn('Unable to send local data to trash')
 
         else:
@@ -212,22 +191,21 @@ def attach_to_cli(cli):
                   help='Omit raw data, acquisition etc..',
                   )
     def copy_action(action_id, to_local, from_local, overwrite, exclude, move):
-        import shutil
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
         fr = action.require_filerecord()
         if to_local:
             source = fr.server_path
-            dest = _get_local_path(fr)
+            dest = action_tools._get_local_path(fr)
         elif from_local:
             dest = fr.server_path
-            source = _get_local_path(fr)
+            source = action_tools._get_local_path(fr)
         else:
             raise IOError('You must choose "to-local" or "from-local"')
         print('Copying "' + source + '" to "' + dest + '"')
-        if not op.exists(source):
+        if not os.path.exists(source):
             raise FileExistsError('Source file does not exist')
-        if op.exists(dest):
+        if os.path.exists(dest):
             if overwrite:
                 shutil.rmtree(dest)
             else:

@@ -1,17 +1,10 @@
-import expipe
-import os
-import os.path as op
-from expipecli.utils import IPlugin
-import click
-from .action_tools import (generate_templates, _get_local_path, GIT_NOTE)
-import sys
-from .pytools import load_parameters
-
-DTIME_FORMAT = expipe.io.core.datetime_format
+from .imports import *
+from . import action_tools
+from . import pytools
 
 
 def attach_to_cli(cli):
-    @cli.command('register')
+    @cli.command('register', short_help='Generate an axona recording-action to database.')
     @click.argument('axona-filename', type=click.Path(exists=True))
     @click.option('-u', '--user',
                   type=click.STRING,
@@ -73,16 +66,6 @@ def attach_to_cli(cli):
                               no_local, overwrite, no_files, no_modules,
                               subject_id, location, message, tag,
                               get_inp, yes):
-        """Generate an axona recording-action to database.
-
-        COMMAND: axona-filename"""
-        import quantities as pq
-        import shutil
-        from expipe_io_neuro import axona
-        from datetime import datetime
-        import exdir
-        from .action_tools import register_depth
-        import pyxona
         if not axona_filename.endswith('.set'):
             print("Sorry, we need an Axona .set file not " +
                   "'{}'.".format(axona_filename))
@@ -124,14 +107,14 @@ def attach_to_cli(cli):
                              'datetime': datetime.now()}
                            for m in message]
         if not no_modules:
-            generate_templates(action, PAR.TEMPLATES['axona'], overwrite,
-                               git_note=GIT_NOTE)
-            register_depth(project, action, anatomy, yes=yes)
+            action_tools.generate_templates(action, PAR.TEMPLATES['axona'], overwrite,
+                                            git_note=action_tools.get_git_info())
+            action_tools.register_depth(project, action, anatomy, yes=yes)
 
         if not no_files:
             fr = action.require_filerecord()
             if not no_local:
-                exdir_path = _get_local_path(fr, make=False)
+                exdir_path = action_tools._get_local_path(fr, make=False)
             else:
                 exdir_path = fr.server_path
             if op.exists(exdir_path):
@@ -151,7 +134,6 @@ def attach_to_cli(cli):
             if get_inp:
                 axona.generate_inp(exdir_path, axona_file)
             else:
-                import warnings
                 warnings.warn('Not registering Axona ".inp".')
             axona.generate_clusters(exdir_path, axona_file)
         time_string = exdir.File(exdir_path).attrs['session_start_time']
@@ -163,8 +145,6 @@ def attach_to_cli(cli):
     #     """Generate an axona recording-action to database.
     #
     #     COMMAND: axona-filename"""
-    #     import pyxona
-    #     import exdir
     #     project = expipe.get_project(PAR.USER_PARAMS['project_id'])
     #
     #

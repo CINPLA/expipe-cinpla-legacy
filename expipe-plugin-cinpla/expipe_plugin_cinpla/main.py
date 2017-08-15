@@ -1,16 +1,16 @@
 import click
-from expipecli.utils import IPlugin
-from . import project_manager
-from . import misc
-from . import transfer
-from . import openephys as _openephys
-from . import optogenetics
-from . import intan as _intan
-from . import axona as _axona
-from . import intan_ephys as _intan_ephys
-from . import electrical_stimulation
-from . import visual_stimulus
-from . import analysis
+from expipecli.utils.plugin import IPlugin
+from . import cli_misc
+from . import cli_analysis
+from . import cli_project_manager
+from . import cli_transfer
+from . import cli_openephys
+from . import cli_axona
+from . import cli_optogenetics
+from . import cli_intan
+from . import cli_intan_ephys
+from . import cli_visual_stimulus
+from . import cli_electrical_stimulation
 
 
 class CinplaPlugin(IPlugin):
@@ -57,14 +57,14 @@ class CinplaPlugin(IPlugin):
         def visual(ctx):
             pass
 
-        analysis.attach_to_cli(cli)
-        visual_stimulus.attach_to_cli(visual)
-        project_manager.attach_to_cli(project)
-        misc.attach_to_cli(cli)
-        transfer.attach_to_cli(cli)
-        misc.attach_to_cli(cli)
-        _openephys.attach_to_cli(openephys)
-        optogenetics.attach_to_cli(opto)
-        _intan.attach_to_cli(intan)
-        _intan_ephys.attach_to_cli(intan_ephys)
-        electrical_stimulation.attach_to_cli(cli)
+        cli_misc.attach_to_cli(cli)
+        cli_analysis.attach_to_cli(cli)
+        cli_project_manager.attach_to_cli(project)
+        cli_transfer.attach_to_cli(cli)
+        cli_openephys.attach_to_cli(openephys)
+        cli_axona.attach_to_cli(axona)
+        cli_optogenetics.attach_to_cli(opto)
+        cli_intan.attach_to_cli(intan)
+        cli_intan_ephys.attach_to_cli(intan_ephys)
+        cli_visual_stimulus.attach_to_cli(visual)
+        cli_electrical_stimulation.attach_to_cli(cli)

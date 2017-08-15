@@ -1,27 +1,10 @@
-import expipe.io
-import os
-import os.path as op
-import shutil
-import json
-import numpy as np
-import exdir
-import quantities as pq
-import argparse
-from datetime import datetime
-import expipe
-import platform
-from .action_tools import generate_templates
-from expipe_io_neuro import pyopenephys
-import glob
-from .pytools import load_parameters
-
-PAR = load_parameters()
+from .imports import *
 
 
 def generate_axona_opto(exdir_path, io_channel=8, **annotations):
     exdir_object = exdir.File(exdir_path)
     session = exdir_object['acquisition'].attrs['axona_session']
-    param = extract_laser_pulse(op.join(str(exdir_object['acquisition'].directory),
+    param = extract_laser_pulse(os.path.join(str(exdir_object['acquisition'].directory),
                                         session))
     if annotations:
         param.update(annotations)
@@ -59,7 +42,7 @@ def generate_axona_opto_from_cut(exdir_path, pulse_phasedur, io_channel=8):
 def generate_openephys_opto(exdir_path, io_channel, **attrs):
     exdir_object = exdir.File(exdir_path)
     session = exdir_object['acquisition'].attrs['openephys_session']
-    openephys_path = op.join(str(exdir_object['acquisition'].directory), session)
+    openephys_path = os.path.join(str(exdir_object['acquisition'].directory), session)
     param = extract_laser_pulse(openephys_path)
     openephys_file = pyopenephys.File(openephys_path)
     if attrs:
@@ -125,14 +108,14 @@ def populate_modules(action, params):
 
 
 def extract_laser_pulse(acquisition_directory):
-    paths = glob.glob(op.join(acquisition_directory, 'PulsePalProgram*'))
+    paths = glob.glob(os.path.join(acquisition_directory, 'PulsePalProgram*'))
     if len(paths) == 0:
         raise ValueError('No Pulse Pal program found.')
     if len(paths) > 1:
         raise ValueError('Multiple Pulse Pal programs found.')
     pulsepalpath = paths[0]
     # laserpath
-    paths = glob.glob(op.join(acquisition_directory, 'PM100*'))
+    paths = glob.glob(os.path.join(acquisition_directory, 'PM100*'))
     if len(paths) == 0:
         raise ValueError('No laser intensity file found.')
     if len(paths) > 1:
@@ -190,9 +173,6 @@ def read_laser_intensity(fname):
     '''
     reads laser intensity from thor labs PM100D
     '''
-    import csv
-    import numpy as np
-    import quantities as pq
     pq_symbols = [foo.symbol for _, foo in pq.units.__dict__.items()
                   if isinstance(foo, pq.Quantity)]
     data = []
@@ -230,7 +210,6 @@ def read_pulse_pal_mat(fname):
     reads pulse duration, and period from settings .mat file from matlab
     gui of Pulse Pal
     '''
-    import scipy.io
     mat = scipy.io.loadmat(fname)
     par = mat['ParameterMatrix']
     output_params = {name[0][0]: dict() for name in par[1:]}

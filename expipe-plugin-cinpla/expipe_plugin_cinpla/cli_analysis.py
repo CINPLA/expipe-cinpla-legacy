@@ -1,16 +1,7 @@
-import expipe
-import os
-import os.path as op
-import click
-import sys
-import warnings
-from .action_tools import (generate_templates, _get_local_path, create_notebook,
-                           GIT_NOTE)
-from .pytools import deep_update, load_python_module, load_parameters
-
-PAR = load_parameters()
-
-DTIME_FORMAT = expipe.io.core.datetime_format
+from .imports import *
+from . import action_tools
+from .pytools import deep_update
+from .analysis_tools import Analyser
 
 
 def attach_to_cli(cli):
@@ -35,12 +26,11 @@ def attach_to_cli(cli):
         action = project.require_action(action_id)
         fr = action.require_filerecord()
         if not no_local:
-            exdir_path = _get_local_path(fr, assert_exists=True)
+            exdir_path = action_tools._get_local_path(fr, assert_exists=True)
         else:
             exdir_path = fr.server_path
-        fname = create_notebook(exdir_path)
+        fname = action_tools.create_notebook(exdir_path)
         if run:
-            import subprocess
             subprocess.run(['jupyter', 'notebook', fname])
 
     @cli.command('analyse', short_help='Analyse a dataset.')
@@ -84,8 +74,6 @@ def attach_to_cli(cli):
                   help='Skip previously generated files.',
                   )
     def analysis(**kwargs):
-        from .analysis_tools import Analyser
-        from datetime import datetime
         if len(kwargs['channel_group']) == 0: kwargs['channel_group'] = None
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(kwargs['action_id'] + '-analysis')
@@ -112,11 +100,11 @@ def attach_to_cli(cli):
                                for m in kwargs['message']])
         fr = rec_action.require_filerecord()
         if not kwargs['no_local']:
-            exdir_path = _get_local_path(fr)
+            exdir_path = action_tools._get_local_path(fr)
         else:
             exdir_path = fr.server_path
         action.require_module('software_version_control_git',
-                              contents=GIT_NOTE,
+                              contents=action_tools.get_git_info(),
                               overwrite=(kwargs['overwrite'] or kwargs['skip']))
         action.require_module('software_analysis_parameters',
                               contents=PAR.ANALYSIS_PARAMS,
@@ -159,16 +147,6 @@ def attach_to_cli(cli):
             deep_update(mod, val)
             action.require_module(key, contents=mod,
                                   overwrite=True)
-                # fname = op.abspath(op.join('action_modules',
-                #                            PAR.USER_PARAMS['project_id'],
-                #                            action.id, key + '.json'))
-                # os.makedirs(op.dirname(fname), exist_ok=True)
-                # print('Got exception during module update of "' + key +
-                #       '" stored in "' + fname + '"')
-                # import json
-                # with open(fname, 'w') as f:
-                #     result = expipe.io.core.convert_quantities(val)
-                #     json.dump(result, f, sort_keys=True, indent=4)
 
     @cli.command('group-analyse',
                  short_help=('Search and generate an analysis-action that' +
@@ -204,7 +182,6 @@ def attach_to_cli(cli):
                   )
     def group_analysis(action_id, user, tags, overwrite, subjects,
                        locations, actions):
-        from datetime import datetime
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         analysis_action = project.require_action(action_id)
 
@@ -250,11 +227,9 @@ def attach_to_cli(cli):
                   help='Store temporary on local drive.',
                   )
     def spikesort(action_id, no_local):
-        import numpy as np
-        from phycontrib.neo.model import NeoModel
-        import logging
-        import sys
         # anoying!!!!
+        import logging
+        from phycontrib.neo.model import NeoModel
         logger = logging.getLogger('phy')
         logger.setLevel(logging.DEBUG)
         ch = logging.StreamHandler(sys.stdout)
@@ -265,7 +240,7 @@ def attach_to_cli(cli):
         action = project.require_action(action_id)
         fr = action.require_filerecord()
         if not no_local:
-            exdir_path = _get_local_path(fr, assert_exists=True)
+            exdir_path = action_tools._get_local_path(fr, assert_exists=True)
         else:
             exdir_path = fr.server_path
         print('Spikesorting ', exdir_path)

@@ -1,10 +1,45 @@
-from collections import Mapping
-from copy import deepcopy
-import imp
-import expipe
-import os.path as op
-import yaml
-import warnings
+from expipecli.utils.misc import lazy_import
+import sys
+
+@lazy_import
+def expipe():
+    import expipe
+    return expipe
+
+@lazy_import
+def Mapping():
+    from collections import Mapping
+    return Mapping
+
+@lazy_import
+def datetime():
+    from datetime import datetime
+    return datetime
+
+@lazy_import
+def os():
+    import os
+    return os
+
+@lazy_import
+def json():
+    import json
+    return json
+
+@lazy_import
+def yaml():
+    import yaml
+    return yaml
+
+@lazy_import
+def imp():
+    import imp
+    return imp
+
+@lazy_import
+def deepcopy():
+    from copy import deepcopy
+    return deepcopy
 
 
 def deep_update(d, other):
@@ -17,10 +52,10 @@ def deep_update(d, other):
 
 
 def load_python_module(module_path):
-    if not op.exists(module_path):
+    if not os.path.exists(module_path):
         raise FileExistsError('Path "' + module_path + '" does not exist.')
-    directory, modname = op.split(module_path)
-    modname, _ = op.splitext(modname)
+    directory, modname = os.path.split(module_path)
+    modname, _ = os.path.splitext(modname)
     file, path, descr = imp.find_module(modname, [directory])
     if file:
         try:
@@ -33,8 +68,8 @@ def load_python_module(module_path):
 
 
 def load_settings():
-    settings_file = op.join(expipe.config.config_dir, 'cinpla_config.yaml')
-    assert op.exists(settings_file)
+    settings_file = os.path.join(expipe.config.config_dir, 'cinpla_config.yaml')
+    assert os.path.exists(settings_file)
     with open(settings_file, "r") as f:
         settings = yaml.load(f)
     return settings

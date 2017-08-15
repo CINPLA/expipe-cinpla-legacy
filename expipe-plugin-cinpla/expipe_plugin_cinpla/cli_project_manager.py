@@ -1,19 +1,13 @@
-import expipe
-import os
-import os.path as op
-import click
-import yaml
-import warnings
+from .imports import *
+from ._version import get_versions
 from .pytools import load_parameters
 
-settings_file = op.join(expipe.config.config_dir, 'cinpla_config.yaml')
-if not op.exists(settings_file):
+
+settings_file = os.path.join(os.path.expanduser('~'), '.config', 'expipe',
+                             'cinpla_config.yaml')
+if not os.path.exists(settings_file):
     warnings.warn('No config file found, import errors will occur, please use' +
                   ' "expipe env create project-id -p path-to-params-file"')
-
-DTIME_FORMAT = expipe.io.core.datetime_format
-
-PAR = load_parameters()
 
 default_settings = {
     'current': {
@@ -27,7 +21,7 @@ def attach_to_cli(cli):
     @cli.command('activate')
     @click.argument('project-id', type=click.STRING)
     def activate(project_id):
-        assert op.exists(settings_file)
+        assert os.path.exists(settings_file)
         with open(settings_file, "r") as f:
             current_settings = yaml.load(f)
         params_path = current_settings[project_id]['parameters_path']
@@ -41,14 +35,8 @@ def attach_to_cli(cli):
     @cli.command('list')
     @click.argument('what', type=click.Choice(['dir', 'actions']))
     def generate_notebook(what):
-        """
-        Provide action id to find exdir path
-
-        COMMAND: action-id: Provide action id to find exdir path
-        """
-        from pprint import pprint
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
-        path = op.join(expipe.settings['data_path'],
+        path = os.path.join(expipe.settings['data_path'],
                        PAR.USER_PARAMS['project_id'])
         if what == 'dir':
             pprint(os.listdir(path))
@@ -82,7 +70,7 @@ def attach_to_cli(cli):
 
     @cli.command('which')
     def which():
-        assert op.exists(settings_file)
+        assert os.path.exists(settings_file)
         with open(settings_file, "r") as f:
             current_settings = yaml.load(f)
         from pprint import pprint

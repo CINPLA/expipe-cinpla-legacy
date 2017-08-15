@@ -1,14 +1,4 @@
-import expipe.io
-import os
-import os.path as op
-import exdir
-import quantities as pq
-import expipe
-from datetime import datetime
-from expipe_io_neuro import pyopenephys, pyintan
-from .pytools import load_parameters
-
-PAR = load_parameters()
+from .imports import *
 
 
 def generate_epochs(exdir_path, triggers, trigger_params, channel_params, stim_signals, **annotations):
@@ -71,7 +61,6 @@ def populate_modules(action, params):
 
 
 def generate_electrical_info(exdir_path, intan_file, openephys_file, stim_chan, stim_trigger='dig'):
-    from exana.misc.signal_tools import extract_stimulation_waveform
     trigger_param = dict()
 
     if stim_trigger == 'dig':
@@ -103,7 +92,7 @@ def generate_electrical_info(exdir_path, intan_file, openephys_file, stim_chan, 
 
     channel_param=dict()
     channel_param['active-electrodes'] = stim_chan
-    stim_wave, curr, phase = extract_stimulation_waveform(stim_signals, triggers, intan_file.times)
+    stim_wave, curr, phase = sig_tools.extract_stimulation_waveform(stim_signals, triggers, intan_file.times)
 
     channel_param['amplitudes'] = curr
     channel_param['phases'] = phase

@@ -1,24 +1,10 @@
-import expipe
-import expipe.io
-import os
-import os.path as op
-import click
-import sys
-from expipe_io_neuro import pyopenephys, openephys
-from .action_tools import (generate_templates, _get_local_path,
-                           _get_probe_file, GIT_NOTE)
-from exana.misc.signal_tools import (create_klusta_prm, save_binary_format,
-                                     apply_CAR, filter_analog_signals,
-                                     ground_bad_channels, duplicate_bad_channels)
-from .pytools import load_parameters
-
-PAR = load_parameters()
-
-DTIME_FORMAT = expipe.io.core.datetime_format
+from . import action_tools
+from .imports import *
 
 
 def attach_to_cli(cli):
-    @cli.command('process')
+    @cli.command('process',
+                 short_help='Generate a klusta .dat and .prm files from openephys directory.')
     @click.argument('action-id', type=click.STRING)
     @click.option('--prb-path',
                   type=click.STRING,
@@ -89,26 +75,21 @@ def attach_to_cli(cli):
                   help='TTL channel for shutter events to sync tracking',
                   )
     def process_openephys(action_id, prb_path, pre_filter,
-                           klusta_filter, filter_low,
-                           filter_high, nchan, common_ref, ground,
-                           split_probe, no_local, openephys_path,
-                           exdir_path, no_klusta, no_convert, shutter_channel,
-                           no_preprocess):
-        """Generate a klusta .dat and .prm files from openephys directory.
-
-        COMMAND: action-id"""
-        import numpy as np
+                          klusta_filter, filter_low,
+                          filter_high, nchan, common_ref, ground,
+                          split_probe, no_local, openephys_path,
+                          exdir_path, no_klusta, no_convert, shutter_channel,
+                          no_preprocess):
         if not no_klusta:
             import klusta
             import klustakwik2
         action = None
         if exdir_path is None:
-            import exdir
             project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_local:
-                exdir_path = _get_local_path(fr)
+                exdir_path = action_tools._get_local_path(fr)
             else:
                 exdir_path = fr.server_path
             exdir_file = exdir.File(exdir_path)
@@ -118,10 +99,10 @@ def attach_to_cli(cli):
                 raise ValueError('No Open Ephys aquisition system ' +
                                  'related to this action')
             openephys_session = acquisition.attrs["openephys_session"]
-            openephys_path = op.join(str(acquisition.directory), openephys_session)
-            openephys_base = op.join(openephys_path, openephys_session)
-            klusta_prm = op.abspath(openephys_base) + '.prm'
-            prb_path = prb_path or _get_probe_file('oe', nchan=nchan,
+            openephys_path = os.path.join(str(acquisition.directory), openephys_session)
+            openephys_base = os.path.join(openephys_path, openephys_session)
+            klusta_prm = os.path.abspath(openephys_base) + '.prm'
+            prb_path = prb_path or action_tools._get_probe_file('oe', nchan=nchan,
                                                    spikesorter='klusta')
             openephys_file = pyopenephys.File(openephys_path, prb_path)
         if not no_preprocess:
@@ -132,35 +113,34 @@ def attach_to_cli(cli):
             anas = openephys_file.analog_signals[0].signal
             fs = openephys_file.sample_rate.magnitude
             nchan = anas.shape[0]
-            create_klusta_prm(openephys_base, prb_path, nchan,
+            sig_tools.create_klusta_prm(openephys_base, prb_path, nchan,
                               fs=fs, klusta_filter=klusta_filter,
                               filter_low=filter_low,
                               filter_high=filter_high)
             if pre_filter:
-                anas = filter_analog_signals(anas, freq=[filter_low, filter_high],
+                anas = sig_tools.filter_analog_signals(anas, freq=[filter_low, filter_high],
                                              fs=fs, filter_type='bandpass')
             if len(ground) != 0:
                 ground = [int(g) for g in ground]
-                anas = ground_bad_channels(anas, ground)
+                anas = sig_tools.ground_bad_channels(anas, ground)
             if split_probe is not None:
                 split_chans = np.arange(nchan)
                 if split_probe != nchan / 2:
-                    import warnings
                     warnings.warn('The split probe is not dividing the number' +
                                   ' of channels in two')
                 print('Splitting probe in channels \n"' +
                       str(split_chans[:split_probe]) + '"\nand\n"' +
                       str(split_chans[split_probe:]) + '"')
             if common_ref == 'car':
-                anas, _ = apply_CAR(anas, car_type='mean',
+                anas, _ = sig_tools.apply_CAR(anas, car_type='mean',
                                     split_probe=split_probe)
             elif common_ref == 'cmr':
-                anas, _ = apply_CAR(anas, car_type='median',
+                anas, _ = sig_tools.apply_CAR(anas, car_type='median',
                                     split_probe=split_probe)
             if len(ground) != 0:
                 duplicate = [int(g) for g in ground]
-                anas = duplicate_bad_channels(anas, duplicate, prb_path)
-            save_binary_format(openephys_base, anas)
+                anas = sig_tools.duplicate_bad_channels(anas, duplicate, prb_path)
+            sig_tools.save_binary_format(openephys_base, anas)
             if action is not None:
                 prepro = {
                     'common_ref': common_ref,
@@ -179,7 +159,6 @@ def attach_to_cli(cli):
 
         if not no_klusta:
             print('Running klusta')
-            import subprocess
             try:
                 subprocess.check_output(['klusta', klusta_prm, '--overwrite'])
             except subprocess.CalledProcessError as e:
@@ -195,14 +174,14 @@ def attach_to_cli(cli):
                 if len(ttl_times) != 0:
                     openephys_file.sync_tracking_from_events(ttl_times)
                 else:
-                    import warnings
                     warnings.warn(
                         'No TTL events was found on IO channel {}'.format(shutter_channel)
                     )
             openephys.generate_tracking(exdir_path, openephys_file)
             openephys.generate_lfp(exdir_path, openephys_file)
 
-    @cli.command('register')
+    @cli.command('register',
+                 short_help='Generate an open-ephys recording-action to database.')
     @click.argument('openephys-path', type=click.Path(exists=True))
     @click.option('-u', '--user',
                   type=click.STRING,
@@ -279,19 +258,11 @@ def attach_to_cli(cli):
                                   subject_id, user, prb_path, session, nchan,
                                   location, spikes_source, message, no_move,
                                   tag):
-        """Generate an open-ephys recording-action to database.
-
-        COMMAND: open-ephys-directory"""
         # TODO default none
-        from expipe_io_neuro import pyopenephys
-        import quantities as pq
-        import shutil
-        from datetime import datetime, timedelta
-        from .action_tools import register_depth
-        openephys_path = op.abspath(openephys_path)
+        openephys_path = os.path.abspath(openephys_path)
         openephys_dirname = openephys_path.split(os.sep)[-1]
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
-        prb_path = prb_path or _get_probe_file(system='oe', nchan=nchan,
+        prb_path = prb_path or action_tools._get_probe_file(system='oe', nchan=nchan,
                                                spikesorter='klusta')
         if prb_path is None:
             raise IOError('No probefile found in expipe config directory,' +
@@ -337,14 +308,14 @@ def attach_to_cli(cli):
                 raise ValueError('Could not find "openephys" in ' +
                                  'expipe_params.py PAR.TEMPLATES: "' +
                                  '{}"'.format(PAR.TEMPLATES.keys()))
-            generate_templates(action, PAR.TEMPLATES['openephys'], overwrite,
-                               git_note=GIT_NOTE)
+            action_tools.generate_templates(action, PAR.TEMPLATES['openephys'], overwrite,
+                                            git_note=action_tools.get_git_info())
             headstage = action.require_module(
                 name='hardware_intan_headstage').to_dict()
             headstage['model']['value'] = 'RHD2132'
             action.require_module(name='hardware_intan_headstage',
                                   contents=headstage, overwrite=True)
-            correct_depth = register_depth(project, action, anatomy)
+            correct_depth = action_tools.register_depth(project, action, anatomy)
             if not correct_depth:
                 print('Aborting registration!')
                 return
@@ -359,17 +330,17 @@ def attach_to_cli(cli):
         if not no_files:
             fr = action.require_filerecord()
             if not no_local:
-                exdir_path = _get_local_path(fr)
+                exdir_path = action_tools._get_local_path(fr)
             else:
                 exdir_path = fr.server_path
-            if op.exists(exdir_path):
+            if os.path.exists(exdir_path):
                 if overwrite:
                     shutil.rmtree(exdir_path)
                 else:
                     raise FileExistsError('The exdir path to this action "' +
                                           exdir_path + '" exists, use ' +
                                           'overwrite flag')
-            os.makedirs(op.dirname(exdir_path), exist_ok=True)
+            os.makedirs(os.path.dirname(exdir_path), exist_ok=True)
             shutil.copy(prb_path, openephys_path)
             openephys.convert(openephys_file,
                               exdir_path=exdir_path)
@@ -379,7 +350,8 @@ def attach_to_cli(cli):
             if not no_move:
                 shutil.rmtree(openephys_path)
 
-    @cli.command('convert-klusta-oe')
+    @cli.command('convert-klusta-oe',
+                 short_help='Convert klusta spikes to exdir.')
     @click.argument('action-id', type=click.STRING)
     @click.option('--prb-path',
                   type=click.STRING,
@@ -404,17 +376,12 @@ def attach_to_cli(cli):
                   )
     def generate_klusta_oe(action_id, prb_path, no_local, openephys_path,
                            exdir_path, nchan):
-        """Convert klusta spikes to exdir.
-
-        COMMAND: action-id"""
-        import numpy as np
         if openephys_path is None:
-            import exdir
             project = expipe.get_project(PAR.USER_PARAMS['project_id'])
             action = project.require_action(action_id)
             fr = action.require_filerecord()
             if not no_local:
-                exdir_path = _get_local_path(fr)
+                exdir_path = action_tools._get_local_path(fr)
             else:
                 exdir_path = fr.server_path
             exdir_file = exdir.File(exdir_path)
@@ -423,27 +390,20 @@ def attach_to_cli(cli):
                 raise ValueError('No Open Ephys aquisition system ' +
                                  'related to this action')
             openephys_session = acquisition.attrs["openephys_session"]
-            openephys_path = op.join(str(acquisition.directory), openephys_session)
-        prb_path = prb_path or _get_probe_file('oe', nchan=nchan,
+            openephys_path = os.path.join(str(acquisition.directory), openephys_session)
+        prb_path = prb_path or action_tools._get_probe_file('oe', nchan=nchan,
                                                spikesorter='klusta')
         openephys_file = pyopenephys.File(openephys_path, prb_path)
         print('Converting to exdir')
         openephys.generate_spike_trains(exdir_path, openephys_file,
                                             source='klusta')
 
-    @cli.command('read-messages')
+    @cli.command('read-messages',
+                 short_help='Read messages from open-ephys recording session.')
     @click.argument('openephys-path', type=click.Path(exists=True))
     def generate_openephys_action(openephys_path):
-        """Read messages from open-ephys recording session.
-
-        COMMAND: open-ephys-directory"""
         # TODO default none
-        from expipe_io_neuro import pyopenephys
-        import quantities as pq
-        import shutil
-        from datetime import datetime, timedelta
-        from .action_tools import register_depth
-        openephys_path = op.abspath(openephys_path)
+        openephys_path = os.path.abspath(openephys_path)
         openephys_dirname = openephys_path.split(os.sep)[-1]
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
 
