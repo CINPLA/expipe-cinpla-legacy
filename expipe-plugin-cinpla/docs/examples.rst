@@ -7,13 +7,13 @@ Nomenclature for CINPLA
 **Axona**
 
 ``FILENAME``: "axona navn" e.g. `22031701`, ``DATE``: `220317`, ``SESSION``:
-`01`, ``SUBJECT``: SUBJECT id e.g. `1704`, ``ACTION-ID`` is thus ``SUBJECT-DATE-SESSION``.
+`01`, ``SUBJECT``: subject-id e.g. `1704`, ``ACTION-ID`` is thus ``SUBJECT-DATE-SESSION``.
 
 **Open Ephys**
 
 ``FOLDERNAME``: e.g. `1704_2017-05-13_13-52-26_03`, ``DATE``:
 `2017-05-13_13-52-26`, which is automatically shortened to `130517`, ``SESSION``:
-`03`, ``SUBJECT``: SUBJECT id e.g. `1704`, ``ACTION-ID`` er thus ``SUBJECT-DATE-SESSION``
+`03`, ``SUBJECT``: subject-id e.g. `1704`, ``ACTION-ID`` er thus ``SUBJECT-DATE-SESSION``
 
 **NWB file structure and exdir**
 
@@ -121,11 +121,11 @@ Open Anaconda 3 prompt::
 To get an overview of available commands::
   expipe --help
 For help på en spesifikk kommando::
-  expipe register-axona --help
+  expipe axona register --help
 
 To overwrite existing data use ``--overwrite``::
 
-  expipe register-axona z:\USER\DATA\SUBJECT\FILENAME.set
+  expipe axona register z:\USER\DATA\SUBJECT\FILENAME.set
 
 Now modules are loaded to the firebase server and depth registration
 is promted to the user.
@@ -150,11 +150,11 @@ Open Anaconda 3 prompt::
 To get an overview of available commands::
   expipe --help
 For help på en spesifikk kommando::
-  expipe register-openephys --help
+  expipe openephys register --help
 
 To overwrite existing data use ``--overwrite``::
 
-  expipe register-openephys c:\open_ephys\data\1704_2017-05-13_13-52-26_03
+  expipe openephys register c:\open_ephys\data\1704_2017-05-13_13-52-26_03
 
 Now modules are loaded to the firebase server and depth registration
 is promted to the user.
@@ -163,7 +163,7 @@ is promted to the user.
 
 **Data processing**::
 
-  $ expipe process-openephys ACTION-ID
+  $ expipe openephys process ACTION-ID
 
 .. todo:: Detail the processing: ground channels, cmr vs car, filtering, probe
 
