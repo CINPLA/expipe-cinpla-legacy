@@ -77,21 +77,12 @@ class Analyser:
         self.anas = [ana for ana in self.seg.analogsignals
                      if ana.sampling_rate == 250 * pq.Hz]
         exdir_group = exdir.File(exdir_path)
-        if 'tracking' in exdir_group['processing']:
-            position_group = exdir_group['processing']['tracking']['camera_0']['Position']
-            x1, y1, t1 = tracking.get_raw_position(position_group['led_0'])
-            try:
-                x2, y2, t2 = tracking.get_raw_position(position_group['led_1'])
-            except KeyError:
-                x2, y2, t2 = x1, y1, t1
-                print("Only found one tracking led..")
-
-            x, y, t = tracking.select_best_position(x1, y1, t1, x2, y2, t2)
-            self.ang, self.ang_t = tracking.head_direction(x1, y1, x2, y2, t1,
-                                                     return_rad=False)
-            self.x, self.y, self.t = tracking.interp_filt_position(x, y, t,
-                                                             pos_fs=self.par['pos_fs'],
-                                                             f_cut=self.par['f_cut'])
+        try:
+            tracking_data = tracking.get_processed_tracking(
+                exdir_path, par=params, return_rad=False)
+            self.x, self.y, self.t, self.ang, self.ang_t = tracking_data
+        except AssertionError as e:
+            print(str(e))
         if len(self.seg.epochs) == 1:
             self.epoch = self.seg.epochs[0]
         else:
