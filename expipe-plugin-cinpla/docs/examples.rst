@@ -7,13 +7,13 @@ Nomenclature for CINPLA
 **Axona**
 
 ``FILENAME``: "axona navn" e.g. `22031701`, ``DATE``: `220317`, ``SESSION``:
-`01`, ``RAT``: rat id e.g. `1704`, ``ACTION-ID`` is thus ``RAT-DATE-SESSION``.
+`01`, ``SUBJECT``: SUBJECT id e.g. `1704`, ``ACTION-ID`` is thus ``SUBJECT-DATE-SESSION``.
 
 **Open Ephys**
 
 ``FOLDERNAME``: e.g. `1704_2017-05-13_13-52-26_03`, ``DATE``:
 `2017-05-13_13-52-26`, which is automatically shortened to `130517`, ``SESSION``:
-`03`, ``RAT``: rat id e.g. `1704`, ``ACTION-ID`` er thus ``RAT-DATE-SESSION``
+`03`, ``SUBJECT``: SUBJECT id e.g. `1704`, ``ACTION-ID`` er thus ``SUBJECT-DATE-SESSION``
 
 **NWB file structure and exdir**
 
@@ -78,27 +78,36 @@ Conversly if you want to transfer the entire action only excluding the acquisiti
 
   $ expipe transfer ACTIO-ID --to-local --exclude acquisition
 
+Registering subject
+-------------------
+
+Subjects are registered under the project-id ``subjects-registry``. This is to
+have a complete overview of animals in the lab i.e. `active`, `dead`, `newborn`
+which information is stored in tags. To register a subject use ``register-subject``::
+
+  $ expipe register-subject SUBJECT --birthday 01.02.2017 --cell_line wild-type
+
 Registering surgery
 -------------------
 
 When performing surgery you can register information with the ``register-surgery``
 command.::
 
-  $ expipe register-surgery --rat RAT --date 14.05.2017:12:35 --procedure implantation --weight 400 --birthday 01.02.2017
+  $ expipe register-surgery SUBJECT --date 14.05.2017:12:35 --procedure implantation --weight 400
 
 Drive adjustment
 ----------------
 
 The first time you want to adjust the brain-area ``X``, ``Y``
-(reffering to PAR.MODULES['electrophysiology']['X']) of a drive
+(reffering to ``PAR.MODULES['implantation']['X']``) of a drive
 an amount of ``um`` you need to
 initialize an adjustment action with the command::
 
-  $ expipe adjust RAT --anatomy X um --anatomy Y um --date dd.mm.yyyyTHH:MM --init
+  $ expipe adjust SUBJECT --init
 
 When you have initialized and later make a new adjustment::
 
-  $ expipe adjust RAT --date dd.mm.yyyyTHH:MM --anatomy X um --anatomy Y um
+  $ expipe adjust SUBJECT --date dd.mm.yyyyTHH:MM --adjustment X um --adjustment Y um
 
 Note that in stead of ``--date dd.mm.yyyyTHH:MM`` can use ``-d now``.
 
@@ -116,7 +125,7 @@ For help på en spesifikk kommando::
 
 To overwrite existing data use ``--overwrite``::
 
-  expipe register-axona z:\USER\DATA\RAT\FILENAME.set
+  expipe register-axona z:\USER\DATA\SUBJECT\FILENAME.set
 
 Now modules are loaded to the firebase server and depth registration
 is promted to the user.
