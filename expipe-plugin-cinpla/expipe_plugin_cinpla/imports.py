@@ -108,9 +108,9 @@ def tqdm():
     return tqdm
 
 @lazy_import
-def SCPClient():
-    from scp import SCPClient
-    return SCPClient
+def scp():
+    import scp
+    return scp
 
 @lazy_import
 def neo():

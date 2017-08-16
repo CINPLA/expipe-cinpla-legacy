@@ -101,7 +101,7 @@ def login(hostname, username, password, port):
                 password=password, timeout=4)
     sftp_client = ssh.open_sftp()
     view_bar, pbar = get_view_bar()
-    scp_client = SCPClient(ssh.get_transport(), progress=view_bar)
+    scp_client = scp.SCPClient(ssh.get_transport(), progress=view_bar)
     return ssh, scp_client, sftp_client, pbar
 
 
