@@ -53,14 +53,11 @@ def attach_to_cli(cli):
     @cli.command('adjust', short_help='Parse info about drive depth adjustment')
     @click.argument('subject-id',  type=click.STRING)
     @click.option('-d', '--date',
-                  required=True,
                   type=click.STRING,
                   help='The date of the surgery format: "dd.mm.yyyyTHH:MM" or "now".',
                   )
-    @click.option('-a', '--anatomy',
-                  nargs=2,
+    @click.option('-a', '--adjustment',
                   multiple=True,
-                  required=True,
                   type=(click.STRING, int),
                   help='The adjustment amount on given anatomical location in "um".',
                   )
@@ -80,8 +77,13 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='The experimenter performing the adjustment.',
                   )
-    def generate_adjustment(subject_id, date, anatomy, user, index, init,
+    def generate_adjustment(subject_id, date, adjustment, user, index, init,
                             overwrite):
+        if not init:
+            assert len(adjustment) != 0, 'Missing option "-a" / "--adjustment".'
+            assert date is not None, 'Missing option "-d" / "--date".'
+        if init and date is None:
+            date = 'now'
         DTIME_FORMAT = expipe.io.core.datetime_format
         if date == 'now':
             date = datetime.now()
@@ -114,8 +116,11 @@ def attach_to_cli(cli):
             index = 0
             surgery = project.get_action(subject_id + '-surgery-implantation')
             sdict = surgery.modules.to_dict()
-            prev_depth = {key: sdict[PAR.MODULES['implantation'][key]]['position'][2]
-                          for key, _ in anatomy}
+            templates_used = {
+                key: mod for key, mod in PAR.MODULES['implantation'].items()
+                if mod in sdict}
+            prev_depth = {key: sdict[mod]['position'][2]
+                          for key, mod in templates_used.items()}
             for key, depth in prev_depth.items():
                 if not isinstance(depth, pq.Quantity):
                     raise ValueError('Depth of implant ' +
@@ -123,18 +128,18 @@ def attach_to_cli(cli):
                 prev_depth[key] = depth.astype(float)
         else:
             prev_name = '{:03d}_adjustment'.format(index - 1)
-            prev_dict = action.require_module(name=prev_name).to_dict()
-            prev_depth = {key: prev_dict['depth'][key] for key, _ in anatomy}
+            prev_depth = action.require_module(name=prev_name).to_dict()['depth']
         name = '{:03d}_adjustment'.format(index)
         module = action.require_module(template=PAR.TEMPLATES['adjustment'],
                                        name=name, overwrite=overwrite)
 
-        curr_depth = {key: round(prev_depth[key] + val * pq.um, 3)
-                      for key, val in anatomy} # round to um
-        curr_adjustment = {key: val * pq.um for key, val in anatomy}
+        adjustment_dict = {key: val * pq.um for key, val in adjustment}
+        adjustment = {key: adjustment_dict.get(key) or 0 * pq.um for key in prev_depth}
+        curr_depth = {key: round(prev_depth[key] + val, 3)
+                      for key, val in adjustment.items()} # round to um
         answer = query_yes_no(
             'Correct adjustment: ' +
-            ' '.join('{} = {}'.format(key, val) for key, val in curr_adjustment.items()) +
+            ' '.join('{} = {}'.format(key, val) for key, val in adjustment.items()) +
             '? New depth: ' +
             ' '.join('{} = {}'.format(key, val) for key, val in curr_depth.items())
         )
@@ -143,13 +148,13 @@ def attach_to_cli(cli):
             return
         print(
             'Registering adjustment: ' +
-            ' '.join('{} = {}'.format(key, val) for key, val in anatomy) +
+            ' '.join('{} = {},'.format(key, val) for key, val in adjustment.items()) +
             ' New depth: ' +
-            ' '.join('{} = {}'.format(key, val) for key, val in curr_depth.items())
+            ' '.join('{} = {},'.format(key, val) for key, val in curr_depth.items())
         )
         content = module.to_dict()
         content['depth'] = curr_depth
-        content['adjustment'] = curr_adjustment
+        content['adjustment'] = adjustment
         content['experimenter'] = user
         content['date'] = datestring
         content['git_note'] = get_git_info()
@@ -179,6 +184,7 @@ def attach_to_cli(cli):
                   required=True,
                   nargs=2,
                   type=(click.FLOAT, click.STRING),
+                  multiple=True,
                   help='The weight of the subject with unit i.e. <200 g> (ommit <>).',
                   )
     @click.option('-p', '--position',
@@ -194,11 +200,15 @@ def attach_to_cli(cli):
     def generate_surgery(subject_id, procedure, date, user, weight,
                          overwrite, position, angle):
         # TODO tag sucject as active
+        assert len(weight) == 1, 'Cannot give multiple weights.'
         if procedure not in ["implantation", "injection"]:
             raise ValueError('procedure must be one of "implantation" ' +
                              'or "injection"')
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(subject_id + '-surgery-' + procedure)
+
+        generate_templates(action, PAR.TEMPLATES['surgery_' + procedure],
+                           overwrite, git_note=get_git_info())
         if date == 'now':
             date = datetime.now()
         else:
@@ -215,8 +225,7 @@ def attach_to_cli(cli):
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
-        generate_templates(action, PAR.TEMPLATES['surgery_' + procedure],
-                           overwrite, git_note=get_git_info())
+        
         modules_dict = action.modules.to_dict()
         for key, x, y, z, unit in position:
             name = PAR.MODULES[procedure][key]
@@ -234,7 +243,7 @@ def attach_to_cli(cli):
         subject = {'_inherits': '/action_modules/' +
                                 'subjects-registry/' +
                                 subject_id}
-        subject['weight'] = pq.Quantity(weight[0], weight[1])
+        subject['weight'] = pq.Quantity(weight[0][0], weight[0][1])
         action.require_module(name=PAR.MODULES['subject'], contents=subject,
                               overwrite=True)
         subjects_project = expipe.require_project('subjects-registry')
@@ -300,9 +309,11 @@ def attach_to_cli(cli):
     @click.option('--weight',
                   nargs=2,
                   type=(click.FLOAT, click.STRING),
+                  default=(None, None),
                   help='The weight of the animal.',
                   )
     def generate_subject(subject_id, overwrite, user, **kwargs):
+        DTIME_FORMAT = expipe.io.core.datetime_format
         project = expipe.require_project('subjects-registry')
         action = project.require_action(subject_id)
         kwargs['birthday'] = datetime.strftime(
@@ -317,15 +328,18 @@ def attach_to_cli(cli):
             if isinstance(val, (str, float, int)):
                 subject[key]['value'] = val
             elif isinstance(val, tuple):
-                subject[key] = pq.Quantity(val[0], val[1])
+                if not None in val:
+                    subject[key] = pq.Quantity(val[0], val[1])
             elif isinstance(val, type(None)):
                 pass
             else:
                 raise TypeError('Not recognized type ' + str(type(val)))
+        not_reg_keys = []
         for key, val in subject.items():
             if isinstance(val, dict):
                 if len(val.get('value')) == 0:
-                    warnings.warn('No value registered for ' + key)
+                    not_reg_keys.append(key)
+        warnings.warn('No value registered for {}'.format(not_reg_keys))
         action.require_module(name=PAR.MODULES['subject'], contents=subject,
                               overwrite=True)
 

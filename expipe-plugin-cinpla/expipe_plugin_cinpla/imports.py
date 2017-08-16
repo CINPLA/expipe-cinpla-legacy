@@ -197,3 +197,8 @@ def imp():
 def collections():
     import collections
     return collections
+
+@lazy_import
+def plt():
+    import matplotlib.pyplot as plt
+    return plt

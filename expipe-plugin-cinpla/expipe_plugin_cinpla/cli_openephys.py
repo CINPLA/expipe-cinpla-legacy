@@ -187,10 +187,11 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='The experimenter performing the recording.',
                   )
-    @click.option('-a', '--anatomy',
+    @click.option('-d', '--depth',
+                  nargs=2,
                   multiple=True,
                   type=(click.STRING, float),
-                  help='The adjustment amount on given anatomical location in "um".',
+                  help='The depth "um".',
                   )
     @click.option('-l', '--location',
                   type=click.Choice(PAR.POSSIBLE_LOCATIONS),
@@ -254,7 +255,7 @@ def attach_to_cli(cli):
                   help='Do not delete open ephys directory after copying.',
                   )
     def generate_openephys_action(action_id, openephys_path, no_local,
-                                  anatomy, overwrite, no_files, no_modules,
+                                  depth, overwrite, no_files, no_modules,
                                   subject_id, user, prb_path, session, nchan,
                                   location, spikes_source, message, no_move,
                                   tag):
@@ -281,6 +282,15 @@ def attach_to_cli(cli):
             action_id = subject_id + '-' + session_dtime + '-%.2d' % session
         print('Generating action', action_id)
         action = project.require_action(action_id)
+
+        if not no_modules:
+            if 'openephys' not in PAR.TEMPLATES:
+                raise ValueError('Could not find "openephys" in ' +
+                                 'expipe_params.py PAR.TEMPLATES: "' +
+                                 '{}"'.format(PAR.TEMPLATES.keys()))
+            action_tools.generate_templates(action, PAR.TEMPLATES['openephys'], overwrite,
+                                            git_note=action_tools.get_git_info())
+
         action.datetime = openephys_file.datetime
         action.type = 'Recording'
         action.tags.extend(list(tag) + ['open-ephys'])
@@ -301,21 +311,16 @@ def attach_to_cli(cli):
         assert location in PAR.POSSIBLE_LOCATIONS
         print('Registering location ' + location)
         action.location = location
+
         messages = [{'message': m, 'user': user, 'datetime': datetime.now()}
                     for m in message]
         if not no_modules:
-            if 'openephys' not in PAR.TEMPLATES:
-                raise ValueError('Could not find "openephys" in ' +
-                                 'expipe_params.py PAR.TEMPLATES: "' +
-                                 '{}"'.format(PAR.TEMPLATES.keys()))
-            action_tools.generate_templates(action, PAR.TEMPLATES['openephys'], overwrite,
-                                            git_note=action_tools.get_git_info())
             headstage = action.require_module(
                 name='hardware_intan_headstage').to_dict()
             headstage['model']['value'] = 'RHD2132'
             action.require_module(name='hardware_intan_headstage',
                                   contents=headstage, overwrite=True)
-            correct_depth = action_tools.register_depth(project, action, anatomy)
+            correct_depth = action_tools.register_depth(project, action, depth)
             if not correct_depth:
                 print('Aborting registration!')
                 return

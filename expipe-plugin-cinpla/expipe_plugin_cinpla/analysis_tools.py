@@ -1,6 +1,35 @@
 from expipecli.utils.misc import lazy_import
 from .imports import *
 
+@lazy_import
+def tracking():
+    import exana.tracking as tracking
+    return tracking
+
+@lazy_import
+def stimulus():
+    import exana.stimulus as stimulus
+    return stimulus
+
+@lazy_import
+def time_frequency():
+    import exana.time_frequency as time_frequency
+    return time_frequency
+
+@lazy_import
+def statistics():
+    import exana.statistics as statistics
+    return statistics
+
+@lazy_import
+def waveform():
+    import exana.waveform as waveform
+    return waveform
+
+@lazy_import
+def gridspec():
+    import matplotlib.gridspec as gridspec
+    return gridspec
 
 def get_logger(fname):
     logger = logging.getLogger(__file__)
@@ -27,18 +56,6 @@ class Analyser:
     def __init__(self, exdir_path, params, unit_info, ext='.png',
                  save_figs=True, close_fig=True, channel_group=None,
                  no_local=False, overwrite=False, skip=False):
-        import matplotlib.pyplot as plt
-        from matplotlib.ticker import MaxNLocator
-        import matplotlib.lines as mlines
-        import matplotlib.gridspec as gridspec
-        from mpl_toolkits.axes_grid1 import make_axes_locatable
-        import exana.tracking as tr
-        import exana.stimulus as st
-        import exana.time_frequency as tf
-        from exana.waveform import (plot_amp_clusters, plot_waveforms)
-        from exana.statistics import correlogram, plot_isi_hist, coeff_var
-        from exana.misc.tools import normalize
-        from .make_spatiality_overview import make_spatiality_overview
         print('Initializing plotting for {}'.format(exdir_path))
         if ext[0] != '.':
             ext = '.' + ext
@@ -62,17 +79,17 @@ class Analyser:
         exdir_group = exdir.File(exdir_path)
         if 'tracking' in exdir_group['processing']:
             position_group = exdir_group['processing']['tracking']['camera_0']['Position']
-            x1, y1, t1 = tr.get_raw_position(position_group['led_0'])
+            x1, y1, t1 = tracking.get_raw_position(position_group['led_0'])
             try:
-                x2, y2, t2 = tr.get_raw_position(position_group['led_1'])
+                x2, y2, t2 = tracking.get_raw_position(position_group['led_1'])
             except KeyError:
                 x2, y2, t2 = x1, y1, t1
                 print("Only found one tracking led..")
 
-            x, y, t = tr.select_best_position(x1, y1, t1, x2, y2, t2)
-            self.ang, self.ang_t = tr.head_direction(x1, y1, x2, y2, t1,
+            x, y, t = tracking.select_best_position(x1, y1, t1, x2, y2, t2)
+            self.ang, self.ang_t = tracking.head_direction(x1, y1, x2, y2, t1,
                                                      return_rad=False)
-            self.x, self.y, self.t = tr.interp_filt_position(x, y, t,
+            self.x, self.y, self.t = tracking.interp_filt_position(x, y, t,
                                                              pos_fs=self.par['pos_fs'],
                                                              f_cut=self.par['f_cut'])
         if len(self.seg.epochs) == 1:
@@ -145,6 +162,7 @@ class Analyser:
         return True
 
     def spatial_overview(self):
+        from .make_spatiality_overview import make_spatiality_overview
         raw_dir = str(self._analysis.require_raw('spatial_overview').directory)
         os.makedirs(raw_dir, exist_ok=True)
         for nr, chx in enumerate(self.chxs):
@@ -168,14 +186,14 @@ class Analyser:
                 fname = '{} {}'.format(chx.name, unit_name).replace(" ", "_")
                 fpath = os.path.join(raw_dir, fname)
 
-                rate_map, rate_bins, _ = tr.spatial_rate_map( # NOTE assuming quadratic box
+                rate_map, rate_bins, _ = tracking.spatial_rate_map( # NOTE assuming quadratic box
                     self.x, self.y, self.t, sptr,
                     binsize=self.par['spat_binsize'],
                     box_xlen=self.par['box_xlen'],
                     box_ylen=self.par['box_ylen'],
                     mask_unvisited=True,
                     return_bins=True)
-                G, acorr = tr.gridness(
+                G, acorr = tracking.gridness(
                     rate_map, return_acorr=True,
                     box_xlen=self.par['box_xlen'],
                     box_ylen=self.par['box_ylen'])
@@ -191,25 +209,26 @@ class Analyser:
                         spike_size=1.)
                     self.savefig(fpath, fig)
 
-                ang_bin, ang_rate = tr.head_direction_rate(
+                ang_bin, ang_rate = tracking.head_direction_rate(
                     sptr, self.ang,
                     self.ang_t,
                     binsize=self.par['ang_binsize'])
-                mean_ang, mean_vec_len = tr.head_direction_stats(ang_bin,
+                mean_ang, mean_vec_len = tracking.head_direction_stats(ang_bin,
                                                                  ang_rate)
-                px = tr.prob_dist(self.x, self.y, rate_bins)
+                px = tracking.prob_dist(self.x, self.y, rate_bins)
                 analysis_output = {
-                    'information_rate': tr.information_rate(rate_map, px),
+                    'information_rate': tracking.information_rate(rate_map, px),
                     'field_maxrate': np.nanmax(rate_map) * pq.Hz,
-                    'sparsity': tr.sparsity(rate_map, px),
-                    'selectivity': tr.selectivity(rate_map, px),
-                    'coeff_var': float(coeff_var([sptr])[0]),
+                    'sparsity': tracking.sparsity(rate_map, px),
+                    'selectivity': tracking.selectivity(rate_map, px),
+                    'coeff_var': float(statistics.coeff_var([sptr])[0]),
                     'gridness': G,
                     'hd_aveclen': mean_vec_len,
                     'avg_rate': sptr.size / sptr.duration}
                 self.analysis_output[group_name][unit_name]['analysis_output'].update(analysis_output)
 
     def occupancy(self):
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
         raw_dir = str(self._analysis.require_raw('occupancy').directory)
         logger = get_logger(os.path.join(raw_dir, 'exceptions.log'))
         os.makedirs(raw_dir, exist_ok=True)
@@ -223,11 +242,11 @@ class Analyser:
             gs = gridspec.GridSpec(20,9)
             ax1 = fig.add_subplot(gs[:9, 3:6])
             ax2 = fig.add_subplot(gs[11:, 3:6])
-            tr.plot_path(self.x, self.y, self.t,
+            tracking.plot_path(self.x, self.y, self.t,
                             box_xlen=self.par['box_xlen'],
                             box_ylen=self.par['box_ylen'],
                             ax=ax1)
-            im, max_t = tr.plot_occupancy(self.x, self.y, self.t,
+            im, max_t = tracking.plot_occupancy(self.x, self.y, self.t,
                             binsize=self.par['spat_binsize'],
                             box_xlen=self.par['box_xlen'],
                             box_ylen=self.par['box_ylen'],
@@ -309,7 +328,7 @@ class Analyser:
                 fname = '{} channelproxy {}'.format(chx.name, num).replace(" ", "_")
                 fpath = os.path.join(raw_dir, fname)
                 if self.epoch is not None:
-                    epo_over = st.epoch_overview(self.epoch,
+                    epo_over = stimulus.epoch_overview(self.epoch,
                                               np.median(np.diff(self.epoch.times)))
                     if len(epo_over.times) > 15:
                         with open(fpath + '.exception', 'w+') as f:
@@ -320,7 +339,7 @@ class Analyser:
                 else:
                     epo_over = None
                 try:
-                    fig = tf.plot_tfr(ana, epoch=epo_over, f0=3, flim=[0, 120],
+                    fig = time_frequency.plot_tfr(ana, epoch=epo_over, f0=3, flim=[0, 120],
                                    plot_ana=True)
                 except Exception as e:
                     with open(fpath + '.exception', 'w+') as f:
@@ -343,7 +362,7 @@ class Analyser:
                 fname = '{} channelproxy {}_psd'.format(chx.name, num).replace(" ", "_")
                 fpath = os.path.join(raw_dir, fname)
                 try:
-                    ax = tf.plot_psd(ana, xlim=[0, 100], nperseg=2048)
+                    ax = time_frequency.plot_psd(ana, xlim=[0, 100], nperseg=2048)
                 except Exception as e:
                     with open(fpath + '.exception', 'w+') as f:
                         print(str(e), file=f)
@@ -374,7 +393,7 @@ class Analyser:
                 sptr = unit.spiketrains[0]
                 fname = '{} {} stim macro'.format(chx.name, unit.name)
                 fpath = os.path.join(raw_dir, fname).replace(" ", "_")
-                epo_over = st.epoch_overview(self.epoch,
+                epo_over = stimulus.epoch_overview(self.epoch,
                                           np.median(np.diff(self.epoch.times)))
 
                 t_start = -np.round(epo_over.durations[0])
@@ -383,7 +402,7 @@ class Analyser:
                 fig = plt.figure()
 
                 try:
-                    st.plot_psth(sptr=sptr, epoch=epo_over, t_start=t_start,
+                    stimulus.plot_psth(sptr=sptr, epoch=epo_over, t_start=t_start,
                               t_stop=t_stop, output='counts', binsize=binsize,
                               fig=fig, ylim=ylim) # TODO does not manage to send ylim???
                     self.savefig(fpath, fig)
@@ -397,7 +416,7 @@ class Analyser:
                 t_stop = np.round(self.epoch.durations[0].rescale('ms')) * 3
                 binsize = (abs(t_start) + abs(t_stop)) / 100.
                 try:
-                    st.plot_psth(sptr=sptr, epoch=self.epoch, t_start=t_start,
+                    stimulus.plot_psth(sptr=sptr, epoch=self.epoch, t_start=t_start,
                               t_stop=t_stop, output='counts', binsize=binsize,
                               fig=fig)
                     self.savefig(fpath, fig)
@@ -407,12 +426,14 @@ class Analyser:
     def spike_lfp_coherence(self, xlim=[4, 16], color='b',
                             srch=[6, 10], show_max=False): # TODO plots everything twice
         # from .signal_tools import downsample_250
+        from matplotlib.ticker import MaxNLocator
+        from exana.misc.tools import normalize
         raw_dir = str(self._analysis.require_raw('spike_lfp_coherence').directory)
         os.makedirs(raw_dir, exist_ok=True)
         starts = [self.blk.segments[0].t_start]
         stops = [self.blk.segments[0].t_stop]
         if self.epoch is not None:
-            epo_over = st.epoch_overview(self.epoch,
+            epo_over = stimulus.epoch_overview(self.epoch,
                                       np.median(np.diff(self.epoch.times)))
             if len(epo_over) > 10:
                 epo_over = None
@@ -489,7 +510,7 @@ class Analyser:
                         3, 1, subplot_spec=gs_main[0, plot_num])
 
                     ax_sptr_spec = fig.add_subplot(gs[0])
-                    tf.plot_spike_psd([sptr], xlim=xlim,
+                    time_frequency.plot_spike_psd([sptr], xlim=xlim,
                                    mark_max=False, NFFT=6000, title=None,
                                    xlabel=None, color=color, ax=ax_sptr_spec,
                                    ylabel=None, ylim=None)
@@ -502,7 +523,7 @@ class Analyser:
                     # lfp psd
                     # TODO select proper lfp signal
                     ax_ana_spec = fig.add_subplot(gs[1])
-                    tf.plot_psd(sliced_anas, color=color, xlim=xlim,
+                    time_frequency.plot_psd(sliced_anas, color=color, xlim=xlim,
                              mark_max=False, nperseg=2048, ylim=None,
                              fcn=lambda inp: normalize(inp, mode='zscore'),
                              title=None, ax=ax_ana_spec, xlabel=False,
@@ -573,11 +594,11 @@ class Analyser:
                     fig = plt.figure()
                     nrc = sptr.waveforms.shape[1]
                     gs = gridspec.GridSpec(2*nrc+4, 2*nrc+4)
-                    plot_waveforms(sptr=sptr, color=color, fig=fig, gs=gs[:nrc+1, :nrc+1])
-                    plot_amp_clusters([sptr], colors=[color], fig=fig, gs=gs[:nrc+1, nrc+2:])
+                    waveform.plot_waveforms(sptr=sptr, color=color, fig=fig, gs=gs[:nrc+1, :nrc+1])
+                    waveform.plot_amp_clusters([sptr], colors=[color], fig=fig, gs=gs[:nrc+1, nrc+2:])
                     bin_width = self.par['corr_bin_width'].rescale('s').magnitude
                     limit = self.par['corr_limit'].rescale('s').magnitude
-                    count, bins = correlogram(t1=sptr.times.magnitude, t2=None,
+                    count, bins = statistics.correlogram(t1=sptr.times.magnitude, t2=None,
                                               bin_width=bin_width, limit=limit,
                                               auto=True)
                     ax_cor = fig.add_subplot(gs[nrc+3:, :nrc+1])
@@ -586,7 +607,7 @@ class Analyser:
                     ax_cor.set_xlim([-limit, limit])
 
                     ax_isi = fig.add_subplot(gs[nrc+3:, nrc+2:])
-                    plot_isi_hist(sptr.times, alpha=1, ax=ax_isi, binsize=self.par['isi_binsize'],
+                    statistics.plot_isi_hist(sptr.times, alpha=1, ax=ax_isi, binsize=self.par['isi_binsize'],
                                   time_limit=self.par['isi_time_limit'], color=color, )
                     self.savefig(fpath, fig)
                 except Exception as e:
@@ -594,16 +615,16 @@ class Analyser:
 
     def orient_tuning_overview(self):
         try:
-            stim_epoch = st.get_epoch(self.seg.epochs, "visual_stimulus")
+            stim_epoch = stimulus.get_epoch(self.seg.epochs, "visual_stimulus")
         except ValueError:
             print("Could not find epoch of type 'visual_stimulus'")
             raise
         raw_dir = str(self._analysis.require_raw('orient_tuning_overview').directory)
         os.makedirs(raw_dir, exist_ok=True)
-        stim_off_epoch = st.make_stimulus_off_epoch(stim_epoch)
-        off_rates = st.compute_spontan_rate(self.chxs, stim_off_epoch)
+        stim_off_epoch = stimulus.make_stimulus_off_epoch(stim_epoch)
+        off_rates = stimulus.compute_spontan_rate(self.chxs, stim_off_epoch)
 
-        stim_trials = st.make_stimulus_trials(self.chxs, stim_epoch)
+        stim_trials = stimulus.make_stimulus_trials(self.chxs, stim_epoch)
         for nr, chx in enumerate(self.chxs):
             group_id = chx.annotations['group_id']
             if group_id not in self.channel_group:
@@ -620,10 +641,10 @@ class Analyser:
 
                     fname = 'raster {} Unit {}'.format(chx.name, u)
                     fpath = os.path.join(raw_dir, fname).replace(" ", "_")
-                    fig = st.orient_raster_plots(trials)
+                    fig = stimulus.orient_raster_plots(trials)
                     self.savefig(fpath, fig)
 
                     fname = 'tuning {} Unit {}'.format(chx.name, u)
                     fpath = os.path.join(raw_dir, fname).replace(" ", "_")
-                    fig = st.plot_tuning_overview(trials, off_rate)
+                    fig = stimulus.plot_tuning_overview(trials, off_rate)
                     self.savefig(fpath, fig)

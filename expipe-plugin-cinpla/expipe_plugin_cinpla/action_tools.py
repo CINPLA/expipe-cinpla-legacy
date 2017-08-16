@@ -18,7 +18,7 @@ def get_git_info():
     return GIT_NOTE
 
 
-def query_yes_no(question, default="yes"):
+def query_yes_no(question, default="yes", answer=None):
     """Ask a yes/no question via raw_input() and return their answer.
 
     "question" is a string that is presented to the user.
@@ -28,6 +28,8 @@ def query_yes_no(question, default="yes"):
 
     The "answer" return value is True for "yes" or False for "no".
     """
+    if answer is True:
+        return True
     valid = {"yes": True, "y": True, "ye": True,
              "no": False, "n": False}
     if default is None:
@@ -56,18 +58,19 @@ def deltadate(adjustdate, regdate):
     return delta
 
 
-def register_depth(project, action, anatomy=None, yes=False):
+def register_depth(project, action, depth=None, answer=False):
     DTIME_FORMAT = expipe.io.core.datetime_format
     regdate = action.datetime
-    mod_info = PAR.MODULES['electrophysiology']
-    if len(anatomy) == 0:
+    mod_info = PAR.MODULES['implantation']
+    if len(depth) == 0:
         assert len(action.subjects) == 1
         subject = action.subjects[0]
         try:
             adjustments = project.get_action(name=subject + '-adjustment')
         except NameError as e:
             raise NameError(
-                str(e) + ', Cannot find current depth, anatomy must be given')
+                str(e) + ', Cannot find current depth, depth must be given ' +
+                'in adjustments with "expipe adjust subject-id --init".')
         adjusts = {}
         for adjust in adjustments.modules:
             values = adjust.to_dict()
@@ -78,26 +81,30 @@ def register_depth(project, action, anatomy=None, yes=False):
         adjustment = adjusts[adjustdate].to_dict()
         curr_depth = {key: adjustment['depth'][key] for key in mod_info}
     else:
-        curr_depth = {key: val * pq.mm for key, val in anatomy}
+        curr_depth = {key: val * pq.mm for key, val in depth}
         adjustdate = None
-    if not yes:
-        answer = query_yes_no(
-            'Are the following values correct: ' +
-            ', '.join('{} = {}'.format(key, val) for key, val in curr_depth.items()) +
-            ' adjust date time = {}'.format(adjustdate))
-        if not answer:
-            print('Aborting depth registration')
-            return False
-    modules_dict = action.modules.to_dict()
-    for key, val in curr_depth.items():
-        name = mod_info[key]
-        if not name in modules_dict:
-            raise NameError('Failed to acquire electrophysiology module')
-        mod = modules_dict[name]
-        print('Registering depth ', key, ' = ', val)
+    correct = query_yes_no(
+        'Are the following values correct: ' +
+        ', '.join('{} = {}'.format(key, val) for key, val in curr_depth.items()) +
+        ' adjust date time = {}'.format(adjustdate), answer=answer)
+    if not correct:
+        print('Aborting depth registration')
+        return False
+    for key, name in mod_info.items():
+        try:
+            assert len(action.subjects) == 1
+            surgery_action_id = action.subjects[0] + '-surgery-implantation'
+            surgery = project.get_action(surgery_action_id)
+            prev_pos = surgery.get_module(name).to_dict()['position']
+        except Exception as e:
+            raise Exception(str(e) + ' Unable to get position from surgery.')
+        mod = action.require_module(template=name, overwrite=True).to_dict()
+        val = curr_depth[key]
         if np.isnan(val):
-            val = 'NaN'
-        mod['depth'] = val
+            raise ValueError('Depth cannot be NaN')
+        print('Registering depth ', key, ' = ', val)
+        prev_pos[2] = val
+        mod['position'] = prev_pos
         action.require_module(name=name, contents=mod, overwrite=True)
     return True
 
