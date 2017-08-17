@@ -26,15 +26,15 @@
     },
     "name": "malin_implant_flex_v1r",
     "notes": {
-      "value": "Indexes refer to x,y,z respectively"
-  },
-  "position": {
-      "unit": "mm",
-      "value": [
-          "x",
-          "y",
-          "z"
-      ]
+        "value": "Indexes refer to x,y,z respectively"
+    },
+    "position": {
+        "unit": "mm",
+        "value": [
+            "x",
+            "y",
+            "z"
+        ]
     },
     "position_reference": {
         "alternatives": [
@@ -47,9 +47,9 @@
         ],
         "definition": "By default position are specified by the coordinates of skull. Use this property for other definitions.",
         "value": [
-              "longitudinal suture",
-              "lambda",
-              "dura"
+            "longitudinal suture",
+            "lambda",
+            "dura"
         ]
     },
     "ref_electrode_location": {

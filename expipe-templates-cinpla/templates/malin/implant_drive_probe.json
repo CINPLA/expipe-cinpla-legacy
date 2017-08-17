@@ -28,15 +28,15 @@
     },
     "name": "malin_implant_drive_probe",
     "notes": {
-      "value": "Indexes refer to x,y,z respectively"
-  },
-  "position": {
-      "unit": "mm",
-      "value": [
-          "x",
-          "y",
-          "z"
-      ]
+        "value": "Indexes refer to x,y,z respectively"
+    },
+    "position": {
+        "unit": "mm",
+        "value": [
+            "x",
+            "y",
+            "z"
+        ]
     },
     "position_reference": {
         "alternatives": [
