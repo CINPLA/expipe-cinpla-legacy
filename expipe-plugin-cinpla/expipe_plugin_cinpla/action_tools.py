@@ -79,7 +79,7 @@ def register_depth(project, action, depth=None, answer=False):
         adjustdates = adjusts.keys()
         adjustdate = min(adjustdates, key=lambda x: deltadate(x, regdate))
         adjustment = adjusts[adjustdate].to_dict()
-        curr_depth = {key: adjustment['depth'][key] for key in mod_info}
+        curr_depth = {key: adjustment['depth'].get(key) for key in mod_info}
     else:
         curr_depth = {key: val * pq.mm for key, val in depth}
         adjustdate = None

@@ -1,9 +1,7 @@
 {
     "angle": {
         "unit": "deg",
-        "value": [
-            15.0
-        ]
+        "value": ""
     },
     "definition": "Describing an implantation procedure of a micro drive and flexDrive.",
     "description": {
@@ -20,21 +18,25 @@
     "identifier": "malin_implant_drive_v1r",
     "location": {
         "alternatives": {
-            "V1BR": "Primary visual cortex, binocular area, right hemisphere",
-            "V1MR": "Primary visual cortex, monocular area, right hemisphere",
-            "V2LR": "Secondary visual cortex, lateral area, right hemisphere",
-            "V2MR": "Secondary visual cortex, medial area, right hemisphere"
+            "v1bl": "Primary visual cortex, binocular area, right hemisphere",
+            "v1ml": "Primary visual cortex, monocular area, right hemisphere",
+            "v2bl": "Secondary visual cortex, lateral area, right hemisphere",
+            "v2ml": "Secondary visual cortex, medial area, right hemisphere"
         },
         "definition": "Describes the brain area of implantation",
         "value": ""
     },
     "name": "malin_implant_drive_v1r",
     "notes": {
-        "value": ""
+        "value": "Indexes refer to x,y,z respectively"
     },
     "position": {
         "unit": "mm",
-        "value": ""
+        "value": [
+            "x",
+            "y",
+            "z"
+        ]
     },
     "position_reference": {
         "alternatives": [

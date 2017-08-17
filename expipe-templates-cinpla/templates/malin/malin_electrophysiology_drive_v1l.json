@@ -20,10 +20,10 @@
     "identifier": "malin_electrophysiology_drive_v1l",
     "location": {
         "alternatives": {
-            "V1BR": "Primary visual cortex, binocular area, right hemisphere",
-            "V1MR": "Primary visual cortex, monocular area, right hemisphere",
-            "V2LR": "Secondary visual cortex, lateral area, right hemisphere",
-            "V2MR": "Secondary visual cortex, medial area, right hemisphere"
+            "v1bl": "Primary visual cortex, binocular area, left hemisphere",
+            "v1ml": "Primary visual cortex, monocular area, left hemisphere",
+            "v2ll": "Secondary visual cortex, lateral area, left hemisphere",
+            "v2ml": "Secondary visual cortex, medial area, left hemisphere"
         },
         "definition": "Describes the brain area of recording.",
         "value": ""

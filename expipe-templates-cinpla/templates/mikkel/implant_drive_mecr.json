@@ -1,9 +1,7 @@
 {
     "angle": {
         "unit": "deg",
-        "value": [
-            15.0
-        ]
+        "value": 15.0
     },
     "definition": "Describing an implantation procedure of a micro drive.",
     "description": {

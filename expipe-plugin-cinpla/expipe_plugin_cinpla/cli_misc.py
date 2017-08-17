@@ -225,7 +225,7 @@ def attach_to_cli(cli):
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
-        
+
         modules_dict = action.modules.to_dict()
         for key, x, y, z, unit in position:
             name = PAR.MODULES[procedure][key]
@@ -248,7 +248,7 @@ def attach_to_cli(cli):
                               overwrite=True)
         subjects_project = expipe.require_project('subjects-registry')
         subject_action = subjects_project.require_action(subject_id)
-        subject_action.tags.append('surgery')
+        subject_action.tags.extend(['surgery', PAR.USER_PARAMS['project_id']])
 
     @cli.command('register-subject', short_help='Register a subject to the "subjects-registry" project.')
     @click.argument('subject-id')
@@ -266,8 +266,7 @@ def attach_to_cli(cli):
                   help='The birthday of the subject, format: "dd.mm.yyyy".',
                   )
     @click.option('--cell_line',
-                  required=True,
-                  type=click.Choice(PAR.POSSIBLE_CELL_LINES),
+                  type=click.STRING,
                   help='Cell line of the subject.',
                   )
     @click.option('--developmental_stage',
@@ -313,6 +312,8 @@ def attach_to_cli(cli):
                   help='The weight of the animal.',
                   )
     def generate_subject(subject_id, overwrite, user, **kwargs):
+        if len(PAR.POSSIBLE_CELL_LINES) > 0:
+            assert kwargs['cell_line'] in PAR.POSSIBLE_CELL_LINES
         DTIME_FORMAT = expipe.io.core.datetime_format
         project = expipe.require_project('subjects-registry')
         action = project.require_action(subject_id)
@@ -321,8 +322,8 @@ def attach_to_cli(cli):
         action.datetime = datetime.now()
         action.type = 'Info'
         action.subjects = [subject_id]
-
-        subject = action.require_module(template=PAR.MODULES['subject'],
+        subject_template_name = PAR.MODULES.get('subject') or 'subject_subject'
+        subject = action.require_module(template=subject_template_name,
                                         overwrite=overwrite).to_dict()
         for key, val in kwargs.items():
             if isinstance(val, (str, float, int)):
@@ -340,7 +341,7 @@ def attach_to_cli(cli):
                 if len(val.get('value')) == 0:
                     not_reg_keys.append(key)
         warnings.warn('No value registered for {}'.format(not_reg_keys))
-        action.require_module(name=PAR.MODULES['subject'], contents=subject,
+        action.require_module(name=subject_template_name, contents=subject,
                               overwrite=True)
 
     @cli.command('register-perfusion',
