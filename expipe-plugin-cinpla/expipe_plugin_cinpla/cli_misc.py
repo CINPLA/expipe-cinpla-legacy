@@ -194,17 +194,26 @@ def attach_to_cli(cli):
                   help='The position e.g. <mecl,x,y,z,mm> (ommit <>).',
                   )
     @click.option('-a', '--angle',
-                  type=click.FLOAT,
+                  nargs=2,
+                  type=(click.FLOAT, click.STRING),
+                  multiple=True,
+                  default=(None, None),
                   help='The angle of implantation/injection.',
                   )
+    @click.option('--message', '-m',
+                  multiple=True,
+                  type=click.STRING,
+                  help='Add message, use "text here" for sentences.',
+                  )
     def generate_surgery(subject_id, procedure, date, user, weight,
-                         overwrite, position, angle):
+                         overwrite, position, angle, message):
         # TODO tag sucject as active
         assert len(weight) == 1, 'Cannot give multiple weights.'
+        assert len(angle) == 1, 'Cannot give multiple angles.'
         if procedure not in ["implantation", "injection"]:
             raise ValueError('procedure must be one of "implantation" ' +
                              'or "injection"')
-        project = expipe.get_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(subject_id + '-surgery-' + procedure)
 
         generate_templates(action, PAR.TEMPLATES['surgery_' + procedure],
@@ -226,6 +235,10 @@ def attach_to_cli(cli):
         print('Registering user ' + user)
         action.users = [user]
 
+        action.messages.extend([{'message': m,
+                                 'user': user,
+                                 'datetime': datetime.now()}
+                               for m in message])
         modules_dict = action.modules.to_dict()
         for key, x, y, z, unit in position:
             name = PAR.MODULES[procedure][key]
@@ -235,9 +248,8 @@ def attach_to_cli(cli):
             print('Registering position ' +
                   '{}: x={}, y={}, z={} {}'.format(key, x, y, z, unit))
             mod['position'] = pq.Quantity([x, y, z], unit)
-            if angle is not None:
-                raise NotImplementedError
-            # mod['angle'] = pq.Quantity(angle[0], angle[1]) # TODO
+            if angle != (None, None):
+                mod['angle'] = pq.Quantity(angle[0][0], angle[0][1])
             action.require_module(name=name, contents=mod, overwrite=True)
 
         subject = {'_inherits': '/action_modules/' +
@@ -311,7 +323,12 @@ def attach_to_cli(cli):
                   default=(None, None),
                   help='The weight of the animal.',
                   )
-    def generate_subject(subject_id, overwrite, user, **kwargs):
+    @click.option('--message', '-m',
+                  multiple=True,
+                  type=click.STRING,
+                  help='Add message, use "text here" for sentences.',
+                  )
+    def generate_subject(subject_id, overwrite, user, message, **kwargs):
         if len(PAR.POSSIBLE_CELL_LINES) > 0:
             assert kwargs['cell_line'] in PAR.POSSIBLE_CELL_LINES
         DTIME_FORMAT = expipe.io.core.datetime_format
@@ -322,6 +339,17 @@ def attach_to_cli(cli):
         action.datetime = datetime.now()
         action.type = 'Info'
         action.subjects = [subject_id]
+        user = user or PAR.USER_PARAMS['user_name']
+        if user is None:
+            raise ValueError('Please add user name')
+        if len(user) == 0:
+            raise ValueError('Please add user name')
+        print('Registering user ' + user)
+        action.users = [user]
+        action.messages.extend([{'message': m,
+                                 'user': user,
+                                 'datetime': datetime.now()}
+                               for m in message])
         subject_template_name = PAR.MODULES.get('subject') or 'subject_subject'
         subject = action.require_module(template=subject_template_name,
                                         overwrite=overwrite).to_dict()

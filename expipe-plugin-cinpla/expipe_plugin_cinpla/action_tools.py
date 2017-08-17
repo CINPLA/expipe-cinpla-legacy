@@ -79,7 +79,8 @@ def register_depth(project, action, depth=None, answer=False):
         adjustdates = adjusts.keys()
         adjustdate = min(adjustdates, key=lambda x: deltadate(x, regdate))
         adjustment = adjusts[adjustdate].to_dict()
-        curr_depth = {key: adjustment['depth'].get(key) for key in mod_info}
+        curr_depth = {key: adjustment['depth'].get(key) for key in mod_info
+                      if adjustment['depth'].get(key) is not None}
     else:
         curr_depth = {key: val * pq.mm for key, val in depth}
         adjustdate = None
@@ -90,14 +91,19 @@ def register_depth(project, action, depth=None, answer=False):
     if not correct:
         print('Aborting depth registration')
         return False
-    for key, name in mod_info.items():
+    if len(action.subjects) == 1:
+        surgery_action_id = action.subjects[0] + '-surgery-implantation'
         try:
-            assert len(action.subjects) == 1
-            surgery_action_id = action.subjects[0] + '-surgery-implantation'
             surgery = project.get_action(surgery_action_id)
-            prev_pos = surgery.get_module(name).to_dict()['position']
-        except Exception as e:
-            raise Exception(str(e) + ' Unable to get position from surgery.')
+        except NameError as e:
+            raise NameError(str(e) + 'There are no surgery-implantation ' +
+                            'registered for this animal. Please insert depth' +
+                            'manually')
+    else:
+        raise ValueError('Multiple subjects registered for this action, ' +
+                         'unable to get surgery.')
+    for key, name in curr_depth.items():
+        prev_pos = surgery.get_module(name).to_dict()['position']
         mod = action.require_module(template=name, overwrite=True).to_dict()
         val = curr_depth[key]
         if np.isnan(val):
@@ -141,8 +147,13 @@ def generate_templates(action, action_templates, overwrite, git_note=None):
         try:
             if template.startswith('_inherit'):
                 name = '_'.join(template.split('_')[2:])
+                try:
+                    action.project.require_module(template=name)
+                    print('Adding module to project ' + name)
+                except (NameError, ValueError):
+                    pass
                 contents = {'_inherits': '/project_modules/' +
-                                         PAR.USER_PARAMS['project_id'] + '/' +
+                                         action.project.id + '/' +
                                          name}
                 action.require_module(name=name, contents=contents,
                                       overwrite=overwrite)

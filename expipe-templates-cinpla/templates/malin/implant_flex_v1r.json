@@ -13,20 +13,18 @@
             "L, left": "left hemisphere",
             "R, right": "right hemisphere"
         },
-        "value": ""
+        "value": "R"
     },
-    "identifier": "malin_implant_drive_flex",
+    "identifier": "malin_implant_flex_v1r",
     "location": {
         "alternatives": {
-            "v1bl": "Primary visual cortex, binocular area, right hemisphere",
-            "v1ml": "Primary visual cortex, monocular area, right hemisphere",
-            "v2bl": "Secondary visual cortex, lateral area, right hemisphere",
-            "v2ml": "Secondary visual cortex, medial area, right hemisphere"
+            "v1br": "Primary visual cortex, binocular area, right hemisphere",
+            "v1mr": "Primary visual cortex, monocular area, right hemisphere"
         },
         "definition": "Describes the brain area of implantation",
         "value": ""
     },
-    "name": "malin_implant_drive_flex",
+    "name": "malin_implant_flex_v1r",
     "notes": {
       "value": "Indexes refer to x,y,z respectively"
   },
@@ -48,7 +46,11 @@
             "transverse sinus"
         ],
         "definition": "By default position are specified by the coordinates of skull. Use this property for other definitions.",
-        "value": "lambda"
+        "value": [
+              "longitudinal suture",
+              "lambda",
+              "dura"
+        ]
     },
     "ref_electrode_location": {
         "alternatives": [

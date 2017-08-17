@@ -1,0 +1,62 @@
+{
+    "angle": {
+        "unit": "deg",
+        "value": ""
+    },
+    "definition": "Describing an implantation procedure of a flexDrive.",
+    "description": {
+        "value": "Implantation of a flexDrive in the Visual Cortex."
+    },
+    "hemisphere": {
+        "alternatives": {
+            "C, center": "between hemispheres",
+            "L, left": "left hemisphere",
+            "R, right": "right hemisphere"
+        },
+        "value": "L"
+    },
+    "identifier": "malin_implant_flex_v1l",
+    "location": {
+        "alternatives": {
+            "v1bl": "Primary visual cortex, binocular area, left hemisphere",
+            "v1ml": "Primary visual cortex, monocular area, left hemisphere"
+        },
+        "definition": "Describes the brain area of implantation",
+        "value": ""
+    },
+    "name": "malin_implant_flex_v1l",
+    "notes": {
+      "value": "Indexes refer to x,y,z respectively"
+  },
+  "position": {
+      "unit": "mm",
+      "value": [
+          "x",
+          "y",
+          "z"
+      ]
+    },
+    "position_reference": {
+        "alternatives": [
+            "bregma",
+            "dura",
+            "lambda",
+            "longitudinal suture",
+            "skull",
+            "transverse sinus"
+        ],
+        "definition": "By default position are specified by the coordinates of skull. Use this property for other definitions.",
+        "value": [
+              "longitudinal suture",
+              "lambda",
+              "dura"
+        ]
+    },
+    "ref_electrode_location": {
+        "alternatives": [
+            "Posterior to bregma"
+        ],
+        "definition": "Describes the location of the reference electrode.",
+        "value": "Posterior to bregma"
+    }
+}
