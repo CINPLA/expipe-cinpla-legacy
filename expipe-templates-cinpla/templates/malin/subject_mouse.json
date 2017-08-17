@@ -1,0 +1,56 @@
+{
+    "birthday": {
+        "definition": "The birthday. Age can be inferred from the date of recording.",
+        "value": "dd.mm.yyyy:HH:MM"
+    },
+    "cell_line": {
+        "definition": "Cell line of the subject.",
+        "value": ""
+    },
+    "definition": "Describing the subject.",
+    "developmental_stage": {
+        "definition": "The developemtal stage of the subject. E.g. 'embroyonal', 'adult', 'larval' etc.",
+        "value": "adult"
+    },
+    "gender": {
+        "definition": "Male or female?",
+        "value": "Male"
+    },
+    "genus": {
+        "definition": "The Genus of the studied subject.",
+        "value": "Mouse"
+    },
+    "health_status": {
+        "definition": "Information about the health status of this subject.",
+        "value": "Healthy"
+    },
+    "identifier": "malin_subject_mouse",
+    "label": {
+        "definition": "If the subject has been labled in a specific way. The lable can be described here.",
+        "value": ""
+    },
+    "name": "malin_subject_mouse",
+    "notes": {
+        "value": ""
+    },
+    "population": {
+        "definition": "The population this subject is offspring of. This may be the bee hive, the ant colony, etc.",
+        "value": ""
+    },
+    "species": {
+        "definition": "The scientific name of the species e.g. Apis mellifera, Homo sapiens.",
+        "value": "Mus Musculus"
+    },
+    "strain": {
+        "definition": "The strain the subject was taken from. E.g. a specific genetic variation etc.",
+        "value": "C57BL6"
+    },
+    "trivial_name": {
+        "definition": "The trivial name of the species like Honeybee, Human.",
+        "value": "Mouse"
+    },
+    "weight": {
+        "unit": "g",
+        "value": ""
+    }
+}

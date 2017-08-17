@@ -1,0 +1,101 @@
+{
+    "angle": {
+        "unit": "deg",
+        "value": [
+            0.0
+        ]
+    },
+    "definition": "Describing an injection procedure e.g. injection of virus.",
+    "description": {
+        "definition": "A textual description of the preparation.",
+        "value": "Injection of virus in dLGN, AAV-mediated expression of channelrhodopsin-2"
+    },
+    "flow": {
+        "definition": "The angle of the glass pipette, assuming leveled bregma and lambda, 0 degrees is vertical implantation",
+        "unit": "nl/min",
+        "value": [
+            20
+        ]
+    },
+    "glass_pipette_diameter": {
+        "unit": "um",
+        "value": [
+            15.0,
+            20.0
+        ]
+    },
+    "glass_pipette_puller_manufacturer": {
+        "definition": "The manufacturer of the P-30 micropipette puller.",
+        "value": "Sutter Instrument Company"
+    },
+    "hemisphere": {
+        "alternatives": {
+            "C, center": "between hemispheres",
+            "L, left": "left hemisphere",
+            "R, right": "right hemisphere"
+        },
+        "value": "R"
+    },
+    "identifier": "malin_injection_lgnr",
+    "injection_substance": {
+        "definition": "The full name of the injection substance, e.g. AAV8-hSyn-eChR2(H134R)-EYFP.",
+        "local_marker": "",
+        "value": ""
+    },
+    "injection_substance_information": {
+        "definition": "Additional information to injection substance.",
+        "value": "Diluted to 5X10e12  with ice cold PBS (sterile lab PBS"
+    },
+    "injection_substance_manufacurer": {
+        "definition": "Name of manufacturer of the injection substance.",
+        "value": "Deisseroth lab"
+    },
+    "injection_substance_storage_info": {
+        "definition": "Information of storage procedure of injection substance.",
+        "value": "Kept on ice in fridge during surgery, for 2 h"
+    },
+    "injection_substance_storage_manufactuer": {
+        "definition": "Manufacturer of storage device for injection substance",
+        "value": ""
+    },
+    "injection_substance_storage_temp": {
+        "unit": "degC",
+        "value": [
+            -80.0
+        ]
+    },
+    "location": {
+        "definition": "Describes the brain area of recording",
+        "value": {
+            "LGNR": "Dorsal lateral geniculate nucleus, right hemisphere"
+        }
+    },
+    "name": "malin_injection_lgnr",
+    "notes": {
+        "value": "1 minute waiting before injection, 10 minute waiting after"
+    },
+    "position": {
+        "unit": "mm",
+        "value": [
+            "x",
+            "y",
+            "z"
+        ]
+    },
+    "position_reference": {
+        "alternatives": [
+            "bregma",
+            "dura",
+            "lambda",
+            "longitudinal suture",
+            "skull",
+            "transverse sinus"
+        ],
+        "definition": "By default position are specified by the coordinates of skull. Use this property for other definitions.",
+        "value": {
+            "x": "longitudinal suture",
+            "y": "bregma",
+            "z": "dura"
+        }
+    }
+}
