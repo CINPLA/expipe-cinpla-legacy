@@ -4,7 +4,7 @@ settings_file_path = os.path.join(os.path.expanduser('~'), '.config', 'expipe',
                              'cinpla_config.yaml')
 if not os.path.exists(settings_file_path):
     warnings.warn('No config file found, import errors will occur, please ' +
-                  'use "expipe env create project-id -p path-to-params-file"')
+                  'use "expipe project create <project-id> <path-to-params-file>" (ommit <>)')
 
 
 def deep_update(d, other):
