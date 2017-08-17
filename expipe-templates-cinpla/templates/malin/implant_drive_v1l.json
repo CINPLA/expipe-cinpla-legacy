@@ -15,24 +15,20 @@
             "L, left": "left hemisphere",
             "R, right": "right hemisphere"
         },
-        "value": "R"
+        "value": "L"
     },
-    "identifier": "malin_implant_drive_R",
+    "identifier": "malin_implant_drive_v1l",
     "location": {
         "alternatives": {
             "V1BL": "Primary visual cortex, binocular area, left hemisphere",
-            "V1BR": "Primary visual cortex, binocular area, right hemisphere",
             "V1ML": "Primary visual cortex, monocular area, left hemisphere",
-            "V1MR": "Primary visual cortex, monocular area, right hemisphere",
             "V2LL": "Secondary visual cortex, lateral area, left hemisphere",
-            "V2LR": "Secondary visual cortex, lateral area, right hemisphere",
             "V2ML": "Secondary visual cortex, medial area, left hemisphere",
-            "V2MR": "Secondary visual cortex, medial area, right hemisphere"
         },
         "definition": "Describes the brain area of implantation",
         "value": ""
     },
-    "name": "malin_implant_drive_R",
+    "name": "malin_implant_drive_v1l",
     "notes": {
         "value": ""
     },
@@ -54,9 +50,9 @@
     },
     "ref_electrode_location": {
         "alternatives": [
-            "Posterior to bregma"
+            "Anterior to bregma"
         ],
         "definition": "Describes the location of the reference electrode.",
-        "value": "Posterior to bregma, right hemisphere"
+        "value": "Anterior to bregma, left hemisphere"
     }
 }

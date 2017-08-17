@@ -19,14 +19,15 @@ Reserved names:
 
 #  these are templates you want to add to each recording perfomed with axona
 axona_templates = [
-    'mikkel_electrophysiology_L',
-    'mikkel_electrophysiology_R',
+    'mikkel_electrophysiology_mecl',
+    'mikkel_electrophysiology_mecr',
     '_inherit_hardware_axona_tracker',
     '_inherit_hardware_axona_daq',
     '_inherit_hardware_axona_camera_objective',
     '_inherit_environment_open_field_tracking',
     '_inherit_environment_rat_housing',
-    '_inherit_hardware_optic_fibre', '_inherit_hardware_tetrode',
+    '_inherit_hardware_optic_fibre',
+    '_inherit_hardware_tetrode',
     '_inherit_hardware_microdrive_optetrode'
 ]
 
@@ -34,8 +35,8 @@ axona_templates = [
 #  these are templates you want to add to each recording perfomed with
 #  open ephys
 openephys_templates = [
-    'mikkel_electrophysiology_L',
-    'mikkel_electrophysiology_R',
+    'mikkel_electrophysiology_mecl',
+    'mikkel_electrophysiology_mecr',
     '_inherit_hardware_openephys_daq',
     '_inherit_hardware_intan_headstage',
     '_inherit_hardware_pointgrey_camera_objective',
@@ -43,7 +44,8 @@ openephys_templates = [
     '_inherit_software_openephys_gui',
     '_inherit_environment_open_field_tracking',
     '_inherit_environment_rat_housing',
-    '_inherit_hardware_optic_fibre', '_inherit_hardware_tetrode',
+    '_inherit_hardware_optic_fibre',
+    '_inherit_hardware_tetrode',
     '_inherit_hardware_microdrive_optetrode'
 ]
 
@@ -51,27 +53,27 @@ openephys_templates = [
 #  these are templates you want to add to each optogenetics session perfomed
 #  with openephys
 opto_openephys_templates = [
-    '_inherit_hardware_openephys_optogenetics',
-    '_inherit_hardware_pulse_pal',
-    '_inherit_hardware_blue_laser',
-    '_inherit_hardware_laser_measure_device',
     'mikkel_laser_settings',
     'mikkel_pulse_pal_settings',
     'mikkel_optogenetics_paradigm',
     'mikkel_optogenetics_anatomical_location'
+    '_inherit_hardware_openephys_optogenetics',
+    '_inherit_hardware_pulse_pal',
+    '_inherit_hardware_blue_laser',
+    '_inherit_hardware_laser_measure_device',
 ]
 
 #  these are templates you want to add to each optogenetics session perfomed
 #  with axona
 opto_axona_templates = [
-    '_inherit_hardware_axona_optogenetics',
-    '_inherit_hardware_pulse_pal',
-    '_inherit_hardware_blue_laser',
-    '_inherit_hardware_laser_measure_device',
     'mikkel_laser_settings',
     'mikkel_pulse_pal_settings',
     'mikkel_optogenetics_paradigm',
     'mikkel_optogenetics_anatomical_location'
+    '_inherit_hardware_axona_optogenetics',
+    '_inherit_hardware_pulse_pal',
+    '_inherit_hardware_blue_laser',
+    '_inherit_hardware_laser_measure_device',
 ]
 
 #  thse are e.g. the brain areas you investigate, this ensures that you
@@ -79,6 +81,7 @@ opto_axona_templates = [
 POSSIBLE_BRAIN_AREAS = ['MECR', 'MECL', 'MS']
 POSSIBLE_OPTO_TAGS = ['opto-inside', 'opto-outside', 'opto-train']
 POSSIBLE_LOCATIONS = ['room2', 'room1']
+POSSIBLE_CELL_LINES = ['gad1-cre', 'wild-type']
 
 #  obligatory tags will be enforced uppon transfer, this is to ensure you
 #  have a minimum of tags for each action
@@ -88,22 +91,23 @@ POSSIBLE_TAGS = ['GC', 'PC', 'BC', 'SC', 'HD', 'TC', 'theta', 'baseline'] + OBLI
 #  thse are the templates you want to load to each suregery implantation
 #  procedure
 surgery_implantation_templates = [
-    'mikkel_implant_drive_L', 'mikkel_implant_drive_R',
-    'mikkel_implant_fibre', 'mikkel_subject',
-    'mikkel_anaesthesia', 'mikkel_analgesia',
-    'mikkel_analgesia_post', 'mikkel_anaesthesia_local',
-    '_inherit_mikkel_optic_fibre', '_inherit_mikkel_tetrode',
-    '_inherit_mikkel_drive_optetrode',
+    'mikkel_anaesthesia',
+    'mikkel_analgesia',
+    'mikkel_analgesia_post',
+    'mikkel_anaesthesia_local',
+    '_inherit_hardware_optic_fibre',
+    '_inherit_hardware_tetrode',
+    '_inherit_hardware_microdrive_optetrode',
     '_inherit_environment_rat_housing',
     '_inherit_environment_surgery_station'
 ]
 
 # thse are the templates you want to load to each suregery injection procedure
 surgery_injection_templates = [
-    'mikkel_anaesthesia', 'mikkel_analgesia',
-    'mikkel_analgesia_post', 'mikkel_anaesthesia_local',
-    'mikkel_subject', 'mikkel_injection_1',
-    'mikkel_injection_2',
+    'mikkel_anaesthesia',
+    'mikkel_analgesia',
+    'mikkel_analgesia_post',
+    'mikkel_anaesthesia_local',
     '_inherit_environment_rat_housing',
     '_inherit_environment_surgery_station'
 ]
@@ -148,9 +152,9 @@ ANALYSIS_PARAMS = {
 
 # this is personal user parameters
 USER_PARAMS = {
-    'project_id': 'apoptotic_aproach_to_voldemort',
-    'user_name': 'Harry Plotter',
-    'location': 'Chamber of secrets',
+    'project_id': 'mikkel_septum_entorhinal',
+    'user_name': 'Mikkel Elle Lepperød',
+    'location': 'room2',
     'laser_device': {'name': 'hardware_blue_laser', 'id': 4}
 }
 
@@ -167,12 +171,13 @@ TEMPLATES = {
 }
 
 MODULES = {
-    'electrophysiology': {'mecl': 'mikkel_electrophysiology_L',
-                          'mecr': 'mikkel_electrophysiology_R'},
-    'implantation': {'mecl': 'mikkel_implant_drive_L',
-                     'mecr': 'mikkel_implant_drive_R',
-                     'ms': 'mikkel_implant_fibre'},
-    'injection': {'ms1': 'mikkel_injection_1',
-                  'ms2': 'mikkel_injection_2'},
+    'electrophysiology': {'mecl': 'mikkel_electrophysiology_mecl',
+                          'mecr': 'mikkel_electrophysiology_mecr'},
+    'implantation': {'mecl': 'mikkel_implant_drive_mecl',
+                     'mecr': 'mikkel_implant_drive_mecr',
+                     'ms': 'mikkel_implant_fibre_ms'},
+    'injection': {'ms1': 'mikkel_septum_injection_1',
+                  'ms2': 'mikkel_septum_injection_2',
+                  'ms3': 'mikkel_septum_injection_3'},
     'subject': 'mikkel_subject'
 }

@@ -7,7 +7,7 @@
         "definition": "Cell line of the subject.",
         "value": ""
     },
-    "definition": "Describing the subject which underwent the experiment.",
+    "definition": "Describing the subject.",
     "developmental_stage": {
         "definition": "The developemtal stage of the subject. E.g. 'embroyonal', 'adult', 'larval' etc.",
         "value": "adult"

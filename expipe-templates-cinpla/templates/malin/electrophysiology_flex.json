@@ -21,17 +21,6 @@
         ]
     },
     "definition": "Describing electrophysiology in the expirimental setup.",
-    "depth": {
-        "unit": "mm",
-        "value": ""
-    },
-    "depth_reference": {
-        "alternatives": {
-            "dura": true,
-            "skull": true,
-            "value": "dura"
-        }
-    },
     "hemisphere": {
         "alternatives": {
             "C, center": "between hemispheres",
