@@ -1,6 +1,6 @@
 from .imports import *
 from . import action_tools
-from .pytools import deep_update
+from .config import deep_update
 from .analysis_tools import Analyser
 
 

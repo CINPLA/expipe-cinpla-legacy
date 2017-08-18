@@ -1,10 +1,9 @@
 from .imports import *
 from ._version import get_versions
-from .pytools import load_parameters
+from .config import load_parameters
 
 nwb_main_groups = ['acquisition', 'analysis', 'processing', 'epochs',
                    'general']
-
 
 def get_git_info():
     DTIME_FORMAT = expipe.io.core.datetime_format
@@ -102,8 +101,10 @@ def register_depth(project, action, depth=None, answer=False):
     else:
         raise ValueError('Multiple subjects registered for this action, ' +
                          'unable to get surgery.')
-    for key, name in curr_depth.items():
-        prev_pos = surgery.get_module(name).to_dict()['position']
+    for key, name in mod_info.items():
+        if not key in curr_depth: # module not used in surgery
+            continue
+        prev_pos = surgery.get_module(name=name).to_dict()['position']
         mod = action.require_module(template=name, overwrite=True).to_dict()
         val = curr_depth[key]
         if np.isnan(val):

@@ -1,5 +1,6 @@
 from . import action_tools
 from .imports import *
+from . import config
 
 
 def attach_to_cli(cli):
@@ -80,6 +81,7 @@ def attach_to_cli(cli):
                           split_probe, no_local, openephys_path,
                           exdir_path, no_klusta, no_convert, shutter_channel,
                           no_preprocess):
+        settings = config.load_settings()['current']
         if not no_klusta:
             import klusta
             import klustakwik2
@@ -102,7 +104,7 @@ def attach_to_cli(cli):
             openephys_path = os.path.join(str(acquisition.directory), openephys_session)
             openephys_base = os.path.join(openephys_path, openephys_session)
             klusta_prm = os.path.abspath(openephys_base) + '.prm'
-            prb_path = prb_path or PAR.USER_PARAMS.get('probe_file')
+            prb_path = prb_path or settings.get('probe_file_path')
             openephys_file = pyopenephys.File(openephys_path, prb_path)
         if not no_preprocess:
             if not pre_filter and not klusta_filter:
@@ -258,13 +260,14 @@ def attach_to_cli(cli):
                                   subject_id, user, prb_path, session, nchan,
                                   location, spikes_source, message, no_move,
                                   tag):
-        # TODO default none
+        settings = config.load_settings()['current']
         openephys_path = os.path.abspath(openephys_path)
         openephys_dirname = openephys_path.split(os.sep)[-1]
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
-        prb_path = prb_path or PAR.USER_PARAMS.get('probe_file')
+        prb_path = prb_path or settings.get('probe_file_path')
         if prb_path is None:
-            raise IOError('No probefile found, please provide one')
+            raise IOError('No probefile found, please provide one either ' +
+                          'as an argument or with "expipe env set-probe".')
         openephys_file = pyopenephys.File(openephys_path, prb_path)
         subject_id = subject_id or openephys_dirname.split('_')[0]
         session = session or openephys_dirname.split('_')[-1]

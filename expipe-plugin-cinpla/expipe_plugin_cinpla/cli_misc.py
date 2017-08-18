@@ -15,6 +15,17 @@ def validate_position(ctx, param, position):
 
 
 def attach_to_cli(cli):
+    @cli.command('list')
+    @click.argument('what', type=click.Choice(['dir', 'actions']))
+    def generate_notebook(what):
+        project = expipe.get_project(PAR.USER_PARAMS['project_id'])
+        path = os.path.join(expipe.settings['data_path'],
+                       PAR.USER_PARAMS['project_id'])
+        if what == 'dir':
+            pprint.pprint(os.listdir(path))
+        elif what == 'actions':
+            pprint.pprint(project.actions.keys())
+
     @cli.command('annotate', short_help='Parse info about recorded units')
     @click.argument('action-id', type=click.STRING)
     @click.option('--tag', '-t',

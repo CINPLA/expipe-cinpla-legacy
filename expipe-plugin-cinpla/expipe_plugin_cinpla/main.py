@@ -3,7 +3,7 @@ from expipecli.utils.plugin import IPlugin
 from .imports import *
 from . import cli_misc
 from . import cli_analysis
-from . import cli_project_manager
+from . import cli_environment
 from . import cli_transfer
 from . import cli_openephys
 from . import cli_axona
@@ -23,10 +23,10 @@ def reveal():
 
 class CinplaPlugin(IPlugin):
     def attach_to_cli(self, cli):
-        @cli.group(short_help='Tools to select project parameters pluss more helpful environment tools.')
+        @cli.group(short_help='Tools to select environment parameters pluss more helpful environment tools.')
         @click.help_option('-h', '--help')
         @click.pass_context
-        def project(ctx):
+        def env(ctx):
             pass
 
         @cli.group(short_help='Tools related to optogenetics.')
@@ -67,7 +67,7 @@ class CinplaPlugin(IPlugin):
 
         cli_misc.attach_to_cli(cli)
         cli_analysis.attach_to_cli(cli)
-        cli_project_manager.attach_to_cli(project)
+        cli_environment.attach_to_cli(env)
         cli_transfer.attach_to_cli(cli)
         cli_openephys.attach_to_cli(openephys)
         cli_axona.attach_to_cli(axona)
