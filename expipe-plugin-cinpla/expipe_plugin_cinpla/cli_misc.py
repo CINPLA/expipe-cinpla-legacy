@@ -6,12 +6,26 @@ def validate_position(ctx, param, position):
     try:
         out = []
         for pos in position:
-            key, x, y, z, unit = pos.split(',', 5)
-            out.append((key, float(x), float(y), float(z), unit))
+            key, num, x, y, z, unit = pos.split(' ', 6)
+            out.append((key, int(num), float(x), float(y), float(z), unit))
         return tuple(out)
     except ValueError:
-        raise click.BadParameter('Position need to be comma separated i.e ' +
-                                 '<key,x,y,z,physical_unit> (ommit <>).')
+        raise click.BadParameter('Position need to be contained in "" and ' +
+                                 'separated with white space i.e ' +
+                                 '<"key num x y z physical_unit"> (ommit <>).')
+
+
+def validate_adjustment(ctx, param, position):
+    try:
+        out = []
+        for pos in position:
+            key, num, z, unit = pos.split(' ', 4)
+            out.append((key, int(num), float(z), unit))
+        return tuple(out)
+    except ValueError:
+        raise click.BadParameter('Position need to be contained in "" and ' +
+                                 'separated with white space i.e ' +
+                                 '<"key num z physical_unit"> (ommit <>).')
 
 
 def attach_to_cli(cli):
@@ -61,16 +75,19 @@ def attach_to_cli(cli):
                                for m in message])
         action.tags.extend(tag)
 
-    @cli.command('adjust', short_help='Parse info about drive depth adjustment')
+    @cli.command('adjust',
+                 short_help='Parse info about drive depth adjustment')
     @click.argument('subject-id',  type=click.STRING)
     @click.option('-d', '--date',
                   type=click.STRING,
-                  help='The date of the surgery format: "dd.mm.yyyyTHH:MM" or "now".',
+                  help=('The date of the surgery format: "dd.mm.yyyyTHH:MM" ' +
+                        'or "now".'),
                   )
     @click.option('-a', '--adjustment',
                   multiple=True,
-                  type=(click.STRING, int),
-                  help='The adjustment amount on given anatomical location in "um".',
+                  callback=validate_adjustment,
+                  help=('The adjustment amount on given anatomical location ' +
+                        'given as <key num value unit>'),
                   )
     @click.option('--overwrite',
                   is_flag=True,
@@ -78,7 +95,8 @@ def attach_to_cli(cli):
                   )
     @click.option('--index',
                   type=click.INT,
-                  help='Index for module name, this is found automatically by default.',
+                  help=('Index for module name, this is found automatically ' +
+                        'by default.'),
                   )
     @click.option('--init',
                   is_flag=True,
@@ -109,9 +127,7 @@ def attach_to_cli(cli):
         action.type = 'Adjustment'
         action.subjects = [subject_id]
         user = user or PAR.USER_PARAMS['user_name']
-        if user is None:
-            raise ValueError('Please add user name')
-        if len(user) == 0:
+        if user is None or len(user) == 0:
             raise ValueError('Please add user name')
         users = list(set(action.users))
         if user not in users:
@@ -130,13 +146,18 @@ def attach_to_cli(cli):
             templates_used = {
                 key: mod for key, mod in PAR.MODULES['implantation'].items()
                 if mod in sdict}
-            prev_depth = {key: sdict[mod]['position'][2]
+            prev_depth = {key: {pos_key: sdict[mod][pos_key][2]
+                                for pos_key in sdict[mod]
+                                if pos_key.startswith('position_')
+                                and pos_key.split('_')[-1].isnumeric()}
                           for key, mod in templates_used.items()}
-            for key, depth in prev_depth.items():
-                if not isinstance(depth, pq.Quantity):
-                    raise ValueError('Depth of implant ' +
-                                     '"{} = {}" not recognized'.format(key, depth))
-                prev_depth[key] = depth.astype(float)
+            for key, groups in prev_depth.items():
+                for group, depth in groups.items():
+                    if not isinstance(depth, pq.Quantity):
+                        raise ValueError('Depth of implant ' +
+                                         '"{} {} = {}"'.format(key, group, depth) +
+                                         ' not recognized')
+                    prev_depth[key][group] = depth.astype(float)
         else:
             prev_name = '{:03d}_adjustment'.format(index - 1)
             prev_depth = action.require_module(name=prev_name).to_dict()['depth']
@@ -144,24 +165,41 @@ def attach_to_cli(cli):
         module = action.require_module(template=PAR.TEMPLATES['adjustment'],
                                        name=name, overwrite=overwrite)
 
-        adjustment_dict = {key: val * pq.um for key, val in adjustment}
-        adjustment = {key: adjustment_dict.get(key) or 0 * pq.um for key in prev_depth}
-        curr_depth = {key: round(prev_depth[key] + val, 3)
+        adjustment_dict = {key: {'position_{}'.format(num):
+                                 pq.Quantity(val, unit)}
+                           for key, num, val, unit in adjustment}
+        adjustment_dict = {key: adjustment_dict.get(key) or {} for key in prev_depth}
+        adjustment = {key: {pos_key: adjustment_dict[key].get(pos_key) or 0 * pq.mm
+                            for pos_key in prev_depth[key]}
+                      for key in prev_depth}
+        curr_depth = {key: {pos_key: round(prev_depth[key][pos_key] + val[pos_key], 3)
+                            for pos_key in val}
                       for key, val in adjustment.items()} # round to um
+
+        def last_num(x):
+            return '%.3d' % int(x.split('_')[-1])
         answer = query_yes_no(
-            'Correct adjustment: ' +
-            ' '.join('{} = {}'.format(key, val) for key, val in adjustment.items()) +
-            '? New depth: ' +
-            ' '.join('{} = {}'.format(key, val) for key, val in curr_depth.items())
+            'Correct adjustment?: \n' +
+            ' '.join('{} {} = {}\n'.format(key, pos_key, val[pos_key])
+                     for key, val in adjustment.items()
+                     for pos_key in sorted(val, key=lambda x: last_num(x))) +
+            'New depth: \n' +
+            ' '.join('{} {} = {}\n'.format(key, pos_key, val[pos_key])
+                     for key, val in curr_depth.items()
+                     for pos_key in sorted(val, key=lambda x: last_num(x)))
         )
         if answer == False:
             print('Aborting adjustment')
             return
         print(
-            'Registering adjustment: ' +
-            ' '.join('{} = {},'.format(key, val) for key, val in adjustment.items()) +
-            ' New depth: ' +
-            ' '.join('{} = {},'.format(key, val) for key, val in curr_depth.items())
+            'Registering adjustment: \n' +
+            ' '.join('{} {} = {}\n'.format(key, pos_key, val[pos_key])
+                     for key, val in adjustment.items()
+                     for pos_key in sorted(val, key=lambda x: last_num(x))) +
+            ' New depth: \n' +
+            ' '.join('{} {} = {}\n'.format(key, pos_key, val[pos_key])
+                     for key, val in curr_depth.items()
+                     for pos_key in sorted(val, key=lambda x: last_num(x)))
         )
         content = module.to_dict()
         content['depth'] = curr_depth
@@ -192,10 +230,9 @@ def attach_to_cli(cli):
                   help='The experimenter performing the surgery.',
                   )
     @click.option('-w', '--weight',
-                  required=True,
                   nargs=2,
                   type=(click.FLOAT, click.STRING),
-                  multiple=True,
+                  default=(None, None),
                   help='The weight of the subject with unit i.e. <200 g> (ommit <>).',
                   )
     @click.option('-p', '--position',
@@ -207,7 +244,6 @@ def attach_to_cli(cli):
     @click.option('-a', '--angle',
                   nargs=2,
                   type=(click.FLOAT, click.STRING),
-                  multiple=True,
                   default=(None, None),
                   help='The angle of implantation/injection.',
                   )
@@ -219,8 +255,8 @@ def attach_to_cli(cli):
     def generate_surgery(subject_id, procedure, date, user, weight,
                          overwrite, position, angle, message):
         # TODO tag sucject as active
-        assert len(weight) == 1, 'Cannot give multiple weights.'
-        assert len(angle) == 1, 'Cannot give multiple angles.'
+        assert weight != (None, None), 'Missing argument -w / --weight.'
+        assert angle != (None, None), 'Missing argument -a / --angle.'
         if procedure not in ["implantation", "injection"]:
             raise ValueError('procedure must be one of "implantation" ' +
                              'or "injection"')
@@ -251,29 +287,37 @@ def attach_to_cli(cli):
                                  'datetime': datetime.now()}
                                for m in message])
         modules_dict = action.modules.to_dict()
-        for key, x, y, z, unit in position:
-            name = PAR.MODULES[procedure][key]
-            mod = action.require_module(template=name, overwrite=overwrite).to_dict()
-            assert 'position' in mod
-            assert isinstance(mod['position'], pq.Quantity)
+        keys = list(set([pos[0] for pos in position]))
+        modules = {
+            key: action.require_module(template=PAR.MODULES[procedure][key],
+                                       overwrite=overwrite).to_dict()
+            for key in keys}
+        for key, num, x, y, z, unit in position:
+            mod = modules[key]
+            if 'position' in mod:
+                del(mod['position']) # delete position template
             print('Registering position ' +
-                  '{}: x={}, y={}, z={} {}'.format(key, x, y, z, unit))
-            mod['position'] = pq.Quantity([x, y, z], unit)
-            if angle != (None, None):
-                mod['angle'] = pq.Quantity(angle[0][0], angle[0][1])
-            action.require_module(name=name, contents=mod, overwrite=True)
+                  '{} {}: x={}, y={}, z={} {}'.format(key, num, x, y, z, unit))
+            mod['position_{}'.format(num)] = pq.Quantity([x, y, z], unit)
+        if angle != (None, None):
+            mod['angle'] = pq.Quantity(angle[0], angle[1])
+        for key in keys:
+            action.require_module(name=PAR.MODULES[procedure][key],
+                                  contents=modules[key], overwrite=True)
 
         subject = {'_inherits': '/action_modules/' +
                                 'subjects-registry/' +
                                 subject_id}
-        subject['weight'] = pq.Quantity(weight[0][0], weight[0][1])
+        subject['weight'] = pq.Quantity(weight[0], weight[1])
         action.require_module(name=PAR.MODULES['subject'], contents=subject,
                               overwrite=True)
         subjects_project = expipe.require_project('subjects-registry')
         subject_action = subjects_project.require_action(subject_id)
         subject_action.tags.extend(['surgery', PAR.USER_PARAMS['project_id']])
 
-    @cli.command('register-subject', short_help='Register a subject to the "subjects-registry" project.')
+    @cli.command('register-subject',
+                 short_help=('Register a subject to the "subjects-registry" ' +
+                             'project.'))
     @click.argument('subject-id')
     @click.option('--overwrite',
                   is_flag=True,

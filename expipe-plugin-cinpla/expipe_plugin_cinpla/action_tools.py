@@ -5,6 +5,7 @@ from .config import load_parameters
 nwb_main_groups = ['acquisition', 'analysis', 'processing', 'epochs',
                    'general']
 
+
 def get_git_info():
     DTIME_FORMAT = expipe.io.core.datetime_format
 
@@ -84,8 +85,8 @@ def register_depth(project, action, depth=None, answer=False):
         curr_depth = {key: val * pq.mm for key, val in depth}
         adjustdate = None
     correct = query_yes_no(
-        'Are the following values correct: ' +
-        ', '.join('{} = {}'.format(key, val) for key, val in curr_depth.items()) +
+        'Are the following values correct: , ' +
+        ''.join('{} = {}'.format(key, val) for key, val in curr_depth.items()) +
         ' adjust date time = {}'.format(adjustdate), answer=answer)
     if not correct:
         print('Aborting depth registration')
@@ -102,14 +103,14 @@ def register_depth(project, action, depth=None, answer=False):
         raise ValueError('Multiple subjects registered for this action, ' +
                          'unable to get surgery.')
     for key, name in mod_info.items():
-        if not key in curr_depth: # module not used in surgery
+        if key not in curr_depth: # module not used in surgery
             continue
         mod = surgery.get_module(name=name).to_dict()
-        val = curr_depth[key]
-        if np.isnan(val):
-            raise ValueError('Depth cannot be NaN')
-        print('Registering depth ', key, ' = ', val)
-        mod['position'][2] = val
+        for idx, val in enumerate(curr_depth[key]):
+            if np.isnan(val):
+                raise ValueError('Depth cannot be NaN')
+            print('Registering depth ', key, ' = ', val)
+            mod['position_{}'.format(idx)][2] = val
         action.require_module(name=name, contents=mod, overwrite=True)
     return True
 
