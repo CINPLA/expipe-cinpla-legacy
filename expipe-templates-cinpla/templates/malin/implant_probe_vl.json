@@ -3,9 +3,9 @@
         "unit": "deg",
         "value": ""
     },
-    "definition": "Describing an implantation procedure of a micro drive and flexDrive.",
+    "definition": "Describing an insertion procedure of a probe.",
     "description": {
-        "value": "Implantation of microdrives or flexDrives in the Visual Cortex."
+        "value": "Insertion of a probe in the Visual Cortex."
     },
     "hemisphere": {
         "alternatives": {
@@ -15,7 +15,7 @@
         },
         "value": "L"
     },
-    "identifier": "malin_implant_drive_v1l",
+    "identifier": "malin_implant_probe_vl",
     "location": {
         "alternatives": {
             "v1bl": "Primary visual cortex, binocular area, left hemisphere",
@@ -23,10 +23,10 @@
             "v2bl": "Secondary visual cortex, lateral area, left hemisphere",
             "v2ml": "Secondary visual cortex, medial area, left hemisphere"
         },
-        "definition": "Describes the brain area of implantation",
+        "definition": "Describes the brain area of insertion",
         "value": ""
     },
-    "name": "malin_implant_drive_v1l",
+    "name": "malin_implant_probe_vl",
     "notes": {
         "value": "Indexes refer to x,y,z respectively"
     },
@@ -53,18 +53,15 @@
     "electrophysiology": {
         "ref_electrode_location": {
             "alternatives": [
-                "Anterior to bregma"
+                "Posterior to bregma"
             ],
             "definition": "Describes the location of the reference electrode.",
-            "value": "Anterior to bregma, left hemisphere"
+            "value": "Posterior to bregma, right hemisphere"
         },
         "channel_groups": {
-            "definition": "Which channel groups are associated with this electrophysiological measurement",
+            "definition": "Which channel groups are associated with this electrophysiological procedure",
             "value": [
-                0.0,
-                1.0,
-                2.0,
-                3.0
+                1.0
             ]
         },
         "definition": "Describing electrophysiology in the expirimental setup.",
