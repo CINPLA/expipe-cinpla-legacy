@@ -53,11 +53,46 @@
             "z": "dura"
         }
     },
-    "ref_electrode_location": {
-        "alternatives": [
-            "Anterior to bregma"
-        ],
-        "definition": "Describes the location of the reference electrode.",
-        "value": "Anterior to bregma, left hemisphere"
+    "electrophysiology": {
+        "ref_electrode_location": {
+            "alternatives": [
+                "Anterior to bregma"
+            ],
+            "definition": "Describes the location of the reference electrode.",
+            "value": "Anterior to bregma, left hemisphere"
+        },
+        "channel_groups": {
+            "definition": "Which channel groups are associated with this electrophysiological measurement",
+            "value": [
+                0.0,
+                1.0,
+                2.0,
+                3.0
+            ]
+        },
+        "definition": "Describing electrophysiology in the expirimental setup.",
+        "subtype": {
+            "alternatives": [
+                "dual electrode recording",
+                "multi electrode recording",
+                "single electrode recording"
+            ],
+            "definition": "Subtype of this electrophysiological experiment.",
+            "value": "multi electrode recording"
+        },
+        "type": {
+            "alternatives": [
+                "EEG",
+                "EKG",
+                "EMG",
+                "ERG",
+                "extracellular recording",
+                "intracellular recording",
+                "loose patch",
+                "patch clamp",
+                "whole cell patch"
+            ],
+            "value": "extracellular recording"
+        }
     }
 }

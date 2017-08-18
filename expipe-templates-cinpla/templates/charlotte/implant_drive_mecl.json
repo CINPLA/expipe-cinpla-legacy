@@ -1,11 +1,11 @@
 {
     "angle": {
         "unit": "deg",
-        "value": ""
+        "value": 15.0
     },
-    "definition": "Describing an implantation procedure of a flexDrive.",
+    "definition": "Describing an implantation procedure of a micro drive.",
     "description": {
-        "value": "Implantation of a flexDrive in the Visual Cortex."
+        "value": "Implantation of optetrodes in Medial Entorhinal Cortex and fibre optcis in Medial Septum."
     },
     "hemisphere": {
         "alternatives": {
@@ -13,18 +13,19 @@
             "L, left": "left hemisphere",
             "R, right": "right hemisphere"
         },
-        "value": "R"
+        "value": "L"
     },
-    "identifier": "malin_implant_flex_v1r",
+    "identifier": "charlotte_implant_drive_mecl",
     "location": {
-        "alternatives": {
-            "v1br": "Primary visual cortex, binocular area, right hemisphere",
-            "v1mr": "Primary visual cortex, monocular area, right hemisphere"
-        },
-        "definition": "Describes the brain area of implantation",
-        "value": ""
+        "alternatives": [
+            "MECL",
+            "MECR",
+            "MS"
+        ],
+        "definition": "Describes the brain area of recording. MS: Medial Septum, MECR: Medial Entorhinal Cortex Right hemisphere, MECL: Medial Entorhinal Cortex Left hemisphere, ",
+        "value": "MECL"
     },
-    "name": "malin_implant_flex_v1r",
+    "name": "charlotte_implant_drive_mecl",
     "notes": {
         "value": "Indexes refer to x,y,z respectively"
     },
@@ -46,39 +47,27 @@
             "transverse sinus"
         ],
         "definition": "By default position are specified by the coordinates of skull. Use this property for other definitions.",
-        "value": [
-            "longitudinal suture",
-            "lambda",
-            "dura"
-        ]
+        "value": {
+            "x": "lambda",
+            "y": "transverse sinus",
+            "z": "dura"
+        }
     },
     "electrophysiology": {
         "ref_electrode_location": {
             "alternatives": [
-                "Posterior to bregma"
+                "Anterior to bregma"
             ],
             "definition": "Describes the location of the reference electrode.",
-            "value": "Posterior to bregma"
+            "value": "Anterior to bregma, left hemisphere"
         },
         "channel_groups": {
             "definition": "Which channel groups are associated with this electrophysiological measurement",
             "value": [
-                0.0,
-                1.0,
-                2.0,
-                3.0,
                 4.0,
                 5.0,
                 6.0,
-                7.0,
-                8.0,
-                9.0,
-                10.0,
-                11.0,
-                12.0,
-                13.0,
-                14.0,
-                15.0
+                7.0
             ]
         },
         "definition": "Describing electrophysiology in the expirimental setup.",
