@@ -104,14 +104,12 @@ def register_depth(project, action, depth=None, answer=False):
     for key, name in mod_info.items():
         if not key in curr_depth: # module not used in surgery
             continue
-        prev_pos = surgery.get_module(name=name).to_dict()['position']
-        mod = action.require_module(template=name, overwrite=True).to_dict()
+        mod = surgery.get_module(name=name).to_dict()
         val = curr_depth[key]
         if np.isnan(val):
             raise ValueError('Depth cannot be NaN')
         print('Registering depth ', key, ' = ', val)
-        prev_pos[2] = val
-        mod['position'] = prev_pos
+        mod['position'][2] = val
         action.require_module(name=name, contents=mod, overwrite=True)
     return True
 
