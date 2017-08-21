@@ -25,7 +25,7 @@
         },
         "value": "C"
     },
-    "identifier": "mikkel_septum_injection_2",
+    "identifier": "mikkel_injection_ms",
     "injection_substance": {
         "definition": "The full name of the injection substance, e.g. AAV8-hSyn-eChR2(H134R)-EYFP.",
         "local_marker": "",
@@ -62,7 +62,7 @@
         "definition": "Describes the brain area of recording. MS: Medial Septum, MECR: Medial Entorhinal Cortex Right hemisphere, MECL: Medial Entorhinal Cortex Left hemisphere, ",
         "value": "MS"
     },
-    "name": "mikkel_septum_injection_2",
+    "name": "mikkel_injection_ms",
     "notes": {
         "value": "1 minute waiting before injection, 8 minute waiting after"
     },

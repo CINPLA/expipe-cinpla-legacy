@@ -6,7 +6,7 @@
     "anaesthetic_dose": {
         "definition": "The dose of the used anaesthetic.",
         "value": "",
-        "unit": "mL"
+        "unit": "ml"
     },
     "anaesthetic_antidrug": {
         "definition": "The drug used to wake up from anaesthesia.",
@@ -15,7 +15,7 @@
     "anaesthetic_antidrug_dose": {
         "definition": "The dose of the used anti drug.",
         "value": 0.1,
-        "unit": "mL"
+        "unit": "ml"
     },
     "description": {
         "definition": "A textual description of the preparation.",
