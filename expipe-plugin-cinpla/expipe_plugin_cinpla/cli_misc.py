@@ -14,6 +14,17 @@ def validate_position(ctx, param, position):
                                  'separated with white space i.e ' +
                                  '<"key num x y z physical_unit"> (ommit <>).')
 
+def validate_angle(ctx, param, position):
+    try:
+        out = []
+        for pos in position:
+            key, angle, unit = pos.split(' ', 3)
+            out.append((key, float(angle), unit))
+        return tuple(out)
+    except ValueError:
+        raise click.BadParameter('Angle need to be contained in "" and ' +
+                                 'separated with white space i.e ' +
+                                 '<"key angle physical_unit"> (ommit <>).')
 
 def validate_adjustment(ctx, param, position):
     try:
@@ -218,7 +229,7 @@ def attach_to_cli(cli):
                   )
     @click.option('--procedure',
                   required=True,
-                  type=click.STRING,
+                  type=click.Choice(['implantation', 'injection']),
                   help='The type of surgery "implantation" or "injection".',
                   )
     @click.option('--overwrite',
@@ -239,12 +250,12 @@ def attach_to_cli(cli):
                   required=True,
                   multiple=True,
                   callback=validate_position,
-                  help='The position e.g. <mecl,x,y,z,mm> (ommit <>).',
+                  help='The position e.g. <"mecl 0 x y z mm"> (ommit <>).',
                   )
     @click.option('-a', '--angle',
-                  nargs=2,
-                  type=(click.FLOAT, click.STRING),
-                  default=(None, None),
+                  required=True,
+                  multiple=True,
+                  callback=validate_angle,
                   help='The angle of implantation/injection.',
                   )
     @click.option('--message', '-m',
@@ -256,10 +267,7 @@ def attach_to_cli(cli):
                          overwrite, position, angle, message):
         # TODO tag sucject as active
         assert weight != (None, None), 'Missing argument -w / --weight.'
-        assert angle != (None, None), 'Missing argument -a / --angle.'
-        if procedure not in ["implantation", "injection"]:
-            raise ValueError('procedure must be one of "implantation" ' +
-                             'or "injection"')
+        weight = pq.Quantity(weight[0], weight[1])
         project = expipe.require_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(subject_id + '-surgery-' + procedure)
 
@@ -281,7 +289,8 @@ def attach_to_cli(cli):
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
-
+        if overwrite:
+            action.messages = []
         action.messages.extend([{'message': m,
                                  'user': user,
                                  'datetime': datetime.now()}
@@ -299,8 +308,13 @@ def attach_to_cli(cli):
             print('Registering position ' +
                   '{} {}: x={}, y={}, z={} {}'.format(key, num, x, y, z, unit))
             mod['position_{}'.format(num)] = pq.Quantity([x, y, z], unit)
-        if angle != (None, None):
-            mod['angle'] = pq.Quantity(angle[0], angle[1])
+        for key, ang, unit in angle:
+            mod = modules[key]
+            if 'angle' in mod:
+                del(mod['angle']) # delete position template
+            print('Registering angle ' +
+                  '{}: angle={} {}'.format(key, ang, unit))
+            mod['angle'] = pq.Quantity(ang, unit)
         for key in keys:
             action.require_module(name=PAR.MODULES[procedure][key],
                                   contents=modules[key], overwrite=True)
@@ -308,12 +322,13 @@ def attach_to_cli(cli):
         subject = {'_inherits': '/action_modules/' +
                                 'subjects-registry/' +
                                 subject_id}
-        subject['weight'] = pq.Quantity(weight[0], weight[1])
+        subject['weight'] = weight
         action.require_module(name=PAR.MODULES['subject'], contents=subject,
                               overwrite=True)
         subjects_project = expipe.require_project('subjects-registry')
         subject_action = subjects_project.require_action(subject_id)
         subject_action.tags.extend(['surgery', PAR.USER_PARAMS['project_id']])
+        subject_action.users.append(user)
 
     @cli.command('register-subject',
                  short_help=('Register a subject to the "subjects-registry" ' +
@@ -326,6 +341,11 @@ def attach_to_cli(cli):
     @click.option('-u', '--user',
                   type=click.STRING,
                   help='The experimenter performing the registration.',
+                  )
+    @click.option('--location',
+                  required=True,
+                  type=click.STRING,
+                  help='The location of the animal.',
                   )
     @click.option('--birthday',
                   required=True,
@@ -383,7 +403,7 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='Add message, use "text here" for sentences.',
                   )
-    def generate_subject(subject_id, overwrite, user, message, **kwargs):
+    def generate_subject(subject_id, overwrite, user, message, location, **kwargs):
         if len(PAR.POSSIBLE_CELL_LINES) > 0:
             assert kwargs['cell_line'] in PAR.POSSIBLE_CELL_LINES
         DTIME_FORMAT = expipe.io.core.datetime_format
@@ -393,11 +413,10 @@ def attach_to_cli(cli):
             datetime.strptime(kwargs['birthday'], '%d.%m.%Y'), DTIME_FORMAT)
         action.datetime = datetime.now()
         action.type = 'Info'
+        action.location = location
         action.subjects = [subject_id]
         user = user or PAR.USER_PARAMS['user_name']
-        if user is None:
-            raise ValueError('Please add user name')
-        if len(user) == 0:
+        if user is None or len(user) == 0:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
@@ -463,9 +482,7 @@ def attach_to_cli(cli):
         action.tags = ['perfusion']
         action.subjects = [subject_id]
         user = user or PAR.USER_PARAMS['user_name']
-        if user is None:
-            raise ValueError('Please add user name')
-        if len(user) == 0:
+        if user is None or len(user) == 0:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
