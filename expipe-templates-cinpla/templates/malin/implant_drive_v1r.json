@@ -28,7 +28,7 @@
     },
     "name": "malin_implant_drive_v1r",
     "notes": {
-        "value": "Indexes refer to x,y,z respectively"
+        "value": "Indexes refer to x,y,z respectively, all tetrodes have the same position."
     },
     "position": {
         "unit": "mm",

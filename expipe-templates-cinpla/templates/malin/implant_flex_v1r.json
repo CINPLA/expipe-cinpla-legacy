@@ -26,7 +26,7 @@
     },
     "name": "malin_implant_flex_v1r",
     "notes": {
-        "value": "Indexes refer to x,y,z respectively"
+        "value": "Indexes refer to x,y,z respectively, each position refer to one channel group (tetrode)"
     },
     "position": {
         "unit": "mm",
