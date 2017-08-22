@@ -227,6 +227,11 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='The date of the surgery format: "dd.mm.yyyyTHH:MM".',
                   )
+    @click.option('--tag', '-t',
+                  multiple=True,
+                  type=click.Choice(PAR.POSSIBLE_TAGS),
+                  help='The tag to be applied to the action.',
+                  )
     @click.option('--procedure',
                   required=True,
                   type=click.Choice(['implantation', 'injection']),
@@ -235,6 +240,10 @@ def attach_to_cli(cli):
     @click.option('--overwrite',
                   is_flag=True,
                   help='Overwrite modules or not.',
+                  )
+    @click.option('--hard',
+                  is_flag=True,
+                  help='Overwrite by deleting action.',
                   )
     @click.option('-u', '--user',
                   type=click.STRING,
@@ -263,14 +272,15 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='Add message, use "text here" for sentences.',
                   )
-    def generate_surgery(subject_id, procedure, date, user, weight,
-                         overwrite, position, angle, message):
+    def generate_surgery(subject_id, procedure, date, user, weight, hard,
+                         overwrite, position, angle, message, tag):
         # TODO tag sucject as active
         assert weight != (None, None), 'Missing argument -w / --weight.'
         weight = pq.Quantity(weight[0], weight[1])
         project = expipe.require_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(subject_id + '-surgery-' + procedure)
-
+        if overwrite and hard:
+            project.delete_action(subject_id + '-surgery-' + procedure)
         generate_templates(action, PAR.TEMPLATES['surgery_' + procedure],
                            overwrite, git_note=get_git_info())
         if date == 'now':
@@ -280,12 +290,10 @@ def attach_to_cli(cli):
         action.datetime = date
         action.location = 'Sterile surgery station'
         action.type = 'Surgery'
-        action.tags = [procedure]
+        action.tags = [procedure] + list(tag)
         action.subjects = [subject_id]
         user = user or PAR.USER_PARAMS['user_name']
-        if user is None:
-            raise ValueError('Please add user name')
-        if len(user) == 0:
+        if user is None or len(user) == 0:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
@@ -403,7 +411,13 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='Add message, use "text here" for sentences.',
                   )
-    def generate_subject(subject_id, overwrite, user, message, location, **kwargs):
+    @click.option('--tag', '-t',
+                  multiple=True,
+                  type=click.Choice(PAR.POSSIBLE_TAGS),
+                  help='The tag to be applied to the action.',
+                  )
+    def generate_subject(subject_id, overwrite, user, message, location, tag,
+                         **kwargs):
         if len(PAR.POSSIBLE_CELL_LINES) > 0:
             assert kwargs['cell_line'] in PAR.POSSIBLE_CELL_LINES
         DTIME_FORMAT = expipe.io.core.datetime_format
@@ -413,6 +427,7 @@ def attach_to_cli(cli):
             datetime.strptime(kwargs['birthday'], '%d.%m.%Y'), DTIME_FORMAT)
         action.datetime = datetime.now()
         action.type = 'Info'
+        action.tags.extend(list(tag))
         action.location = location
         action.subjects = [subject_id]
         user = user or PAR.USER_PARAMS['user_name']
@@ -446,9 +461,36 @@ def attach_to_cli(cli):
         action.require_module(name=subject_template_name, contents=subject,
                               overwrite=True)
 
+    @cli.command('register-euthanasia',
+                 short_help=('Register a subjects euthanasia.'))
+    @click.argument('subject-id')
+    @click.option('-u', '--user',
+                  type=click.STRING,
+                  help='The experimenter performing the registration.',
+                  )
+    @click.option('--message', '-m',
+                  multiple=True,
+                  type=click.STRING,
+                  help='Add message, use "text here" for sentences.',
+                  )
+    def generate_euthanasia(subject_id, user, message):
+        project = expipe.require_project('subjects-registry')
+        action = project.require_action(subject_id)
+        action.tags.append('euthanised')
+        assert action.subjects[0] == subject_id
+        user = user or PAR.USER_PARAMS['user_name']
+        if user is None or len(user) == 0:
+            raise ValueError('Please add user name')
+        print('Registering user ' + user)
+        action.users.append(user)
+        action.messages.extend([{'message': m,
+                                 'user': user,
+                                 'datetime': datetime.now()}
+                               for m in message])
+
     @cli.command('register-perfusion',
                  short_help=('Generate a perfusion action. ' +
-                             'Also tags the subject as perfused.'))
+                             'Also tags the subject as perfused and euthanised.'))
     @click.argument('subject-id')
     @click.option('--date', '-d',
                   required=True,
@@ -472,6 +514,8 @@ def attach_to_cli(cli):
     def generate_perfusion(subject_id, date, user, overwrite, weight):
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(subject_id + '-perfusion')
+        generate_templates(action, PAR.TEMPLATES['perfusion'],
+                           overwrite, git_note=get_git_info())
         if date == 'now':
             date = datetime.now()
         else:
@@ -486,8 +530,6 @@ def attach_to_cli(cli):
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
-        generate_templates(action, PAR.TEMPLATES['perfusion'],
-                           overwrite, git_note=get_git_info())
         subject = {'_inherits': '/action_modules/' +
                                 'subjects-registry/' +
                                 subject_id}
@@ -497,4 +539,4 @@ def attach_to_cli(cli):
                               overwrite=True)
         subjects_project = expipe.require_project('subjects-registry')
         subject_action = subjects_project.require_action(subject_id)
-        subject_action.tags.append('surgery')
+        subject_action.tags.extend(['perfused', 'euthanised'])

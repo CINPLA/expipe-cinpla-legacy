@@ -62,6 +62,7 @@ def register_depth(project, action, depth=None, answer=False):
     DTIME_FORMAT = expipe.io.core.datetime_format
     regdate = action.datetime
     mod_info = PAR.MODULES['implantation']
+    depth = depth or []
     if len(depth) == 0:
         assert len(action.subjects) == 1
         subject = action.subjects[0]
