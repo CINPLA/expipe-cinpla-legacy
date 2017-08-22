@@ -71,8 +71,7 @@ def attach_to_cli(cli):
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
         user = user or PAR.USER_PARAMS['user_name']
-        if user is None:
-            raise ValueError('Please add user name')
+        user = user or []
         if len(user) == 0:
             raise ValueError('Please add user name')
 
@@ -138,7 +137,8 @@ def attach_to_cli(cli):
         action.type = 'Adjustment'
         action.subjects = [subject_id]
         user = user or PAR.USER_PARAMS['user_name']
-        if user is None or len(user) == 0:
+        user = user or []
+        if len(user) == 0:
             raise ValueError('Please add user name')
         users = list(set(action.users))
         if user not in users:
@@ -175,11 +175,11 @@ def attach_to_cli(cli):
         name = '{:03d}_adjustment'.format(index)
         module = action.require_module(template=PAR.TEMPLATES['adjustment'],
                                        name=name, overwrite=overwrite)
-
-        adjustment_dict = {key: {'position_{}'.format(num):
-                                 pq.Quantity(val, unit)}
-                           for key, num, val, unit in adjustment}
-        adjustment_dict = {key: adjustment_dict.get(key) or {} for key in prev_depth}
+        assert isinstance(prev_depth, dict), 'Unable to retrieve previous depth.'
+        adjustment_dict = {key: dict() for key in prev_depth}
+        for key, num, val, unit in adjustment:
+            pos_key = 'position_{}'.format(num)
+            adjustment_dict[key][pos_key] = pq.Quantity(val, unit)
         adjustment = {key: {pos_key: adjustment_dict[key].get(pos_key) or 0 * pq.mm
                             for pos_key in prev_depth[key]}
                       for key in prev_depth}
@@ -293,7 +293,8 @@ def attach_to_cli(cli):
         action.tags = [procedure] + list(tag)
         action.subjects = [subject_id]
         user = user or PAR.USER_PARAMS['user_name']
-        if user is None or len(user) == 0:
+        user = user or []
+        if len(user) == 0:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
@@ -431,7 +432,8 @@ def attach_to_cli(cli):
         action.location = location
         action.subjects = [subject_id]
         user = user or PAR.USER_PARAMS['user_name']
-        if user is None or len(user) == 0:
+        user = user or []
+        if len(user) == 0:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
@@ -479,7 +481,8 @@ def attach_to_cli(cli):
         action.tags.append('euthanised')
         assert action.subjects[0] == subject_id
         user = user or PAR.USER_PARAMS['user_name']
-        if user is None or len(user) == 0:
+        user = user or []
+        if len(user) == 0:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users.append(user)
@@ -526,7 +529,8 @@ def attach_to_cli(cli):
         action.tags = ['perfusion']
         action.subjects = [subject_id]
         user = user or PAR.USER_PARAMS['user_name']
-        if user is None or len(user) == 0:
+        user = user or []
+        if len(user) == 0:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
