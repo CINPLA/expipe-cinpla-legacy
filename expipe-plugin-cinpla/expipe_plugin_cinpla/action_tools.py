@@ -85,10 +85,16 @@ def register_depth(project, action, depth=None, answer=False):
     else:
         curr_depth = {key: val * pq.mm for key, val in depth}
         adjustdate = None
+
+    def last_num(x):
+        return '%.3d' % int(x.split('_')[-1])
     correct = query_yes_no(
-        'Are the following values correct: , ' +
-        ''.join('{} = {}'.format(key, val) for key, val in curr_depth.items()) +
-        ' adjust date time = {}'.format(adjustdate), answer=answer)
+        'Are the following values correct: ' +
+        ' adjust date time = {}\n'.format(adjustdate) +
+        ''.join('{} {} = {}\n'.format(key, pos_key, val[pos_key])
+                for key, val in curr_depth.items()
+                for pos_key in sorted(val, key=lambda x: last_num(x)))
+        , answer=answer)
     if not correct:
         print('Aborting depth registration')
         return False
@@ -107,11 +113,11 @@ def register_depth(project, action, depth=None, answer=False):
         if key not in curr_depth: # module not used in surgery
             continue
         mod = surgery.get_module(name=name).to_dict()
-        for idx, val in enumerate(curr_depth[key]):
+        for pos_key, val in curr_depth[key].items():
             if np.isnan(val):
                 raise ValueError('Depth cannot be NaN')
-            print('Registering depth ', key, ' = ', val)
-            mod['position_{}'.format(idx)][2] = val
+            print('Registering depth:', key, pos_key, '=', val)
+            mod[pos_key][2] = val
         action.require_module(name=name, contents=mod, overwrite=True)
     return True
 
