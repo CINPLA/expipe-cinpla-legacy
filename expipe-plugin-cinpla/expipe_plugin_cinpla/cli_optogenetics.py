@@ -71,8 +71,7 @@ def attach_to_cli(cli):
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
         user = user or PAR.USER_PARAMS['user_name']
-        if user is None:
-            raise ValueError('Please add user name')
+        user = user or []
         if len(user) == 0:
             raise ValueError('Please add user name')
         action.tags.extend(list(tag) + ['opto-' + brain_area])

@@ -39,7 +39,14 @@ def attach_to_cli(cli):
                 current_settings = yaml.load(f)
         else:
             raise FileExistsError('No settings file found, use "expipe env set-params".')
-        pprint.pprint(current_settings)
+        print('Current environment:\n')
+        print('\n'.join(['{}: \n\t {}'.format(key, val)
+                         for key, val in current_settings['current'].items()]))
+        print('\nAvailable environment(s):')
+        for pid, value in [(p, v) for p, v in current_settings.items() if p != 'current']:
+            print('project_id:\n\t', pid)
+            print('\n'.join(['{}: \n\t {}'.format(key, val)
+                             for key, val in value.items()]))
 
     @cli.command('set-params')
     @click.argument('project-id', type=click.STRING)
