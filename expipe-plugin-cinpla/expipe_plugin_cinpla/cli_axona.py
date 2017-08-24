@@ -80,6 +80,10 @@ def attach_to_cli(cli):
             session = basename[-2:]
             action_id = subject_id + '-' + session_dtime + '-' + session
         action = project.require_action(action_id)
+        if not no_modules:
+            action_tools.generate_templates(action, PAR.TEMPLATES['axona'], overwrite,
+                                            git_note=action_tools.get_git_info())
+            action_tools.register_depth(project, action, anatomy, answer=yes)
 
         action.type = 'Recording'
         action.datetime = axona_file._start_datetime
@@ -106,10 +110,6 @@ def attach_to_cli(cli):
                              'user': user,
                              'datetime': datetime.now()}
                            for m in message]
-        if not no_modules:
-            action_tools.generate_templates(action, PAR.TEMPLATES['axona'], overwrite,
-                                            git_note=action_tools.get_git_info())
-            action_tools.register_depth(project, action, anatomy, yes=yes)
 
         if not no_files:
             fr = action.require_filerecord()
