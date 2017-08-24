@@ -1,5 +1,6 @@
 from .imports import *
 from . import visual_tools
+from . import action_tools
 
 
 def attach_to_cli(cli):
@@ -50,8 +51,13 @@ def attach_to_cli(cli):
                   type=click.INT,
                   help='Channel recieving timestamps, open ephys IO board.',
                   )
+    @click.option('--tolerance',
+                  default=0.01,
+                  type=click.FLOAT,
+                  help='Tolerance for difference between psychopy and openephys.',
+                  )
     def generate_epoch_openephys(action_id, psyexp_path, overwrite,
-                                 io_channel):
+                                 io_channel, tolerance):
         # TODO: check overwrite
         """Generates stimulus groups and epoch based on axona inp epoch.
 
@@ -62,7 +68,8 @@ def attach_to_cli(cli):
         fr = action.require_filerecord()
         exdir_path = action_tools._get_local_path(fr)
 
-        grating = visual_tools.parse_psychopy_openephys(action, psyexp_path, io_channel)
+        grating = visual_tools.parse_psychopy_openephys(action, psyexp_path,
+                                                        io_channel, tolerance)
         # keys = visual_tools.get_key_press_events(exdir_object["epochs/axona_inp"])
 
         # generate stimulus groups

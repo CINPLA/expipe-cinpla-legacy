@@ -9,7 +9,7 @@ def pd():
 
 @lazy_import
 def psychopyio():
-    import psychopyio
+    from expipe_io_neuro import psychopyio
     return psychopyio
 
 @lazy_import
