@@ -48,7 +48,7 @@ def parse_psychopy_openephys(action, psyexp_path, io_channel, tolerance):
     if not all(np.array(oe_diff) < tolerance):
         raise ValueError('Inconsistency in timestamps from psychopy and' +
                          ' timestamps from paralell port to open ephys.')
-    orientations = csvdata['orientation']
+    orientations = csvdata['orientation'] * pq.deg
 
     blanks = np.hstack((0, times + durations)).magnitude * pq.s
     grating = {
