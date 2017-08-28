@@ -611,6 +611,7 @@ class Analyser:
             print("Could not find epoch of type 'visual_stimulus'")
             raise
         raw_dir = str(self._analysis.require_raw('orient_tuning_overview').directory)
+        logger = get_logger(os.path.join(raw_dir, 'exceptions.log'))
         os.makedirs(raw_dir, exist_ok=True)
         stim_off_epoch = stimulus.make_stimulus_off_epoch(stim_epoch)
         off_rates = stimulus.compute_spontan_rate(self.chxs, stim_off_epoch)
@@ -623,19 +624,23 @@ class Analyser:
             if not self._check_and_delete_figs(raw_dir, group_id):
                 continue
             for u, unit in enumerate(chx.units):
-                if unit.annotations.get('cluster_group') == 'Good':
+                cluster_group = unit.annotations.get('cluster_group') or 'noise'
+                if cluster_group != 'noise':
                     print('Plotting orientation tuning, ' +
                           'channel group {}'.format(group_id))
                     unit_id = unit.annotations["cluster_id"]
-                    trials = stim_trials[chx.name][unit_id]
-                    off_rate = off_rates[chx.name][unit_id]
+                    try:
+                        trials = stim_trials[chx.name][unit_id]
+                        off_rate = off_rates[chx.name][unit_id]
 
-                    fname = 'raster {} Unit {}'.format(chx.name, u)
-                    fpath = os.path.join(raw_dir, fname).replace(" ", "_")
-                    fig = stimulus.orient_raster_plots(trials)
-                    self.savefig(fpath, fig)
+                        fname = 'raster {} Unit {}'.format(chx.name, u)
+                        fpath = os.path.join(raw_dir, fname).replace(" ", "_")
+                        fig = stimulus.orient_raster_plots(trials)
+                        self.savefig(fpath, fig)
 
-                    fname = 'tuning {} Unit {}'.format(chx.name, u)
-                    fpath = os.path.join(raw_dir, fname).replace(" ", "_")
-                    fig = stimulus.plot_tuning_overview(trials, off_rate)
-                    self.savefig(fpath, fig)
+                        fname = 'tuning {} Unit {}'.format(chx.name, u)
+                        fpath = os.path.join(raw_dir, fname).replace(" ", "_")
+                        fig = stimulus.plot_tuning_overview(trials, off_rate)
+                        self.savefig(fpath, fig)
+                    except Exception as e:
+                        logger.exception('orientation tuning')

@@ -1,7 +1,7 @@
 from .imports import *
 
 
-def parse_psychopy_openephys(action, psyexp_path, io_channel):
+def parse_psychopy_openephys(action, psyexp_path, io_channel, tolerance):
     exdir_path = action.require_filerecord().local_path
     exdir_object = exdir.File(exdir_path)
     session = exdir_object['acquisition'].attrs['openephys_session']
@@ -35,7 +35,7 @@ def parse_psychopy_openephys(action, psyexp_path, io_channel):
         shutil.copy2(path, openephys_path)
     csvdata = psychopyio.csv_to_dict(psycho_basepath + '.csv')
     stim_on, stim_off, durations = psychopyio.read_psychopy_log(psycho_basepath + '.log')
-    if not len(stim_on) == len(csvdata['ori']):
+    if not len(stim_on) == len(csvdata['orientation']):
         raise ValueError('Inconsistency in number of orientations and ' +
                          'stimulus onsets')
     openephys_file = pyopenephys.File(openephys_path)
@@ -44,14 +44,17 @@ def parse_psychopy_openephys(action, psyexp_path, io_channel):
         raise ValueError('No recorded TTL signals on io channel ' +
                          str(io_channel))
     rel_times = times - times[0]
-    if not all(abs(psy_t - oe_t) < 0.01 for psy_t, oe_t in zip(stim_on, rel_times)):
+    oe_diff = [abs(psy_t - oe_t) for psy_t, oe_t in zip(stim_on, rel_times)]
+    if not all(np.array(oe_diff) < tolerance):
         raise ValueError('Inconsistency in timestamps from psychopy and' +
                          ' timestamps from paralell port to open ephys.')
+    orientations = csvdata['orientation'] * pq.deg
+
     blanks = np.hstack((0, times + durations)).magnitude * pq.s
     grating = {
         'grating': {
             'timestamps': times,
-            'data': csvdata['ori'],
+            'data': orientations,
             # 'mode': csvdata['']
         },
         'blank': {
