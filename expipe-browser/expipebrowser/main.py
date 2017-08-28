@@ -468,6 +468,11 @@ class ActionAttributeModel(QAbstractListModel):
                 print("ERROR: Unexpected value of key", key)
 
         self.beginInsertRows(QModelIndex(), 0, len(attributes) - 1)
+        if None in attributes:
+            print('Warning: "None" found in attributes, this is shown as' +
+                  '"null" in qml, converting to "str".')
+            attributes = list(attributes)
+            attributes[attributes.index(None)] = 'None'
         self._attributes = sorted(list(attributes))
         self.endInsertRows()
 
