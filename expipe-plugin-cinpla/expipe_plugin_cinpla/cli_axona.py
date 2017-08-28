@@ -10,10 +10,11 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='The experimenter performing the recording.',
                   )
-    @click.option('-a', '--anatomy',
+    @click.option('-d', '--depth',
+                  nargs=2,
                   multiple=True,
                   type=(click.STRING, float),
-                  help='The adjustment amount on given anatomical location in "um".',
+                  help='The depth given with units e.g. <10 um> (omit <>).',
                   )
     @click.option('-l', '--location',
                   type=click.STRING,
@@ -54,7 +55,7 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='Add tags to action.',
                   )
-    @click.option('--get_inp',
+    @click.option('--get-inp',
                   is_flag=True,
                   help='Use Axona input ".inp.',
                   )
@@ -62,7 +63,7 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='Yes to depth registering query.',
                   )
-    def generate_axona_action(action_id, axona_filename, anatomy, user,
+    def generate_axona_action(action_id, axona_filename, depth, user,
                               no_local, overwrite, no_files, no_modules,
                               subject_id, location, message, tag,
                               get_inp, yes):
@@ -83,8 +84,17 @@ def attach_to_cli(cli):
         if not no_modules:
             action_tools.generate_templates(action, PAR.TEMPLATES['axona'], overwrite,
                                             git_note=action_tools.get_git_info())
-            action_tools.register_depth(project, action, anatomy, answer=yes)
-
+            try:
+                correct = action_tools.register_depth(project, action,
+                                                      depth=depth, answer=yes)
+            except Exception as e:
+                raise Exception(str(e) + 'Unable to register depth, give' +
+                                '"--depth" manually or make sure adjustmets ' +
+                                'are available. Note, you may also use ' +
+                                '"--no-modules"')
+            if not correct:
+                print('Aborting')
+                return
         action.type = 'Recording'
         action.datetime = axona_file._start_datetime
         action.tags = list(tag) + ['axona']

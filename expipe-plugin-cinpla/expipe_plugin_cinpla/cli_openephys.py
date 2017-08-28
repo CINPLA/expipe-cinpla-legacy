@@ -192,7 +192,7 @@ def attach_to_cli(cli):
                   nargs=2,
                   multiple=True,
                   type=(click.STRING, float),
-                  help='The depth "um".',
+                  help='The depth given with units e.g. <10 um> (omit <>).',
                   )
     @click.option('-l', '--location',
                   type=click.Choice(PAR.POSSIBLE_LOCATIONS),
