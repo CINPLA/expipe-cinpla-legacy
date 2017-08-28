@@ -76,7 +76,7 @@ def attach_to_cli(cli):
         if action_id is None:
             session_dtime = datetime.strftime(axona_file._start_datetime,
                                               '%d%m%y')
-            basename, _ = op.splitext(axona_filename)
+            basename, _ = os.path.splitext(axona_filename)
             session = basename[-2:]
             action_id = subject_id + '-' + session_dtime + '-' + session
         action = project.require_action(action_id)
@@ -117,7 +117,7 @@ def attach_to_cli(cli):
                 exdir_path = action_tools._get_local_path(fr, make=False)
             else:
                 exdir_path = fr.server_path
-            if op.exists(exdir_path):
+            if os.path.exists(exdir_path):
                 if overwrite:
                     shutil.rmtree(exdir_path)
                 else:
@@ -125,7 +125,7 @@ def attach_to_cli(cli):
                                           exdir_path + '" exists, use ' +
                                           'overwrite flag')
             else:
-                os.makedirs(op.dirname(exdir_path))
+                os.makedirs(os.path.dirname(exdir_path))
             axona.convert(axona_file, exdir_path)
             axona.generate_tracking(exdir_path, axona_file)
             axona.generate_analog_signals(exdir_path, axona_file)
@@ -160,8 +160,8 @@ def attach_to_cli(cli):
             #     print('No datetime {}'.format(action.id))
             # local_path = '/media/norstore/server'
             # exdir_path = action.require_filerecord().exdir_path
-            # exdir_path = op.join(local_path, exdir_path)
-            # if not op.exists(exdir_path):
+            # exdir_path = os.path.join(local_path, exdir_path)
+            # if not os.path.exists(exdir_path):
             #     print('Does not exist "' + exdir_path + '"')
             #     continue
             # exdir_file = exdir.File(exdir_path)
@@ -169,7 +169,7 @@ def attach_to_cli(cli):
             # if 'axona_session' not in exdir_file['acquisition'].attrs:
             #     continue
             # session = exdir_file['acquisition'].attrs['axona_session']
-            # axona_filename = op.join(exdir_path, 'acquisition', session,
+            # axona_filename = os.path.join(exdir_path, 'acquisition', session,
             #                          session + '.set')
             # axona_file = pyxona.File(axona_filename)
             # # if action.datetime is not None:
