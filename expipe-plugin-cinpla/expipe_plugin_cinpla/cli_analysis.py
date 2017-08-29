@@ -80,8 +80,7 @@ def attach_to_cli(cli):
         rec_action = project.require_action(kwargs['action_id'])
         action.type = 'Action-analysis'
         user = kwargs['user'] or PAR.USER_PARAMS['user_name']
-        if user is None:
-            raise ValueError('Please add user name')
+        user = user or []
         if len(user) == 0:
             raise ValueError('Please add user name')
 

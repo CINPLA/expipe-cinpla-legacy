@@ -77,12 +77,16 @@ class Analyser:
         self.anas = [ana for ana in self.seg.analogsignals
                      if ana.sampling_rate == 250 * pq.Hz]
         exdir_group = exdir.File(exdir_path)
-        try:
-            tracking_data = tracking.get_processed_tracking(
-                exdir_path, par=params, return_rad=False)
-            self.x, self.y, self.t, self.ang, self.ang_t = tracking_data
-        except AssertionError as e:
-            print(str(e))
+        exdir_group = exdir.File(exdir_path)
+        processing = exdir_group['processing']
+        if 'tracking' in processing:
+            try:
+                tracking_data = tracking.get_processed_tracking(
+                    exdir_path, par=params, return_rad=False)
+                self.x, self.y, self.t, self.ang, self.ang_t = tracking_data
+            except Exception as e:
+                print(str(e) + ' Unable to load tracking data, some analysis ' +
+                      'will not work.')
         if len(self.seg.epochs) == 1:
             self.epoch = self.seg.epochs[0]
         else:

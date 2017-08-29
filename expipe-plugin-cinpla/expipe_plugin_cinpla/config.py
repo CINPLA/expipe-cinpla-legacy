@@ -12,7 +12,8 @@ if not os.path.exists(settings_file_path):
 def deep_update(d, other):
     for k, v in other.items():
         d_v = d.get(k)
-        if isinstance(v, collections.Mapping) and isinstance(d_v, collections.Mapping):
+        if (isinstance(v, collections.Mapping) and
+            isinstance(d_v, collections.Mapping)):
             deep_update(d_v, v)
         else:
             d[k] = copy.deepcopy(v)
