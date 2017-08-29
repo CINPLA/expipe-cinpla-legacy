@@ -76,7 +76,13 @@ def attach_to_cli(cli):
         if project_id in current_settings:
             delete = query_yes_no('Are you sure you want to completely remove' +
                                   ' ' + current_settings[project_id])
-            del(current_settings[project_id])
+            if delete:
+                del(current_settings[project_id])
+            if project_id == current_settings['current']['project_id']:
+                warnings.warn('The environment you are removing is the ' +
+                              'current active environment. You need to ' +
+                              'activate another environment to change ' +
+                              'current active environment.')
         else:
             raise ValueError('Project id "' + project_id + '" not found in settings file.')
         with open(settings_file_path, "w") as f:
