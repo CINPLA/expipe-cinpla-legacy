@@ -23,15 +23,6 @@ def attach_to_cli(cli):
         with open(settings_file_path, "w") as f:
             yaml.dump(current_settings, f, default_flow_style=False)
 
-    @cli.command('list')
-    def generate_notebook():
-        if os.path.exists(settings_file_path):
-            with open(settings_file_path, "r") as f:
-                current_settings = yaml.load(f)
-        else:
-            raise FileExistsError('No settings file found, use "expipe env set-params".')
-        pprint.pprint([key for key in current_settings if not key == 'current'])
-
     @cli.command('status')
     def generate_notebook():
         if os.path.exists(settings_file_path):
@@ -119,10 +110,3 @@ def attach_to_cli(cli):
             current_settings['current'].update({'project_id': project_id})
         with open(settings_file_path, "w") as f:
             yaml.dump(current_settings, f, default_flow_style=False)
-
-    @cli.command('which')
-    def which():
-        assert os.path.exists(settings_file_path)
-        with open(settings_file_path, "r") as f:
-            current_settings = yaml.load(f)
-        pprint.pprint(current_settings['current'])
