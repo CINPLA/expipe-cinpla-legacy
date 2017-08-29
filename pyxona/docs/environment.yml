@@ -1,0 +1,6 @@
+channels:
+- conda-forge
+- cinpla
+dependencies:
+- pyxona
+- python=3.5

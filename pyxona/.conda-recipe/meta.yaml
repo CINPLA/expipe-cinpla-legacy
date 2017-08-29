@@ -1,0 +1,36 @@
+package:
+    name: pyxona
+    version: {{ environ.get("GIT_TAG", "0.0.0_custom")|replace("v", "")|replace("-", "_") }}
+source:
+    git_url: ..
+build:
+    #noarch: python
+    script: 
+    # TODO remove this and add back quantities as conda package once its updated with the new numpy API
+    - pip install git+https://github.com/python-quantities/python-quantities.git
+    - python setup.py install    
+requirements:
+    build:
+        - python
+        - setuptools
+        - pip
+        - numpy
+        - scipy
+    run:
+        - python
+        - setuptools
+        - pip
+        - numpy
+        - scipy
+test:
+  imports:
+      - pyxona
+about:
+    description: 'IO for expipe and neuroscience data'
+    dev_url: https://github.com/CINPLA/pyxona
+    license: GNU GPLv3
+    license_family: GPL
+    license_file: LICENSE
+extra:
+    recipe-maintainers:
+        - dragly
