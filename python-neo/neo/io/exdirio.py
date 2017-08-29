@@ -524,15 +524,19 @@ class ExdirIO(BaseIO):
                              'EventWaveform group')
         if read_waveforms:
             waveforms = []
-            for wf in wf_group.values():
+            for idx, wf in enumerate(wf_group.values()):
                 if lazy:
                     data = [] * pq.dimensionless
                 else:
                     data = pq.Quantity(wf["data"].data[indices, :, :],
                                        wf["data"].attrs['unit'])
+                    if idx == 0:
+                        dim = data.dimensionality
+                    else:
+                        data = data.rescale(dim)
                 waveforms.append(data)
                 metadata.update(wf.attrs.to_dict())
-            waveforms = np.vstack(waveforms)
+            waveforms = pq.Quantity(np.vstack(waveforms).magnitude, dim)
             # TODO assert shape of waveforms relative to channel_ids etc
             sampling_rate = wf["data"].attrs['sample_rate']
         else:
