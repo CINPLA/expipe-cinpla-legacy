@@ -104,7 +104,7 @@ def attach_to_cli(cli):
             openephys_path = os.path.join(str(acquisition.directory), openephys_session)
             openephys_base = os.path.join(openephys_path, openephys_session)
             klusta_prm = os.path.abspath(openephys_base) + '.prm'
-            prb_path = prb_path or settings.get('probe_file_path')
+            prb_path = prb_path or settings.get('probe')
             openephys_file = pyopenephys.File(openephys_path, prb_path)
         if not no_preprocess:
             if not pre_filter and not klusta_filter:
@@ -264,7 +264,7 @@ def attach_to_cli(cli):
         openephys_path = os.path.abspath(openephys_path)
         openephys_dirname = openephys_path.split(os.sep)[-1]
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
-        prb_path = prb_path or settings.get('probe_file_path')
+        prb_path = prb_path or settings.get('probe')
         if prb_path is None:
             raise IOError('No probefile found, please provide one either ' +
                           'as an argument or with "expipe env set-probe".')

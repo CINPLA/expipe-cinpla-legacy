@@ -5,7 +5,7 @@ from .config import settings_file_path
 
 default_settings = {
     'current': {
-        'parameters_path': None,
+        'params': None,
         'project_id': None
     }
 }
@@ -29,7 +29,8 @@ def attach_to_cli(cli):
             with open(settings_file_path, "r") as f:
                 current_settings = yaml.load(f)
         else:
-            raise FileExistsError('No settings file found, use "expipe env set-params".')
+            raise FileExistsError('No settings file found, use "expipe env ' +
+                                  'set project-id --params".')
         print('Current environment:\n')
         print('\n'.join(['{}: \n\t {}'.format(key, val)
                          for key, val in current_settings['current'].items()]))
@@ -39,26 +40,32 @@ def attach_to_cli(cli):
             print('\n'.join(['{}: \n\t {}'.format(key, val)
                              for key, val in value.items()]))
 
-    @cli.command('set-params')
+    @cli.command('set')
     @click.argument('project-id', type=click.STRING)
-    @click.argument('params-path', type=click.Path(exists=True))
     @click.option('-a', '--activate',
                   is_flag=True,
                   help='Activate the project.',
                   )
-    def set_params(project_id, params_path, activate):
+    @click.option('--params',
+                  type=click.Path(exists=True, resolve_path=True),
+                  help='Set the expipe cinpla parameter file.',
+                  )
+    @click.option('--probe',
+                  type=click.Path(exists=True, resolve_path=True),
+                  help='Set the expipe cinpla parameter file.',
+                  )
+    def set(project_id, activate, **kwargs):
         if os.path.exists(settings_file_path):
             with open(settings_file_path, "r") as f:
                 current_settings = yaml.load(f)
         else:
             current_settings = default_settings
             activate = True
-        if project_id in current_settings:
-            current_settings[project_id].update({'parameters_path': params_path})
-        else:
-            current_settings.update({
-                project_id: {'parameters_path': params_path}
-            })
+        for key, val in kwargs.items():
+            if project_id in current_settings:
+                current_settings[project_id].update({key: val})
+            else:
+                current_settings.update({project_id: {key: val}})
         if activate:
             current_settings['current'] = current_settings[project_id]
             current_settings['current'].update({'project_id': project_id})
@@ -83,36 +90,8 @@ def attach_to_cli(cli):
                               'current active environment. You need to ' +
                               'activate another environment to change ' +
                               'current active environment.')
+
         else:
             raise ValueError('Project id "' + project_id + '" not found in settings file.')
-        with open(settings_file_path, "w") as f:
-            yaml.dump(current_settings, f, default_flow_style=False)
-
-    @cli.command('set-probe')
-    @click.argument('project-id', type=click.STRING)
-    @click.argument('probe-file-path', type=click.Path(exists=True))
-    @click.option('-a', '--activate',
-                  is_flag=True,
-                  help='Activate the project.',
-                  )
-    def set_probe(project_id, probe_file_path, activate):
-        assert probe_file_path.endswith('.prb')
-        if os.path.exists(settings_file_path):
-            with open(settings_file_path, "r") as f:
-                current_settings = yaml.load(f)
-        else:
-            current_settings = default_settings
-            activate = True
-        if project_id in current_settings:
-            current_settings[project_id].update({
-                'probe_file_path': probe_file_path})
-        else:
-            warnings.warn('No parameters file found, use "expipe env set-params".')
-            current_settings.update({
-                project_id: {'probe_file_path': probe_file_path}})
-
-        if activate:
-            current_settings['current'] = current_settings[project_id]
-            current_settings['current'].update({'project_id': project_id})
         with open(settings_file_path, "w") as f:
             yaml.dump(current_settings, f, default_flow_style=False)
