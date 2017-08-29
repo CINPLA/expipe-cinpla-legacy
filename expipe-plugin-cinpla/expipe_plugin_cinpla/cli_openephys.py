@@ -3,6 +3,19 @@ from .imports import *
 from . import config
 
 
+def validate_depth(ctx, param, depth):
+    try:
+        out = []
+        for pos in depth:
+            key, num, z, unit = pos.split(' ', 4)
+            out.append((key, int(num), float(z), unit))
+        return tuple(out)
+    except ValueError:
+        raise click.BadParameter('Depth need to be contained in "" and ' +
+                                 'separated with white space i.e ' +
+                                 '<"key num depth physical_unit"> (ommit <>).')
+
+
 def attach_to_cli(cli):
     @cli.command('process',
                  short_help='Generate a klusta .dat and .prm files from openephys directory.')
@@ -189,10 +202,10 @@ def attach_to_cli(cli):
                   help='The experimenter performing the recording.',
                   )
     @click.option('-d', '--depth',
-                  nargs=2,
                   multiple=True,
-                  type=(click.STRING, float),
-                  help='The depth given with units e.g. <10 um> (omit <>).',
+                  callback=validate_depth,
+                  help=('The depth given as <key num depth unit> e.g. ' +
+                        '<mecl 0 10 um> (omit <>).'),
                   )
     @click.option('-l', '--location',
                   type=click.Choice(PAR.POSSIBLE_LOCATIONS),
@@ -236,6 +249,10 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='Overwrite modules or not.',
                   )
+    @click.option('--hard',
+                  is_flag=True,
+                  help='Overwrite by deleting action.',
+                  )
     @click.option('--nchan',
                   type=click.INT,
                   default=32,
@@ -259,7 +276,7 @@ def attach_to_cli(cli):
                                   depth, overwrite, no_files, no_modules,
                                   subject_id, user, prb_path, session, nchan,
                                   location, spikes_source, message, no_move,
-                                  tag):
+                                  tag, hard):
         settings = config.load_settings()['current']
         openephys_path = os.path.abspath(openephys_path)
         openephys_dirname = openephys_path.split(os.sep)[-1]
@@ -280,6 +297,11 @@ def attach_to_cli(cli):
             session_dtime = datetime.strftime(openephys_file.datetime,
                                               '%d%m%y')
             action_id = subject_id + '-' + session_dtime + '-%.2d' % session
+        if overwrite and hard:
+            try:
+                project.delete_action(action_id)
+            except NameError as e:
+                print(str(e))
         print('Generating action', action_id)
         action = project.require_action(action_id)
 

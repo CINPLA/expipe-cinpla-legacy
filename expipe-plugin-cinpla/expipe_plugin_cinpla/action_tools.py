@@ -63,6 +63,7 @@ def register_depth(project, action, depth=None, answer=False):
     regdate = action.datetime
     mod_info = PAR.MODULES['implantation']
     depth = depth or []
+    print(depth)
     if len(depth) == 0:
         assert len(action.subjects) == 1
         subject = action.subjects[0]
@@ -71,7 +72,9 @@ def register_depth(project, action, depth=None, answer=False):
         except NameError as e:
             raise NameError(
                 str(e) + ', Cannot find current depth, depth must be given ' +
-                'in adjustments with "expipe adjust subject-id --init".')
+                'either in adjustments with ' +
+                '"expipe adjust subject-id --init" ' +
+                'or with "--depth".')
         adjusts = {}
         for adjust in adjustments.modules:
             values = adjust.to_dict()
@@ -83,7 +86,10 @@ def register_depth(project, action, depth=None, answer=False):
         curr_depth = {key: adjustment['depth'].get(key) for key in mod_info
                       if adjustment['depth'].get(key) is not None}
     else:
-        curr_depth = {key: val * pq.mm for key, val in depth}
+        curr_depth = {d[0]: dict() for d in depth}
+        for key, num, val, unit in depth:
+            pos_key = 'position_{}'.format(num)
+            curr_depth[key][pos_key] = pq.Quantity(val, unit)
         adjustdate = None
 
     def last_num(x):
@@ -98,26 +104,33 @@ def register_depth(project, action, depth=None, answer=False):
     if not correct:
         print('Aborting depth registration')
         return False
-    if len(action.subjects) == 1:
+    if len(depth) == 0:
+        assert len(action.subjects) == 1, ('Multiple subjects registered for ' +
+                                           'this action, unable to get surgery.')
         surgery_action_id = action.subjects[0] + '-surgery-implantation'
         try:
             surgery = project.get_action(surgery_action_id)
         except NameError as e:
-            raise NameError(str(e) + 'There are no surgery-implantation ' +
+            raise NameError(str(e) + ' There are no surgery-implantation ' +
                             'registered for this animal. Please insert depth' +
                             'manually')
     else:
-        raise ValueError('Multiple subjects registered for this action, ' +
-                         'unable to get surgery.')
+        surgery = None
     for key, name in mod_info.items():
         if key not in curr_depth: # module not used in surgery
             continue
-        mod = surgery.get_module(name=name).to_dict()
+        if surgery:
+            mod = surgery.get_module(name=name).to_dict()
+        else:
+            mod = action.require_module(template=name).to_dict()
+            del(mod['position'])
         for pos_key, val in curr_depth[key].items():
-            if np.isnan(val):
-                raise ValueError('Depth cannot be NaN')
             print('Registering depth:', key, pos_key, '=', val)
-            mod[pos_key][2] = val
+            if pos_key in mod:
+                mod[pos_key][2] = val
+            else:
+                tmp = [np.nan, np.nan, float(val.magnitude)]
+                mod[pos_key] = pq.Quantity(tmp, val.dimensionality)
         action.require_module(name=name, contents=mod, overwrite=True)
     return True
 

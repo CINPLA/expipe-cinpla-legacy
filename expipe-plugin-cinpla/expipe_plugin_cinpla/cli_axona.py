@@ -3,6 +3,19 @@ from . import action_tools
 from . import config
 
 
+def validate_depth(ctx, param, depth):
+    try:
+        out = []
+        for pos in depth:
+            key, num, z, unit = pos.split(' ', 4)
+            out.append((key, int(num), float(z), unit))
+        return tuple(out)
+    except ValueError:
+        raise click.BadParameter('Depth need to be contained in "" and ' +
+                                 'separated with white space i.e ' +
+                                 '<"key num depth physical_unit"> (ommit <>).')
+
+
 def attach_to_cli(cli):
     @cli.command('register', short_help='Generate an axona recording-action to database.')
     @click.argument('axona-filename', type=click.Path(exists=True))
@@ -11,10 +24,10 @@ def attach_to_cli(cli):
                   help='The experimenter performing the recording.',
                   )
     @click.option('-d', '--depth',
-                  nargs=2,
                   multiple=True,
-                  type=(click.STRING, float),
-                  help='The depth given with units e.g. <10 um> (omit <>).',
+                  callback=validate_depth,
+                  help=('The depth given as <key num depth unit> e.g. ' +
+                        '<mecl 0 10 um> (omit <>).'),
                   )
     @click.option('-l', '--location',
                   type=click.STRING,
@@ -45,6 +58,10 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='Overwrite modules or not.',
                   )
+    @click.option('--hard',
+                  is_flag=True,
+                  help='Overwrite by deleting action.',
+                  )
     @click.option('-m', '--message',
                   multiple=True,
                   type=click.STRING,
@@ -66,7 +83,7 @@ def attach_to_cli(cli):
     def generate_axona_action(action_id, axona_filename, depth, user,
                               no_local, overwrite, no_files, no_modules,
                               subject_id, location, message, tag,
-                              get_inp, yes):
+                              get_inp, yes, hard):
         if not axona_filename.endswith('.set'):
             print("Sorry, we need an Axona .set file not " +
                   "'{}'.".format(axona_filename))
@@ -80,23 +97,16 @@ def attach_to_cli(cli):
             basename, _ = os.path.splitext(axona_filename)
             session = basename[-2:]
             action_id = subject_id + '-' + session_dtime + '-' + session
+        if overwrite and hard:
+            try:
+                project.delete_action(action_id)
+            except NameError as e:
+                print(str(e))
         action = project.require_action(action_id)
         if not no_modules:
             action_tools.generate_templates(action, PAR.TEMPLATES['axona'],
                                             overwrite,
                                             git_note=action_tools.get_git_info())
-            try:
-                correct = action_tools.register_depth(project, action,
-                                                      depth=depth, answer=yes)
-            except Exception as e:
-                raise Exception(str(e) + 'Unable to register depth, give' +
-                                '"--depth" manually or make sure adjustmets ' +
-                                'are available. Note, you may also use ' +
-                                '"--no-modules"')
-            if not correct:
-                print('Aborting')
-                return
-        action.type = 'Recording'
         action.datetime = axona_file._start_datetime
         action.tags = list(tag) + ['axona']
         print('Registering action id ' + action_id)
@@ -119,7 +129,18 @@ def attach_to_cli(cli):
                              'user': user,
                              'datetime': datetime.now()}
                            for m in message]
-
+        if not no_modules:
+            try:
+                correct = action_tools.register_depth(project, action,
+                                                      depth=depth, answer=yes)
+            except (NameError, ValueError):
+                raise
+            except Exception as e:
+                raise Exception(str(e) + ' Note, you may also use ' +
+                                '"--no-modules"')
+            if not correct:
+                print('Aborting')
+                return
         if not no_files:
             fr = action.require_filerecord()
             if not no_local:
