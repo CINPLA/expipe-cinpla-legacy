@@ -582,7 +582,6 @@ class Analyser:
                 if unit.name is None:
                     unit.name = 'cluster_{}'.format(unit.annotations['cluster_id'])
                 sptr = unit.spiketrains[0]
-
                 try:
                     fname = '{} {}'.format(chx.name, unit.name)
                     fpath = os.path.join(raw_dir, fname).replace(" ", "_")
