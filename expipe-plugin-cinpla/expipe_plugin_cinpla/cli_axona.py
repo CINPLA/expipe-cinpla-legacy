@@ -82,7 +82,8 @@ def attach_to_cli(cli):
             action_id = subject_id + '-' + session_dtime + '-' + session
         action = project.require_action(action_id)
         if not no_modules:
-            action_tools.generate_templates(action, PAR.TEMPLATES['axona'], overwrite,
+            action_tools.generate_templates(action, PAR.TEMPLATES['axona'],
+                                            overwrite,
                                             git_note=action_tools.get_git_info())
             try:
                 correct = action_tools.register_depth(project, action,
@@ -102,15 +103,13 @@ def attach_to_cli(cli):
         print('Registering subject id ' + subject_id)
         action.subjects = [subject_id]
         user = user or PAR.USER_PARAMS['user_name']
-        if user is None:
-            raise ValueError('Please add user name')
+        user = user or []
         if len(user) == 0:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
         location = location or PAR.USER_PARAMS['location']
-        if location is None:
-            raise ValueError('Please add location')
+        location = location or []
         if len(location) == 0:
             raise ValueError('Please add location')
         assert location in PAR.POSSIBLE_LOCATIONS

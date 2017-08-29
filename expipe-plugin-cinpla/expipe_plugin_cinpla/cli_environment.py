@@ -92,6 +92,7 @@ def attach_to_cli(cli):
                               'current active environment.')
 
         else:
-            raise ValueError('Project id "' + project_id + '" not found in settings file.')
+            raise ValueError('Project id "' + project_id +
+                             '" not found in settings file.')
         with open(settings_file_path, "w") as f:
             yaml.dump(current_settings, f, default_flow_style=False)
