@@ -18,8 +18,8 @@ def attach_to_cli(cli):
         assert os.path.exists(settings_file_path)
         with open(settings_file_path, "r") as f:
             current_settings = yaml.load(f)
+        current_settings['current'] = current_settings[project_id]
         current_settings['current'].update({'project_id': project_id})
-        current_settings['current'].update(current_settings[project_id])
         with open(settings_file_path, "w") as f:
             yaml.dump(current_settings, f, default_flow_style=False)
 
@@ -44,7 +44,7 @@ def attach_to_cli(cli):
                          for key, val in current_settings['current'].items()]))
         print('\nAvailable environment(s):')
         for pid, value in [(p, v) for p, v in current_settings.items() if p != 'current']:
-            print('project_id:\n\t', pid)
+            print('\nproject_id:\n\t', pid)
             print('\n'.join(['{}: \n\t {}'.format(key, val)
                              for key, val in value.items()]))
 
@@ -69,8 +69,8 @@ def attach_to_cli(cli):
                 project_id: {'parameters_path': params_path}
             })
         if activate:
+            current_settings['current'] = current_settings[project_id]
             current_settings['current'].update({'project_id': project_id})
-            current_settings['current'].update(current_settings[project_id])
         with open(settings_file_path, "w") as f:
             yaml.dump(current_settings, f, default_flow_style=False)
 
@@ -115,8 +115,8 @@ def attach_to_cli(cli):
                 project_id: {'probe_file_path': probe_file_path}})
 
         if activate:
+            current_settings['current'] = current_settings[project_id]
             current_settings['current'].update({'project_id': project_id})
-            current_settings['current'].update(current_settings[project_id])
         with open(settings_file_path, "w") as f:
             yaml.dump(current_settings, f, default_flow_style=False)
 
