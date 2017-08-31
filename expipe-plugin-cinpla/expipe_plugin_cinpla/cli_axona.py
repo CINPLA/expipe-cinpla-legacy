@@ -76,6 +76,10 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='Use Axona input ".inp.',
                   )
+    @click.option('--no-cut',
+                  is_flag=True,
+                  help='Do not load ".cut" files',
+                  )
     @click.option('-y', '--yes',
                   is_flag=True,
                   help='Yes to depth registering query.',
@@ -83,7 +87,7 @@ def attach_to_cli(cli):
     def generate_axona_action(action_id, axona_filename, depth, user,
                               no_local, overwrite, no_files, no_modules,
                               subject_id, location, message, tag,
-                              get_inp, yes, hard):
+                              get_inp, yes, hard, no_cut):
         if not axona_filename.endswith('.set'):
             print("Sorry, we need an Axona .set file not " +
                   "'{}'.".format(axona_filename))
@@ -161,7 +165,8 @@ def attach_to_cli(cli):
             axona.generate_tracking(exdir_path, axona_file)
             axona.generate_analog_signals(exdir_path, axona_file)
             axona.generate_spike_trains(exdir_path, axona_file)
-            axona.generate_units(exdir_path, axona_file)
+            if not no_cut:
+                axona.generate_units(exdir_path, axona_file)
             if get_inp:
                 axona.generate_inp(exdir_path, axona_file)
             else:
