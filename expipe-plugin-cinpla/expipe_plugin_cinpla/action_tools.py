@@ -63,7 +63,6 @@ def register_depth(project, action, depth=None, answer=False):
     regdate = action.datetime
     mod_info = PAR.MODULES['implantation']
     depth = depth or []
-    print(depth)
     if len(depth) == 0:
         assert len(action.subjects) == 1
         subject = action.subjects[0]
@@ -129,8 +128,7 @@ def register_depth(project, action, depth=None, answer=False):
             if pos_key in mod:
                 mod[pos_key][2] = val
             else:
-                tmp = [np.nan, np.nan, float(val.magnitude)]
-                mod[pos_key] = pq.Quantity(tmp, val.dimensionality)
+                mod[pos_key] = [np.nan, np.nan, float(val.magnitude)] * val.units
         action.require_module(name=name, contents=mod, overwrite=True)
     return True
 
