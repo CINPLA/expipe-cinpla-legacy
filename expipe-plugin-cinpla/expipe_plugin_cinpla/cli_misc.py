@@ -116,8 +116,12 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='The experimenter performing the adjustment.',
                   )
+    @click.option('-y', '--yes',
+                  type=click.STRING,
+                  help='No query for correct adjustment.',
+                  )
     def generate_adjustment(subject_id, date, adjustment, user, index, init,
-                            overwrite):
+                            overwrite, yes):
         if not init:
             assert len(adjustment) != 0, 'Missing option "-a" / "--adjustment".'
             assert date is not None, 'Missing option "-d" / "--date".'
@@ -134,16 +138,6 @@ def attach_to_cli(cli):
             action = project.require_action(subject_id + '-adjustment')
         else:
             action = project.get_action(subject_id + '-adjustment')
-        action.type = 'Adjustment'
-        action.subjects = [subject_id]
-        user = user or PAR.USER_PARAMS['user_name']
-        user = user or []
-        if len(user) == 0:
-            raise ValueError('Please add user name')
-        users = list(set(action.users))
-        if user not in users:
-            users.append(user)
-        action.users = users
         if index is None and not init:
             deltas = []
             for name in action.modules.keys():
@@ -173,8 +167,6 @@ def attach_to_cli(cli):
             prev_name = '{:03d}_adjustment'.format(index - 1)
             prev_depth = action.require_module(name=prev_name).to_dict()['depth']
         name = '{:03d}_adjustment'.format(index)
-        module = action.require_module(template=PAR.TEMPLATES['adjustment'],
-                                       name=name, overwrite=overwrite)
         assert isinstance(prev_depth, dict), 'Unable to retrieve previous depth.'
         adjustment_dict = {key: dict() for key in prev_depth}
         for key, num, val, unit in adjustment:
@@ -189,7 +181,7 @@ def attach_to_cli(cli):
 
         def last_num(x):
             return '%.3d' % int(x.split('_')[-1])
-        answer = query_yes_no(
+        correct = query_yes_no(
             'Correct adjustment?: \n' +
             ' '.join('{} {} = {}\n'.format(key, pos_key, val[pos_key])
                      for key, val in adjustment.items()
@@ -197,10 +189,11 @@ def attach_to_cli(cli):
             'New depth: \n' +
             ' '.join('{} {} = {}\n'.format(key, pos_key, val[pos_key])
                      for key, val in curr_depth.items()
-                     for pos_key in sorted(val, key=lambda x: last_num(x)))
+                     for pos_key in sorted(val, key=lambda x: last_num(x))),
+            answer=yes
         )
-        if answer == False:
-            print('Aborting adjustment')
+        if not correct:
+            print('Aborting adjustment.')
             return
         print(
             'Registering adjustment: \n' +
@@ -212,6 +205,8 @@ def attach_to_cli(cli):
                      for key, val in curr_depth.items()
                      for pos_key in sorted(val, key=lambda x: last_num(x)))
         )
+        module = action.require_module(template=PAR.TEMPLATES['adjustment'],
+                                       name=name, overwrite=overwrite)
         content = module.to_dict()
         content['depth'] = curr_depth
         content['adjustment'] = adjustment
@@ -219,6 +214,14 @@ def attach_to_cli(cli):
         content['date'] = datestring
         content['git_note'] = get_git_info()
         action.require_module(name=name, contents=content, overwrite=True)
+
+        action.type = 'Adjustment'
+        action.subjects = [subject_id]
+        user = user or PAR.USER_PARAMS['user_name']
+        user = user or []
+        if len(user) == 0:
+            raise ValueError('Please add user name')
+        action.users = users
 
     @cli.command('register-surgery', short_help='Generate a surgery action.')
     @click.argument('subject-id')
