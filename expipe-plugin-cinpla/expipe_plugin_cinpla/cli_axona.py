@@ -167,11 +167,11 @@ def attach_to_cli(cli):
             axona.generate_spike_trains(exdir_path, axona_file)
             if not no_cut:
                 axona.generate_units(exdir_path, axona_file)
+                axona.generate_clusters(exdir_path, axona_file)
             if get_inp:
                 axona.generate_inp(exdir_path, axona_file)
             else:
                 warnings.warn('Not registering Axona ".inp".')
-            axona.generate_clusters(exdir_path, axona_file)
         time_string = exdir.File(exdir_path).attrs['session_start_time']
         dtime = datetime.strptime(time_string, '%Y-%m-%dT%H:%M:%S')
         action.datetime = dtime
