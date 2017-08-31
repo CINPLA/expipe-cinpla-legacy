@@ -310,7 +310,7 @@ def attach_to_cli(cli):
                 raise ValueError('Could not find "openephys" in ' +
                                  'expipe_params.py PAR.TEMPLATES: "' +
                                  '{}"'.format(PAR.TEMPLATES.keys()))
-            action_tools.generate_templates(action, PAR.TEMPLATES['openephys'], overwrite,
+            action_tools.generate_templates(action, 'openephys', overwrite,
                                             git_note=action_tools.get_git_info())
 
         action.datetime = openephys_file.datetime

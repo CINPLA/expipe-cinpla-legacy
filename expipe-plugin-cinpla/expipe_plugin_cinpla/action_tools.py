@@ -149,19 +149,23 @@ def _get_local_path(file_record, assert_exists=False, make=False):
     return local_path
 
 
-def generate_templates(action, action_templates, overwrite, git_note=None):
+def generate_templates(action, templates_key, overwrite, git_note=None):
     '''
 
     :param action:
-    :param action_templates:
+    :param templates:
     :param overwrite:
     :param git_note:
     :return:
     '''
+    templates = PAR.TEMPLATES.get(templates_key)
+    if templates is None:
+        print('Warning: no templates matching "' + templates_key + '".')
+        return
     if git_note is not None:
         action.require_module(name='software_version_control_git',
                               contents=git_note, overwrite=overwrite)
-    for template in action_templates:
+    for template in templates:
         try:
             if template.startswith('_inherit'):
                 name = '_'.join(template.split('_')[2:])

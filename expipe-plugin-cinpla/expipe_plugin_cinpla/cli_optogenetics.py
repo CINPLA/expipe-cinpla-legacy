@@ -99,7 +99,7 @@ def attach_to_cli(cli):
             raise ValueError('Acquisition system not recognized')
         if not no_modules:
             params.update({'location': brain_area})
-            action_tools.generate_templates(action, PAR.TEMPLATES['opto_' + aq_sys],
+            action_tools.generate_templates(action, 'opto_' + aq_sys,
                                overwrite, git_note=None)
             opto_tools.populate_modules(action, params)
             laser_id = laser_id or PAR.USER_PARAMS['laser_device'].get('id')

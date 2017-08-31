@@ -320,7 +320,7 @@ def attach_to_cli(cli):
                 raise ValueError('Could not find "intan" in ' +
                                  'expipe_params.py PAR.TEMPLATES: "' +
                                  '{}"'.format(PAR.TEMPLATES.keys()))
-            action_tools.generate_templates(action, PAR.TEMPLATES['intan'], overwrite,
+            action_tools.generate_templates(action, 'intan', overwrite,
                                git_note=action_tools.get_git_info())
             headstage = action.require_module(
                 name='hardware_intan_headstage').to_dict()

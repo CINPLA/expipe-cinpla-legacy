@@ -149,7 +149,7 @@ def attach_to_cli(cli):
 
         trigger_param, channel_param = generate_electrical_info(exdir_path, intan_file, openephys_file,
                                                                 trigger_chan, stim_trigger=trigger_sig)
-        action_tools.generate_templates(action, PAR.TEMPLATES['electrical_stimulation'],
+        action_tools.generate_templates(action, 'electrical_stimulation',
                            overwrite, git_note=None)
 
         trigger_param.update(channel_param)

@@ -42,10 +42,10 @@ def load_settings():
     return settings
 
 
-def give_empty_attrs(obj, *attrs):
+def give_attrs_val(obj, value, *attrs):
     for attr in attrs:
         if not hasattr(obj, attr):
-            setattr(obj, attr, [])
+            setattr(obj, attr, value)
 
 
 def load_parameters():
@@ -62,11 +62,14 @@ def load_parameters():
         class Dummy:
             pass
         PAR = Dummy
-    give_empty_attrs(PAR,
-                     'POSSIBLE_TAGS',
-                     'POSSIBLE_LOCATIONS',
-                     'POSSIBLE_OPTO_TAGS',
-                     'POSSIBLE_BRAIN_AREAS',
-                     'POSSIBLE_LOCATIONS',
-                     'POSSIBLE_CELL_LINES')
+    give_attrs_val(PAR, list(),
+                 'POSSIBLE_TAGS',
+                 'POSSIBLE_LOCATIONS',
+                 'POSSIBLE_OPTO_TAGS',
+                 'POSSIBLE_BRAIN_AREAS',
+                 'POSSIBLE_LOCATIONS',
+                 'POSSIBLE_CELL_LINES')
+    give_attrs_val(PAR, dict(),
+                     'UNIT_INFO',
+                     'TEMPLATES')
     return PAR

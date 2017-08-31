@@ -284,7 +284,7 @@ def attach_to_cli(cli):
         action = project.require_action(subject_id + '-surgery-' + procedure)
         if overwrite and hard:
             project.delete_action(subject_id + '-surgery-' + procedure)
-        generate_templates(action, PAR.TEMPLATES['surgery_' + procedure],
+        generate_templates(action, 'surgery_' + procedure,
                            overwrite, git_note=get_git_info())
         if date == 'now':
             date = datetime.now()
@@ -520,7 +520,7 @@ def attach_to_cli(cli):
     def generate_perfusion(subject_id, date, user, overwrite, weight):
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(subject_id + '-perfusion')
-        generate_templates(action, PAR.TEMPLATES['perfusion'],
+        generate_templates(action, 'perfusion',
                            overwrite, git_note=get_git_info())
         if date == 'now':
             date = datetime.now()

@@ -108,7 +108,7 @@ def attach_to_cli(cli):
                 print(str(e))
         action = project.require_action(action_id)
         if not no_modules:
-            action_tools.generate_templates(action, PAR.TEMPLATES['axona'],
+            action_tools.generate_templates(action, 'axona',
                                             overwrite,
                                             git_note=action_tools.get_git_info())
         action.datetime = axona_file._start_datetime
