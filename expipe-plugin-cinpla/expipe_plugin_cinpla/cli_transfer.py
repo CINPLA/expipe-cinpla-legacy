@@ -23,6 +23,10 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='Do not send local data to trash after transfer.',
                   )
+    @click.option('--move',
+                  is_flag=True,
+                  help='Permanently delete local data after transfer.',
+                  )
     @click.option('--overwrite',
                   is_flag=True,
                   help='Overwrite data or not.',
@@ -55,13 +59,13 @@ def attach_to_cli(cli):
                   help='SSH username.',
                   )
     @click.option('--server',
-                  default='norstore',
+                  default='nird',
                   type=click.STRING,
-                  help='Name of server as named in config.yaml. Default is "norstore"',
+                  help='Name of server as named in config.yaml. Default is "nird"',
                   )
     def transfer(action_id, to_local, from_local, overwrite, no_trash,
                  exclude, include, port, username,
-                 hostname, recursive, server):
+                 hostname, recursive, server, move):
         assert server in expipe.config.settings
         server_dict = expipe.config.settings.get(server)
         if len(exclude) > 0 and len(include) > 0:
@@ -150,7 +154,7 @@ def attach_to_cli(cli):
                 print('Deleting tar archives')
                 sftp_client.remove(server_data + '.tar')
                 os.remove(local_data + '.tar')
-            if not no_trash:
+            if not no_trash and not move:
                 try:
                     from send2trash import send2trash
                     send2trash(local_data)
@@ -158,6 +162,9 @@ def attach_to_cli(cli):
                           '" sent to trash.')
                 except Exception:
                     warnings.warn('Unable to send local data to trash')
+            if move:
+                print('Deleting "' + local_data + '".')
+                shutil.rmtree(local_data)
 
         else:
             raise IOError('You must choose "to-local" or "from-local"')

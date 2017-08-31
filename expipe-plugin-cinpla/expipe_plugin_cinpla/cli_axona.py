@@ -126,8 +126,8 @@ def attach_to_cli(cli):
         print('Registering location ' + location)
         action.location = location
         action.messages = [{'message': m,
-                             'user': user,
-                             'datetime': datetime.now()}
+                            'user': user,
+                            'datetime': datetime.now()}
                            for m in message]
         if not no_modules:
             try:
@@ -149,6 +149,7 @@ def attach_to_cli(cli):
                 exdir_path = fr.server_path
             if os.path.exists(exdir_path):
                 if overwrite:
+                    print('Deleting existing directory "' + exdir_path + '".')
                     shutil.rmtree(exdir_path)
                 else:
                     raise FileExistsError('The exdir path to this action "' +

@@ -4,7 +4,7 @@ from . import opto_tools
 
 
 def attach_to_cli(cli):
-    @cli.command('register')
+    @cli.command('register', short_help='Parse optogenetics info to an action.')
     @click.argument('action-id', type=click.STRING)
     @click.option('--brain-area',
                   required=True,
@@ -61,9 +61,6 @@ def attach_to_cli(cli):
     def parse_optogenetics(action_id, brain_area, no_local, overwrite,
                            io_channel, tag, message, laser_id, user,
                            no_modules, use_axona_cut, pulse_phasedur):
-        """Parse optogenetics info to an action.
-
-        COMMAND: action-id: Provide action id to find exdir path"""
         # TODO deafault none
         if brain_area not in PAR.POSSIBLE_BRAIN_AREAS:
             raise ValueError("brain_area must be either %s",
@@ -118,7 +115,7 @@ def attach_to_cli(cli):
                                  'datetime': datetime.now()}
                                for m in message])
 
-    @cli.command('parse-files')
+    @cli.command('parse-files', short_help='Parse optogenetics files.')
     @click.argument('action-id', type=click.STRING)
     @click.option('--no-local',
                   is_flag=True,
@@ -130,9 +127,6 @@ def attach_to_cli(cli):
                   help='TTL input channel.',
                   )
     def parse_optogenetics_files(action_id, no_local, io_channel):
-        """Parse optogenetics info to an action.
-
-        COMMAND: action-id: Provide action id to find exdir path"""
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
         fr = action.require_filerecord()
