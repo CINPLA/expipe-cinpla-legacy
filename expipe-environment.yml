@@ -16,6 +16,7 @@ dependencies:
   - paramiko
   - tqdm
   - packaging
+  - openpyxl
   - pip:
     - pycircstat
     - quantities
