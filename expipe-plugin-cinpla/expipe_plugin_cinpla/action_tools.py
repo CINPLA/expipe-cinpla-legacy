@@ -103,18 +103,19 @@ def register_depth(project, action, depth=None, answer=False):
     if not correct:
         print('Aborting depth registration')
         return False
-    if len(depth) == 0:
-        assert len(action.subjects) == 1, ('Multiple subjects registered for ' +
-                                           'this action, unable to get surgery.')
-        surgery_action_id = action.subjects[0] + '-surgery-implantation'
-        try:
-            surgery = project.get_action(surgery_action_id)
-        except NameError as e:
+
+    assert len(action.subjects) == 1, ('Multiple subjects registered for ' +
+                                       'this action, unable to get surgery.')
+    surgery_action_id = action.subjects[0] + '-surgery-implantation'
+    try:
+        surgery = project.get_action(surgery_action_id)
+    except NameError as e:
+        if len(depth) == 0:
             raise NameError(str(e) + ' There are no surgery-implantation ' +
                             'registered for this animal. Please insert depth' +
                             'manually')
-    else:
-        surgery = None
+        else:
+            surgery = None
     for key, name in mod_info.items():
         if key not in curr_depth: # module not used in surgery
             continue
