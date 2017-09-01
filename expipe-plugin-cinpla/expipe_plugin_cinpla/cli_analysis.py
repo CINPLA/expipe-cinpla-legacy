@@ -51,10 +51,12 @@ def attach_to_cli(cli):
                                      'occupancy', 'orient-tuning']),
                   help='Analyse data.',
                   )
-    @click.option('--tag', '-t',
+    @click.option('-t', '--tag',
                   multiple=True,
-                  type=click.Choice(PAR.POSSIBLE_TAGS),
-                  help='The anatomical brain-area of the optogenetic stimulus.',
+                  type=click.STRING,
+                  callback=config.optional_choice,
+                  envvar=PAR.POSSIBLE_TAGS,
+                  help='Add tags to action.',
                   )
     @click.option('-m', '--message',
                   multiple=True,

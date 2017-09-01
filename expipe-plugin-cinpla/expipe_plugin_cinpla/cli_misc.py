@@ -1,42 +1,6 @@
 from .imports import *
 from .action_tools import generate_templates, get_git_info, query_yes_no
-
-
-def validate_position(ctx, param, position):
-    try:
-        out = []
-        for pos in position:
-            key, num, x, y, z, unit = pos.split(' ', 6)
-            out.append((key, int(num), float(x), float(y), float(z), unit))
-        return tuple(out)
-    except ValueError:
-        raise click.BadParameter('Position need to be contained in "" and ' +
-                                 'separated with white space i.e ' +
-                                 '<"key num x y z physical_unit"> (ommit <>).')
-
-def validate_angle(ctx, param, position):
-    try:
-        out = []
-        for pos in position:
-            key, angle, unit = pos.split(' ', 3)
-            out.append((key, float(angle), unit))
-        return tuple(out)
-    except ValueError:
-        raise click.BadParameter('Angle need to be contained in "" and ' +
-                                 'separated with white space i.e ' +
-                                 '<"key angle physical_unit"> (ommit <>).')
-
-def validate_adjustment(ctx, param, position):
-    try:
-        out = []
-        for pos in position:
-            key, num, z, unit = pos.split(' ', 4)
-            out.append((key, int(num), float(z), unit))
-        return tuple(out)
-    except ValueError:
-        raise click.BadParameter('Position need to be contained in "" and ' +
-                                 'separated with white space i.e ' +
-                                 '<"key num z physical_unit"> (ommit <>).')
+from . import config
 
 
 def attach_to_cli(cli):
@@ -53,11 +17,13 @@ def attach_to_cli(cli):
 
     @cli.command('annotate', short_help='Parse info about recorded units')
     @click.argument('action-id', type=click.STRING)
-    @click.option('--tag', '-t',
-                  multiple=True,
-                  type=click.Choice(PAR.POSSIBLE_TAGS),
-                  help='The tag to be applied to the action.',
-                  )
+    @click.option('-t', '--tag',
+                    multiple=True,
+                    type=click.STRING,
+                    callback=config.optional_choice,
+                    envvar=PAR.POSSIBLE_TAGS,
+                    help='Add tags to action.',
+                    )
     @click.option('--message', '-m',
                   multiple=True,
                   type=click.STRING,
@@ -95,7 +61,7 @@ def attach_to_cli(cli):
                   )
     @click.option('-a', '--adjustment',
                   multiple=True,
-                  callback=validate_adjustment,
+                  callback=config.validate_adjustment,
                   help=('The adjustment amount on given anatomical location ' +
                         'given as <key num value unit>'),
                   )
@@ -117,7 +83,7 @@ def attach_to_cli(cli):
                   help='The experimenter performing the adjustment.',
                   )
     @click.option('-y', '--yes',
-                  type=click.STRING,
+                  is_flag=True,
                   help='No query for correct adjustment.',
                   )
     def generate_adjustment(subject_id, date, adjustment, user, index, init,
@@ -231,10 +197,12 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='The date of the surgery format: "dd.mm.yyyyTHH:MM".',
                   )
-    @click.option('--tag', '-t',
+    @click.option('-t', '--tag',
                   multiple=True,
-                  type=click.Choice(PAR.POSSIBLE_TAGS),
-                  help='The tag to be applied to the action.',
+                  type=click.STRING,
+                  callback=config.optional_choice,
+                  envvar=PAR.POSSIBLE_TAGS,
+                  help='Add tags to action.',
                   )
     @click.option('--procedure',
                   required=True,
@@ -262,13 +230,13 @@ def attach_to_cli(cli):
     @click.option('-p', '--position',
                   required=True,
                   multiple=True,
-                  callback=validate_position,
+                  callback=config.validate_position,
                   help='The position e.g. <"mecl 0 x y z mm"> (ommit <>).',
                   )
     @click.option('-a', '--angle',
                   required=True,
                   multiple=True,
-                  callback=validate_angle,
+                  callback=config.validate_angle,
                   help='The angle of implantation/injection.',
                   )
     @click.option('--message', '-m',
@@ -367,7 +335,9 @@ def attach_to_cli(cli):
                   )
     @click.option('--cell_line',
                   type=click.STRING,
-                  help='Cell line of the subject.',
+                  callback=config.optional_choice,
+                  envvar=PAR.POSSIBLE_CELL_LINES,
+                  help='Add tags to action.',
                   )
     @click.option('--developmental_stage',
                   type=click.STRING,
@@ -416,15 +386,15 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='Add message, use "text here" for sentences.',
                   )
-    @click.option('--tag', '-t',
+    @click.option('-t', '--tag',
                   multiple=True,
-                  type=click.Choice(PAR.POSSIBLE_TAGS),
-                  help='The tag to be applied to the action.',
+                  type=click.STRING,
+                  callback=config.optional_choice,
+                  envvar=PAR.POSSIBLE_TAGS,
+                  help='Add tags to action.',
                   )
     def generate_subject(subject_id, overwrite, user, message, location, tag,
                          **kwargs):
-        if len(PAR.POSSIBLE_CELL_LINES) > 0:
-            assert kwargs['cell_line'] in PAR.POSSIBLE_CELL_LINES
         DTIME_FORMAT = expipe.io.core.datetime_format
         project = expipe.require_project('subjects-registry')
         action = project.require_action(subject_id)

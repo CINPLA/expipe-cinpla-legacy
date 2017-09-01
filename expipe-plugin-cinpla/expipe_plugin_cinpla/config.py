@@ -19,6 +19,81 @@ def deep_update(d, other):
             d[k] = copy.deepcopy(v)
 
 
+def validate_depth(ctx, param, depth):
+    try:
+        out = []
+        for pos in depth:
+            key, num, z, unit = pos.split(' ', 4)
+            out.append((key, int(num), float(z), unit))
+        return tuple(out)
+    except ValueError:
+        raise click.BadParameter('Depth need to be contained in "" and ' +
+                                 'separated with white space i.e ' +
+                                 '<"key num depth physical_unit"> (ommit <>).')
+
+
+def validate_position(ctx, param, position):
+    try:
+        out = []
+        for pos in position:
+            key, num, x, y, z, unit = pos.split(' ', 6)
+            out.append((key, int(num), float(x), float(y), float(z), unit))
+        return tuple(out)
+    except ValueError:
+        raise click.BadParameter('Position need to be contained in "" and ' +
+                                 'separated with white space i.e ' +
+                                 '<"key num x y z physical_unit"> (ommit <>).')
+
+def validate_angle(ctx, param, position):
+    try:
+        out = []
+        for pos in position:
+            key, angle, unit = pos.split(' ', 3)
+            out.append((key, float(angle), unit))
+        return tuple(out)
+    except ValueError:
+        raise click.BadParameter('Angle need to be contained in "" and ' +
+                                 'separated with white space i.e ' +
+                                 '<"key angle physical_unit"> (ommit <>).')
+
+def validate_adjustment(ctx, param, position):
+    try:
+        out = []
+        for pos in position:
+            key, num, z, unit = pos.split(' ', 4)
+            out.append((key, int(num), float(z), unit))
+        return tuple(out)
+    except ValueError:
+        raise click.BadParameter('Position need to be contained in "" and ' +
+                                 'separated with white space i.e ' +
+                                 '<"key num z physical_unit"> (ommit <>).')
+
+
+def optional_choice(ctx, param, value):
+    options = param.envvar
+    assert isinstance(options, list)
+    if value is None:
+        if param.required:
+            raise ValueError('Missing option "{}"'.format(param.opts))
+        return value
+    if param.multiple:
+        if len(value) == 0:
+            if param.required:
+                raise ValueError('Missing option "{}"'.format(param.opts))
+            return value
+    if len(options) == 0:
+        return value
+    else:
+        if not param.multiple:
+            value = tuple(list)
+        for val in value:
+            if not value in options:
+                raise ValueError(
+                    'Value "{}" not in "{}".'.format(value, options))
+            else:
+                return value
+
+
 def load_python_module(module_path):
     if not os.path.exists(module_path):
         raise FileExistsError('Path "' + module_path + '" does not exist.')

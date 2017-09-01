@@ -8,13 +8,15 @@ def attach_to_cli(cli):
     @click.argument('action-id', type=click.STRING)
     @click.option('--brain-area',
                   required=True,
-                  type=click.Choice(PAR.POSSIBLE_BRAIN_AREAS),
+                  callback=config.optional_choice,
+                  envvar=PAR.POSSIBLE_BRAIN_AREAS,
                   help='The anatomical brain-area of the optogenetic stimulus.',
                   )
     @click.option('-t', '--tag',
                   multiple=True,
                   required=True,
-                  type=click.Choice(PAR.POSSIBLE_OPTO_TAGS),
+                  callback=config.optional_choice,
+                  envvar=PAR.POSSIBLE_OPTO_TAGS,
                   help='The anatomical brain-area of the optogenetic stimulus.',
                   )
     @click.option('-m', '--message',
@@ -70,9 +72,6 @@ def attach_to_cli(cli):
                            no_modules, use_axona_cut, pulse_phasedur,
                            pulse_period):
         # TODO deafault none
-        if brain_area not in PAR.POSSIBLE_BRAIN_AREAS:
-            raise ValueError("brain_area must be either %s",
-                             PAR.POSSIBLE_BRAIN_AREAS)
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
         user = user or PAR.USER_PARAMS['user_name']

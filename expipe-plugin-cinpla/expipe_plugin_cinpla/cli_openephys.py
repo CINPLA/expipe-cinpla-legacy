@@ -203,13 +203,15 @@ def attach_to_cli(cli):
                   )
     @click.option('-d', '--depth',
                   multiple=True,
-                  callback=validate_depth,
+                  callback=config.validate_depth,
                   help=('The depth given as <key num depth unit> e.g. ' +
                         '<mecl 0 10 um> (omit <>).'),
                   )
     @click.option('-l', '--location',
-                  type=click.Choice(PAR.POSSIBLE_LOCATIONS),
-                  help='The location of the recording, e.g. "room1".',
+                  type=click.STRING,
+                  callback=config.optional_choice,
+                  envvar=PAR.POSSIBLE_LOCATIONS,
+                  help='The location of the recording, i.e. "room1".'
                   )
     @click.option('--session',
                   type=click.STRING,
@@ -266,6 +268,8 @@ def attach_to_cli(cli):
     @click.option('-t', '--tag',
                   multiple=True,
                   type=click.STRING,
+                  callback=config.optional_choice,
+                  envvar=PAR.POSSIBLE_TAGS,
                   help='Add tags to action.',
                   )
     @click.option('--no-move',
@@ -325,12 +329,10 @@ def attach_to_cli(cli):
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
-        location = location or PAR.USER_PARAMS['location']
-        if location is None:
-            raise ValueError('Please add location')
+        location = location or PAR.USER_PARAMS('location')
+        location = location or []
         if len(location) == 0:
             raise ValueError('Please add location')
-        assert location in PAR.POSSIBLE_LOCATIONS
         print('Registering location ' + location)
         action.location = location
 

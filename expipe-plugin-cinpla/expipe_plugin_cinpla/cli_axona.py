@@ -3,19 +3,6 @@ from . import action_tools
 from . import config
 
 
-def validate_depth(ctx, param, depth):
-    try:
-        out = []
-        for pos in depth:
-            key, num, z, unit = pos.split(' ', 4)
-            out.append((key, int(num), float(z), unit))
-        return tuple(out)
-    except ValueError:
-        raise click.BadParameter('Depth need to be contained in "" and ' +
-                                 'separated with white space i.e ' +
-                                 '<"key num depth physical_unit"> (ommit <>).')
-
-
 def attach_to_cli(cli):
     @cli.command('register', short_help='Generate an axona recording-action to database.')
     @click.argument('axona-filename', type=click.Path(exists=True))
@@ -25,13 +12,15 @@ def attach_to_cli(cli):
                   )
     @click.option('-d', '--depth',
                   multiple=True,
-                  callback=validate_depth,
+                  callback=config.validate_depth,
                   help=('The depth given as <key num depth unit> e.g. ' +
                         '<mecl 0 10 um> (omit <>).'),
                   )
     @click.option('-l', '--location',
                   type=click.STRING,
-                  help='The location of the recording, i.e. "room1".',
+                  callback=config.optional_choice,
+                  envvar=PAR.POSSIBLE_LOCATIONS,
+                  help='The location of the recording, i.e. "room1".'
                   )
     @click.option('--action-id',
                   type=click.STRING,
@@ -70,6 +59,8 @@ def attach_to_cli(cli):
     @click.option('-t', '--tag',
                   multiple=True,
                   type=click.STRING,
+                  callback=config.optional_choice,
+                  envvar=PAR.POSSIBLE_TAGS,
                   help='Add tags to action.',
                   )
     @click.option('--get-inp',
@@ -122,11 +113,10 @@ def attach_to_cli(cli):
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
-        location = location or PAR.USER_PARAMS['location']
+        location = location or PAR.USER_PARAMS.get('location')
         location = location or []
         if len(location) == 0:
-            raise ValueError('Please add location')
-        assert location in PAR.POSSIBLE_LOCATIONS
+            raise ValueError('Please add location.')
         print('Registering location ' + location)
         action.location = location
         action.messages = [{'message': m,

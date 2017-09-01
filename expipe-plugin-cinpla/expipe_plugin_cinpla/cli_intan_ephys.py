@@ -272,16 +272,17 @@ def attach_to_cli(cli):
                 type=click.STRING,
                 help='The experimenter performing the recording.',
                 )
-    @click.option('-a', '--anatomy',
+  @click.option('-d', '--depth',
                 multiple=True,
-                type=(click.STRING, float),
-                help='The adjustment amount on given anatomical location in "um".',
+                callback=config.validate_depth,
+                help=('The depth given as <key num depth unit> e.g. ' +
+                      '<mecl 0 10 um> (omit <>).'),
                 )
-    @click.option('-l', '--location',
-                required=True,
+  @click.option('-l', '--location',
                 type=click.STRING,
-                help='The location of the recording, i.e. "room_1".',
-                default='room_1'
+                callback=config.optional_choice,
+                envvar=PAR.POSSIBLE_LOCATIONS,
+                help='The location of the recording, i.e. "room1".'
                 )
     @click.option('--session',
                 type=click.STRING,
@@ -335,9 +336,11 @@ def attach_to_cli(cli):
                 default=32,
                 help='Number of channels. Default = 32',
                 )
-    @click.option('-t', '--tag',
+  @click.option('-t', '--tag',
                 multiple=True,
                 type=click.STRING,
+                callback=config.optional_choice,
+                envvar=PAR.POSSIBLE_TAGS,
                 help='Add tags to action.',
                 )
     @click.option('-m', '--message',
@@ -396,12 +399,10 @@ def attach_to_cli(cli):
           raise ValueError('Please add user name')
       print('Registering user ' + user)
       action.users = [user]
-      location = location or PAR.USER_PARAMS['location']
-      if location is None:
-          raise ValueError('Please add location')
+      location = location or PAR.USER_PARAMS.get('location')
+      location = location or []
       if len(location) == 0:
           raise ValueError('Please add location')
-      assert location in PAR.POSSIBLE_LOCATIONS
       print('Registering location ' + location)
       action.location = location
       messages = [{'message': m, 'user': user, 'datetime': datetime.now()}
@@ -461,16 +462,17 @@ def attach_to_cli(cli):
                 type=click.STRING,
                 help='The experimenter performing the recording.',
                 )
-    @click.option('-a', '--anatomy',
+  @click.option('-d', '--depth',
                 multiple=True,
-                type=(click.STRING, float),
-                help='The adjustment amount on given anatomical location in "um".',
+                callback=config.validate_depth,
+                help=('The depth given as <key num depth unit> e.g. ' +
+                      '<mecl 0 10 um> (omit <>).'),
                 )
-    @click.option('-l', '--location',
-                required=True,
+  @click.option('-l', '--location',
                 type=click.STRING,
-                help='The location of the recording, i.e. "room_1".',
-                default='room_1'
+                callback=config.optional_choice,
+                envvar=PAR.POSSIBLE_LOCATIONS,
+                help='The location of the recording, i.e. "room1".'
                 )
     @click.option('--session',
                 type=click.STRING,
@@ -567,10 +569,12 @@ def attach_to_cli(cli):
                 help='Run klusta on dataset.',
                 )
     @click.option('-t', '--tag',
-                multiple=True,
-                type=click.STRING,
-                help='Add tags to action.',
-                )
+                  multiple=True,
+                  type=click.STRING,
+                  callback=config.optional_choice,
+                  envvar=PAR.POSSIBLE_TAGS,
+                  help='Add tags to action.',
+                  )
     @click.option('-m', '--message',
                 multiple=True,
                 type=click.STRING,
@@ -684,12 +688,10 @@ def attach_to_cli(cli):
           raise ValueError('Please add user name')
       print('Registering user ' + user)
       action.users = [user]
-      location = location or PAR.USER_PARAMS['location']
-      if location is None:
-          raise ValueError('Please add location')
+      location = location or PAR.USER_PARAMS.get('location')
+      location = location or []
       if len(location) == 0:
           raise ValueError('Please add location')
-      assert location in PAR.POSSIBLE_LOCATIONS
       print('Registering location ' + location)
       action.location = location
       messages = [{'message': m, 'user': user, 'datetime': datetime.now()}
