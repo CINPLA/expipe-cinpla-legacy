@@ -222,7 +222,7 @@ def attach_to_cli(cli):
         user = user or []
         if len(user) == 0:
             raise ValueError('Please add user name')
-        action.users = user
+        action.users = [user]
 
     @cli.command('register-surgery', short_help='Generate a surgery action.')
     @click.argument('subject-id')
