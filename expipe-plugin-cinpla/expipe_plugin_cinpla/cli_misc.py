@@ -205,7 +205,8 @@ def attach_to_cli(cli):
                      for key, val in curr_depth.items()
                      for pos_key in sorted(val, key=lambda x: last_num(x)))
         )
-        module = action.require_module(template=PAR.TEMPLATES['adjustment'],
+        template_name = PAR.TEMPLATES.get('adjustment') or 'protocol_depth_adjustment'
+        module = action.require_module(template=template_name,
                                        name=name, overwrite=overwrite)
         content = module.to_dict()
         content['depth'] = curr_depth
