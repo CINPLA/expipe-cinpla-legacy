@@ -68,6 +68,10 @@ def attach_to_cli(cli):
                   help=('Period of laser pulse with units e.g. 10 ms.' +
                         ' Only relevant if no config file available.'),
                   )
+    @click.option('--no-intensity',
+                  is_flag=True,
+                  help='Use Axona cut file for input registration.',
+                  )
     def parse_optogenetics(action_id, brain_area, no_local, overwrite,
                            io_channel, tag, message, laser_id, user,
                            no_modules, use_axona_cut, pulse_phasedur,
@@ -99,7 +103,8 @@ def attach_to_cli(cli):
                                                       pulse_phasedur,
                                                       io_channel)
             else:
-                params = opto_tools.generate_axona_opto(exdir_path, io_channel)
+                params = opto_tools.generate_axona_opto(
+                    exdir_path, io_channel, no_intensity=no_intensity)
         elif exdir_object['acquisition'].attrs['acquisition_system'] == 'OpenEphys':
             aq_sys = 'openephys'
             params = opto_tools.generate_openephys_opto(exdir_path, io_channel)

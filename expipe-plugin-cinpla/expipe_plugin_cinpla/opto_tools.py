@@ -1,12 +1,14 @@
 from .imports import *
 
 
-def generate_axona_opto(exdir_path, io_channel=8, **annotations):
+def generate_axona_opto(exdir_path, io_channel=8, no_intensity=False,
+                        **annotations):
     exdir_object = exdir.File(exdir_path)
     session = exdir_object['acquisition'].attrs['axona_session']
     param = extract_laser_pulse(
         str(exdir_object['acquisition'].directory),
-        session)
+        session,
+        no_intensity=no_intensity)
     if annotations:
         param.update(annotations)
     # get the data
@@ -60,7 +62,7 @@ def generate_openephys_opto(exdir_path, io_channel, **attrs):
     return param
 
 
-def populate_modules(action, params):
+def populate_modules(action, params, no_intensity=False):
     name = [n for n in action.modules.keys() if 'pulse_pal_settings' in n]
     assert len(name) == 1
     name = name[0]
@@ -72,21 +74,21 @@ def populate_modules(action, params):
     pulse_dict['trigger_software']['value'] = params['trigger_software']
     action.require_module(name=name, contents=pulse_dict,
                           overwrite=True)
-
-    name = [n for n in action.modules.keys() if 'laser_settings' in n]
-    assert len(name) == 1
-    name = name[0]
-    laser_dict = action.require_module(name=name).to_dict()
-    laser_dict['intensity_file_url']['value'] = '/'.join(params['laser_url'].split('/')[4:])
-    laser_mask = params['laser_intensity'] > .1 * pq.mW
-    avg = params['laser_intensity'][laser_mask].mean().rescale('mW')
-    std = params['laser_intensity'][laser_mask].std().rescale('mW')
-    laser_dict['intensity'] = pq.UncertainQuantity(avg, uncertainty=std)
-    timestring = datetime.strftime(params['laser_dtime'],
-                                   expipe.io.core.datetime_format)
-    laser_dict['intensity_date_time']['value'] = timestring
-    laser_dict['intensity_info']['value'] = params['laser_info']
-    action.require_module(name=name, contents=laser_dict, overwrite=True)
+    if not no_intensity:
+        name = [n for n in action.modules.keys() if 'laser_settings' in n]
+        assert len(name) == 1
+        name = name[0]
+        laser_dict = action.require_module(name=name).to_dict()
+        laser_dict['intensity_file_url']['value'] = '/'.join(params['laser_url'].split('/')[4:])
+        laser_mask = params['laser_intensity'] > .1 * pq.mW
+        avg = params['laser_intensity'][laser_mask].mean().rescale('mW')
+        std = params['laser_intensity'][laser_mask].std().rescale('mW')
+        laser_dict['intensity'] = pq.UncertainQuantity(avg, uncertainty=std)
+        timestring = datetime.strftime(params['laser_dtime'],
+                                       expipe.io.core.datetime_format)
+        laser_dict['intensity_date_time']['value'] = timestring
+        laser_dict['intensity_info']['value'] = params['laser_info']
+        action.require_module(name=name, contents=laser_dict, overwrite=True)
 
     name = [n for n in action.modules.keys()
             if 'optogenetics_anatomical_location' in n]
@@ -108,7 +110,7 @@ def populate_modules(action, params):
     action.require_module(name=name, contents=paradigm, overwrite=True)
 
 
-def extract_laser_pulse(acquisition_directory, file_end_match=None):
+def extract_laser_pulse(acquisition_directory, file_end_match=None, no_intensity=False):
     paths = glob.glob(os.path.join(acquisition_directory, 'PulsePalProgram*'))
     if len(paths) == 0:
         raise ValueError('No Pulse Pal program found.')
@@ -119,15 +121,16 @@ def extract_laser_pulse(acquisition_directory, file_end_match=None):
         raise ValueError('Multiple Pulse Pal programs found.')
     pulsepalpath = paths[0]
     # laserpath
-    paths = glob.glob(os.path.join(acquisition_directory, 'PM100*'))
-    if len(paths) == 0:
-        raise ValueError('No laser intensity file found.')
-    if file_end_match is not None:
-        paths = [p for p in paths
-                 if os.path.splitext(p)[0].endswith(file_end_match)]
-    if len(paths) > 1:
-        raise ValueError('Multiple laser intensity files found.')
-    pm100path = paths[0]
+    if not no_intensity:
+        paths = glob.glob(os.path.join(acquisition_directory, 'PM100*'))
+        if len(paths) == 0:
+            raise ValueError('No laser intensity file found.')
+        if file_end_match is not None:
+            paths = [p for p in paths
+                     if os.path.splitext(p)[0].endswith(file_end_match)]
+        if len(paths) > 1:
+            raise ValueError('Multiple laser intensity files found.')
+        pm100path = paths[0]
     # load data
     par = {}
     if pulsepalpath.endswith('.xml'):
@@ -145,11 +148,12 @@ def extract_laser_pulse(acquisition_directory, file_end_match=None):
         par['pulse_traindur'] = float(mat_par['Stimulus Train Duration']['Channel 1'][0]) *pq.s
         par['trigger_software'] = "MATLAB"
     par['pulse_url'] = pulsepalpath
-    intensity, dtime, device_info = read_laser_intensity(pm100path)
-    par['laser_intensity'] = intensity
-    par['laser_dtime'] = dtime
-    par['laser_info'] = device_info
-    par['laser_url'] = pm100path
+    if not no_intensity:
+        intensity, dtime, device_info = read_laser_intensity(pm100path)
+        par['laser_intensity'] = intensity
+        par['laser_dtime'] = dtime
+        par['laser_info'] = device_info
+        par['laser_url'] = pm100path
     return par
 
 
