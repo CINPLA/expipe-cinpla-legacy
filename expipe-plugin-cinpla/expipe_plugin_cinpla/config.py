@@ -84,14 +84,17 @@ def optional_choice(ctx, param, value):
     if len(options) == 0:
         return value
     else:
-        if not isinstance(value, (tuple, list)):
-            value = (value)
+        if isinstance(value, (str, int, float)):
+            value = [value,]
         for val in value:
-            if not value in options:
+            if not val in options:
                 raise ValueError(
-                    'Value "{}" not in "{}".'.format(value, options))
+                    'Value "{}" not in "{}".'.format(val, options))
             else:
-                return value
+                if param.multiple:
+                    return value
+                else:
+                    return value[0]
 
 
 def load_python_module(module_path):
