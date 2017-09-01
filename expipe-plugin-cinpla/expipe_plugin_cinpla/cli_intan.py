@@ -1,5 +1,6 @@
 from .imports import *
 from . import action_tools
+from . import config
 
 
 def attach_to_cli(cli):

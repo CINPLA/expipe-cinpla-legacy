@@ -1,6 +1,6 @@
 from .imports import *
 from . import action_tools
-from .config import deep_update
+from . import config
 from .analysis_tools import Analyser
 
 
@@ -145,7 +145,7 @@ def attach_to_cli(cli):
                 mod = action.get_module(key).to_dict()
             except NameError:
                 mod = {}
-            deep_update(mod, val)
+            config.deep_update(mod, val)
             action.require_module(key, contents=mod,
                                   overwrite=True)
 

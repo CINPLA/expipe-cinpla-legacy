@@ -1,5 +1,6 @@
 from .imports import *
 from . import action_tools
+from . import config
 
 
 def attach_to_cli(cli):
@@ -272,13 +273,13 @@ def attach_to_cli(cli):
                 type=click.STRING,
                 help='The experimenter performing the recording.',
                 )
-  @click.option('-d', '--depth',
+    @click.option('-d', '--depth',
                 multiple=True,
                 callback=config.validate_depth,
                 help=('The depth given as <key num depth unit> e.g. ' +
                       '<mecl 0 10 um> (omit <>).'),
                 )
-  @click.option('-l', '--location',
+    @click.option('-l', '--location',
                 type=click.STRING,
                 callback=config.optional_choice,
                 envvar=PAR.POSSIBLE_LOCATIONS,
@@ -336,7 +337,7 @@ def attach_to_cli(cli):
                 default=32,
                 help='Number of channels. Default = 32',
                 )
-  @click.option('-t', '--tag',
+    @click.option('-t', '--tag',
                 multiple=True,
                 type=click.STRING,
                 callback=config.optional_choice,
@@ -462,13 +463,13 @@ def attach_to_cli(cli):
                 type=click.STRING,
                 help='The experimenter performing the recording.',
                 )
-  @click.option('-d', '--depth',
+    @click.option('-d', '--depth',
                 multiple=True,
                 callback=config.validate_depth,
                 help=('The depth given as <key num depth unit> e.g. ' +
                       '<mecl 0 10 um> (omit <>).'),
                 )
-  @click.option('-l', '--location',
+    @click.option('-l', '--location',
                 type=click.STRING,
                 callback=config.optional_choice,
                 envvar=PAR.POSSIBLE_LOCATIONS,
