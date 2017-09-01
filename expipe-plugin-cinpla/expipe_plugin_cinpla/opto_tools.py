@@ -4,8 +4,9 @@ from .imports import *
 def generate_axona_opto(exdir_path, io_channel=8, **annotations):
     exdir_object = exdir.File(exdir_path)
     session = exdir_object['acquisition'].attrs['axona_session']
-    param = extract_laser_pulse(os.path.join(str(exdir_object['acquisition'].directory),
-                                        session))
+    param = extract_laser_pulse(
+        str(exdir_object['acquisition'].directory),
+        session)
     if annotations:
         param.update(annotations)
     # get the data
@@ -107,10 +108,13 @@ def populate_modules(action, params):
     action.require_module(name=name, contents=paradigm, overwrite=True)
 
 
-def extract_laser_pulse(acquisition_directory):
+def extract_laser_pulse(acquisition_directory, file_end_match=None):
     paths = glob.glob(os.path.join(acquisition_directory, 'PulsePalProgram*'))
     if len(paths) == 0:
         raise ValueError('No Pulse Pal program found.')
+    if file_end_match is not None:
+        paths = [p for p in paths
+                 if os.path.splitext(p)[0].endswith(file_end_match)]
     if len(paths) > 1:
         raise ValueError('Multiple Pulse Pal programs found.')
     pulsepalpath = paths[0]
@@ -118,6 +122,9 @@ def extract_laser_pulse(acquisition_directory):
     paths = glob.glob(os.path.join(acquisition_directory, 'PM100*'))
     if len(paths) == 0:
         raise ValueError('No laser intensity file found.')
+    if file_end_match is not None:
+        paths = [p for p in paths
+                 if os.path.splitext(p)[0].endswith(file_end_match)]
     if len(paths) > 1:
         raise ValueError('Multiple laser intensity files found.')
     pm100path = paths[0]

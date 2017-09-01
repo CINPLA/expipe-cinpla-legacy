@@ -84,8 +84,8 @@ def optional_choice(ctx, param, value):
     if len(options) == 0:
         return value
     else:
-        if not param.multiple:
-            value = tuple(list)
+        if not isinstance(value, (tuple, list)):
+            value = (value)
         for val in value:
             if not value in options:
                 raise ValueError(
