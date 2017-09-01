@@ -56,11 +56,19 @@ def attach_to_cli(cli):
                   default=(None, None),
                   type=(click.FLOAT, click.STRING),
                   help=('Duration of laser pulse with units e.g. 10 ms.' +
-                        ' Only relevant if using axona cut.'),
+                        ' Only relevant if no config file available.'),
+                  )
+    @click.option('--pulse-period',
+                  nargs=2,
+                  default=(None, None),
+                  type=(click.FLOAT, click.STRING),
+                  help=('Period of laser pulse with units e.g. 10 ms.' +
+                        ' Only relevant if no config file available.'),
                   )
     def parse_optogenetics(action_id, brain_area, no_local, overwrite,
                            io_channel, tag, message, laser_id, user,
-                           no_modules, use_axona_cut, pulse_phasedur):
+                           no_modules, use_axona_cut, pulse_phasedur,
+                           pulse_period):
         # TODO deafault none
         if brain_area not in PAR.POSSIBLE_BRAIN_AREAS:
             raise ValueError("brain_area must be either %s",
