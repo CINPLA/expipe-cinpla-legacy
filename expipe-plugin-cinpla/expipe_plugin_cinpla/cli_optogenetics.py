@@ -75,7 +75,7 @@ def attach_to_cli(cli):
     def parse_optogenetics(action_id, brain_area, no_local, overwrite,
                            io_channel, tag, message, laser_id, user,
                            no_modules, use_axona_cut, pulse_phasedur,
-                           pulse_period):
+                           pulse_period, no_intensity):
         # TODO deafault none
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
