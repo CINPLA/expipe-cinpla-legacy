@@ -6,7 +6,7 @@ def generate_axona_opto(exdir_path, io_channel=8, no_intensity=False,
     exdir_object = exdir.File(exdir_path)
     session = exdir_object['acquisition'].attrs['axona_session']
     param = extract_laser_pulse(
-        str(exdir_object['acquisition'].directory),
+        os.path.join(str(exdir_object['acquisition'].directory), session),
         no_intensity=no_intensity)
     if annotations:
         param.update(annotations)
