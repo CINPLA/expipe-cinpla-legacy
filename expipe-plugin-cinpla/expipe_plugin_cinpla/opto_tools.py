@@ -193,7 +193,10 @@ def read_laser_intensity(fname):
                 device_info.extend(line)
     assert np.array_equal(np.array(units), np.array(units))
     data = pq.Quantity(data, units[0])
-    dtime = datetime.strptime(line[0][:19], '%d.%m.%Y %H:%M:%S')
+    try:
+        dtime = datetime.strptime(line[0][:19], '%d.%m.%Y %H:%M:%S')
+    except ValueError:
+        dtime = datetime.strptime('00.00.0000 00:00:00', '%d.%m.%Y %H:%M:%S')
     device_info = ' '.join(info for info in device_info)
     return data, dtime, device_info
 
