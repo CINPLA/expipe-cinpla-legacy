@@ -114,7 +114,8 @@ def attach_to_cli(cli):
             params.update({'location': brain_area})
             action_tools.generate_templates(action, 'opto_' + aq_sys,
                                overwrite, git_note=None)
-            opto_tools.populate_modules(action, params)
+            opto_tools.populate_modules(action, params,
+                                        no_intensity=no_intensity)
             laser_id = laser_id or PAR.USER_PARAMS['laser_device'].get('id')
             laser_name = PAR.USER_PARAMS['laser_device'].get('name')
             assert laser_id is not None
