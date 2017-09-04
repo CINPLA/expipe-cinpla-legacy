@@ -85,8 +85,8 @@ def populate_modules(action, params, no_intensity=False):
         laser_dict['intensity'] = pq.UncertainQuantity(avg, uncertainty=std)
         timestring = datetime.strftime(params['laser_dtime'],
                                        expipe.io.core.datetime_format)
-        laser_dict['intensity_date_time']['value'] = timestring
-        laser_dict['intensity_info']['value'] = params['laser_info']
+        laser_dict['intensity_date_time'] = timestring
+        laser_dict['intensity_info'] = params['laser_info']
         action.require_module(name=name, contents=laser_dict, overwrite=True)
 
     name = [n for n in action.modules.keys()
