@@ -130,7 +130,7 @@ def generate_clusters(exdir_path, axona_file):
                 nums.attrs["num_samples"] = len(cut.indices)
 
 
-def generate_units(exdir_path, axona_file):
+def generate_units(exdir_path, axona_file, cluster_group=None, set_noise=False):
     channel_groups = make_channel_groups(exdir_path, axona_file)
     for channel_group_segment in channel_groups.values():
         channel_group = channel_group_segment['channel_group']
@@ -138,22 +138,33 @@ def generate_units(exdir_path, axona_file):
         spike_train = axona_channel_group.spike_train
         start_time = channel_group_segment['start_time']
         stop_time = channel_group_segment['stop_time']
-
+        cluster_group = cluster_group or {}
         for cut in axona_file.cuts:
             if(axona_channel_group.channel_group_id == cut.channel_group_id):
                 unit_times = channel_group.require_group("UnitTimes")
                 unit_times.attrs["start_time"] = start_time
                 unit_times.attrs["stop_time"] = stop_time
-
+                cluster_group_units = cluster_group.get(cut.channel_group_id) or {}
                 unit_ids = [i for i in np.unique(cut.indices) if i > 0]
                 unit_ids = np.array(unit_ids)
+                if cluster_group_units:
+                    if not all(key in unit_ids - 1 # -1 for python convention
+                               for key in cluster_group_units):
+                        raise ValueError('cluster_group must reffer to existing cuts.')
+                    if set_noise:
+                        for cluster_id in unit_ids - 1: # -1 for python convention
+                            if not cluster_id in cluster_group_units:
+                                cluster_group_units[cluster_id] = 'noise'
                 for index in unit_ids:
                     unit = unit_times.require_group("{}".format(index - 1))  # -1 for python convention
                     indices = np.where(cut.indices == index)[0]
                     times = spike_train.times[indices]
                     unit.require_dataset("times", data=times)
                     unit.attrs['num_samples'] = len(times)
-                    unit.attrs["cluster_group"] = "Good"
+                    sorting = cluster_group_units.get(int(index - 1)) # -1 for python convention
+                    if sorting:
+                        assert sorting.lower() in ['noise', 'good', 'unsorted']
+                    unit.attrs["cluster_group"] = sorting or "Good"
                     unit.attrs["cluster_id"] = int(index - 1)  # -1 for python convention
                     # TODO: Add unit_description (e.g. cell type) and source as in NWB
                     unit.attrs["source"] = None

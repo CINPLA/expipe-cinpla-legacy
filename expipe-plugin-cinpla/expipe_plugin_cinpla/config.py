@@ -19,6 +19,23 @@ def deep_update(d, other):
             d[k] = copy.deepcopy(v)
 
 
+def validate_cluster_group(ctx, param, cluster_group):
+    try:
+        tmp = []
+        for cl in cluster_group:
+            group, cluster, sorting = cl.split(' ', 3)
+            tmp.append((int(group), int(cluster), sorting))
+        out = {cl[0]: dict() for cl in tmp}
+        for cl in tmp:
+            out[cl[0]].update({cl[1]: cl[2]})
+        return out
+    except ValueError:
+        raise click.BadParameter(
+            'cluster-group needs to be contained in "" and ' +
+            'separated with white space i.e ' +
+            '<channel_group cluster_id good|noise|unsorted> (ommit <>).')
+
+
 def validate_depth(ctx, param, depth):
     try:
         out = []

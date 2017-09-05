@@ -16,6 +16,13 @@ def attach_to_cli(cli):
                   help=('The depth given as <key num depth unit> e.g. ' +
                         '<mecl 0 10 um> (omit <>).'),
                   )
+    @click.option('--cluster-group',
+                  multiple=True,
+                  default=None,
+                  callback=config.validate_cluster_group,
+                  help=('The depth given as <key num depth unit> e.g. ' +
+                        '<channel_group cluster_id good|noise|unsorted> (omit <>).'),
+                  )
     @click.option('-l', '--location',
                   type=click.STRING,
                   callback=config.optional_choice,
@@ -71,6 +78,10 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='Do not load ".cut" files',
                   )
+    @click.option('--set-noise',
+                  is_flag=True,
+                  help='All units not defined in cluster-group are noise.',
+                  )
     @click.option('-y', '--yes',
                   is_flag=True,
                   help='Yes to depth registering query.',
@@ -78,11 +89,11 @@ def attach_to_cli(cli):
     def generate_axona_action(action_id, axona_filename, depth, user,
                               no_local, overwrite, no_files, no_modules,
                               subject_id, location, message, tag,
-                              get_inp, yes, hard, no_cut):
+                              get_inp, yes, hard, no_cut, cluster_group,
+                              set_noise):
         if not axona_filename.endswith('.set'):
-            print("Sorry, we need an Axona .set file not " +
+            raise ValueError("Sorry, we need an Axona .set file not " +
                   "'{}'.".format(axona_filename))
-            return
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         subject_id = subject_id or axona_filename.split(os.sep)[-2]
         axona_file = pyxona.File(axona_filename)
@@ -156,7 +167,9 @@ def attach_to_cli(cli):
             axona.generate_analog_signals(exdir_path, axona_file)
             axona.generate_spike_trains(exdir_path, axona_file)
             if not no_cut:
-                axona.generate_units(exdir_path, axona_file)
+                axona.generate_units(exdir_path, axona_file,
+                                     cluster_group=cluster_group,
+                                     set_noise=set_noise)
                 axona.generate_clusters(exdir_path, axona_file)
             if get_inp:
                 axona.generate_inp(exdir_path, axona_file)

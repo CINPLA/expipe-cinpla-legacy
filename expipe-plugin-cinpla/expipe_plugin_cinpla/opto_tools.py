@@ -145,7 +145,7 @@ def extract_laser_pulse(acquisition_directory, no_intensity=False):
     if not no_intensity:
         intensity, dtime, device_info = read_laser_intensity(pm100path)
         par['laser_intensity'] = intensity
-        par['laser_dtime'] = dtime
+        par['laser_dtime'] = dtime or ''
         par['laser_info'] = device_info
         par['laser_url'] = pm100path
     return par
@@ -183,20 +183,20 @@ def read_laser_intensity(fname):
     data = []
     units = []
     device_info = []
+    dtime = None
     with open(fname) as tsv:
         for idx, line in enumerate(csv.reader(tsv, dialect="excel-tab")):
             if len(line) > 2:
                 if is_num(line[1].replace(',', '.')) and line[2] in pq_symbols:
                     units.append(line[2])
                     data.append(float(line[1].replace(',', '.')))
+                    dtime = line[0][:19]
             else:
                 device_info.extend(line)
     assert np.array_equal(np.array(units), np.array(units))
     data = pq.Quantity(data, units[0])
-    try:
-        dtime = datetime.strptime(line[0][:19], '%d.%m.%Y %H:%M:%S')
-    except ValueError:
-        dtime = datetime.strptime('00.00.0000 00:00:00', '%d.%m.%Y %H:%M:%S')
+    if dtime:
+        dtime = datetime.strptime(dtime, '%d.%m.%Y %H:%M:%S')
     device_info = ' '.join(info for info in device_info)
     return data, dtime, device_info
 
