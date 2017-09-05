@@ -16,7 +16,7 @@ def attach_to_cli(cli):
                   help=('The depth given as <key num depth unit> e.g. ' +
                         '<mecl 0 10 um> (omit <>).'),
                   )
-    @click.option('--cluster-group',
+    @click.option('-c', '--cluster-group',
                   multiple=True,
                   callback=config.validate_cluster_group,
                   help=('The depth given as <key num depth unit> e.g. ' +
