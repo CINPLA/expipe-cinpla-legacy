@@ -71,6 +71,10 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='Overwrite.',
                   )
+    @click.option('--hard',
+                  is_flag=True,
+                  help='Overwrite hard - delete analysis action.',
+                  )
     @click.option('--skip',
                   is_flag=True,
                   help='Skip previously generated files.',
@@ -78,7 +82,13 @@ def attach_to_cli(cli):
     def analysis(**kwargs):
         if len(kwargs['channel_group']) == 0: kwargs['channel_group'] = None
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
-        action = project.require_action(kwargs['action_id'] + '-analysis')
+        action_id = kwargs['action_id'] + '-analysis'
+        action = project.require_action(action_id)
+        if kwargs['overwrite'] and kwargs['hard']:
+            try:
+                project.delete_action(action_id)
+            except NameError as e:
+                print(str(e))
         rec_action = project.require_action(kwargs['action_id'])
         action.type = 'Action-analysis'
         user = kwargs['user'] or PAR.USER_PARAMS['user_name']
