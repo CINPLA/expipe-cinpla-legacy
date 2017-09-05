@@ -18,10 +18,9 @@ def attach_to_cli(cli):
                   )
     @click.option('--cluster-group',
                   multiple=True,
-                  default=None,
                   callback=config.validate_cluster_group,
                   help=('The depth given as <key num depth unit> e.g. ' +
-                        '<channel_group cluster_id good|noise|unsorted> (omit <>).'),
+                        '<"channel_group cluster_id good|noise|unsorted"> (omit <>).'),
                   )
     @click.option('-l', '--location',
                   type=click.STRING,
@@ -94,6 +93,8 @@ def attach_to_cli(cli):
         if not axona_filename.endswith('.set'):
             raise ValueError("Sorry, we need an Axona .set file not " +
                   "'{}'.".format(axona_filename))
+        if len(cluster_group) == 0:
+            cluster_group = None # TODO set proper default via callback
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         subject_id = subject_id or axona_filename.split(os.sep)[-2]
         axona_file = pyxona.File(axona_filename)
