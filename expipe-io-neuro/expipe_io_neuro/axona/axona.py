@@ -164,7 +164,7 @@ def generate_units(exdir_path, axona_file, cluster_group=None, set_noise=False):
                     sorting = cluster_group_units.get(int(index - 1)) # -1 for python convention
                     if sorting:
                         assert sorting.lower() in ['noise', 'good', 'unsorted']
-                    unit.attrs["cluster_group"] = sorting or "Good"
+                    unit.attrs["cluster_group"] = sorting or "good"
                     unit.attrs["cluster_id"] = int(index - 1)  # -1 for python convention
                     # TODO: Add unit_description (e.g. cell type) and source as in NWB
                     unit.attrs["source"] = None
