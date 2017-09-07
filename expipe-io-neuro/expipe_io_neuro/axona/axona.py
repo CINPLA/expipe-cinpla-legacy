@@ -150,7 +150,14 @@ def generate_units(exdir_path, axona_file, cluster_group=None, set_noise=False):
                 if cluster_group_units:
                     if not all(key in unit_ids - 1 # -1 for python convention
                                for key in cluster_group_units):
-                        raise ValueError('cluster_group must reffer to existing cuts.')
+                        raise ValueError(
+                            'cluster_group must reffer to existing cuts.' +
+                            '{} did not match {} in channel_group {}. '.format(
+                                [key for key in cluster_group_units
+                                 if key not in unit_ids - 1],
+                                 unit_ids - 1,
+                                 cut.channel_group_id) +
+                            'From "' + exdir_path + '".')
                     if set_noise:
                         for cluster_id in unit_ids - 1: # -1 for python convention
                             if not cluster_id in cluster_group_units:
