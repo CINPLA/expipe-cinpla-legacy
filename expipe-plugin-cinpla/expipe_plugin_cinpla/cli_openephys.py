@@ -81,7 +81,7 @@ def attach_to_cli(cli):
                   )
     @click.option('--no-preprocess',
                   is_flag=True,
-                  help='Preporcess data.',
+                  help='Preprocess data.',
                   )
     @click.option('--shutter-channel',
                   type=click.INT,
@@ -126,7 +126,7 @@ def attach_to_cli(cli):
                 raise IOError('Choose either klusta-filter or pre-filter.')
             anas = openephys_file.analog_signals[0].signal
             fs = openephys_file.sample_rate.magnitude
-            nchan = anas.shape[0]
+            #nchan = anas.shape[0]
             sig_tools.create_klusta_prm(openephys_base, prb_path, nchan,
                               fs=fs, klusta_filter=klusta_filter,
                               filter_low=filter_low,
@@ -191,7 +191,7 @@ def attach_to_cli(cli):
                     warnings.warn(
                         'No TTL events was found on IO channel {}'.format(shutter_channel)
                     )
-            openephys.generate_tracking(exdir_path, openephys_file)
+            #openephys.generate_tracking(exdir_path, openephys_file)
             openephys.generate_lfp(exdir_path, openephys_file)
 
     @cli.command('register',
@@ -329,7 +329,7 @@ def attach_to_cli(cli):
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
-        location = location or PAR.USER_PARAMS('location')
+        location = location or PAR.USER_PARAMS['location']
         location = location or []
         if len(location) == 0:
             raise ValueError('Please add location')
