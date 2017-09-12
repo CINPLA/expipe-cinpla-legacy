@@ -112,7 +112,8 @@ class Analyser:
     def generate_output_dict(self):
         analysis_output = {}
         exdir_idx = self.exdir_path.split('/').index('main.exdir')
-        action_id = self.exdir_path.split('/')[exdir_idx - 2]
+        project_id = self.exdir_path.split('/')[exdir_idx - 2]
+        action_id = self.exdir_path.split('/')[exdir_idx - 1]
         for chx in self.blk.channel_indexes:
             contents = {}
             group_id = chx.annotations['group_id']
@@ -126,7 +127,7 @@ class Analyser:
                 attrs = copy.deepcopy(self.unit_info)
                 attrs.update(sptr.annotations)
 
-                attrs['exdir_path'] = '/'.join([action_id, 'main.exdir',
+                attrs['exdir_path'] = '/'.join([project_id, action_id, 'main.exdir',
                                                 attrs['exdir_path'].lstrip('/')])
                 if unit.name is None:
                     unit.name = 'cluster_{}'.format(unit.annotations['cluster_id'])
