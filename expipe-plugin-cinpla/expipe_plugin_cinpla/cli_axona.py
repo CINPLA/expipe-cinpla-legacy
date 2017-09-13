@@ -131,6 +131,7 @@ def attach_to_cli(cli):
             raise ValueError('Please add location.')
         print('Registering location ' + location)
         action.location = location
+        action.type = 'Recording'
         action.messages = [{'message': m,
                             'user': user,
                             'datetime': datetime.now()}
