@@ -88,12 +88,16 @@ def attach_to_cli(cli):
                   default=0,
                   help='TTL channel for shutter events to sync tracking',
                   )
+    @click.option('--no-tracking',
+                  is_flag=True,
+                  help='Disable registering of tracking data',
+                  )
     def process_openephys(action_id, prb_path, pre_filter,
                           klusta_filter, filter_low,
                           filter_high, nchan, common_ref, ground,
                           split_probe, no_local, openephys_path,
                           exdir_path, no_klusta, no_convert, shutter_channel,
-                          no_preprocess):
+                          no_preprocess, no_tracking):
         settings = config.load_settings()['current']
         if not no_klusta:
             import klusta
@@ -126,7 +130,7 @@ def attach_to_cli(cli):
                 raise IOError('Choose either klusta-filter or pre-filter.')
             anas = openephys_file.analog_signals[0].signal
             fs = openephys_file.sample_rate.magnitude
-            #nchan = anas.shape[0]
+            nchan = anas.shape[0]
             sig_tools.create_klusta_prm(openephys_base, prb_path, nchan,
                               fs=fs, klusta_filter=klusta_filter,
                               filter_low=filter_low,
@@ -191,7 +195,8 @@ def attach_to_cli(cli):
                     warnings.warn(
                         'No TTL events was found on IO channel {}'.format(shutter_channel)
                     )
-            #openephys.generate_tracking(exdir_path, openephys_file)
+            if not no_tracking:
+                openephys.generate_tracking(exdir_path, openephys_file)
             openephys.generate_lfp(exdir_path, openephys_file)
 
     @cli.command('register',
