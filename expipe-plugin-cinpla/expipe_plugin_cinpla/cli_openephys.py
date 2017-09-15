@@ -196,8 +196,8 @@ def attach_to_cli(cli):
                         'No TTL events was found on IO channel {}'.format(shutter_channel)
                     )
             openephys.generate_lfp(exdir_path, openephys_file)
-        if not no_tracking and no_convert:
-            warnings.warn('option no-tracking = {} has no effect as option no_convert = {}'.format(
+        if no_tracking and no_convert:
+            warnings.warn('Option no-tracking = {} has no effect as option no_convert = {}'.format(
                 no_tracking, no_convert)) 
         elif not no_tracking and not no_convert:
             openephys.generate_tracking(exdir_path, openephys_file)
