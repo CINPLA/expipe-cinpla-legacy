@@ -195,9 +195,14 @@ def attach_to_cli(cli):
                     warnings.warn(
                         'No TTL events was found on IO channel {}'.format(shutter_channel)
                     )
-            if not no_tracking:
-                openephys.generate_tracking(exdir_path, openephys_file)
             openephys.generate_lfp(exdir_path, openephys_file)
+        if not no_tracking and no_convert:
+            warnings.warn('option no-tracking = {} has no effect as option no_convert = {}'.format(
+                no_tracking, no_convert)) 
+        elif not no_tracking and not no_convert:
+            openephys.generate_tracking(exdir_path, openephys_file)
+        else:
+            pass
 
     @cli.command('register',
                  short_help='Generate an open-ephys recording-action to database.')
