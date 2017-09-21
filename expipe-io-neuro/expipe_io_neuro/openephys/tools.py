@@ -46,8 +46,8 @@ def _start_from_zero_time(time, *args):
     if any(np.diff([len(x) for x in args])) or len(time) != len(args[0]):
         raise ValueError('All arguments must be of equal length')
     for arg in args:
-        out.append(arg[start:])
-    return time[start:], out
+        out.append(arg[int(start):])
+    return time[int(start):], out
 
 
 def _zeros_to_nan(*args):
