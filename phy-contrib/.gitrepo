@@ -6,6 +6,6 @@
 [subrepo]
 	remote = git@github.com:CINPLA/phy-contrib.git
 	branch = NeoGUI
-	commit = 76171c2748732786ed25131f33c29d72c19127ef
-	parent = cfcc8d8ebc7a0bfefc24cd1f8f431fb4d6d18f78
+	commit = 68f984f286c54e5b0d4e2b887f8c7cccc683d642
+	parent = fc78ce449099b6655d5f67ae774e7b96b420580c
 	cmdver = 0.3.1
