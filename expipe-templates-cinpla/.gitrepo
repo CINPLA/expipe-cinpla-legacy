@@ -6,6 +6,6 @@
 [subrepo]
 	remote = https://github.com/CINPLA/expipe-templates-cinpla.git
 	branch = master
-	commit = c2bb72d6430701fc354f0d56f2dbd2d0542ce085
-	parent = f03b165466c071c068394e9aea6c66679f9712b9
+	commit = 3364b62c78b2aee1f1af3c691a7db0b40d82c38b
+	parent = 0b8b0dfb3e2fb9ada2b4dd880b2ec2ac524f090e
 	cmdver = 0.3.1
