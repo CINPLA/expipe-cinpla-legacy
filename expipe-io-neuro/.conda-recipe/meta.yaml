@@ -4,7 +4,9 @@ package:
 source:
     git_url: ..
 build:
-    script: python setup.py install
+    script:
+      - pip install git+https://github.com/python-quantities/python-quantities.git
+      - python setup.py install
 requirements:
     build:
         - future
@@ -18,11 +20,9 @@ requirements:
         - pip
         - numpy
         - scipy
-        - quantities
         - exdir
         - pyxona
         - six
-        # - expipe
 test:
   imports:
       - expipe_io_neuro
