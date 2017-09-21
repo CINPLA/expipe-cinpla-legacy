@@ -390,7 +390,10 @@ def attach_to_cli(cli):
                 openephys.generate_spike_trains(exdir_path, openephys_file,
                                                 source=spikes_source)
             if not no_move:
-                shutil.rmtree(openephys_path)
+                if action_tools.query_yes_no(
+                    'Delete raw data in {}? (yes/no)'.format(openephys_path),
+                    default='no'):
+                    shutil.rmtree(openephys_path)
 
     @cli.command('convert-klusta-oe',
                  short_help='Convert klusta spikes to exdir.')
