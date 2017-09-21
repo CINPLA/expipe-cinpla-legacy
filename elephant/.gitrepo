@@ -6,6 +6,6 @@
 [subrepo]
 	remote = https://github.com/NeuralEnsemble/elephant.git
 	branch = master
-	commit = 93169704d6bde21f4fdc7a27079c90503a7b65a7
-	parent = 3e7f211fad5887cb5072ece68bdec78a62bdbce3
+	commit = c79bc0d4ad6856042e58f02dcbe3ab16100765b8
+	parent = f40d573da07ab34fea3aa4b3c16f6b7c563ebb43
 	cmdver = 0.3.1
