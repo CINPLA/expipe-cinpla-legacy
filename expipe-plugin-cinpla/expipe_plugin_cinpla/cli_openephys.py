@@ -71,10 +71,18 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='Not run klusta on dataset.',
                   )
-    @click.option('--no-convert',
+    @click.option('--no-spikes',
                   is_flag=True,
-                  help='Not convert to exdir.',
+                  help='Disable convertion of spikes to exdir.',
                   )
+    @click.option('--no-lfp',
+                  is_flag=True,
+                  help='Disable convertion of LFP to exdir.',
+                  )
+    @click.option('--no-tracking',
+                  is_flag=True,
+                  help='Disable registering of tracking data to exdir.',
+                  )    
     @click.option('--no-local',
                   is_flag=True,
                   help='Store temporary on local drive.',
@@ -88,16 +96,12 @@ def attach_to_cli(cli):
                   default=0,
                   help='TTL channel for shutter events to sync tracking',
                   )
-    @click.option('--no-tracking',
-                  is_flag=True,
-                  help='Disable registering of tracking data',
-                  )
     def process_openephys(action_id, prb_path, pre_filter,
                           klusta_filter, filter_low,
                           filter_high, nchan, common_ref, ground,
                           split_probe, no_local, openephys_path,
-                          exdir_path, no_klusta, no_convert, shutter_channel,
-                          no_preprocess, no_tracking):
+                          exdir_path, no_klusta, shutter_channel,
+                          no_preprocess, no_spikes, no_lfp, no_tracking):
         settings = config.load_settings()['current']
         if not no_klusta:
             import klusta
@@ -181,28 +185,27 @@ def attach_to_cli(cli):
                 subprocess.check_output(['klusta', klusta_prm, '--overwrite'])
             except subprocess.CalledProcessError as e:
                 raise Exception(e.output)
-        if not no_convert:
-            print('Converting to exdir')
+        if not no_spikes:
+            print('Converting from ".kwik" to ".exdir"')
             openephys.generate_spike_trains(exdir_path, openephys_file,
                                             source='klusta')
-            print('Finished with spiketrains, you can now start manual ' +
-                  'clustering while tracking and LFP is processed')
+            print('Processed spiketrains, manual clustering possible')
+        if not no_lfp:
+            print('Filtering and downsampling raw data to LFP.')
+            openephys.generate_lfp(exdir_path, openephys_file)
+            print('Finished processing LFPs.')
+        if not no_tracking:
+            print('Converting tracking from OpenEphys raw data to ".exdir"')
+            openephys.generate_tracking(exdir_path, openephys_file)
             if shutter_channel is not None:
-                ttl_times = openephys_file.digital_in_signals[0].times[shutter_channel]
+                ttl_times = openephys_file.digital_in_signals[0].times[
+                    shutter_channel]
                 if len(ttl_times) != 0:
                     openephys_file.sync_tracking_from_events(ttl_times)
                 else:
-                    warnings.warn(
-                        'No TTL events was found on IO channel {}'.format(shutter_channel)
-                    )
-            openephys.generate_lfp(exdir_path, openephys_file)
-        if no_tracking and no_convert:
-            warnings.warn('Option no-tracking = {} has no effect as option no_convert = {}'.format(
-                no_tracking, no_convert)) 
-        elif not no_tracking and not no_convert:
-            openephys.generate_tracking(exdir_path, openephys_file)
-        else:
-            pass
+                    warnings.warn('No TTL events found on IO channel {}'.format(
+                        shutter_channel))
+
 
     @cli.command('register',
                  short_help='Generate an open-ephys recording-action to database.')

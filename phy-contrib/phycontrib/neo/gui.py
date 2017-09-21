@@ -77,8 +77,8 @@ def _get_distance_max(pos):
 class NeoController(EventEmitter):
     gui_name = 'NeoGUI'
 
-    n_spikes_waveforms = 100
-    batch_size_waveforms = 100
+    n_spikes_waveforms = 200
+    batch_size_waveforms = 200
 
     n_spikes_features = 10000
     n_spikes_amplitudes = 10000
@@ -223,6 +223,7 @@ class NeoController(EventEmitter):
         return Bunch(data=data,
                      channel_ids=channel_ids,
                      channel_positions=pos[channel_ids],
+                     alpha=0.25
                      )
 
     def _get_mean_waveforms(self, cluster_id):
