@@ -109,7 +109,7 @@ class NeoController(EventEmitter):
 
     def _set_cache(self):
         memcached = ('get_best_channels',
-                     'get_probe_depth',
+                     #'get_probe_depth',
                      '_get_mean_waveforms',
                      )
         cached = ('_get_waveforms',
