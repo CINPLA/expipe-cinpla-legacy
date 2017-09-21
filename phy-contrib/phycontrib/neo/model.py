@@ -309,7 +309,8 @@ class NeoModel(object):
                 self.spike_times)
             )
         # HACK TODO memory mapped data cannot be overridden therefore convert to array issue #29 in exdir
-        return np.array(feat['data'].data), np.array(feat['masks'].data)
+        # return np.array(feat['data'].data), np.array(feat['masks'].data)
+        return feat['data'].data, feat['masks'].data
 
     def _find_exdir_channel_group(self, exdir_group):
         # TODO assumes that electrode_group_id is in attributes of an electrode group
