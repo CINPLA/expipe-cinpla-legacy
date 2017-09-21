@@ -431,9 +431,12 @@ def attach_to_cli(cli):
         not_reg_keys = []
         for key, val in subject.items():
             if isinstance(val, dict):
-                if len(val.get('value')) == 0:
+                if val.get('value') is None:
                     not_reg_keys.append(key)
-        warnings.warn('No value registered for {}'.format(not_reg_keys))
+                elif len(val.get('value')) == 0:
+                    not_reg_keys.append(key)
+        if len(not_reg_keys) > 0:
+            warnings.warn('No value registered for {}'.format(not_reg_keys))
         action.require_module(name=subject_template_name, contents=subject,
                               overwrite=True)
 

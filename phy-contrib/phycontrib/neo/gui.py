@@ -77,8 +77,8 @@ def _get_distance_max(pos):
 class NeoController(EventEmitter):
     gui_name = 'NeoGUI'
 
-    n_spikes_waveforms = 100
-    batch_size_waveforms = 100
+    n_spikes_waveforms = 200
+    batch_size_waveforms = 200
 
     n_spikes_features = 10000
     n_spikes_amplitudes = 10000
@@ -109,7 +109,7 @@ class NeoController(EventEmitter):
 
     def _set_cache(self):
         memcached = ('get_best_channels',
-                     'get_probe_depth',
+                     #'get_probe_depth',
                      '_get_mean_waveforms',
                      )
         cached = ('_get_waveforms',
@@ -173,37 +173,31 @@ class NeoController(EventEmitter):
 
     def get_best_channel(self, cluster_id):
         channel_ids = self.get_best_channels(cluster_id)
-        amps = self.model.amplitudes.mean(axis=0)
-        channel_id = np.argmax(amps)
+        amps = self._get_mean_waveforms(cluster_id).data[0].min(axis=0)
+        channel_id = channel_ids[np.argmin(amps)]
         return channel_id
 
     def get_best_channels(self, cluster_ids):  # TODO
-        # mm = self._get_mean_waveforms(cluster_id)
-        # channel_ids = np.argsort(mm)[::-1]
-        # channel_ids = channel_ids[mm[channel_ids] > .1]
-        # return channel_ids
         return np.arange(self.model.n_chans)
 
     def get_cluster_position(self, cluster_id):
-        channel_id = self.get_best_channels(cluster_id)[0]
+        channel_id = self.get_best_channel(cluster_id)
         return self.model.channel_positions[channel_id]
 
     def get_probe_depth(self, cluster_id):
-        return self.get_cluster_position(cluster_id)[1]
+        channel_id = self.get_best_channel(cluster_id)
+        return self.model.channel_positions[channel_id][1]
 
     def similarity(self, cluster_id):
         """Return the list of similar clusters to a given cluster."""
 
         pos_i = self.get_cluster_position(cluster_id)
-        assert len(pos_i) == 2
-
+        
         def _sim_ij(cj):
             """Distance between channel position of clusters i and j."""
             pos_j = self.get_cluster_position(cj)
-            assert len(pos_j) == 2
             d = np.sqrt(np.sum((pos_j - pos_i) ** 2))
             return self.distance_max - d
-
         out = [(cj, _sim_ij(cj))
                for cj in self.supervisor.clustering.cluster_ids]
         return sorted(out, key=itemgetter(1), reverse=True)
@@ -223,6 +217,7 @@ class NeoController(EventEmitter):
         return Bunch(data=data,
                      channel_ids=channel_ids,
                      channel_positions=pos[channel_ids],
+                     alpha=0.25
                      )
 
     def _get_mean_waveforms(self, cluster_id):
