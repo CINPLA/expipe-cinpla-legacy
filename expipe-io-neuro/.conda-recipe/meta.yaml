@@ -5,7 +5,7 @@ source:
     git_url: ..
 build:
     script:
-      - pip install git+https://github.com/python-quantities/python-quantities.git
+      - pip install quantities
       - python setup.py install
 requirements:
     build:
