@@ -75,15 +75,14 @@ def test_default_dtype(setup_teardown_file):
     grp = f.create_group("test")
 
     dset = grp.create_dataset('foo', (63,))
-    assert dset.dtype == np.dtype('float64')
+    assert dset.dtype == np.dtype('float32')
 
-# def test_missing_shape(setup_teardown_file):
-#     """Missing shape raises TypeError."""
-#     f = setup_teardown_file[3]
+def test_missing_shape(setup_teardown_file):
+    """Missing shape raises TypeError."""
+    f = setup_teardown_file[3]
 
-#     with pytest.raises(TypeError):
-#         f.create_dataset('foo')
-
+    with pytest.raises(TypeError):
+        f.create_dataset('foo')
 
 def test_long_double(setup_teardown_file):
     """Confirm that the default dtype is float """
@@ -152,18 +151,7 @@ def test_reshape(setup_teardown_file):
     assert dset.shape == (10, 3)
     assert np.array_equal(dset.data, data.reshape((10, 3)))
 
-
-def test_empty_create(setup_teardown_file):
-    f = setup_teardown_file[3]
-    grp = f.create_group("test")
-
-    dset = grp.create_dataset('foo')
-    assert np.array_equal(dset.data, np.array([]))
-
-
-
 # Feature: Datasets can be created only if they don't exist in the file
-
 def test_create(setup_teardown_file):
     """Create new dataset with no conflicts."""
     f = setup_teardown_file[3]
@@ -176,8 +164,8 @@ def test_create(setup_teardown_file):
     dset2 = grp.require_dataset('bar', data=(3, 10))
     dset3 = grp.require_dataset('bar', data=(4, 11))
     assert isinstance(dset2, Dataset)
-    assert np.all(dset2[:] == (4, 11))
-    assert np.all(dset3[:] == (4, 11))
+    assert np.all(dset2[:] == (3, 10))
+    assert np.all(dset3[:] == (3, 10))
     assert dset2 == dset3
 
 def test_create_existing(setup_teardown_file):
@@ -199,7 +187,7 @@ def test_require_quantities(setup_teardown_file):
     testdata = np.array([1, 2, 3]) * pq.J
     dset = grp.create_dataset('data', data=testdata)
 
-    dset2 = grp.require_dataset('data')
+    dset2 = grp.require_dataset('data', data=testdata)
 
     assert dset == dset2
     assert np.all(dset[:] == testdata)
@@ -229,20 +217,19 @@ def test_dtype_conflict(setup_teardown_file):
     f = setup_teardown_file[3]
     grp = f.create_group("test")
 
-    dset = grp.create_dataset('foo', (10, 3), 'float32')
+    dset = grp.create_dataset('foo', (10, 3), 'f')
     with pytest.raises(TypeError):
-        grp.require_dataset('foo', (10, 3), 'int8')
+        grp.require_dataset('foo', (10, 3), 'S10')
 
-# TODO create this test fi we use convertable dtype
-# def test_dtype_close(setup_teardown_file):
-#     """require_dataset with convertible type succeeds (non-strict mode)-"""
-#     f = setup_teardown_file[3]
-#     grp = f.create_group("test")
+def test_dtype_close(setup_teardown_file):
+    """require_dataset with convertible type succeeds (non-strict mode)-"""
+    f = setup_teardown_file[3]
+    grp = f.create_group("test")
 
-#     dset = grp.create_dataset('foo', (10, 3), 'i4')
-#     dset2 = grp.require_dataset('foo', (10, 3), 'i2', exact=False)
-#     assert dset == dset2
-#     assert dset2.dtype == np.dtype('i4')
+    dset = grp.create_dataset('foo', (10, 3), 'i4')
+    dset2 = grp.require_dataset('foo', (10, 3), 'i2', exact=False)
+    assert dset == dset2
+    assert dset2.dtype == np.dtype('i4')
 
 
 
@@ -422,8 +409,7 @@ def test_set_data(setup_teardown_file):
     assert np.all(outdata == testdata)
     assert outdata.dtype == testdata.dtype
 
-    with pytest.raises(RuntimeError):
-        grp['testdata'] = testdata
+    grp['testdata'] = testdata
 
 
 
@@ -673,3 +659,9 @@ def test_slice_of_length_zero(setup_teardown_file):
         out = dset[1:1]
         assert isinstance(out, np.ndarray)
         assert out.shape == (0,)+shape[1:]
+
+def test_modify_all(setup_teardown_file):
+    f = setup_teardown_file[3]
+    dset = f.create_dataset("test", data=np.arange(10))
+    dset.data = np.ones(4)
+    assert np.all(dset.data == np.ones(4))
