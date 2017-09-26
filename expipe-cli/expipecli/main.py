@@ -58,7 +58,7 @@ class Default(IPlugin):
         def configure(data_path, email, password, url_prefix, api_key):
             """Create a configuration file."""
             import expipe
-            expie.configure(data_path, email, password, url_prefix, api_key)
+            expipe.configure(data_path, email, password, url_prefix, api_key)
 
 
 # ------------------------------------------------------------------------------
