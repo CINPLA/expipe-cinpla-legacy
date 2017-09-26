@@ -1,4 +1,6 @@
 name: expipe
+channels:
+  - defaults
 dependencies:
   - numpy
   - matplotlib
