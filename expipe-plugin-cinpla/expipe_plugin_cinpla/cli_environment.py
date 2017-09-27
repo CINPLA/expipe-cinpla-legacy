@@ -82,7 +82,7 @@ def attach_to_cli(cli):
             raise FileExistsError('No settings file found.')
         if project_id in current_settings:
             delete = query_yes_no('Are you sure you want to completely remove' +
-                                  ' ' + current_settings[project_id])
+                                  ' ' + project_id)
             if delete:
                 del(current_settings[project_id])
             if project_id == current_settings['current']['project_id']:
