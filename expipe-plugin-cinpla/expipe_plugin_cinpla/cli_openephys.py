@@ -32,11 +32,6 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='Path to desired exdir directory, if none it is deduced from action id.',
                   )
-    @click.option('--nchan',
-                  type=click.INT,
-                  default=32,
-                  help='Number of channels. Default = 32',
-                  )
     @click.option('--klusta-filter',
                   is_flag=True,
                   help='Let klusta filter or not. Default = False',
@@ -82,7 +77,7 @@ def attach_to_cli(cli):
     @click.option('--no-tracking',
                   is_flag=True,
                   help='Disable registering of tracking data to exdir.',
-                  )    
+                  )
     @click.option('--no-local',
                   is_flag=True,
                   help='Store temporary on local drive.',
@@ -98,7 +93,7 @@ def attach_to_cli(cli):
                   )
     def process_openephys(action_id, prb_path, pre_filter,
                           klusta_filter, filter_low,
-                          filter_high, nchan, common_ref, ground,
+                          filter_high, common_ref, ground,
                           split_probe, no_local, openephys_path,
                           exdir_path, no_klusta, shutter_channel,
                           no_preprocess, no_spikes, no_lfp, no_tracking):
