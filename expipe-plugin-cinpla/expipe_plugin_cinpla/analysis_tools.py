@@ -311,6 +311,7 @@ class Analyser:
 
     def tfr(self):
         raw_dir = str(self._analysis.require_raw('time_frequency').directory)
+        logger = get_logger(os.path.join(raw_dir, 'exceptions.log'))
         os.makedirs(raw_dir, exist_ok=True)
         for chx in self.chxs:
             group_id = chx.annotations['group_id']
@@ -337,14 +338,13 @@ class Analyser:
                 try:
                     fig = time_frequency.plot_tfr(ana, epoch=epo_over, f0=3, flim=[0, 120],
                                    plot_ana=True)
+                    self.savefig(fpath, fig)
                 except Exception as e:
-                    with open(fpath + '.exception', 'w+') as f:
-                        print(str(e), file=f)
-                    continue
-                self.savefig(fpath, fig)
+                    logger.exception('tfr')
 
     def psd(self):
         raw_dir = str(self._analysis.require_raw('power_spectrum_density').directory)
+        logger = get_logger(os.path.join(raw_dir, 'exceptions.log'))
         os.makedirs(raw_dir, exist_ok=True)
         for chx in self.chxs:
             group_id = chx.annotations['group_id']
@@ -358,12 +358,12 @@ class Analyser:
                 fname = '{} channelproxy {}_psd'.format(chx.name, num).replace(" ", "_")
                 fpath = os.path.join(raw_dir, fname)
                 try:
-                    ax = time_frequency.plot_psd(ana, xlim=[0, 100], nperseg=2048)
+                    fig, ax = plt.subplots(1,1)
+                    time_frequency.plot_psd([ana], xlim=[0, 100], nperseg=2048,
+                                            ax=ax)
+                    self.savefig(fpath, fig)
                 except Exception as e:
-                    with open(fpath + '.exception', 'w+') as f:
-                        print(str(e), file=f)
-                    continue
-                self.savefig(fpath, fig)
+                    logger.exception('psd')
 
     def stimulation_statistics(self, ylim=[0, 30]):
         if self.epoch is None:
@@ -482,6 +482,7 @@ class Analyser:
                     if len(np.unique(sampling_rates)) > 1:
                         warnings.warn('Found multiple sampling rates, selecting minimum')
                     target_rate = min(sampling_rates)
+                    # only get anas from id list
                     anas = [ana for ana in self.seg.analogsignals
                             if ana.sampling_rate == target_rate and
                             ana.channel_index.annotations['group_id'] in id_list]
@@ -495,7 +496,6 @@ class Analyser:
                                 t_start=0 * pq.s
                             )
                         )
-                    # anas = downsample_250(anas)
                     ana_arr = np.array([np.reshape(ana.magnitude, len(ana))
                                         for ana in anas])
                     ana_arr = neo.AnalogSignal(signal=ana_arr.T * anas[0].units,
