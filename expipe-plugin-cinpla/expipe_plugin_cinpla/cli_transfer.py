@@ -157,15 +157,20 @@ def attach_to_cli(cli):
             if not no_trash and not move:
                 try:
                     from send2trash import send2trash
-                    send2trash(local_data)
-                    print('local data "' + local_data +
-                          '" sent to trash.')
+                    if action_tools.query_yes_no(
+                            'Thrash local data {}?'.format(local_data),
+                            default='no'):
+                        send2trash(local_data)
+                        print('local data "' + local_data +
+                              '" sent to trash.')
                 except Exception:
                     warnings.warn('Unable to send local data to trash')
             if move:
-                print('Deleting "' + local_data + '".')
-                shutil.rmtree(local_data)
-
+                if action_tools.query_yes_no(
+                        'Delete local data in {}? (yes/no)?'.format(local_data),
+                        default='no'):                                    
+                    print('Deleting "' + local_data + '".')
+                    shutil.rmtree(local_data)
         else:
             raise IOError('You must choose "to-local" or "from-local"')
             ssh.close()
