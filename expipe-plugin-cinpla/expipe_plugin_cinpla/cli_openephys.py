@@ -1,6 +1,8 @@
 from . import action_tools
 from .imports import *
 from . import config
+from datetime import timedelta
+
 
 
 def validate_depth(ctx, param, depth):
@@ -53,7 +55,7 @@ def attach_to_cli(cli):
     @click.option('--common-ref',
                   type=click.Choice(['car', 'cmr', 'none']),
                   default='cmr',
-                  help='Apply Common average/median referencing. Default is "car"')
+                  help='Apply Common average/median (car/cmr) exreferencing. Default is "cmr"')
     @click.option('--split-probe',
                   type=click.INT,
                   default=16,
@@ -359,7 +361,7 @@ def attach_to_cli(cli):
 
             for idx, m in enumerate(openephys_file.messages):
                 secs = float(m['time'].rescale('s').magnitude)
-                dtime = openephys_file.datetime + timedelta(seconds=secs)
+                dtime = openephys_file.datetime + timedelta(secs)
                 messages.append({'datetime': dtime,
                                  'message': m['message'],
                                  'user': user})
