@@ -52,6 +52,14 @@ def attach_to_cli(cli):
                   default=6000,
                   help='High cut off frequencey. Default is 6000 Hz',
                   )
+    @click.option('--filter-order',
+                  type=click.INT,
+                  default=3,
+                  help='Butterworth filter order N. Default is N=3. For acausal filters (filter type "filtfilt"), the effective filter order is N*2')
+    @click.option('--filter-function',
+                  type=click.Choice(['filtfilt', 'lfilter']),
+                  default='filtfilt',
+                  help='Filter function. The default "filtfilt" corresponds to a forward-backward filter operation, "lfilter" a forward filter. NOTE: does not affect filtering with klusta.')
     @click.option('--common-ref',
                   type=click.Choice(['car', 'cmr', 'none']),
                   default='cmr',
@@ -94,8 +102,9 @@ def attach_to_cli(cli):
                   help='TTL channel for shutter events to sync tracking',
                   )
     def process_openephys(action_id, prb_path, pre_filter,
-                          klusta_filter, filter_low,
-                          filter_high, common_ref, ground,
+                          klusta_filter, filter_low, filter_high,
+                          filter_order, filter_function,
+                          common_ref, ground,
                           split_probe, no_local, openephys_path,
                           exdir_path, no_klusta, shutter_channel,
                           no_preprocess, no_spikes, no_lfp, no_tracking):
@@ -135,10 +144,12 @@ def attach_to_cli(cli):
             sig_tools.create_klusta_prm(openephys_base, prb_path, nchan,
                               fs=fs, klusta_filter=klusta_filter,
                               filter_low=filter_low,
-                              filter_high=filter_high)
+                              filter_high=filter_high,
+                              filter_order=filter_order)
             if pre_filter:
                 anas = sig_tools.filter_analog_signals(anas, freq=[filter_low, filter_high],
-                                             fs=fs, filter_type='bandpass')
+                                             fs=fs, filter_type='bandpass',
+                                             order=filter_order, filter_function=filter_function)
             if len(ground) != 0:
                 ground = [int(g) for g in ground]
                 anas = sig_tools.ground_bad_channels(anas, ground)
