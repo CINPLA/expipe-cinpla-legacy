@@ -64,7 +64,8 @@ def attach_to_cli(cli):
                   help='Name of server as named in config.yaml. Default is "nird"',
                   )
     @click.option('--override-prompts',
-                  is_flag=False,
+                  is_flag=True,
+                  default=False,
                   help='disables yes/no prompts for automated removal of files after transfer. Default is False')
     def transfer(action_id, to_local, from_local, overwrite, no_trash,
                  exclude, include, port, username,
@@ -162,13 +163,13 @@ def attach_to_cli(cli):
                 try:
                     from send2trash import send2trash
                     if override_prompts:
-                        print('send local data "' + local_data + '"to trash.')
+                        print('thrashing local data "' + local_data + '"')
                         send2trash(local_data)
                     else:
                         if action_tools.query_yes_no(
                                 'Thrash local data {}?'.format(local_data),
                                 default='no'):
-                            print('send local data "' + local_data + '"to trash.')
+                            print('thrashing local data "' + local_data + '"')
                             send2trash(local_data)
                 except Exception:
                     warnings.warn('Unable to send local data to trash')
