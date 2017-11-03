@@ -60,6 +60,20 @@ def attach_to_cli(cli):
                   type=click.Choice(['filtfilt', 'lfilter']),
                   default='filtfilt',
                   help='Filter function. The default "filtfilt" corresponds to a forward-backward filter operation, "lfilter" a forward filter. NOTE: does not affect filtering with klusta.')
+    @click.option('--use-single-threshold',
+                  type=click.Choice([True, False]),
+                  default=True,
+                  help='Use the same threshold across channels. Default is True')
+    @click.option('--threshold-strong-std-factor',
+                  type=click.FLOAT,
+                  default=4.5,
+                  help='Strong spike detection threshold. Default is 4.5',
+                  )
+    @click.option('--threshold-weak-std-factor',
+                  type=click.FLOAT,
+                  default=2,
+                  help='Weak spike detection threshold. Default is 2',
+                  )
     @click.option('--common-ref',
                   type=click.Choice(['car', 'cmr', 'none']),
                   default='cmr',
@@ -104,6 +118,9 @@ def attach_to_cli(cli):
     def process_openephys(action_id, prb_path, pre_filter,
                           klusta_filter, filter_low, filter_high,
                           filter_order, filter_function,
+                          use_single_threshold,
+                          threshold_strong_std_factor,
+                          threshold_weak_std_factor,
                           common_ref, ground,
                           split_probe, no_local, openephys_path,
                           exdir_path, no_klusta, shutter_channel,
@@ -145,7 +162,10 @@ def attach_to_cli(cli):
                               fs=fs, klusta_filter=klusta_filter,
                               filter_low=filter_low,
                               filter_high=filter_high,
-                              filter_order=filter_order)
+                              filter_order=filter_order,
+                              use_single_threshold=use_single_threshold,
+                              threshold_strong_std_factor=threshold_strong_std_factor,
+                              threshold_weak_std_factor=threshold_weak_std_factor)
             if pre_filter:
                 anas = sig_tools.filter_analog_signals(anas, freq=[filter_low, filter_high],
                                              fs=fs, filter_type='bandpass',
