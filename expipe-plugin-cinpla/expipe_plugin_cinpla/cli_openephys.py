@@ -61,8 +61,8 @@ def attach_to_cli(cli):
                   default='filtfilt',
                   help='Filter function. The default "filtfilt" corresponds to a forward-backward filter operation, "lfilter" a forward filter. NOTE: does not affect filtering with klusta.')
     @click.option('--use-single-threshold',
-                  type=click.Choice([True, False]),
-                  default=True,
+                  type=click.Choice(['True', 'False']),
+                  default='True',
                   help='Use the same threshold across channels. Default is True')
     @click.option('--threshold-strong-std-factor',
                   type=click.FLOAT,
