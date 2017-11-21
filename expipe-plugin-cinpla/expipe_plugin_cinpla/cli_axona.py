@@ -136,18 +136,18 @@ def attach_to_cli(cli):
                             'user': user,
                             'datetime': datetime.now()}
                            for m in message]
-        if not no_modules:
-            try:
-                correct = action_tools.register_depth(project, action,
-                                                      depth=depth, answer=yes)
-            except (NameError, ValueError):
-                raise
-            except Exception as e:
-                raise Exception(str(e) + ' Note, you may also use ' +
-                                '"--no-modules"')
-            if not correct:
-                print('Aborting')
-                return
+        # if not no_modules:
+        #     try:
+        #         correct = action_tools.register_depth(project, action,
+        #                                               depth=depth, answer=yes)
+        #     except (NameError, ValueError):
+        #         raise
+        #     except Exception as e:
+        #         raise Exception(str(e) + ' Note, you may also use ' +
+        #                         '"--no-modules"')
+        #     if not correct:
+        #         print('Aborting')
+        #         return
         if not no_files:
             fr = action.require_filerecord()
             if not no_local:
