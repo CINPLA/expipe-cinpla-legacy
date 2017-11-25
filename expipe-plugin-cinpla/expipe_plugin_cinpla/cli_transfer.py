@@ -63,9 +63,14 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='Name of server as named in config.yaml. Default is "nird"',
                   )
+    @click.option('-y', '--yes',
+                  is_flag=True,
+                  default=False,
+                  help='disables yes/no prompts for automated removal of files after transfer. Default is False')
     def transfer(action_id, to_local, from_local, overwrite, no_trash,
                  exclude, include, port, username,
-                 hostname, recursive, server, move):
+                 hostname, recursive, server, move,
+                 yes):
         assert server in expipe.config.settings
         server_dict = expipe.config.settings.get(server)
         if len(exclude) > 0 and len(include) > 0:
@@ -157,20 +162,27 @@ def attach_to_cli(cli):
             if not no_trash and not move:
                 try:
                     from send2trash import send2trash
-                    if action_tools.query_yes_no(
-                            'Thrash local data {}?'.format(local_data),
-                            default='no'):
+                    if yes:
+                        print('thrashing local data "' + local_data + '"')
                         send2trash(local_data)
-                        print('local data "' + local_data +
-                              '" sent to trash.')
+                    else:
+                        if action_tools.query_yes_no(
+                                'Thrash local data {}?'.format(local_data),
+                                default='no'):
+                            print('thrashing local data "' + local_data + '"')
+                            send2trash(local_data)
                 except Exception:
                     warnings.warn('Unable to send local data to trash')
             if move:
-                if action_tools.query_yes_no(
-                        'Delete local data in {}? (yes/no)?'.format(local_data),
-                        default='no'):                                    
+                if yes:
                     print('Deleting "' + local_data + '".')
                     shutil.rmtree(local_data)
+                else:
+                    if action_tools.query_yes_no(
+                            'Delete local data in {}? (yes/no)?'.format(local_data),
+                            default='no'):                                    
+                        print('Deleting "' + local_data + '".')
+                        shutil.rmtree(local_data)
         else:
             raise IOError('You must choose "to-local" or "from-local"')
             ssh.close()
