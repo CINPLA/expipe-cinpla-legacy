@@ -384,12 +384,12 @@ def copy_bonsai_raw_data(exdir_path, axona_filename):
     axona_file = pyxona.File(axona_filename)
     exdir_file = exdir.File(exdir_path)
     acquisition = exdir_file.require_group("acquisition")
-    target_folder = acquisition.require_raw(axona_file.session)
+    exdir_raw = acquisition.require_raw(axona_file.session)
+    target_folder = str(exdir_raw.directory)
 
     axona_dirname = os.path.dirname(axona_filename)
     csv_files = glob.glob(os.path.join(axona_dirname, "*.csv"))
     avi_files = glob.glob(os.path.join(axona_dirname, "*.avi"))
-
     for filename in csv_files + avi_files:
         shutil.copy(filename, target_folder)
 

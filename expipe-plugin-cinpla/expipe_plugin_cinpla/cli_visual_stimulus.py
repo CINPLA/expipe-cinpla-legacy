@@ -110,7 +110,7 @@ def attach_to_cli(cli):
         fr = action.require_filerecord()
         exdir_path = action_tools._get_local_path(fr)
         exdir_object = exdir.File(exdir_path)
-
+        
         visual_tools.copy_bonsai_raw_data(exdir_path, axona_filename)
         axona_dirname = os.path.dirname(axona_filename)
         filenames = visual_tools.organize_bonsai_tracking_files(axona_dirname)
@@ -124,3 +124,5 @@ def attach_to_cli(cli):
                                                   key, source_filename)
                 except FileExistsError:
                     print("Headtracking datasets (" + str(key) + ") already exist. Skipping...")
+
+        print("successfully registered bonsai tracking.")
