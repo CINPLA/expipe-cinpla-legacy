@@ -69,7 +69,7 @@ def add_orientation_to_trials(trials, orients):
         trial.annotations["orient"] = orient
 
 
-def make_stimulus_trials(chxs, stim_epoch):
+def make_stimulus_trials(chxs, stim_epoch, time_offset=0*pq.ms):
     '''
     makes stimulus trials for every units (good) in each channel
     ----------
@@ -91,8 +91,8 @@ def make_stimulus_trials(chxs, stim_epoch):
             if cluster_group.lower() != "noise":
                 sptr = un.spiketrains[0]
                 trials = make_spiketrain_trials(epoch=stim_epoch,
-                                                t_start=0 * pq.s,
-                                                t_stop=stim_epoch.durations,
+                                                t_start=0 * pq.s - time_offset,
+                                                t_stop=stim_epoch.durations + time_offset,
                                                 spike_train=sptr)
                 unit_id = un.annotations["cluster_id"]
                 stim_trials[chx.name][unit_id] = trials
