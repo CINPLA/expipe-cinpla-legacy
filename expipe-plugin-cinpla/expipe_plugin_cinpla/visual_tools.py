@@ -380,9 +380,20 @@ def generate_grating_stimulus_epoch(exdir_path, timestamps, durations, data):
 ###############################################################################
 #                           Bonsai parsing
 ###############################################################################
-def copy_bonsai_raw_data(exdir_path, axona_filename):
+def copy_bonsai_raw_data(exdir_file, axona_filename):
+    """
+    Copies the tracking data (.csv and .avi files)
+    to acquisition in exdir file
+
+    Parameters
+    ----------
+    exdir_file : exdir.core.File
+            Exdir file
+
+    axona_filename : str
+            Axona filename (.set file)
+    """
     axona_file = pyxona.File(axona_filename)
-    exdir_file = exdir.File(exdir_path)
     acquisition = exdir_file.require_group("acquisition")
     exdir_raw = acquisition.require_raw(axona_file.session)
     target_folder = str(exdir_raw.directory)
@@ -497,18 +508,22 @@ def _check_bonsai_processing_delay(t_start, t_stop, eps=1*pq.ms):
     except AssertionError:
         print("Warning: t_start and t_stop have different length. Cannot compute Bonsai processing delay.")
 
-    max_delay = (t_stop - t_start).max().rescale("ms")
+    max_delay = (abs(t_stop - t_start)).max().rescale("ms")
     if max_delay > eps:
-        print("Warning: Bonsai processing delay ({}) > accepted value ({})".format(round(max_delay, 2), eps))
+        print("Warning: Bonsai processing delay ({}) > accepted value ({})".format(round(max_delay, 2),
+                                                                                   eps))
+        return max_delay
+    else:
+        return eps
 
 
-def parse_bonsai_head_tracking_file(filepath):
+def parse_bonsai_head_tracking_file(ir_filename, key_log_filename):
     """
     Parses the tracking data from bonsai
 
     Parameters
     ----------
-    filepath : str
+    ir_filename : str
                path to .csv file
 
     Returns
@@ -516,20 +531,36 @@ def parse_bonsai_head_tracking_file(filepath):
     out : dict
         dictionary with position and time data
     """
-    filename, extension = os.path.splitext(filepath)
+    filename, extension = os.path.splitext(ir_filename)
 
     if extension != ".csv":
-        raise ValueError("file extension must be '.csv'")
+        raise ValueError("file extension must be '.csv': {}".format(ir_filename))
 
-    data = pd.read_csv(filepath, sep=" ",
+    data = pd.read_csv(ir_filename, sep=" ",
                        usecols=range(0, 6), parse_dates=[4, 5],
                        names=["x1", "y1", "x2", "y2", "t_start", "t_stop"])
 
-    data["t_start"] = (data["t_start"] - data["t_start"][0]).astype('timedelta64[us]')
-    data["t_stop"] = (data["t_stop"] - data["t_stop"][0]).astype('timedelta64[us]')
+    attrs = {}
+    if key_log_filename is not None:
+        attrs["key_sync"] = True
+        log_filename, log_extension = os.path.splitext(key_log_filename)
 
-    t_start = np.array(data["t_start"]) / 1.e6 * pq.s
-    t_stop = np.array(data["t_stop"]) / 1.e6 * pq.s
+        if log_extension != ".csv":
+            raise ValueError("file extension must be '.csv': {}".format(key_log_filename))
+
+        key_press = pd.read_csv(key_log_filename, sep=" ", usecols=[0], parse_dates=[0], names=["t_key"])
+        t_sync = key_press["t_key"][0]
+        t_diff = (key_press["t_key"]-t_sync).astype('timedelta64[us]').to_dict()
+        attrs["t_key"] = {"value": t_diff, "unit": "us"}
+    else:
+        attrs["key_sync"] = False
+        t_sync = data["t_start"][0]
+
+    data["t_start"] = (data["t_start"] - t_sync).astype('timedelta64[us]')
+    data["t_stop"] = (data["t_stop"] - t_sync).astype('timedelta64[us]')
+
+    t_start = np.array(data["t_start"]) / 1.e6 * pq.s  # micro-sec to sec
+    t_stop = np.array(data["t_stop"]) / 1.e6 * pq.s  # micro-sec to sec
 
     if not len(t_start) == len(t_stop):
         print("Warning: t_start and t_stop have different length: ", len(t_start), " ", len(t_stop))
@@ -546,28 +577,25 @@ def parse_bonsai_head_tracking_file(filepath):
                                                             t_start, t_stop)
 
     if t_start.size is not 0:
-        _check_bonsai_processing_delay(t_start, t_stop)
+        attrs["max_delay"] = _check_bonsai_processing_delay(t_start, t_stop)
+
     tracking = {"led_1": {"x": x1, "y": y1, "t": t_start},
-                "led_2": {"x": x2, "y": y2, "t": t_start}
+                "led_2": {"x": x2, "y": y2, "t": t_start},
+                "attrs": attrs
                 }
 
     return tracking
 
 
-def parse_bonsai_overhead_tracking_file(filepath):
-    # TODO: parse overhead files
-    pass
-
-
-def generate_head_tracking_groups(exdir_path, tracking_data,
+def generate_head_tracking_groups(exdir_file, tracking_data,
                                   camera_id, source_filename):
     """
     Save tracking data in an exdir Position group
 
     Parameters
     ----------
-    exdir_path : string
-            Path to exdir file
+    exdir_file : exdir.core.File
+            Exdir file
 
     tracking_data : dict
         dictionary with position and time data
@@ -578,23 +606,17 @@ def generate_head_tracking_groups(exdir_path, tracking_data,
     """
     print("generating head tracking groups....")
 
-    exdir_file = exdir.File(exdir_path)
     processing = exdir_file.require_group("processing")
     tracking = processing.require_group("tracking")
     head_tracking = tracking.require_group("head_tracking")
     camera = head_tracking.require_group(camera_id)
     camera.attrs["source_filename"] = source_filename
     position = camera.require_group("Position")
+    position.attrs = tracking_data["attrs"]
 
     for led, data in tracking_data.items():
-        tracked_spot = position.require_group(led)
-        timestamps = tracked_spot.require_dataset("timestamps", data=data["t"])
-        tracked_spot.require_dataset(
-            "data", data=np.column_stack((data["x"], data["y"])))
-
-
-###############################################################################
-#                           Plot functions
-###############################################################################
-def orient_raster_plots(stim_trials):
-    pass
+        if not led == "attrs":
+            tracked_spot = position.require_group(led)
+            timestamps = tracked_spot.require_dataset("timestamps", data=data["t"])
+            tracked_spot.require_dataset(
+                "data", data=np.column_stack((data["x"], data["y"])))

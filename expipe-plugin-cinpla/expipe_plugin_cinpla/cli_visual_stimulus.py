@@ -107,21 +107,20 @@ def attach_to_cli(cli):
 
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
-        fr = action.require_filerecord()
-        exdir_path = action_tools._get_local_path(fr)
-        exdir_object = exdir.File(exdir_path)
-        
-        visual_tools.copy_bonsai_raw_data(exdir_path, axona_filename)
+        exdir_path = action.require_filerecord().local_path
+        exdir_file = exdir.File(exdir_path)
+
+        visual_tools.copy_bonsai_raw_data(exdir_file, axona_filename)
         axona_dirname = os.path.dirname(axona_filename)
         filenames = visual_tools.organize_bonsai_tracking_files(axona_dirname)
 
         for key, path in filenames.items():
             if "ir" in key:
-                tracking = visual_tools.parse_bonsai_head_tracking_file(path)
+                tracking = visual_tools.parse_bonsai_head_tracking_file(path, filenames.get("key_log"))
                 try:
                     source_filename = os.path.basename(path)
-                    visual_tools.generate_head_tracking_groups(exdir_path, tracking,
-                                                  key, source_filename)
+                    visual_tools.generate_head_tracking_groups(exdir_file, tracking,
+                                                               key, source_filename)
                 except FileExistsError:
                     print("Headtracking datasets (" + str(key) + ") already exist. Skipping...")
 
