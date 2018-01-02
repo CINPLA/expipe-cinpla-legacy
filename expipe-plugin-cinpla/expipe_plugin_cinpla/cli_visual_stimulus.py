@@ -27,15 +27,16 @@ def attach_to_cli(cli):
 
         # generate stimulus groups
         visual_tools.generate_blank_group(exdir_path, grating["blank"]["timestamps"])
-        visual_tools.generate_key_event_group(exdir_path, keys["keys"], keys["timestamps"])
+        visual_tools.generate_key_event_group(exdir_path, keys=keys["keys"],
+                                              timestamps=keys["timestamps"])
         visual_tools.generate_grating_stimulus_group(exdir_path,
-                                        grating["grating"]["timestamps"], grating["grating"]["data"], grating["grating"]["mode"])
+                                                     data=grating["grating"]["data"], timestamps=grating["grating"]["timestamps"], mode=grating["grating"]["mode"])
 
         # generate stimulus epoch
         visual_tools.generate_grating_stimulus_epoch(exdir_path,
-                                        grating["grating"]["timestamps"],
-                                        durations,
-                                        grating["grating"]["data"])
+                                        timestamps=grating["grating"]["timestamps"],
+                                        durations=durations,
+                                        data=grating["grating"]["data"])
 
         print("successfully created stimulus groups and epoch.")
 
