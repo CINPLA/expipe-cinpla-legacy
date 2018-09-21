@@ -150,13 +150,15 @@ def attach_to_cli(cli):
             klusta_prm = os.path.abspath(openephys_base) + '.prm'
             prb_path = prb_path or settings.get('probe')
             openephys_file = pyopenephys.File(openephys_path, prb_path)
+            openephys_exp = openephys_file.experiments[0]
+            openephys_rec = openephys_exp.recordings[0]
         if not no_preprocess:
             if not pre_filter and not klusta_filter:
                 pre_filter = True
             elif pre_filter and klusta_filter:
                 raise IOError('Choose either klusta-filter or pre-filter.')
-            anas = openephys_file.analog_signals[0].signal
-            fs = openephys_file.sample_rate.magnitude
+            anas = openephys_rec.analog_signals[0].signal
+            fs = openephys_rec.sample_rate.magnitude
             nchan = anas.shape[0]
             sig_tools.create_klusta_prm(openephys_base, prb_path, nchan,
                               fs=fs, klusta_filter=klusta_filter,
@@ -215,24 +217,25 @@ def attach_to_cli(cli):
                 raise Exception(e.output)
         if not no_spikes:
             print('Converting from ".kwik" to ".exdir"')
-            openephys.generate_spike_trains(exdir_path, openephys_file,
+            openephys.generate_spike_trains(exdir_path, openephys_rec,
                                             source='klusta')
             print('Processed spiketrains, manual clustering possible')
         if not no_lfp:
             print('Filtering and downsampling raw data to LFP.')
-            openephys.generate_lfp(exdir_path, openephys_file)
+            openephys.generate_lfp(exdir_path, openephys_rec)
             print('Finished processing LFPs.')
         if not no_tracking:
             print('Converting tracking from OpenEphys raw data to ".exdir"')
-            openephys.generate_tracking(exdir_path, openephys_file)
-            if shutter_channel is not None:
-                ttl_times = openephys_file.digital_in_signals[0].times[
-                    shutter_channel]
-                if len(ttl_times) != 0:
-                    openephys_file.sync_tracking_from_events(ttl_times)
-                else:
-                    warnings.warn('No TTL events found on IO channel {}'.format(
-                        shutter_channel))
+            openephys.generate_tracking(exdir_path, openephys_rec)
+            # TODO update
+            # if shutter_channel is not None:
+            #     ttl_times = openephys_file.digital_in_signals[0].times[
+            #         shutter_channel]
+            #     if len(ttl_times) != 0:
+            #         openephys_file.sync_tracking_from_events(ttl_times)
+            #     else:
+            #         warnings.warn('No TTL events found on IO channel {}'.format(
+            #             shutter_channel))
 
 
     @cli.command('register',
@@ -331,6 +334,8 @@ def attach_to_cli(cli):
             raise IOError('No probefile found, please provide one either ' +
                           'as an argument or with "expipe env set-probe".')
         openephys_file = pyopenephys.File(openephys_path, prb_path)
+        openephys_exp = openephys_file.experiments[0]
+        openephys_rec = openephys_exp.recordings[0]
         subject_id = subject_id or openephys_dirname.split('_')[0]
         session = session or openephys_dirname.split('_')[-1]
         if session.isdigit():
@@ -339,7 +344,7 @@ def attach_to_cli(cli):
             raise ValueError('Did not find valid session number "' +
                              session + '"')
         if action_id is None:
-            session_dtime = datetime.strftime(openephys_file.datetime,
+            session_dtime = datetime.strftime(openephys_exp.datetime,
                                               '%d%m%y')
             action_id = subject_id + '-' + session_dtime + '-%.2d' % session
         if overwrite and hard:
@@ -358,7 +363,7 @@ def attach_to_cli(cli):
             action_tools.generate_templates(action, 'openephys', overwrite,
                                             git_note=action_tools.get_git_info())
 
-        action.datetime = openephys_file.datetime
+        action.datetime = openephys_exp.datetime
         action.type = 'Recording'
         action.tags.extend(list(tag) + ['open-ephys'])
         print('Registering subject id ' + subject_id)
@@ -390,12 +395,13 @@ def attach_to_cli(cli):
                 print('Aborting registration!')
                 return
 
-            for idx, m in enumerate(openephys_file.messages):
-                secs = float(m['time'].rescale('s').magnitude)
-                dtime = openephys_file.datetime + timedelta(secs)
-                messages.append({'datetime': dtime,
-                                 'message': m['message'],
-                                 'user': user})
+            # TODO update to messages
+            # for idx, m in enumerate(openephys_rec.messages):
+            #     secs = float(m['time'].rescale('s').magnitude)
+            #     dtime = openephys_file.datetime + timedelta(secs)
+            #     messages.append({'datetime': dtime,
+            #                      'message': m['message'],
+            #                      'user': user})
         action.messages.extend(messages)
         if not no_files:
             fr = action.require_filerecord()
@@ -481,7 +487,9 @@ def attach_to_cli(cli):
         project = expipe.get_project(PAR.USER_PARAMS['project_id'])
 
         openephys_file = pyopenephys.File(openephys_path)
-        messages = openephys_file.messages
+        openephys_exp = openephys_file.experiments[0]
+        openephys_rec = openephys_exp.recordings[0]
+        messages = openephys_rec.messages
 
         print('Open-ephys messages:')
         for m in messages:

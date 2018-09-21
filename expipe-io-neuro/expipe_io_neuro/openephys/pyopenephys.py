@@ -875,6 +875,7 @@ class File:
         else:
             print('Empty clipping times list.')
 
+
     def sync_tracking_from_events(self, ttl_events, parallel=False, nprocesses=None):
         """Synchronizes tracking timestamps with ttl signal provided.
 
