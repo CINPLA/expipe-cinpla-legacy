@@ -56,7 +56,7 @@ class CustomInstall(Command):
         self.extra = None
 
     def finalize_options(self):
-        assert self.extra in (None, 'browser', 'phy'), 'Invalid extra!'
+        assert self.extra in (None, 'browser', 'phy', 'all'), 'Invalid extra!'
 
     def run(self):
         if 'develop' in sys.argv:
