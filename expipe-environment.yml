@@ -17,12 +17,12 @@ dependencies:
   - tqdm
   - packaging
   - openpyxl
+  - pyqt5
+  - sip
   - pip:
     - pycircstat
     - quantities
     - pyrebase
-    - pyqt5==5.7.1
-    - sip==4.19
     - pycodestyle
     - xmljson
     - klusta

@@ -18,7 +18,8 @@ def setupInstall(cmd, arg):
         'exdir-cli',
         'expipe-io-neuro',
         'exana',
-        'pyxona'
+        'pyxona',
+        'py-open-ephys'
     ]
 
     browser_list = [
@@ -36,6 +37,10 @@ def setupInstall(cmd, arg):
     elif arg == 'phy':
         print('Installing expipe with phy')
         dep_list += phy_list
+    elif arg == 'all':
+        print('Installing expipe with phy and browser')
+        dep_list += phy_list
+        dep_list += browser_list
     else:
         print('Installing expipe without browsers')
     for dep in dep_list:
