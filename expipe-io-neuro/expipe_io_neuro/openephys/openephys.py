@@ -163,7 +163,7 @@ def generate_tracking(exdir_path, openephys_rec):
     for n, tracking in enumerate(openephys_rec.tracking):
         x, y, times = tracking.x, tracking.y, tracking.times
         led = position.require_group("led_" + str(n))
-        dset = led.require_dataset('data', data=np.hstack((x, y)) * pq.m)
+        dset = led.require_dataset('data', data=np.vstack((x, y)).T * pq.m)
         dset.attrs['num_samples'] = len(times)
         dset = led.require_dataset("timestamps", data=times)
         dset.attrs['num_samples'] = len(times)

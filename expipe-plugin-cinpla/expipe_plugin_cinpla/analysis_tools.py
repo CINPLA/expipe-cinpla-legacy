@@ -67,6 +67,20 @@ class Analyser:
         self.save_figs = save_figs
         self.close_fig = close_fig
         self.exdir_path = exdir_path.replace('\\', '/')
+
+        self._exdir_object = exdir.File(exdir_path)
+        processing = self._exdir_object['processing']
+        if 'tracking' in processing:
+            try:
+                tracking_data = tracking.get_processed_tracking(
+                    exdir_path, par=params, return_rad=False)
+                self.x, self.y, self.t, self.ang, self.ang_t = tracking_data
+                mask = not (self.x <= 1e-15) & (self.y <= 1e-15)
+                self.x, self.y, self.t = self.x[mask], self.y[mask], self.t[mask]
+            except Exception as e:
+                print(str(e) + '. Unable to load tracking data, some analysis ' +
+                      'will not work.')
+        # NEO
         io = neo.ExdirIO(exdir_path)
         self.blk = io.read_block()
         self.seg = self.blk.segments[0]
@@ -76,22 +90,11 @@ class Analyser:
         self.channel_group = list(self.channel_group)
         self.anas = [ana for ana in self.seg.analogsignals
                      if ana.sampling_rate == 250 * pq.Hz]
-        exdir_group = exdir.File(exdir_path)
-        exdir_group = exdir.File(exdir_path)
-        processing = exdir_group['processing']
-        if 'tracking' in processing:
-            try:
-                tracking_data = tracking.get_processed_tracking(
-                    exdir_path, par=params, return_rad=False)
-                self.x, self.y, self.t, self.ang, self.ang_t = tracking_data
-            except Exception as e:
-                print(str(e) + ' Unable to load tracking data, some analysis ' +
-                      'will not work.')
         if len(self.seg.epochs) == 1:
             self.epoch = self.seg.epochs[0]
         else:
             self.epoch = None
-        self._exdir_object = exdir.File(exdir_path)
+
         self._processing = self._exdir_object.require_group("processing")
         self._epochs = self._exdir_object.require_group("epochs")
         self._analysis = self._exdir_object.require_group("analysis")
