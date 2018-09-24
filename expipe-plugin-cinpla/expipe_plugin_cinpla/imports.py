@@ -19,7 +19,7 @@ def sig_tools():
 
 @lazy_import
 def pyopenephys():
-    from expipe_io_neuro import pyopenephys
+    import pyopenephys
     return pyopenephys
 
 @lazy_import

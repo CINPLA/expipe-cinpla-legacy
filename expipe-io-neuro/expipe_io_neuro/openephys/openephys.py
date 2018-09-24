@@ -23,9 +23,10 @@ def _prepare_exdir_file(exdir_file):
     return general, subject, processing, epochs
 
 
-def convert(openephys_rec, exdir_path):
+def convert(openephys_rec, exdir_path, session):
     exdir_file = exdir.File(exdir_path)
-    dtime = openephys_rec._start_datetime.strftime('%Y-%m-%dT%H:%M:%S')
+    experiment = openephys_rec.experiment
+    dtime = experiment.datetime.strftime('%Y-%m-%dT%H:%M:%S')
     exdir_file.attrs['session_start_time'] = dtime
     exdir_file.attrs['session_duration'] = openephys_rec.duration
     acquisition = exdir_file.require_group("acquisition")
@@ -33,13 +34,12 @@ def convert(openephys_rec, exdir_path):
     processing = exdir_file.require_group("processing")
     subject = general.require_group("subject")
 
-    target_folder = op.join(str(acquisition.directory), openephys_rec.session)
-    acquisition.attrs["openephys_session"] = openephys_rec.session
-    if openephys_rec.rhythm:
-        acquisition.attrs["acquisition_system"] = 'OpenEphys'
+    target_folder = op.join(str(acquisition.directory), session)
+    acquisition.attrs["openephys_session"] = session
+    acquisition.attrs["acquisition_system"] = experiment.acquisition_system
 
-    print("Copying ", openephys_rec._absolute_foldername, " to ", target_folder)
-    shutil.copytree(openephys_rec._absolute_foldername, target_folder)
+    print("Copying ", openephys_rec.absolute_foldername, " to ", target_folder)
+    shutil.copytree(experiment.file.absolute_foldername, target_folder)
 
 
 def _prepare_channel_groups(exdir_path, openephys_rec):
@@ -78,8 +78,8 @@ def generate_lfp(exdir_path, openephys_rec):
                 # decimate
                 target_rate = 1000 * pq.Hz
                 signal = np.array(analog_signal.signal, dtype=float)
-                sample_rate = copy.copy(analog_signal.sample_rate)
-                qs = [10, int((analog_signal.sample_rate / target_rate) / 10)]
+                sample_rate = copy.copy(openephys_rec.sample_rate)
+                qs = [10, int((openephys_rec.sample_rate / target_rate) / 10)]
                 for q in qs:
                     signal = ss.decimate(signal, q=q, zero_phase=True)
                     sample_rate /= q
@@ -160,34 +160,12 @@ def generate_tracking(exdir_path, openephys_rec):
     position.attrs['start_time'] = 0 * pq.s
     # TODO update to new
     position.attrs['stop_time'] = openephys_rec.duration
-    tracking_data = openephys_rec.tracking[0]
-    # for n, (times, coords) in enumerate(zip(tracking_data.times,
-    #                                         tracking_data.positions)):
-    #     led = position.require_group("led_" + str(n))
-    #     dset = led.require_dataset('data', data=coords.transpose() * pq.m) # TODO units??
-    #     dset.attrs['num_samples'] = coords.shape[1]
-    #     dset = led.require_dataset("timestamps", data=times)
-    #     dset.attrs['num_samples'] = len(times)
-    #     led.attrs['start_time'] = 0 * pq.s
-    #     led.attrs['stop_time'] = openephys_rec.duration
-
-
-# class OpenEphysFilerecord(Filerecord):
-#     def __init__(self, action, filerecord_id=None):
-#         super().__init__(action, filerecord_id)
-#
-#     def import_file(self, openephys_rec):
-#         convert(openephys_rec=openephys_rec,
-#                 exdir_path=self.local_path)
-#
-#     def generate_tracking(self, openephys_rec):
-#         generate_tracking(self.local_path, openephys_rec)
-#
-#     def generate_lfp(self, openephys_rec):
-#         generate_analog_signals(self.local_path, openephys_rec)
-#
-#     def generate_spike_trains(self, openephys_rec):
-#         generate_spike_trains(self.local_path, openephys_rec)
-#
-#     def generate_inp(self, openephys_rec):
-#         generate_inp(self.local_path, openephys_rec)
+    for n, tracking in enumerate(openephys_rec.tracking):
+        x, y, times = tracking.x, tracking.y, tracking.times
+        led = position.require_group("led_" + str(n))
+        dset = led.require_dataset('data', data=np.hstack((x, y)) * pq.m)
+        dset.attrs['num_samples'] = len(times)
+        dset = led.require_dataset("timestamps", data=times)
+        dset.attrs['num_samples'] = len(times)
+        led.attrs['start_time'] = 0 * pq.s
+        led.attrs['stop_time'] = openephys_rec.duration

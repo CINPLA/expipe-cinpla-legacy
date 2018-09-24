@@ -141,7 +141,7 @@ def attach_to_cli(cli):
             exdir_file = exdir.File(exdir_path)
         if openephys_path is None:
             acquisition = exdir_file["acquisition"]
-            if acquisition.attrs['acquisition_system'] != 'OpenEphys':
+            if acquisition.attrs['acquisition_system'] is None:
                 raise ValueError('No Open Ephys aquisition system ' +
                                  'related to this action')
             openephys_session = acquisition.attrs["openephys_session"]
@@ -150,6 +150,7 @@ def attach_to_cli(cli):
             klusta_prm = os.path.abspath(openephys_base) + '.prm'
             prb_path = prb_path or settings.get('probe')
             openephys_file = pyopenephys.File(openephys_path, prb_path)
+            print(openephys_path)
             openephys_exp = openephys_file.experiments[0]
             openephys_rec = openephys_exp.recordings[0]
         if not no_preprocess:
@@ -339,14 +340,14 @@ def attach_to_cli(cli):
         subject_id = subject_id or openephys_dirname.split('_')[0]
         session = session or openephys_dirname.split('_')[-1]
         if session.isdigit():
-            session = int(session)
+            pass
         else:
             raise ValueError('Did not find valid session number "' +
                              session + '"')
         if action_id is None:
             session_dtime = datetime.strftime(openephys_exp.datetime,
                                               '%d%m%y')
-            action_id = subject_id + '-' + session_dtime + '-%.2d' % session
+            action_id = subject_id + '-' + session_dtime + '-' + session
         if overwrite and hard:
             try:
                 project.delete_action(action_id)
@@ -418,10 +419,11 @@ def attach_to_cli(cli):
                                           'overwrite flag')
             os.makedirs(os.path.dirname(exdir_path), exist_ok=True)
             shutil.copy(prb_path, openephys_path)
-            openephys.convert(openephys_file,
-                              exdir_path=exdir_path)
+            openephys.convert(openephys_rec,
+                              exdir_path=exdir_path,
+                              session=session)
             if spikes_source != 'none':
-                openephys.generate_spike_trains(exdir_path, openephys_file,
+                openephys.generate_spike_trains(exdir_path, openephys_rec,
                                                 source=spikes_source)
             if not no_move:
                 if action_tools.query_yes_no(
