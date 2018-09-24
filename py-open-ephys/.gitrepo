@@ -6,6 +6,6 @@
 [subrepo]
 	remote = git@github.com:CINPLA/py-open-ephys.git
 	branch = master
-	commit = 69902e88dbac7ee37c514900c1b831d457e4f914
-	parent = 093f0b01139c134b06aedccf497a477a4d77fd83
+	commit = 94f10562f39594038875a61f3d414abf4a28154b
+	parent = 129259477930c73af6a05848db7b0e674fbf0474
 	cmdver = 0.3.1
