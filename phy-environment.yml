@@ -34,3 +34,4 @@ dependencies:
     - scp
     - send2trash
     - packaging
+    - xmltodict
