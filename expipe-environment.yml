@@ -1,5 +1,6 @@
 name: expipe
 dependencies:
+  - python=3.5
   - numpy
   - matplotlib
   - scipy
@@ -17,7 +18,7 @@ dependencies:
   - tqdm
   - packaging
   - openpyxl
-  - pyqt5
+  - pyqt=5
   - sip
   - pip:
     - pycircstat

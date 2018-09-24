@@ -6,7 +6,7 @@ dependencies:
   - scipy
   - h5py
   - cython
-  - pyqt=5
+  - pyqt=4
   - pandas
   - seaborn
   - pyyaml
@@ -18,15 +18,15 @@ dependencies:
   - paramiko
   - packaging
   - tqdm
+  - click
+  - six
   - pip:
     - klusta
     - klustakwik2
     - vispy
     - requests
     - traitlets
-    - six
     - joblib
-    - click
     - pycircstat
     - quantities
     - pyrebase
