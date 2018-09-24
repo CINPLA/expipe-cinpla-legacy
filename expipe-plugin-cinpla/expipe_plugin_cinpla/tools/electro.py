@@ -1,4 +1,4 @@
-from .imports import *
+from expipe_plugin_cinpla.imports import *
 
 
 def generate_epochs(exdir_path, triggers, trigger_params, channel_params, stim_signals, **annotations):

@@ -1,4 +1,4 @@
-from .imports import *
+from expipe_plugin_cinpla.imports import *
 
 
 def ssh_execute(ssh, command):

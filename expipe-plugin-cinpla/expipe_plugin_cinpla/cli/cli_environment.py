@@ -1,7 +1,7 @@
-from .imports import *
-from ._version import get_versions
-from .action_tools import query_yes_no
-from .config import settings_file_path
+from expipe_plugin_cinpla.imports import *
+from expipe_plugin_cinpla.tools. action as import query_yes_no
+from expipe_plugin_cinpla._version import get_versions
+from expipe_plugin_cinpla.tools.config import settings_file_path
 
 default_settings = {
     'current': {

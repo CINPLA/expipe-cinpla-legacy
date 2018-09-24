@@ -1,6 +1,6 @@
-from . import action_tools
-from .imports import *
-from . import config
+from expipe_plugin_cinpla.imports import *
+from expipe_plugin_cinpla.tools import action as action_tools
+from expipe_plugin_cinpla.tools import config
 from datetime import timedelta
 
 

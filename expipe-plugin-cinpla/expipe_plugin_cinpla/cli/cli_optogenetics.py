@@ -1,7 +1,7 @@
-from .imports import *
-from . import action_tools
-from . import opto_tools
-from . import config
+from expipe_plugin_cinpla.imports import *
+from expipe_plugin_cinpla.tools import action as action_tools
+from expipe_plugin_cinpla.tools import opto as opto_tools
+from expipe_plugin_cinpla.tools import config
 
 
 def attach_to_cli(cli):

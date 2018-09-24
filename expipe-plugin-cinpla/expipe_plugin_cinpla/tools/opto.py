@@ -1,4 +1,4 @@
-from .imports import *
+from expipe_plugin_cinpla.imports import *
 
 
 def generate_axona_opto(exdir_path, io_channel=8, no_intensity=False,

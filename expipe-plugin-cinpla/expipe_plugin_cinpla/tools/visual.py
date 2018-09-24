@@ -1,4 +1,4 @@
-from .imports import *
+from expipe_plugin_cinpla.imports import *
 
 
 def parse_psychopy_openephys(action, psyexp_path, io_channel, tolerance):

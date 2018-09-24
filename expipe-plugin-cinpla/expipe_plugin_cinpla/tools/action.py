@@ -1,5 +1,5 @@
-from .imports import *
-from ._version import get_versions
+from expipe_plugin_cinpla.imports import *
+from expipe_plugin_cinpla._version import get_versions
 from .config import load_parameters
 
 nwb_main_groups = ['acquisition', 'analysis', 'processing', 'epochs',

@@ -1,6 +1,6 @@
-from .ssh_tools import get_login, login, ssh_execute, untar
-from . import action_tools
-from .imports import *
+from expipe_plugin_cinpla.tools.ssh_tools import get_login, login, ssh_execute, untar
+from expipe_plugin_cinpla.imports import *
+from expipe_plugin_cinpla.tools import action as action_tools
 
 
 def attach_to_cli(cli):
@@ -180,7 +180,7 @@ def attach_to_cli(cli):
                 else:
                     if action_tools.query_yes_no(
                             'Delete local data in {}? (yes/no)?'.format(local_data),
-                            default='no'):                                    
+                            default='no'):
                         print('Deleting "' + local_data + '".')
                         shutil.rmtree(local_data)
         else:

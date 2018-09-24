@@ -1,4 +1,4 @@
-from .imports import *
+from expipe_plugin_cinpla.imports import *
 
 
 settings_file_path = os.path.join(os.path.expanduser('~'), '.config', 'expipe',

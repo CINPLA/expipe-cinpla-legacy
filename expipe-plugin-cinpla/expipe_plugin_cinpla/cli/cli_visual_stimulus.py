@@ -1,6 +1,6 @@
-from .imports import *
-from . import visual_tools
-from . import action_tools
+from expipe_plugin_cinpla.imports import *
+from expipe_plugin_cinpla.tools import action as action_tools
+from expipe_plugin_cinpla.tools import visual_tools
 
 
 def attach_to_cli(cli):

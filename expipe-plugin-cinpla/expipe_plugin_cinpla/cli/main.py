@@ -1,6 +1,6 @@
 import expipe_plugin_cinpla
 from expipecli.utils.plugin import IPlugin
-from .imports import *
+from expipe_plugin_cinpla.imports import *
 from . import cli_misc
 from . import cli_analysis
 from . import cli_environment
