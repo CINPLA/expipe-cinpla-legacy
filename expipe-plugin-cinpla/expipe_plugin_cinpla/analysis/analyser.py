@@ -1,5 +1,5 @@
 from expipecli.utils.misc import lazy_import
-from .imports import *
+from expipe_plugin_cinpla.imports import *
 
 @lazy_import
 def tracking():

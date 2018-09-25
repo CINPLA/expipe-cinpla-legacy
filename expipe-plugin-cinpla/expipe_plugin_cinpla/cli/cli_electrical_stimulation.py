@@ -1,6 +1,6 @@
 from expipe_plugin_cinpla.imports import *
 from expipe_plugin_cinpla.tools import action as action_tools
-from .electro_tools import (generate_electrical_info, populate_modules)
+from expipe_plugin_cinpla.tools.electro import (generate_electrical_info, populate_modules)
 
 
 def attach_to_cli(cli):

@@ -175,7 +175,7 @@ def warnings():
 
 @lazy_import
 def PAR():
-    from .config import load_parameters
+    from expipe_plugin_cinpla.tools.config import load_parameters
     return load_parameters()
 
 @lazy_import

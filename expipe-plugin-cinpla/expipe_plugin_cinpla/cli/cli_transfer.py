@@ -1,4 +1,4 @@
-from expipe_plugin_cinpla.tools.ssh_tools import get_login, login, ssh_execute, untar
+from expipe_plugin_cinpla.tools.ssh import get_login, login, ssh_execute, untar
 from expipe_plugin_cinpla.imports import *
 from expipe_plugin_cinpla.tools import action as action_tools
 
