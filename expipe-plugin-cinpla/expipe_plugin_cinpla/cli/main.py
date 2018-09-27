@@ -1,17 +1,16 @@
 import expipe_plugin_cinpla
 from expipecli.utils.plugin import IPlugin
 from expipe_plugin_cinpla.imports import *
-from . import cli_misc
-from . import cli_analysis
-from . import cli_environment
-from . import cli_transfer
-from . import cli_openephys
-from . import cli_axona
-from . import cli_optogenetics
-from . import cli_intan
-from . import cli_intan_ephys
-from . import cli_visual_stimulus
-from . import cli_electrical_stimulation
+from . import adjust
+from . import axona
+from . import environment
+from . import intan_ephys
+from . import intan
+from . import misc
+from . import openephys
+from . import subject
+from . import surgery
+from . import transfer
 
 
 def reveal():
@@ -27,12 +26,6 @@ class CinplaPlugin(IPlugin):
         @click.help_option('-h', '--help')
         @click.pass_context
         def env(ctx):
-            pass
-
-        @cli.group(short_help='Tools related to optogenetics.')
-        @click.help_option('-h', '--help')
-        @click.pass_context
-        def opto(ctx):
             pass
 
         @cli.group(short_help='Tools related to Open Ephys.')
@@ -59,20 +52,13 @@ class CinplaPlugin(IPlugin):
         def intan_ephys(ctx):
             pass
 
-        @cli.group(short_help='Tools related to visual stimulation.')
-        @click.help_option('-h', '--help')
-        @click.pass_context
-        def visual(ctx):
-            pass
-
-        cli_misc.attach_to_cli(cli)
-        cli_analysis.attach_to_cli(cli)
-        cli_environment.attach_to_cli(env)
-        cli_transfer.attach_to_cli(cli)
-        cli_openephys.attach_to_cli(openephys)
-        cli_axona.attach_to_cli(axona)
-        cli_optogenetics.attach_to_cli(opto)
-        cli_intan.attach_to_cli(intan)
-        cli_intan_ephys.attach_to_cli(intan_ephys)
-        cli_visual_stimulus.attach_to_cli(visual)
-        cli_electrical_stimulation.attach_to_cli(cli)
+        misc.attach_to_cli(cli)
+        adjust.attach_to_cli(cli)
+        surgery.attach_to_cli(cli)
+        subject.attach_to_cli(cli)
+        transfer.attach_to_cli(cli)
+        environment.attach_to_cli(env)
+        openephys.attach_to_cli(openephys)
+        axona.attach_to_cli(axona)
+        intan.attach_to_cli(intan)
+        intan_ephys.attach_to_cli(intan_ephys)
