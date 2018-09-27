@@ -51,37 +51,37 @@ def attach_to_cli(cli):
         with open(settings_file_path, "w") as f:
             yaml.dump(settings, f, default_flow_style=False)
 
-        @cli.command('create')
-        @click.argument('project-id', type=click.STRING)
-        @click.option('-a', '--activate',
-                      is_flag=True,
-                      help='Activate the project.',
-                      )
-        @click.option('--params',
-                      type=click.Path(exists=True, resolve_path=True),
-                      help='Set the expipe cinpla parameter file.',
-                      )
-        @click.option('--probe',
-                      type=click.Path(exists=True, resolve_path=True),
-                      help='Set a probe file.',
-                      )
-        def set(project_id, activate, **kwargs):
-            if os.path.exists(settings_file_path):
-                with open(settings_file_path, "r") as f:
-                    settings = yaml.load(f)
+    @cli.command('create')
+    @click.argument('project-id', type=click.STRING)
+    @click.option('-a', '--activate',
+                  is_flag=True,
+                  help='Activate the project.',
+                  )
+    @click.option('--params',
+                  type=click.Path(exists=True, resolve_path=True),
+                  help='Set the expipe cinpla parameter file.',
+                  )
+    @click.option('--probe',
+                  type=click.Path(exists=True, resolve_path=True),
+                  help='Set a probe file.',
+                  )
+    def set(project_id, activate, **kwargs):
+        if os.path.exists(settings_file_path):
+            with open(settings_file_path, "r") as f:
+                settings = yaml.load(f)
+        else:
+            settings = default_settings
+            activate = True
+        for key, val in kwargs.items():
+            if project_id in settings:
+                settings[project_id].update({key: val})
             else:
-                settings = default_settings
-                activate = True
-            for key, val in kwargs.items():
-                if project_id in settings:
-                    settings[project_id].update({key: val})
-                else:
-                    settings.update({project_id: {key: val}})
-            if activate:
-                settings['current'] = settings[project_id]
-                settings['current'].update({'project_id': project_id})
-            with open(settings_file_path, "w") as f:
-                yaml.dump(settings, f, default_flow_style=False)
+                settings.update({project_id: {key: val}})
+        if activate:
+            settings['current'] = settings[project_id]
+            settings['current'].update({'project_id': project_id})
+        with open(settings_file_path, "w") as f:
+            yaml.dump(settings, f, default_flow_style=False)
 
     @cli.command('remove')
     @click.argument('project-id', type=click.STRING)
