@@ -8,11 +8,6 @@ def pd():
     return pd
 
 @lazy_import
-def psychopyio():
-    from expipe_io_neuro import psychopyio
-    return psychopyio
-
-@lazy_import
 def sig_tools():
     import exana.misc.signal_tools as sig_tools
     return sig_tools
@@ -46,16 +41,6 @@ def csv():
 def json():
     import json
     return json
-
-@lazy_import
-def pyintan():
-    from expipe_io_neuro import pyintan
-    return pyintan
-
-@lazy_import
-def intan():
-    from expipe_io_neuro import intan
-    return intan
 
 @lazy_import
 def axona():
