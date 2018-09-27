@@ -108,7 +108,7 @@ def attach_to_cli(cli):
         settings = config.load_settings()['current']
         openephys_path = os.path.abspath(openephys_path)
         openephys_dirname = openephys_path.split(os.sep)[-1]
-        project = expipe.get_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
         prb_path = prb_path or settings.get('probe')
         if prb_path is None:
             raise IOError('No probefile found, please provide one either ' +
@@ -217,7 +217,7 @@ def attach_to_cli(cli):
         # TODO default none
         openephys_path = os.path.abspath(openephys_path)
         openephys_dirname = openephys_path.split(os.sep)[-1]
-        project = expipe.get_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
 
         openephys_file = pyopenephys.File(openephys_path)
         openephys_exp = openephys_file.experiments[0]

@@ -95,7 +95,7 @@ def attach_to_cli(cli):
                   "'{}'.".format(axona_filename))
         if len(cluster_group) == 0:
             cluster_group = None # TODO set proper default via callback
-        project = expipe.get_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
         subject_id = subject_id or axona_filename.split(os.sep)[-2]
         axona_file = pyxona.File(axona_filename)
         if action_id is None:
@@ -186,7 +186,7 @@ def attach_to_cli(cli):
     #     """Generate an axona recording-action to database.
     #
     #     COMMAND: axona-filename"""
-    #     project = expipe.get_project(PAR.USER_PARAMS['project_id'])
+    #     project = expipe.require_project(PAR.USER_PARAMS['project_id'])
     #
     #
     #     for action in project.actions:

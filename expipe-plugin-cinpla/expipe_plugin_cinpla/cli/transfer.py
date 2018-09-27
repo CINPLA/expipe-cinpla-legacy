@@ -75,7 +75,7 @@ def attach_to_cli(cli):
         server_dict = expipe.config.settings.get(server)
         if len(exclude) > 0 and len(include) > 0:
             raise IOError('You can only use exlude or include')
-        project = expipe.get_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
         fr = action.require_filerecord()
 
@@ -215,7 +215,7 @@ def attach_to_cli(cli):
                   help='Omit raw data, acquisition etc..',
                   )
     def copy_action(action_id, to_local, from_local, overwrite, exclude, move):
-        project = expipe.get_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(action_id)
         fr = action.require_filerecord()
         if to_local:

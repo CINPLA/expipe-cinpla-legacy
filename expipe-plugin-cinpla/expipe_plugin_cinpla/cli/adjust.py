@@ -52,7 +52,7 @@ def attach_to_cli(cli):
         else:
             date = datetime.strptime(date, '%d.%m.%YT%H:%M')
         datestring = datetime.strftime(date, DTIME_FORMAT)
-        project = expipe.get_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
         if init:
             action = project.require_action(subject_id + '-adjustment')
         else:

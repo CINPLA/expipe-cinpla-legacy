@@ -177,7 +177,7 @@ def attach_to_cli(cli):
                   help='The weight of the animal.',
                   )
     def generate_perfusion(subject_id, date, user, overwrite, weight):
-        project = expipe.get_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(subject_id + '-perfusion')
         generate_templates(action, 'perfusion',
                            overwrite, git_note=get_git_info())
