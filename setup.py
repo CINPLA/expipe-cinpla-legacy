@@ -10,7 +10,6 @@ from setuptools.command.develop import develop as _develop
 def setupInstall(cmd, arg):
     dep_list = [
         'python-neo',
-        'elephant',
         'exdir',
         'expipe',
         'expipe-plugin-cinpla',
