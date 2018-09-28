@@ -52,14 +52,6 @@ def teardown_setup_project():
     except NameError:
         pass
     project = expipe.require_project(PROJECT_ID)
-    for key, val in PAR.TEMPLATES.items():
-        for template in val:
-            if template.startswith('_inherit'):
-                name = '_'.join(template.split('_')[2:])
-                try:
-                    project.require_module(name=name, contents={'model': {'value': ''}})
-                except NameError:
-                    pass
     action = project.require_action(ACTION_ID)
     yield project, action
 
@@ -71,14 +63,6 @@ def module_teardown_setup_project_setup():
     except NameError:
         pass
     project = expipe.require_project(PROJECT_ID)
-    for key, val in PAR.TEMPLATES.items():
-        for template in val:
-            if template.startswith('_inherit'):
-                name = '_'.join(template.split('_')[2:])
-                try:
-                    project.require_module(name=name, contents={'model': {'value': ''}})
-                except NameError:
-                    pass
 
     from expipe_plugin_cinpla.main import CinplaPlugin
     CinplaPlugin().attach_to_cli(cli)
@@ -104,14 +88,6 @@ def module_teardown_setup_project_setup():
 @pytest.fixture
 def setup_project_action():
     project = expipe.require_project(PROJECT_ID)
-    for key, val in PAR.TEMPLATES.items():
-        for template in val:
-            if template.startswith('_inherit'):
-                name = '_'.join(template.split('_')[2:])
-                try:
-                    project.require_module(name=name, contents={'test': 'cont'})
-                except NameError:
-                    pass
     try:
         project.delete_action(ACTION_ID)
     except NameError:
