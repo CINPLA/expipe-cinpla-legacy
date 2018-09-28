@@ -1,6 +1,7 @@
-import yaml
 import os
-import sys
+
+import yaml
+
 import expipe
 
 config_dir = os.path.join(os.path.expanduser('~'), '.config', 'expipe')
@@ -9,6 +10,8 @@ test_settings_file_path = os.path.join(config_dir, 'test-config.yaml')
 
 default_settings = {
     'data_path': os.path.join(os.path.join(os.path.expanduser('~'), 'expipe_data')),
+    'database_version': 1,
+    "username": "nobody",
     'firebase': {
         'email': '',
         'password': '',
@@ -23,7 +26,9 @@ default_settings = {
 
 debug_settings = {
     'allow_tests': 'true',
+    'database_version': 1,
     'data_path': '/tmp/expipe_data',
+    "username": "nobody",
     'firebase': {
         'email': 'debug-bot@cinpla.com',
         'password': 'noneed',
@@ -107,23 +112,27 @@ def ensure_testing():
         settings = debug_settings
     assert("allow_tests" in settings and settings["allow_tests"])
     expipe.settings = settings
-    expipe.io.core._init_module()
 
 
-try:
-    with open(settings_file_path) as settings_file:
-        settings = yaml.load(settings_file)
-        deep_verification(default_settings, settings)
-        expipe.settings = settings
-except FileNotFoundError:
-    print("WARNING: No expipe configuration file found. Using default settings.",
-          "Type the following for more information about creating a config file:\n\n",
-          "\texpipe.configure?\n\n")
-    settings = default_settings
-    expipe.settings = settings
+class Settings:
+    def __init__(self):
+        self.settings = {}
 
-# if ("unittest" in sys.modules.keys() or
-#         "_pytest" in sys.modules.keys() or
-#         "doctest" in sys.argv):
-#     print("Test module has been loaded. Using test config.")
-#     ensure_testing()
+    def ensure_init(self):
+        try:
+            with open(settings_file_path) as settings_file:
+                settings = yaml.load(settings_file)
+                deep_verification(default_settings, settings)
+                self.settings = settings
+                return True
+        except FileNotFoundError:
+            print("ERROR: No expipe configuration file found.",
+                  "Type the following for more information about creating a config file:\n\n",
+                  "\texpipe.configure?\n\n")
+            return False
+
+    def __getitem__(self, name):
+        self.ensure_init()
+        return self.settings[name]
+
+settings = Settings()
