@@ -68,4 +68,4 @@ for action in project.actions:
     print('Evaluating ', action.id)
     run_shell_command(['expipe', 'analyse', action.id, '-a',
                        'spatial', '--skip'])
-    expipe.io.core.refresh_token()
+    expipe.core.refresh_token()

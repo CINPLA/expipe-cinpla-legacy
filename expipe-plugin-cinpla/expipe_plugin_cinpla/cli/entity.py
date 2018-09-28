@@ -88,7 +88,7 @@ def attach_to_cli(cli):
                   )
     def generate_entity(entity_id, overwrite, user, message, location, tag,
                          **kwargs):
-        DTIME_FORMAT = expipe.io.core.datetime_format
+        DTIME_FORMAT = expipe.core.datetime_format
         project = expipe.require_project('entities-registry')
         entity = project.require_entity(entity_id)
         kwargs['birthday'] = datetime.strftime(

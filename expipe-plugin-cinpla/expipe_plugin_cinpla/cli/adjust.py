@@ -46,7 +46,7 @@ def attach_to_cli(cli):
             assert date is not None, 'Missing option "-d" / "--date".'
         if init and date is None:
             date = 'now'
-        DTIME_FORMAT = expipe.io.core.datetime_format
+        DTIME_FORMAT = expipe.core.datetime_format
         if date == 'now':
             date = datetime.now()
         else:

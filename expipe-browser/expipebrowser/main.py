@@ -25,7 +25,7 @@ from PyQt5.QtQml import qmlRegisterType, qmlRegisterSingletonType, QQmlComponent
 
 from . import qml_qrc
 from expipe import settings
-import expipe.io
+import expipe
 
 import time
 
@@ -226,8 +226,8 @@ class EventSource(QAbstractListModel):
 
         if self._partial_message:
             print("WARNING: Received partial message, forcing update by an ugly hack.")
-            expipe.io.core.db.child(self._path).update({"__partial_update_hack": True}, expipe.io.core.user["idToken"])
-            expipe.io.core.db.child(self._path).update({"__partial_update_hack": None}, expipe.io.core.user["idToken"])
+            expipe.core.db.child(self._path).update({"__partial_update_hack": True}, expipe.core.user["idToken"])
+            expipe.core.db.child(self._path).update({"__partial_update_hack": None}, expipe.core.user["idToken"])
 
     def processFinished(self):
         reply = self.sender()
@@ -256,8 +256,8 @@ class EventSource(QAbstractListModel):
         if path == "":
             self.disconnect()
         else:
-            target = expipe.io.core.db.child(path).order_by_key().shallow()
-            url_str = target.build_request_url(token=expipe.io.core.user["idToken"])
+            target = expipe.core.db.child(path).order_by_key().shallow()
+            url_str = target.build_request_url(token=expipe.core.user["idToken"])
             url = QUrl(url_str)
             self.reconnect(url)
         self.pathChanged.emit()
@@ -499,11 +499,11 @@ class Pyrebase(QObject):
 
     @pyqtSlot(str, name="buildUrl", result=str)
     def build_url(self, path):
-        return expipe.io.core.db.child(path).build_request_url(expipe.io.core.user["idToken"])
+        return expipe.core.db.child(path).build_request_url(expipe.core.user["idToken"])
 
     @pyqtSlot(name="refreshToken")
     def refresh_token(self):
-        expipe.io.core.refresh_token()
+        expipe.core.refresh_token()
 
 pyrebase_static = Pyrebase()
 

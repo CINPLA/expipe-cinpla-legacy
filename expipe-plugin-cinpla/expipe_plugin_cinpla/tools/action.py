@@ -7,7 +7,7 @@ nwb_main_groups = ['acquisition', 'analysis', 'processing', 'epochs',
 
 
 def get_git_info():
-    DTIME_FORMAT = expipe.io.core.datetime_format
+    DTIME_FORMAT = expipe.core.datetime_format
 
     GIT_NOTE = {
         'registered': datetime.strftime(datetime.now(), DTIME_FORMAT),
@@ -59,7 +59,7 @@ def deltadate(adjustdate, regdate):
 
 
 def register_depth(project, action, depth=None, answer=False):
-    DTIME_FORMAT = expipe.io.core.datetime_format
+    DTIME_FORMAT = expipe.core.datetime_format
     regdate = action.datetime
     mod_info = PAR.MODULES['implantation']
     depth = depth or []

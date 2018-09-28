@@ -94,7 +94,7 @@ Rectangle {
             Button {
                 id: codeButton
                 property string snippet: "import expipe\n" +
-                                         "project = expipe.io.get_project('" + experimentData.project+ "')\n" +
+                                         "project = expipe.get_project('" + experimentData.project+ "')\n" +
                                          "action = project.require_action('" + experimentData.__key + "')\n" +
                                          "# continue working with action"
                 text: "Copy Python code"
