@@ -1,4 +1,4 @@
-from expipe_plugin_cinpla.imports import *
+entitiesfrom expipe_plugin_cinpla.imports import *
 from expipe_plugin_cinpla.tools import action as action_tools
 from expipe_plugin_cinpla.tools import config
 
@@ -45,9 +45,9 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='Generate action without storing modules.',
                   )
-    @click.option('--subject-id',
+    @click.option('--entity-id',
                   type=click.STRING,
-                  help='The id number of the subject.',
+                  help='The id number of the entity.',
                   )
     @click.option('--overwrite',
                   is_flag=True,
@@ -87,7 +87,7 @@ def attach_to_cli(cli):
                   )
     def generate_axona_action(action_id, axona_filename, depth, user,
                               no_local, overwrite, no_files, no_modules,
-                              subject_id, location, message, tag,
+                              entity_id, location, message, tag,
                               get_inp, yes, hard, no_cut, cluster_group,
                               set_noise):
         if not axona_filename.endswith('.set'):
@@ -96,14 +96,14 @@ def attach_to_cli(cli):
         if len(cluster_group) == 0:
             cluster_group = None # TODO set proper default via callback
         project = expipe.require_project(PAR.USER_PARAMS['project_id'])
-        subject_id = subject_id or axona_filename.split(os.sep)[-2]
+        entity_id = entity_id or axona_filename.split(os.sep)[-2]
         axona_file = pyxona.File(axona_filename)
         if action_id is None:
             session_dtime = datetime.strftime(axona_file._start_datetime,
                                               '%d%m%y')
             basename, _ = os.path.splitext(axona_filename)
             session = basename[-2:]
-            action_id = subject_id + '-' + session_dtime + '-' + session
+            action_id = entity_id + '-' + session_dtime + '-' + session
         if overwrite and hard:
             try:
                 project.delete_action(action_id)
@@ -117,8 +117,8 @@ def attach_to_cli(cli):
         action.datetime = axona_file._start_datetime
         action.tags = list(tag) + ['axona']
         print('Registering action id ' + action_id)
-        print('Registering subject id ' + subject_id)
-        action.subjects = [subject_id]
+        print('Registering entity id ' + entity_id)
+        action.entities = [entity_id]
         user = user or PAR.USER_PARAMS['user_name']
         user = user or []
         if len(user) == 0:

@@ -5,7 +5,7 @@ from expipe_plugin_cinpla.tools import config
 
 def attach_to_cli(cli):
     @cli.command('register-surgery', short_help='Generate a surgery action.')
-    @click.argument('subject-id')
+    @click.argument('entity-id')
     @click.option('--date', '-d',
                   required=True,
                   type=click.STRING,
@@ -39,7 +39,7 @@ def attach_to_cli(cli):
                   nargs=2,
                   type=(click.FLOAT, click.STRING),
                   default=(None, None),
-                  help='The weight of the subject with unit i.e. <200 g> (ommit <>).',
+                  help='The weight of the entity with unit i.e. <200 g> (ommit <>).',
                   )
     @click.option('-p', '--position',
                   required=True,
@@ -58,15 +58,15 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='Add message, use "text here" for sentences.',
                   )
-    def generate_surgery(subject_id, procedure, date, user, weight, hard,
+    def generate_surgery(entity_id, procedure, date, user, weight, hard,
                          overwrite, position, angle, message, tag):
         # TODO tag sucject as active
         assert weight != (None, None), 'Missing argument -w / --weight.'
         weight = pq.Quantity(weight[0], weight[1])
         project = expipe.require_project(PAR.USER_PARAMS['project_id'])
-        action = project.require_action(subject_id + '-surgery-' + procedure)
+        action = project.require_action(entity_id + '-surgery-' + procedure)
         if overwrite and hard:
-            project.delete_action(subject_id + '-surgery-' + procedure)
+            project.delete_action(entity_id + '-surgery-' + procedure)
         generate_templates(action, 'surgery_' + procedure,
                            overwrite, git_note=get_git_info())
         if date == 'now':
@@ -77,7 +77,7 @@ def attach_to_cli(cli):
         action.location = 'Sterile surgery station'
         action.type = 'Surgery'
         action.tags = [procedure] + list(tag)
-        action.subjects = [subject_id]
+        action.entities = [entity_id]
         user = user or PAR.USER_PARAMS['user_name']
         user = user or []
         if len(user) == 0:
@@ -114,20 +114,17 @@ def attach_to_cli(cli):
             action.require_module(name=PAR.MODULES[procedure][key],
                                   contents=modules[key], overwrite=True)
 
-        subject = {'_inherits': '/action_modules/' +
-                                'subjects-registry/' +
-                                subject_id}
-        subject['weight'] = weight
-        action.require_module(name=PAR.MODULES['subject'], contents=subject,
+        action.require_module(name=PAR.MODULES['entity'], contents=entity,
                               overwrite=True)
-        subjects_project = expipe.require_project('subjects-registry')
-        subject_action = subjects_project.require_action(subject_id)
-        subject_action.tags.extend(['surgery', PAR.USER_PARAMS['project_id']])
-        subject_action.users.append(user)
+        entity = project.require_entity(entity_id)
+        entity_module = entity.require_module(PAR.MODULES['entity'])
+        entity_module['weight'] = weight
+        entity.tags.extend(['surgery', PAR.USER_PARAMS['project_id']])
+        entity.users.append(user)
 
     @cli.command('register-euthanasia',
-                 short_help=('Register a subjects euthanasia.'))
-    @click.argument('subject-id')
+                 short_help=('Register a entities euthanasia.'))
+    @click.argument('entity-id')
     @click.option('-u', '--user',
                   type=click.STRING,
                   help='The experimenter performing the registration.',
@@ -137,26 +134,24 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='Add message, use "text here" for sentences.',
                   )
-    def generate_euthanasia(subject_id, user, message):
-        project = expipe.require_project('subjects-registry')
-        action = project.require_action(subject_id)
-        action.tags.append('euthanised')
-        assert action.subjects[0] == subject_id
+    def generate_euthanasia(entity_id, user, message):
+        entity = project.require_entity(entity_id)
+        entity.tags.append('euthanised')
         user = user or PAR.USER_PARAMS['user_name']
         user = user or []
         if len(user) == 0:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
-        action.users.append(user)
-        action.messages.extend([{'message': m,
+        entity.users.append(user)
+        entity.messages.extend([{'message': m,
                                  'user': user,
                                  'datetime': datetime.now()}
                                for m in message])
 
     @cli.command('register-perfusion',
                  short_help=('Generate a perfusion action. ' +
-                             'Also tags the subject as perfused and euthanised.'))
-    @click.argument('subject-id')
+                             'Also tags the entity as perfused and euthanised.'))
+    @click.argument('entity-id')
     @click.option('--date', '-d',
                   required=True,
                   type=click.STRING,
@@ -176,9 +171,9 @@ def attach_to_cli(cli):
                   default=(None, None),
                   help='The weight of the animal.',
                   )
-    def generate_perfusion(subject_id, date, user, overwrite, weight):
+    def generate_perfusion(entity_id, date, user, overwrite, weight):
         project = expipe.require_project(PAR.USER_PARAMS['project_id'])
-        action = project.require_action(subject_id + '-perfusion')
+        action = project.require_action(entity_id + '-perfusion')
         generate_templates(action, 'perfusion',
                            overwrite, git_note=get_git_info())
         if date == 'now':
@@ -189,20 +184,17 @@ def attach_to_cli(cli):
         action.location = 'Sterile surgery station'
         action.type = 'Surgery'
         action.tags = ['perfusion']
-        action.subjects = [subject_id]
+        action.entities = [entity_id]
         user = user or PAR.USER_PARAMS['user_name']
         user = user or []
         if len(user) == 0:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
-        subject = {'_inherits': '/action_modules/' +
-                                'subjects-registry/' +
-                                subject_id}
         if weight != (None, None):
-            subject['weight'] = pq.Quantity(weight[0], weight[1])
-        action.require_module(name=PAR.MODULES['subject'], contents=subject,
-                              overwrite=True)
-        subjects_project = expipe.require_project('subjects-registry')
-        subject_action = subjects_project.require_action(subject_id)
-        subject_action.tags.extend(['perfused', 'euthanised'])
+            entity_dict = action.require_module(name=PAR.MODULES['entity']).to_dict()
+            entity_dict['weight'] = pq.Quantity(weight[0], weight[1])
+            action.require_module(name=PAR.MODULES['entity'], contents=entity_dict,
+                                  overwrite=True)
+        entity = project.require_entity(entity_id)
+        entity.tags.extend(['perfused', 'euthanised'])

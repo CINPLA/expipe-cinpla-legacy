@@ -1,13 +1,13 @@
-from expipe_plugin_cinpla.imports import *
+entitiesfrom expipe_plugin_cinpla.imports import *
 from expipe_plugin_cinpla.tools.action import generate_templates, get_git_info, query_yes_no
 from expipe_plugin_cinpla.tools import config
 
 
 def attach_to_cli(cli):
-    @cli.command('register-subject',
-                 short_help=('Register a subject to the "subjects-registry" ' +
+    @cli.command('register-entity',
+                 short_help=('Register a entity to the "entities-registry" ' +
                              'project.'))
-    @click.argument('subject-id')
+    @click.argument('entity-id')
     @click.option('--overwrite',
                   is_flag=True,
                   help='Overwrite modules or not.',
@@ -24,17 +24,17 @@ def attach_to_cli(cli):
     @click.option('--birthday',
                   required=True,
                   type=click.STRING,
-                  help='The birthday of the subject, format: "dd.mm.yyyy".',
+                  help='The birthday of the entity, format: "dd.mm.yyyy".',
                   )
     @click.option('--cell_line',
                   type=click.STRING,
                   callback=config.optional_choice,
                   envvar=PAR.POSSIBLE_CELL_LINES,
-                  help='Add tags to action.',
+                  help='Add cell line to entity.',
                   )
     @click.option('--developmental_stage',
                   type=click.STRING,
-                  help="The developemtal stage of the subject. E.g. 'embroyonal', 'adult', 'larval' etc.",
+                  help="The developemtal stage of the entity. E.g. 'embroyonal', 'adult', 'larval' etc.",
                   )
     @click.option('--gender',
                   type=click.STRING,
@@ -42,19 +42,19 @@ def attach_to_cli(cli):
                   )
     @click.option('--genus',
                   type=click.STRING,
-                  help='The Genus of the studied subject. E.g "rattus"',
+                  help='The Genus of the studied entity. E.g "rattus"',
                   )
     @click.option('--health_status',
                   type=click.STRING,
-                  help='Information about the health status of this subject.',
+                  help='Information about the health status of this entity.',
                   )
     @click.option('--label',
                   type=click.STRING,
-                  help='If the subject has been labled in a specific way. The lable can be described here.',
+                  help='If the entity has been labled in a specific way. The lable can be described here.',
                   )
     @click.option('--population',
                   type=click.STRING,
-                  help='The population this subject is offspring of. This may be the bee hive, the ant colony, etc.',
+                  help='The population this entity is offspring of. This may be the bee hive, the ant colony, etc.',
                   )
     @click.option('--species',
                   type=click.STRING,
@@ -62,7 +62,7 @@ def attach_to_cli(cli):
                   )
     @click.option('--strain',
                   type=click.STRING,
-                  help='The strain the subject was taken from. E.g. a specific genetic variation etc.',
+                  help='The strain the entity was taken from. E.g. a specific genetic variation etc.',
                   )
     @click.option('--trivial_name',
                   type=click.STRING,
@@ -84,45 +84,44 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   callback=config.optional_choice,
                   envvar=PAR.POSSIBLE_TAGS,
-                  help='Add tags to action.',
+                  help='Add tags to entity.',
                   )
-    def generate_subject(subject_id, overwrite, user, message, location, tag,
+    def generate_entity(entity_id, overwrite, user, message, location, tag,
                          **kwargs):
         DTIME_FORMAT = expipe.io.core.datetime_format
-        project = expipe.require_project('subjects-registry')
-        action = project.require_action(subject_id)
+        project = expipe.require_project('entities-registry')
+        entity = project.require_entity(entity_id)
         kwargs['birthday'] = datetime.strftime(
             datetime.strptime(kwargs['birthday'], '%d.%m.%Y'), DTIME_FORMAT)
-        action.datetime = datetime.now()
-        action.type = 'Info'
-        action.tags.extend(list(tag))
-        action.location = location
-        action.subjects = [subject_id]
+        entity.datetime = datetime.now()
+        entity.type = 'Subject'
+        entity.tags.extend(list(tag))
+        entity.location = location
         user = user or PAR.USER_PARAMS['user_name']
         user = user or []
         if len(user) == 0:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
-        action.users = [user]
-        action.messages.extend([{'message': m,
+        entity.users = [user]
+        entity.messages.extend([{'message': m,
                                  'user': user,
                                  'datetime': datetime.now()}
                                for m in message])
-        subject_template_name = PAR.MODULES.get('subject') or 'subject_subject'
-        subject = action.require_module(template=subject_template_name,
+        entity_template_name = PAR.MODULES.get('entity') or 'entity_entity'
+        entity = entity.require_module(template=entity_template_name,
                                         overwrite=overwrite).to_dict()
         for key, val in kwargs.items():
             if isinstance(val, (str, float, int)):
-                subject[key]['value'] = val
+                entity[key]['value'] = val
             elif isinstance(val, tuple):
                 if not None in val:
-                    subject[key] = pq.Quantity(val[0], val[1])
+                    entity[key] = pq.Quantity(val[0], val[1])
             elif isinstance(val, type(None)):
                 pass
             else:
                 raise TypeError('Not recognized type ' + str(type(val)))
         not_reg_keys = []
-        for key, val in subject.items():
+        for key, val in entity.items():
             if isinstance(val, dict):
                 if val.get('value') is None:
                     not_reg_keys.append(key)
@@ -130,5 +129,5 @@ def attach_to_cli(cli):
                     not_reg_keys.append(key)
         if len(not_reg_keys) > 0:
             warnings.warn('No value registered for {}'.format(not_reg_keys))
-        action.require_module(name=subject_template_name, contents=subject,
+        entity.require_module(name=entity_template_name, contents=entity,
                               overwrite=True)

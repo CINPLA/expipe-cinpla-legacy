@@ -6,7 +6,7 @@ from . import axona as AX
 from . import environment
 from . import misc
 from . import openephys as OE
-from . import subject
+from . import entity
 from . import surgery
 from . import transfer
 
@@ -41,7 +41,7 @@ class CinplaPlugin(IPlugin):
         misc.attach_to_cli(cli)
         adjust.attach_to_cli(cli)
         surgery.attach_to_cli(cli)
-        subject.attach_to_cli(cli)
+        entity.attach_to_cli(cli)
         transfer.attach_to_cli(cli)
         environment.attach_to_cli(env)
         OE.attach_to_cli(openephys)

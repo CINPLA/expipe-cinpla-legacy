@@ -6,7 +6,7 @@ from expipe_plugin_cinpla.tools import config
 def attach_to_cli(cli):
     @cli.command('adjust',
                  short_help='Parse info about drive depth adjustment')
-    @click.argument('subject-id',  type=click.STRING)
+    @click.argument('entity-id',  type=click.STRING)
     @click.option('-d', '--date',
                   type=click.STRING,
                   help=('The date of the surgery format: "dd.mm.yyyyTHH:MM" ' +
@@ -39,7 +39,7 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='No query for correct adjustment.',
                   )
-    def generate_adjustment(subject_id, date, adjustment, user, index, init,
+    def generate_adjustment(entity_id, date, adjustment, user, index, init,
                             overwrite, yes):
         if not init:
             assert len(adjustment) != 0, 'Missing option "-a" / "--adjustment".'
@@ -54,9 +54,9 @@ def attach_to_cli(cli):
         datestring = datetime.strftime(date, DTIME_FORMAT)
         project = expipe.require_project(PAR.USER_PARAMS['project_id'])
         if init:
-            action = project.require_action(subject_id + '-adjustment')
+            action = project.require_action(entity_id + '-adjustment')
         else:
-            action = project.get_action(subject_id + '-adjustment')
+            action = project.get_action(entity_id + '-adjustment')
         if index is None and not init:
             deltas = []
             for name in action.modules.keys():
@@ -65,7 +65,7 @@ def attach_to_cli(cli):
             index = max(deltas) + 1
         if init:
             index = 0
-            surgery = project.get_action(subject_id + '-surgery-implantation')
+            surgery = project.get_action(entity_id + '-surgery-implantation')
             sdict = surgery.modules.to_dict()
             templates_used = {
                 key: mod for key, mod in PAR.MODULES['implantation'].items()
@@ -136,7 +136,7 @@ def attach_to_cli(cli):
         action.require_module(name=name, contents=content, overwrite=True)
 
         action.type = 'Adjustment'
-        action.subjects = [subject_id]
+        action.entities = [entity_id]
         user = user or PAR.USER_PARAMS['user_name']
         user = user or []
         if len(user) == 0:

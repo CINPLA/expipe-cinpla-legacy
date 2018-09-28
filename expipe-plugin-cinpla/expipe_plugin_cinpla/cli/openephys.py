@@ -1,4 +1,4 @@
-from expipe_plugin_cinpla.imports import *
+entitiesfrom expipe_plugin_cinpla.imports import *
 from expipe_plugin_cinpla.tools import action as action_tools
 from expipe_plugin_cinpla.tools import config
 from datetime import timedelta
@@ -63,9 +63,9 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='Generate action without storing modules.',
                   )
-    @click.option('--subject-id',
+    @click.option('--entity-id',
                   type=click.STRING,
-                  help='The id number of the subject.',
+                  help='The id number of the entity.',
                   )
     @click.option('--prb-path',
                   type=click.STRING,
@@ -102,7 +102,7 @@ def attach_to_cli(cli):
                   )
     def generate_openephys_action(action_id, openephys_path, no_local,
                                   depth, overwrite, no_files, no_modules,
-                                  subject_id, user, prb_path, session, nchan,
+                                  entity_id, user, prb_path, session, nchan,
                                   location, spikes_source, message, no_move,
                                   tag, hard):
         settings = config.load_settings()['current']
@@ -116,7 +116,7 @@ def attach_to_cli(cli):
         openephys_file = pyopenephys.File(openephys_path, prb_path)
         openephys_exp = openephys_file.experiments[0]
         openephys_rec = openephys_exp.recordings[0]
-        subject_id = subject_id or openephys_dirname.split('_')[0]
+        entity_id = entity_id or openephys_dirname.split('_')[0]
         session = session or openephys_dirname.split('_')[-1]
         if session.isdigit():
             pass
@@ -126,7 +126,7 @@ def attach_to_cli(cli):
         if action_id is None:
             session_dtime = datetime.strftime(openephys_exp.datetime,
                                               '%d%m%y')
-            action_id = subject_id + '-' + session_dtime + '-' + session
+            action_id = entity_id + '-' + session_dtime + '-' + session
         if overwrite and hard:
             try:
                 project.delete_action(action_id)
@@ -146,8 +146,8 @@ def attach_to_cli(cli):
         action.datetime = openephys_exp.datetime
         action.type = 'Recording'
         action.tags.extend(list(tag) + ['open-ephys'])
-        print('Registering subject id ' + subject_id)
-        action.subjects = [subject_id]
+        print('Registering entity id ' + entity_id)
+        action.entities = [entity_id]
         user = user or PAR.USER_PARAMS['user_name']
         if user is None:
             raise ValueError('Please add user name')
