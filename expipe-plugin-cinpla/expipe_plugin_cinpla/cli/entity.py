@@ -1,4 +1,4 @@
-entitiesfrom expipe_plugin_cinpla.imports import *
+from expipe_plugin_cinpla.imports import *
 from expipe_plugin_cinpla.tools.action import generate_templates, get_git_info, query_yes_no
 from expipe_plugin_cinpla.tools import config
 
