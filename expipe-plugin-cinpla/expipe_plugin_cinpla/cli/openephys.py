@@ -73,7 +73,7 @@ def attach_to_cli(cli):
                   )
     @click.option('--overwrite',
                   is_flag=True,
-                  help='Overwrite modules or not.',
+                  help='Overwrite files and expipe action.',
                   )
     @click.option('--hard',
                   is_flag=True,
@@ -140,7 +140,11 @@ def attach_to_cli(cli):
                 raise ValueError('Could not find "openephys" in ' +
                                  'expipe_params.py PAR.TEMPLATES: "' +
                                  '{}"'.format(PAR.TEMPLATES.keys()))
-            action_tools.generate_templates(action, 'openephys', overwrite,
+            correct_depth = action_tools.register_depth(project, action, depth)
+            if not correct_depth:
+                print('Aborting registration!')
+                return
+            action_tools.generate_templates(action, 'openephys',
                                             git_note=action_tools.get_git_info())
 
         action.datetime = openephys_exp.datetime
@@ -162,27 +166,21 @@ def attach_to_cli(cli):
         print('Registering location ' + location)
         action.location = location
 
-        messages = [{'message': m, 'user': user, 'datetime': datetime.now()}
-                    for m in message]
+        for m in message:
+            action.create_message(text=m, user=user, datetime=datetime.now())
         if not no_modules:
             headstage = action.require_module(
                 name='hardware_intan_headstage').to_dict()
             headstage['model']['value'] = 'RHD2132'
             action.require_module(name='hardware_intan_headstage',
-                                  contents=headstage, overwrite=True)
-            correct_depth = action_tools.register_depth(project, action, depth)
-            if not correct_depth:
-                print('Aborting registration!')
-                return
+                                  contents=headstage)
 
             # TODO update to messages
             # for idx, m in enumerate(openephys_rec.messages):
             #     secs = float(m['time'].rescale('s').magnitude)
             #     dtime = openephys_file.datetime + timedelta(secs)
-            #     messages.append({'datetime': dtime,
-            #                      'message': m['message'],
-            #                      'user': user})
-        action.messages.extend(messages)
+            #     action.create_message(text=m['message'], user=user, datetime=dtime)
+
         if not no_files:
             fr = action.require_filerecord()
             if not no_local:

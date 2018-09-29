@@ -1,6 +1,7 @@
 from expipe_plugin_cinpla.imports import *
-from expipe_plugin_cinpla.tools.action import generate_templates, get_git_info, query_yes_no
+from expipe_plugin_cinpla.tools import action as action_tools
 from expipe_plugin_cinpla.tools import config
+from datetime import datetime as dt
 
 
 def attach_to_cli(cli):
@@ -18,10 +19,6 @@ def attach_to_cli(cli):
                   help=('The adjustment amount on given anatomical location ' +
                         'given as <key num value unit>'),
                   )
-    @click.option('--overwrite',
-                  is_flag=True,
-                  help='Overwrite modules or not.',
-                  )
     @click.option('--index',
                   type=click.INT,
                   help=('Index for module name, this is found automatically ' +
@@ -30,6 +27,12 @@ def attach_to_cli(cli):
     @click.option('--init',
                   is_flag=True,
                   help='Initialize, retrieve depth from surgery.',
+                  )
+    @click.option('-d', '--depth',
+                  multiple=True,
+                  callback=config.validate_depth,
+                  help=('The depth given as <key num depth unit> e.g. ' +
+                        '<mecl 0 10 um> (omit <>).'),
                   )
     @click.option('-u', '--user',
                   type=click.STRING,
@@ -40,23 +43,17 @@ def attach_to_cli(cli):
                   help='No query for correct adjustment.',
                   )
     def generate_adjustment(entity_id, date, adjustment, user, index, init,
-                            overwrite, yes):
+                            depth, yes):
         if not init:
+            assert len(depth) == 0, '"--depth" is only valid if "--init"'
             assert len(adjustment) != 0, 'Missing option "-a" / "--adjustment".'
             assert date is not None, 'Missing option "-d" / "--date".'
-        if init and date is None:
-            date = 'now'
         DTIME_FORMAT = expipe.core.datetime_format
-        if date == 'now':
-            date = datetime.now()
-        else:
-            date = datetime.strptime(date, '%d.%m.%YT%H:%M')
-        datestring = datetime.strftime(date, DTIME_FORMAT)
+        date = dt.now() if date is None else dt.strptime(date, '%d.%m.%YT%H:%M')
+
+        datestring = dt.strftime(date, DTIME_FORMAT)
         project = expipe.require_project(PAR.USER_PARAMS['project_id'])
-        if init:
-            action = project.require_action(entity_id + '-adjustment')
-        else:
-            action = project.get_action(entity_id + '-adjustment')
+        action = project.require_action(entity_id + '-adjustment')
         if index is None and not init:
             deltas = []
             for name in action.modules.keys():
@@ -64,27 +61,15 @@ def attach_to_cli(cli):
                     deltas.append(int(name.split('_')[0]))
             index = max(deltas) + 1
         if init:
+            if len(depth) > 0:
+                prev_depth = action_tools.position_to_dict(depth)
+            else:
+                prev_depth = action_tools.get_position_from_surgery(
+                    project=project, entity_id=entity_id)
             index = 0
-            surgery = project.get_action(entity_id + '-surgery-implantation')
-            sdict = surgery.modules.to_dict()
-            templates_used = {
-                key: mod for key, mod in PAR.MODULES['implantation'].items()
-                if mod in sdict}
-            prev_depth = {key: {pos_key: sdict[mod][pos_key][2]
-                                for pos_key in sdict[mod]
-                                if pos_key.startswith('position_')
-                                and pos_key.split('_')[-1].isnumeric()}
-                          for key, mod in templates_used.items()}
-            for key, groups in prev_depth.items():
-                for group, depth in groups.items():
-                    if not isinstance(depth, pq.Quantity):
-                        raise ValueError('Depth of implant ' +
-                                         '"{} {} = {}"'.format(key, group, depth) +
-                                         ' not recognized')
-                    prev_depth[key][group] = depth.astype(float)
         else:
-            prev_name = '{:03d}_adjustment'.format(index - 1)
-            prev_depth = action.require_module(name=prev_name).to_dict()['depth']
+            prev_depth = action.require_module(
+                name='{:03d}_adjustment'.format(index - 1)).to_dict()['depth']
         name = '{:03d}_adjustment'.format(index)
         assert isinstance(prev_depth, dict), 'Unable to retrieve previous depth.'
         adjustment_dict = {key: dict() for key in prev_depth}
@@ -100,7 +85,7 @@ def attach_to_cli(cli):
 
         def last_num(x):
             return '%.3d' % int(x.split('_')[-1])
-        correct = query_yes_no(
+        correct = action_tools.query_yes_no(
             'Correct adjustment?: \n' +
             ' '.join('{} {} = {}\n'.format(key, pos_key, val[pos_key])
                      for key, val in adjustment.items()
@@ -125,15 +110,14 @@ def attach_to_cli(cli):
                      for pos_key in sorted(val, key=lambda x: last_num(x)))
         )
         template_name = PAR.TEMPLATES.get('adjustment') or 'protocol_depth_adjustment'
-        module = action.require_module(template=template_name,
-                                       name=name, overwrite=overwrite)
+        module = action.require_module(template=template_name)
         content = module.to_dict()
         content['depth'] = curr_depth
         content['adjustment'] = adjustment
         content['experimenter'] = user
         content['date'] = datestring
-        content['git_note'] = get_git_info()
-        action.require_module(name=name, contents=content, overwrite=True)
+        content['git_note'] = action_tools.get_git_info()
+        action.require_module(name=name, contents=content)
 
         action.type = 'Adjustment'
         action.entities = [entity_id]

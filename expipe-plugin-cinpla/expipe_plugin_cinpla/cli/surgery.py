@@ -68,7 +68,7 @@ def attach_to_cli(cli):
         if overwrite and hard:
             project.delete_action(entity_id + '-surgery-' + procedure)
         generate_templates(action, 'surgery_' + procedure,
-                           overwrite, git_note=get_git_info())
+                           git_note=get_git_info())
         if date == 'now':
             date = datetime.now()
         else:
@@ -86,15 +86,12 @@ def attach_to_cli(cli):
         action.users = [user]
         if overwrite:
             action.messages = []
-        action.messages.extend([{'message': m,
-                                 'user': user,
-                                 'datetime': datetime.now()}
-                               for m in message])
+        for m in message:
+            action.create_message(text=m, user=user, datetime=datetime.now())
         modules_dict = action.modules.to_dict()
         keys = list(set([pos[0] for pos in position]))
         modules = {
-            key: action.require_module(template=PAR.MODULES[procedure][key],
-                                       overwrite=overwrite).to_dict()
+            key: action.require_module(template=PAR.MODULES[procedure][key]).to_dict()
             for key in keys}
         for key, num, x, y, z, unit in position:
             mod = modules[key]
@@ -112,10 +109,9 @@ def attach_to_cli(cli):
             mod['angle'] = pq.Quantity(ang, unit)
         for key in keys:
             action.require_module(name=PAR.MODULES[procedure][key],
-                                  contents=modules[key], overwrite=True)
+                                  contents=modules[key])
 
-        action.require_module(name=PAR.MODULES['entity'], contents=entity,
-                              overwrite=True)
+        action.require_module(name=PAR.MODULES['entity'], contents=entity)
         entity = project.require_entity(entity_id)
         entity_module = entity.require_module(PAR.MODULES['entity'])
         entity_module['weight'] = weight
@@ -157,10 +153,6 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='The date of the surgery format: "dd.mm.yyyyTHH:MM".',
                   )
-    @click.option('--overwrite',
-                  is_flag=True,
-                  help='Overwrite modules or not.',
-                  )
     @click.option('-u', '--user',
                   type=click.STRING,
                   help='The experimenter performing the surgery.',
@@ -171,11 +163,11 @@ def attach_to_cli(cli):
                   default=(None, None),
                   help='The weight of the animal.',
                   )
-    def generate_perfusion(entity_id, date, user, overwrite, weight):
+    def generate_perfusion(entity_id, date, user, weight):
         project = expipe.require_project(PAR.USER_PARAMS['project_id'])
         action = project.require_action(entity_id + '-perfusion')
         generate_templates(action, 'perfusion',
-                           overwrite, git_note=get_git_info())
+                           git_note=get_git_info())
         if date == 'now':
             date = datetime.now()
         else:
@@ -194,7 +186,6 @@ def attach_to_cli(cli):
         if weight != (None, None):
             entity_dict = action.require_module(name=PAR.MODULES['entity']).to_dict()
             entity_dict['weight'] = pq.Quantity(weight[0], weight[1])
-            action.require_module(name=PAR.MODULES['entity'], contents=entity_dict,
-                                  overwrite=True)
+            action.require_module(name=PAR.MODULES['entity'], contents=entity_dict)
         entity = project.require_entity(entity_id)
         entity.tags.extend(['perfused', 'euthanised'])

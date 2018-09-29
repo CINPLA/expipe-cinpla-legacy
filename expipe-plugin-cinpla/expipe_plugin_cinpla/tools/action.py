@@ -58,38 +58,65 @@ def deltadate(adjustdate, regdate):
     return delta
 
 
+def position_to_dict(depth):
+    position = {d[0]: dict() for d in depth}
+    for key, num, val, unit in depth:
+        pos_key = 'position_{}'.format(num)
+        position[key][pos_key] = pq.Quantity(val, unit)
+    return position
+
+
+def get_position_from_surgery(project, entity_id):
+    index = 0
+    surgery = project.get_action(entity_id + '-surgery-implantation')
+    sdict = surgery.modules.to_dict()
+    templates_used = {
+        key: mod for key, mod in PAR.MODULES['implantation'].items()
+        if mod in sdict}
+    position = {key: {pos_key: sdict[mod][pos_key][2]
+                        for pos_key in sdict[mod]
+                        if pos_key.startswith('position_')
+                        and pos_key.split('_')[-1].isnumeric()}
+                  for key, mod in templates_used.items()}
+    for key, groups in position.items():
+        for group, depth in groups.items():
+            if not isinstance(depth, pq.Quantity):
+                raise ValueError('Depth of implant ' +
+                                 '"{} {} = {}"'.format(key, group, depth) +
+                                 ' not recognized')
+            position[key][group] = depth.astype(float)
+    return position
+
+
 def register_depth(project, action, depth=None, answer=False):
     DTIME_FORMAT = expipe.core.datetime_format
     regdate = action.datetime
     mod_info = PAR.MODULES['implantation']
     depth = depth or []
     if len(depth) == 0:
-        assert len(action.subjects) == 1
-        subject = action.subjects[0]
+        assert len(action.entities) == 1
+        entity_id = action.entities[0]
         try:
-            adjustments = project.get_action(name=subject + '-adjustment')
-        except NameError as e:
-            raise NameError(
-                str(e) + ', Cannot find current depth, depth must be given ' +
-                'either in adjustments with ' +
-                '"expipe adjust subject-id --init" ' +
-                'or with "--depth".')
-        adjusts = {}
-        for adjust in adjustments.modules:
-            values = adjust.to_dict()
-            adjusts[datetime.strptime(values['date'], DTIME_FORMAT)] = adjust
+            adjustments = project.get_action(name=entity_id + '-adjustment')
+            adjusts = {}
+            for adjust in adjustments.modules:
+                values = adjust.to_dict()
+                adjusts[datetime.strptime(values['date'], DTIME_FORMAT)] = adjust
 
-        adjustdates = adjusts.keys()
-        adjustdate = min(adjustdates, key=lambda x: deltadate(x, regdate))
-        adjustment = adjusts[adjustdate].to_dict()
-        curr_depth = {key: adjustment['depth'].get(key) for key in mod_info
-                      if adjustment['depth'].get(key) is not None}
+            adjustdates = adjusts.keys()
+            adjustdate = min(adjustdates, key=lambda x: deltadate(x, regdate))
+            adjustment = adjusts[adjustdate].to_dict()
+            curr_depth = {key: adjustment['depth'].get(key) for key in mod_info
+                          if adjustment['depth'].get(key) is not None}
+        except KeyError as e:
+            raise KeyError(
+                str(e) + '. Cannot find current depth, from adjustments. ' +
+                'Depth can be given either in adjustments with ' +
+                '"expipe adjust entity-id --init" ' +
+                'or with "--depth".')
+
     else:
-        curr_depth = {d[0]: dict() for d in depth}
-        for key, num, val, unit in depth:
-            pos_key = 'position_{}'.format(num)
-            curr_depth[key][pos_key] = pq.Quantity(val, unit)
-        adjustdate = None
+        curr_depth = position_to_dict(depth)
 
     def last_num(x):
         return '%.3d' % int(x.split('_')[-1])
@@ -104,9 +131,9 @@ def register_depth(project, action, depth=None, answer=False):
         print('Aborting depth registration')
         return False
 
-    assert len(action.subjects) == 1, ('Multiple subjects registered for ' +
+    assert len(action.entities) == 1, ('Multiple entities registered for ' +
                                        'this action, unable to get surgery.')
-    surgery_action_id = action.subjects[0] + '-surgery-implantation'
+    surgery_action_id = action.entities[0] + '-surgery-implantation'
     try:
         surgery = project.get_action(surgery_action_id)
     except NameError as e:
@@ -130,7 +157,7 @@ def register_depth(project, action, depth=None, answer=False):
                 mod[pos_key][2] = val
             else:
                 mod[pos_key] = [np.nan, np.nan, float(val.magnitude)] * val.units
-        action.require_module(name=name, contents=mod, overwrite=True)
+        action.require_module(name=name, contents=mod)
     return True
 
 
@@ -150,12 +177,11 @@ def _get_local_path(file_record, assert_exists=False, make=False):
     return local_path
 
 
-def generate_templates(action, templates_key, overwrite, git_note=None):
+def generate_templates(action, templates_key, git_note=None):
     '''
 
     :param action:
     :param templates:
-    :param overwrite:
     :param git_note:
     :return:
     '''
@@ -165,11 +191,10 @@ def generate_templates(action, templates_key, overwrite, git_note=None):
         return
     if git_note is not None:
         action.require_module(name='software_version_control_git',
-                              contents=git_note, overwrite=overwrite)
+                              contents=git_note)
     for template in templates:
         try:
-            action.require_module(template=template,
-                                  overwrite=overwrite)
+            action.require_module(template=template)
             print('Adding module ' + template)
         except Exception as e:
             print(template)

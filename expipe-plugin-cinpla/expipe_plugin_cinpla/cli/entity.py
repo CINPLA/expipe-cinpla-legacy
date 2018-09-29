@@ -8,10 +8,6 @@ def attach_to_cli(cli):
                  short_help=('Register a entity to the "entities-registry" ' +
                              'project.'))
     @click.argument('entity-id')
-    @click.option('--overwrite',
-                  is_flag=True,
-                  help='Overwrite modules or not.',
-                  )
     @click.option('-u', '--user',
                   type=click.STRING,
                   help='The experimenter performing the registration.',
@@ -86,7 +82,7 @@ def attach_to_cli(cli):
                   envvar=PAR.POSSIBLE_TAGS,
                   help='Add tags to entity.',
                   )
-    def generate_entity(entity_id, overwrite, user, message, location, tag,
+    def generate_entity(entity_id, user, message, location, tag,
                          **kwargs):
         DTIME_FORMAT = expipe.core.datetime_format
         project = expipe.require_project('entities-registry')
@@ -103,13 +99,10 @@ def attach_to_cli(cli):
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         entity.users = [user]
-        entity.messages.extend([{'message': m,
-                                 'user': user,
-                                 'datetime': datetime.now()}
-                               for m in message])
+        for m in message:
+            action.create_message(text=m, user=user, datetime=datetime.now())
         entity_template_name = PAR.MODULES.get('entity') or 'entity_entity'
-        entity = entity.require_module(template=entity_template_name,
-                                        overwrite=overwrite).to_dict()
+        entity = entity.require_module(template=entity_template_name).to_dict()
         for key, val in kwargs.items():
             if isinstance(val, (str, float, int)):
                 entity[key]['value'] = val
@@ -129,5 +122,4 @@ def attach_to_cli(cli):
                     not_reg_keys.append(key)
         if len(not_reg_keys) > 0:
             warnings.warn('No value registered for {}'.format(not_reg_keys))
-        entity.require_module(name=entity_template_name, contents=entity,
-                              overwrite=True)
+        entity.require_module(name=entity_template_name, contents=entity)

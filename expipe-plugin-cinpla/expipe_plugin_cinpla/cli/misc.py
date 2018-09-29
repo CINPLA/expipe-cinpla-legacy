@@ -45,8 +45,6 @@ def attach_to_cli(cli):
         if user not in users:
             users.append(user)
         action.users = users
-        action.messages.extend([{'message': m,
-                                 'user': user,
-                                 'datetime': datetime.now()}
-                               for m in message])
+        for m in message:
+            action.create_message(text=m, user=user, datetime=datetime.now())
         action.tags.extend(tag)
