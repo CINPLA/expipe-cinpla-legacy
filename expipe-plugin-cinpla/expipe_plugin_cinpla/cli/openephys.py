@@ -18,8 +18,8 @@ def validate_depth(ctx, param, depth):
                                  '<"key num depth physical_unit"> (ommit <>).')
 
 def attach_to_cli(cli):
-    @cli.command('register',
-                 short_help='Generate an open-ephys recording-action to database.')
+    @cli.command('openephys',
+                 short_help='Register an open-ephys recording-action to database.')
     @click.argument('openephys-path', type=click.Path(exists=True))
     @click.option('-u', '--user',
                   type=click.STRING,
@@ -207,21 +207,3 @@ def attach_to_cli(cli):
                     'Delete raw data in {}? (yes/no)'.format(openephys_path),
                     default='no'):
                     shutil.rmtree(openephys_path)
-
-    @cli.command('read-messages',
-                 short_help='Read messages from open-ephys recording session.')
-    @click.argument('openephys-path', type=click.Path(exists=True))
-    def generate_openephys_action(openephys_path):
-        # TODO default none
-        openephys_path = os.path.abspath(openephys_path)
-        openephys_dirname = openephys_path.split(os.sep)[-1]
-        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
-
-        openephys_file = pyopenephys.File(openephys_path)
-        openephys_exp = openephys_file.experiments[0]
-        openephys_rec = openephys_exp.recordings[0]
-        messages = openephys_rec.messages
-
-        print('Open-ephys messages:')
-        for m in messages:
-            print('time: ', m['time'], ' message: ', m['message'])

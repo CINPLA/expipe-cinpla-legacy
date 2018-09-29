@@ -4,7 +4,7 @@ from expipe_plugin_cinpla.tools import config
 
 
 def attach_to_cli(cli):
-    @cli.command('register-entity',
+    @cli.command('entity',
                  short_help=('Register a entity to the "entities-registry" ' +
                              'project.'))
     @click.argument('entity-id')

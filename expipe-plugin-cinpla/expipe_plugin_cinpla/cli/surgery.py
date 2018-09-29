@@ -4,7 +4,7 @@ from expipe_plugin_cinpla.tools import config
 
 
 def attach_to_cli(cli):
-    @cli.command('register-surgery', short_help='Generate a surgery action.')
+    @cli.command('surgery', short_help='Generate a surgery action.')
     @click.argument('entity-id')
     @click.option('--date', '-d',
                   required=True,
@@ -67,6 +67,20 @@ def attach_to_cli(cli):
         action = project.require_action(entity_id + '-surgery-' + procedure)
         if overwrite and hard:
             project.delete_action(entity_id + '-surgery-' + procedure)
+        try:
+            entity = project.get_entity(entity_id)
+        except KeyError as e:
+            raise KeyError(
+                str(e) +
+                '. Register entity with "expipe register-entity entity_id"')
+        entity_module = entity.get_module(name=PAR.MODULES['entity'])
+        entity.tags.extend(['surgery', PAR.USER_PARAMS['project_id']])
+        entity.users.append(user)
+
+        entity_module['weight'] = weight
+        action.require_module(
+            name=PAR.MODULES['entity'], contents=entity_module.to_dict())
+
         generate_templates(action, 'surgery_' + procedure,
                            git_note=get_git_info())
         if date == 'now':
@@ -111,14 +125,7 @@ def attach_to_cli(cli):
             action.require_module(name=PAR.MODULES[procedure][key],
                                   contents=modules[key])
 
-        action.require_module(name=PAR.MODULES['entity'], contents=entity)
-        entity = project.require_entity(entity_id)
-        entity_module = entity.require_module(PAR.MODULES['entity'])
-        entity_module['weight'] = weight
-        entity.tags.extend(['surgery', PAR.USER_PARAMS['project_id']])
-        entity.users.append(user)
-
-    @cli.command('register-euthanasia',
+    @cli.command('euthanasia',
                  short_help=('Register a entities euthanasia.'))
     @click.argument('entity-id')
     @click.option('-u', '--user',
@@ -144,7 +151,7 @@ def attach_to_cli(cli):
                                  'datetime': datetime.now()}
                                for m in message])
 
-    @cli.command('register-perfusion',
+    @cli.command('perfusion',
                  short_help=('Generate a perfusion action. ' +
                              'Also tags the entity as perfused and euthanised.'))
     @click.argument('entity-id')

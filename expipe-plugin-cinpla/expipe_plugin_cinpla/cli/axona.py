@@ -4,7 +4,7 @@ from expipe_plugin_cinpla.tools import config
 
 
 def attach_to_cli(cli):
-    @cli.command('register', short_help='Generate an axona recording-action to database.')
+    @cli.command('axona', short_help='Register an axona recording-action to database.')
     @click.argument('axona-filename', type=click.Path(exists=True))
     @click.option('-u', '--user',
                   type=click.STRING,

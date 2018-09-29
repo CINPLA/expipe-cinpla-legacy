@@ -26,23 +26,17 @@ class CinplaPlugin(IPlugin):
         def env(ctx):
             pass
 
-        @cli.group(short_help='Tools related to Open Ephys.')
+        @cli.group(short_help='Tools for registering.')
         @click.help_option('-h', '--help')
         @click.pass_context
-        def openephys(ctx):
-            pass
-
-        @cli.group(short_help='Tools related to Axona.')
-        @click.help_option('-h', '--help')
-        @click.pass_context
-        def axona(ctx):
+        def register(ctx):
             pass
 
         misc.attach_to_cli(cli)
         adjust.attach_to_cli(cli)
-        surgery.attach_to_cli(cli)
-        entity.attach_to_cli(cli)
+        surgery.attach_to_cli(register)
+        entity.attach_to_cli(register)
         transfer.attach_to_cli(cli)
         environment.attach_to_cli(env)
-        OE.attach_to_cli(openephys)
-        AX.attach_to_cli(axona)
+        OE.attach_to_cli(register)
+        AX.attach_to_cli(register)
