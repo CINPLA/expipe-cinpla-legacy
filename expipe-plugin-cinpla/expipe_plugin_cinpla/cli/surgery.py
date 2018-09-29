@@ -76,10 +76,10 @@ def attach_to_cli(cli):
         entity_module = entity.get_module(name=PAR.MODULES['entity'])
         entity.tags.extend(['surgery', PAR.USER_PARAMS['project_id']])
         entity.users.append(user)
-
-        entity_module['weight'] = weight
+        entity_val = entity_module.to_dict()
+        entity_val['weight'] = weight
         action.require_module(
-            name=PAR.MODULES['entity'], contents=entity_module.to_dict())
+            name=PAR.MODULES['entity'], contents=entity_val)
 
         generate_templates(action, 'surgery_' + procedure,
                            git_note=get_git_info())

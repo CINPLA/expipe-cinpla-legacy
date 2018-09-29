@@ -5,8 +5,7 @@ from expipe_plugin_cinpla.tools import config
 
 def attach_to_cli(cli):
     @cli.command('entity',
-                 short_help=('Register a entity to the "entities-registry" ' +
-                             'project.'))
+                 short_help=('Register a entity.'))
     @click.argument('entity-id')
     @click.option('-u', '--user',
                   type=click.STRING,
@@ -85,7 +84,7 @@ def attach_to_cli(cli):
     def generate_entity(entity_id, user, message, location, tag,
                          **kwargs):
         DTIME_FORMAT = expipe.core.datetime_format
-        project = expipe.require_project('entities-registry')
+        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
         entity = project.require_entity(entity_id)
         kwargs['birthday'] = datetime.strftime(
             datetime.strptime(kwargs['birthday'], '%d.%m.%Y'), DTIME_FORMAT)
@@ -102,19 +101,19 @@ def attach_to_cli(cli):
         for m in message:
             action.create_message(text=m, user=user, datetime=datetime.now())
         entity_template_name = PAR.MODULES.get('entity') or 'entity_entity'
-        entity = entity.require_module(template=entity_template_name).to_dict()
+        entity_val = entity.require_module(template=entity_template_name).to_dict()
         for key, val in kwargs.items():
             if isinstance(val, (str, float, int)):
-                entity[key]['value'] = val
+                entity_val[key]['value'] = val
             elif isinstance(val, tuple):
                 if not None in val:
-                    entity[key] = pq.Quantity(val[0], val[1])
+                    entity_val[key] = pq.Quantity(val[0], val[1])
             elif isinstance(val, type(None)):
                 pass
             else:
                 raise TypeError('Not recognized type ' + str(type(val)))
         not_reg_keys = []
-        for key, val in entity.items():
+        for key, val in entity_val.items():
             if isinstance(val, dict):
                 if val.get('value') is None:
                     not_reg_keys.append(key)
