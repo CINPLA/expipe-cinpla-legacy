@@ -5,8 +5,8 @@ settings_file_path = os.path.join(os.path.expanduser('~'), '.config', 'expipe',
                              'cinpla_config.yaml')
 if not os.path.exists(settings_file_path):
     warnings.warn('No config file found, import errors will occur, please ' +
-                  'use "expipe env set <project-id> --params ' +
-                  '<path-to-params-file>" (ommit <>)')
+                  'use "expipe env create <project-id> --config ' +
+                  '<path-to-config-file>" (ommit <>)')
 
 
 def deep_update(d, other):
@@ -146,14 +146,16 @@ def give_attrs_val(obj, value, *attrs):
 def load_parameters():
     try:
         settings = load_settings()
-        PAR = load_python_module(settings['current']['params'])
-    except AssertionError:
+        path = settings['current'].get('params') or ''
+        PAR = load_python_module(path)
+    except (AssertionError, KeyError):
         class Dummy:
             pass
         PAR = Dummy
     except FileExistsError:
-        warnings.warn('Unable to load parameters file "' +
-                      settings['current']['params'] + '".')
+        path = settings['current'].get('params')
+        if path is not None:
+            warnings.warn('Unable to load parameters file "' + path + '".')
         class Dummy:
             pass
         PAR = Dummy
