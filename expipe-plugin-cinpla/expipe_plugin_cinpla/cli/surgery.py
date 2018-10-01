@@ -63,7 +63,7 @@ def attach_to_cli(cli):
         # TODO tag sucject as active
         assert weight != (None, None), 'Missing argument -w / --weight.'
         weight = pq.Quantity(weight[0], weight[1])
-        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.PROJECT_ID)
         action = project.require_action(entity_id + '-surgery-' + procedure)
         if overwrite and hard:
             project.delete_action(entity_id + '-surgery-' + procedure)
@@ -73,13 +73,13 @@ def attach_to_cli(cli):
             raise KeyError(
                 str(e) +
                 '. Register entity with "expipe register-entity entity_id"')
-        entity_module = entity.get_module(name=PAR.MODULES['entity'])
-        entity.tags.extend(['surgery', PAR.USER_PARAMS['project_id']])
+        entity_module = entity.get_module(name=PAR.TEMPLATES['entity'])
+        entity.tags.extend(['surgery', PAR.PROJECT_ID])
         entity.users.append(user)
         entity_val = entity_module.to_dict()
         entity_val['weight'] = weight
         action.require_module(
-            name=PAR.MODULES['entity'], contents=entity_val)
+            name=PAR.TEMPLATES['entity'], contents=entity_val)
 
         generate_templates(action, 'surgery_' + procedure,
                            git_note=get_git_info())
@@ -92,7 +92,7 @@ def attach_to_cli(cli):
         action.type = 'Surgery'
         action.tags = [procedure] + list(tag)
         action.entities = [entity_id]
-        user = user or PAR.USER_PARAMS['user_name']
+        user = user or PAR.USERNAME
         user = user or []
         if len(user) == 0:
             raise ValueError('Please add user name')
@@ -105,7 +105,7 @@ def attach_to_cli(cli):
         modules_dict = action.modules.to_dict()
         keys = list(set([pos[0] for pos in position]))
         modules = {
-            key: action.require_module(template=PAR.MODULES[procedure][key]).to_dict()
+            key: action.require_module(template=PAR.TEMPLATES[procedure][key]).to_dict()
             for key in keys}
         for key, num, x, y, z, unit in position:
             mod = modules[key]
@@ -122,7 +122,7 @@ def attach_to_cli(cli):
                   '{}: angle={} {}'.format(key, ang, unit))
             mod['angle'] = pq.Quantity(ang, unit)
         for key in keys:
-            action.require_module(name=PAR.MODULES[procedure][key],
+            action.require_module(name=PAR.TEMPLATES[procedure][key],
                                   contents=modules[key])
 
     @cli.command('euthanasia',
@@ -140,7 +140,7 @@ def attach_to_cli(cli):
     def generate_euthanasia(entity_id, user, message):
         entity = project.require_entity(entity_id)
         entity.tags.append('euthanised')
-        user = user or PAR.USER_PARAMS['user_name']
+        user = user or PAR.USERNAME
         user = user or []
         if len(user) == 0:
             raise ValueError('Please add user name')
@@ -171,7 +171,7 @@ def attach_to_cli(cli):
                   help='The weight of the animal.',
                   )
     def generate_perfusion(entity_id, date, user, weight):
-        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.PROJECT_ID)
         action = project.require_action(entity_id + '-perfusion')
         generate_templates(action, 'perfusion',
                            git_note=get_git_info())
@@ -184,15 +184,15 @@ def attach_to_cli(cli):
         action.type = 'Surgery'
         action.tags = ['perfusion']
         action.entities = [entity_id]
-        user = user or PAR.USER_PARAMS['user_name']
+        user = user or PAR.USERNAME
         user = user or []
         if len(user) == 0:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
         if weight != (None, None):
-            entity_dict = action.require_module(name=PAR.MODULES['entity']).to_dict()
+            entity_dict = action.require_module(name=PAR.TEMPLATES['entity']).to_dict()
             entity_dict['weight'] = pq.Quantity(weight[0], weight[1])
-            action.require_module(name=PAR.MODULES['entity'], contents=entity_dict)
+            action.require_module(name=PAR.TEMPLATES['entity'], contents=entity_dict)
         entity = project.require_entity(entity_id)
         entity.tags.extend(['perfused', 'euthanised'])

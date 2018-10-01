@@ -84,7 +84,7 @@ def attach_to_cli(cli):
     def generate_entity(entity_id, user, message, location, tag,
                          **kwargs):
         DTIME_FORMAT = expipe.core.datetime_format
-        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.PROJECT_ID)
         entity = project.require_entity(entity_id)
         kwargs['birthday'] = datetime.strftime(
             datetime.strptime(kwargs['birthday'], '%d.%m.%Y'), DTIME_FORMAT)
@@ -92,7 +92,7 @@ def attach_to_cli(cli):
         entity.type = 'Subject'
         entity.tags.extend(list(tag))
         entity.location = location
-        user = user or PAR.USER_PARAMS['user_name']
+        user = user or PAR.USERNAME
         user = user or []
         if len(user) == 0:
             raise ValueError('Please add user name')
@@ -100,7 +100,7 @@ def attach_to_cli(cli):
         entity.users = [user]
         for m in message:
             action.create_message(text=m, user=user, datetime=datetime.now())
-        entity_template_name = PAR.MODULES.get('entity') or 'entity_entity'
+        entity_template_name = PAR.TEMPLATES.get('entity') or 'entity_entity'
         entity_val = entity.require_module(template=entity_template_name).to_dict()
         for key, val in kwargs.items():
             if isinstance(val, (str, float, int)):

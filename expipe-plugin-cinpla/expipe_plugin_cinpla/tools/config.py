@@ -2,7 +2,7 @@ from expipe_plugin_cinpla.imports import *
 
 
 settings_file_path = os.path.join(os.path.expanduser('~'), '.config', 'expipe',
-                             'cinpla_config.yaml')
+                             'expipe-plugin-cinpla-config.yaml')
 if not os.path.exists(settings_file_path):
     warnings.warn('No config file found, import errors will occur, please ' +
                   'use "expipe env create <project-id> --config ' +
@@ -144,29 +144,41 @@ def give_attrs_val(obj, value, *attrs):
 
 
 def load_parameters():
-    try:
-        settings = load_settings()
-        path = settings['current'].get('params') or ''
-        PAR = load_python_module(path)
-    except (AssertionError, KeyError):
-        class Dummy:
+    settings = load_settings()
+    curr_settings = settings['current']
+    project_id = curr_settings['project_id']
+
+    project_params_file_path = os.path.join(
+        os.path.expanduser('~'), '.config', 'expipe',
+        '{}-project-params.yaml'.format(project_id))
+
+    if 'params' in curr_settings:
+        PAR = load_python_module(curr_settings['params'])
+    else:
+        class Parameters:
             pass
-        PAR = Dummy
-    except FileExistsError:
-        path = settings['current'].get('params')
-        if path is not None:
-            warnings.warn('Unable to load parameters file "' + path + '".')
-        class Dummy:
-            pass
-        PAR = Dummy
-    give_attrs_val(PAR, list(),
-                 'POSSIBLE_TAGS',
-                 'POSSIBLE_LOCATIONS',
-                 'POSSIBLE_OPTO_TAGS',
-                 'POSSIBLE_BRAIN_AREAS',
-                 'POSSIBLE_LOCATIONS',
-                 'POSSIBLE_CELL_LINES')
-    give_attrs_val(PAR, dict(),
-                     'UNIT_INFO',
-                     'TEMPLATES')
+        PAR = Parameters()
+        if os.path.exists(project_params_file_path):
+            with open(project_params_file_path, "r") as f:
+                project_parameters = yaml.load(f)
+        else:
+            project = expipe.get_project(project_id)
+            project_parameters = project.modules['settings'].to_dict()
+        PAR.__dict__.update(settings)
+    give_attrs_val(
+        PAR, list(),
+        'POSSIBLE_TAGS',
+        'POSSIBLE_LOCATIONS',
+        'POSSIBLE_OPTO_TAGS',
+        'POSSIBLE_BRAIN_AREAS',
+        'POSSIBLE_LOCATIONS',
+        'POSSIBLE_CELL_LINES')
+    give_attrs_val(
+        PAR, dict(),
+        'UNIT_INFO',
+        'TEMPLATES')
+
+    PAR.PROJECT_ID = project_id
+    PAR.USERNAME = expipe.config.settings['username']
+
     return PAR

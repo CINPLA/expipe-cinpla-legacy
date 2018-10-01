@@ -83,7 +83,8 @@ def attach_to_cli(cli):
                   )
     def create(project_id, **kwargs):
         settings = load_settings() or {}
-        settings.update({project_id: kwargs})
+        update = {k: v for k, v in kwargs.items() if v is not None}
+        settings.update({project_id: update})
         if_active_update_current(settings, project_id)
         with open(settings_file_path, "w") as f:
             yaml.dump(settings, f, default_flow_style=False)
@@ -105,7 +106,8 @@ def attach_to_cli(cli):
     def set(project_id, **kwargs):
         settings = load_settings() or {}
         check_project_exists(settings, project_id)
-        settings.update({project_id: kwargs})
+        update = {k: v for k, v in kwargs.items() if v is not None}
+        settings.update({project_id: update})
         if_active_update_current(settings, project_id)
         with open(settings_file_path, "w") as f:
             yaml.dump(settings, f, default_flow_style=False)
@@ -130,4 +132,15 @@ def attach_to_cli(cli):
             raise ValueError('Project id "' + project_id +
                              '" not found in settings file.')
         with open(settings_file_path, "w") as f:
+            yaml.dump(settings, f, default_flow_style=False)
+
+    @cli.command('sync-project-settings')
+    @click.argument('project-id', type=click.STRING)
+    def create(project_id):
+        project_params_file_path = os.path.join(
+            os.path.expanduser('~'), '.config', 'expipe',
+            '{}-project-params.yaml'.format(project_id))
+        project = expipe.get_project(project_id)
+        settings = project.modules['settings'].to_dict()
+        with open(project_params_file_path, "w") as f:
             yaml.dump(settings, f, default_flow_style=False)

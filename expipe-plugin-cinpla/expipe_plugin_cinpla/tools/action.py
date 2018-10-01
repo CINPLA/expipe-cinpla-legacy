@@ -71,7 +71,7 @@ def get_position_from_surgery(project, entity_id):
     surgery = project.get_action(entity_id + '-surgery-implantation')
     sdict = surgery.modules.to_dict()
     templates_used = {
-        key: mod for key, mod in PAR.MODULES['implantation'].items()
+        key: mod for key, mod in PAR.TEMPLATES['implantation'].items()
         if mod in sdict}
     position = {key: {pos_key: sdict[mod][pos_key][2]
                         for pos_key in sdict[mod]
@@ -91,7 +91,7 @@ def get_position_from_surgery(project, entity_id):
 def register_depth(project, action, depth=None, answer=False):
     DTIME_FORMAT = expipe.core.datetime_format
     regdate = action.datetime
-    mod_info = PAR.MODULES['implantation']
+    mod_info = PAR.TEMPLATES['implantation']
     depth = depth or []
     if len(depth) == 0:
         assert len(action.entities) == 1

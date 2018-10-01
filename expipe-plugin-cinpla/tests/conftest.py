@@ -15,7 +15,7 @@ from expipe_params import (PAR.USER_PARAMS, PAR.TEMPLATES, PAR.UNIT_INFO, PAR.PO
 
 # TODO ADD ALL PAR.TEMPLATES
 
-PROJECT_ID = PAR.USER_PARAMS['project_id']
+PROJECT_ID = PAR.PROJECT_ID
 ACTION_ID = 'action-plugin-test'
 MODULE_ID = 'module-plugin-test'
 RAT_ID = 'test-rat'

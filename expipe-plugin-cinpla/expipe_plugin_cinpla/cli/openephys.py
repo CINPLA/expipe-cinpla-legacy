@@ -108,7 +108,7 @@ def attach_to_cli(cli):
         settings = config.load_settings()['current']
         openephys_path = os.path.abspath(openephys_path)
         openephys_dirname = openephys_path.split(os.sep)[-1]
-        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.PROJECT_ID)
         prb_path = prb_path or settings.get('probe')
         if prb_path is None:
             raise IOError('No probefile found, please provide one either ' +
@@ -152,7 +152,7 @@ def attach_to_cli(cli):
         action.tags.extend(list(tag) + ['open-ephys'])
         print('Registering entity id ' + entity_id)
         action.entities = [entity_id]
-        user = user or PAR.USER_PARAMS['user_name']
+        user = user or PAR.USERNAME
         if user is None:
             raise ValueError('Please add user name')
         if len(user) == 0:

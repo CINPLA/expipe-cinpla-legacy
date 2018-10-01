@@ -52,7 +52,7 @@ def attach_to_cli(cli):
         date = dt.now() if date is None else dt.strptime(date, '%d.%m.%YT%H:%M')
 
         datestring = dt.strftime(date, DTIME_FORMAT)
-        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.PROJECT_ID)
         action = project.require_action(entity_id + '-adjustment')
         if index is None and not init:
             deltas = []
@@ -121,7 +121,7 @@ def attach_to_cli(cli):
 
         action.type = 'Adjustment'
         action.entities = [entity_id]
-        user = user or PAR.USER_PARAMS['user_name']
+        user = user or PAR.USERNAME
         user = user or []
         if len(user) == 0:
             raise ValueError('Please add user name')

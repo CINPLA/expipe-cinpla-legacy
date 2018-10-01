@@ -7,9 +7,9 @@ def attach_to_cli(cli):
     @cli.command('list')
     @click.argument('what', type=click.Choice(['dir', 'actions']))
     def generate_notebook(what):
-        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.PROJECT_ID)
         path = os.path.join(expipe.settings['data_path'],
-                       PAR.USER_PARAMS['project_id'])
+                       PAR.PROJECT_ID)
         if what == 'dir':
             pprint.pprint(os.listdir(path))
         elif what == 'actions':
@@ -34,9 +34,9 @@ def attach_to_cli(cli):
                   help='The experimenter performing the annotation.',
                   )
     def annotate(action_id, tag, message, user):
-        project = expipe.require_project(PAR.USER_PARAMS['project_id'])
+        project = expipe.require_project(PAR.PROJECT_ID)
         action = project.require_action(action_id)
-        user = user or PAR.USER_PARAMS['user_name']
+        user = user or PAR.USERNAME
         user = user or []
         if len(user) == 0:
             raise ValueError('Please add user name')
