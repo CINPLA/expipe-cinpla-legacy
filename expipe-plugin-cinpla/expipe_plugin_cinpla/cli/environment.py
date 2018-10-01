@@ -98,6 +98,10 @@ def attach_to_cli(cli):
                   type=click.Path(exists=True, resolve_path=True),
                   help='Set a probe file.',
                   )
+    @click.option('--params',
+                  type=click.Path(exists=True, resolve_path=True),
+                  help='Set a probe file.',
+                  )
     def set(project_id, **kwargs):
         settings = load_settings() or {}
         check_project_exists(settings, project_id)
