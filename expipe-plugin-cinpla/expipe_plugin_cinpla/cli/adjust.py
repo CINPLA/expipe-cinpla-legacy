@@ -116,7 +116,6 @@ def attach_to_cli(cli):
         content['adjustment'] = adjustment
         content['experimenter'] = user
         content['date'] = datestring
-        content['git_note'] = action_tools.get_git_info()
         action.require_module(name=name, contents=content)
 
         action.type = 'Adjustment'

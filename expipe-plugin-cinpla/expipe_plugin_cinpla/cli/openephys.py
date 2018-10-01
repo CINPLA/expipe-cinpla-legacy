@@ -34,8 +34,9 @@ def attach_to_cli(cli):
     @click.option('-l', '--location',
                   type=click.STRING,
                   callback=config.optional_choice,
+                  required=True,
                   envvar=PAR.POSSIBLE_LOCATIONS,
-                  help='The location of the recording, i.e. "room1".'
+                  help='The location of the recording, i.e. "room-1-ibv".'
                   )
     @click.option('--session',
                   type=click.STRING,
@@ -112,7 +113,8 @@ def attach_to_cli(cli):
         prb_path = prb_path or settings.get('probe')
         if prb_path is None:
             raise IOError('No probefile found, please provide one either ' +
-                          'as an argument or with "expipe env set-probe".')
+                          'as an argument or with\n' +
+                          '"expipe env set --probe".')
         openephys_file = pyopenephys.File(openephys_path, prb_path)
         openephys_exp = openephys_file.experiments[0]
         openephys_rec = openephys_exp.recordings[0]
@@ -124,8 +126,7 @@ def attach_to_cli(cli):
             raise ValueError('Did not find valid session number "' +
                              session + '"')
         if action_id is None:
-            session_dtime = datetime.strftime(openephys_exp.datetime,
-                                              '%d%m%y')
+            session_dtime = datetime.strftime(openephys_exp.datetime, '%d%m%y')
             action_id = entity_id + '-' + session_dtime + '-' + session
         if overwrite and hard:
             try:
@@ -135,45 +136,38 @@ def attach_to_cli(cli):
         print('Generating action', action_id)
         action = project.require_action(action_id)
 
-        if not no_modules:
-            if 'openephys' not in PAR.TEMPLATES:
-                raise ValueError('Could not find "openephys" in ' +
-                                 'expipe_params.py PAR.TEMPLATES: "' +
-                                 '{}"'.format(PAR.TEMPLATES.keys()))
-            correct_depth = action_tools.register_depth(project, action, depth)
-            if not correct_depth:
-                print('Aborting registration!')
-                return
-            action_tools.generate_templates(action, 'openephys',
-                                            git_note=action_tools.get_git_info())
-
         action.datetime = openephys_exp.datetime
         action.type = 'Recording'
         action.tags.extend(list(tag) + ['open-ephys'])
         print('Registering entity id ' + entity_id)
         action.entities = [entity_id]
         user = user or PAR.USERNAME
-        if user is None:
-            raise ValueError('Please add user name')
-        if len(user) == 0:
-            raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
-        location = location or PAR.USER_PARAMS['location']
-        location = location or []
-        if len(location) == 0:
-            raise ValueError('Please add location')
         print('Registering location ' + location)
         action.location = location
+
+        if not no_modules:
+            if 'openephys' not in PAR.TEMPLATES:
+                raise ValueError('Could not find "openephys" in ' +
+                                 'expipe_params.py PAR.TEMPLATES: "' +
+                                 '{}"'.format(PAR.TEMPLATES.keys()))
+            correct_depth = action_tools.register_depth(
+                project=project, action=action, depth=depth, overwrite=overwrite)
+            if not correct_depth:
+                print('Aborting registration!')
+                return
+            action_tools.generate_templates(action, 'openephys',
+                                            overwrite=overwrite)
 
         for m in message:
             action.create_message(text=m, user=user, datetime=datetime.now())
         if not no_modules:
-            headstage = action.require_module(
+            headstage = action.get_module(
                 name='hardware_intan_headstage').to_dict()
             headstage['model']['value'] = 'RHD2132'
             action.require_module(name='hardware_intan_headstage',
-                                  contents=headstage)
+                                  contents=headstage, overwrite=overwrite)
 
             # TODO update to messages
             # for idx, m in enumerate(openephys_rec.messages):

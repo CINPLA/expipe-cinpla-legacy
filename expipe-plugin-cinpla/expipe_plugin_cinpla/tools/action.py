@@ -68,7 +68,7 @@ def position_to_dict(depth):
 
 def get_position_from_surgery(project, entity_id):
     index = 0
-    surgery = project.get_action(entity_id + '-surgery-implantation')
+    surgery = project.actions[entity_id + '-surgery-implantation']
     sdict = surgery.modules.to_dict()
     templates_used = {
         key: mod for key, mod in PAR.TEMPLATES['implantation'].items()
@@ -88,21 +88,22 @@ def get_position_from_surgery(project, entity_id):
     return position
 
 
-def register_depth(project, action, depth=None, answer=False):
+def register_depth(project, action, depth=None, answer=False, overwrite=False):
     DTIME_FORMAT = expipe.core.datetime_format
-    regdate = action.datetime
     mod_info = PAR.TEMPLATES['implantation']
     depth = depth or []
+    adjustdate = None
     if len(depth) == 0:
         assert len(action.entities) == 1
         entity_id = action.entities[0]
         try:
-            adjustments = project.get_action(name=entity_id + '-adjustment')
+            adjustments = project.actions[entity_id + '-adjustment']
             adjusts = {}
             for adjust in adjustments.modules:
                 values = adjust.to_dict()
                 adjusts[datetime.strptime(values['date'], DTIME_FORMAT)] = adjust
 
+            regdate = action.datetime
             adjustdates = adjusts.keys()
             adjustdate = min(adjustdates, key=lambda x: deltadate(x, regdate))
             adjustment = adjusts[adjustdate].to_dict()
@@ -121,8 +122,8 @@ def register_depth(project, action, depth=None, answer=False):
     def last_num(x):
         return '%.3d' % int(x.split('_')[-1])
     correct = query_yes_no(
-        'Are the following values correct: ' +
-        ' adjust date time = {}\n'.format(adjustdate) +
+        'Are the following values correct:\n' +
+        'Adjust date time = {}\n'.format(adjustdate) +
         ''.join('{} {} = {}\n'.format(key, pos_key, val[pos_key])
                 for key, val in curr_depth.items()
                 for pos_key in sorted(val, key=lambda x: last_num(x)))
@@ -135,8 +136,8 @@ def register_depth(project, action, depth=None, answer=False):
                                        'this action, unable to get surgery.')
     surgery_action_id = action.entities[0] + '-surgery-implantation'
     try:
-        surgery = project.get_action(surgery_action_id)
-    except NameError as e:
+        surgery = project.actions[surgery_action_id]
+    except KeyError as e:
         if len(depth) == 0:
             raise NameError(str(e) + ' There are no surgery-implantation ' +
                             'registered for this animal. Please insert depth' +
@@ -147,9 +148,9 @@ def register_depth(project, action, depth=None, answer=False):
         if key not in curr_depth: # module not used in surgery
             continue
         if surgery:
-            mod = surgery.get_module(name=name).to_dict()
+            mod = surgery[name].to_dict()
         else:
-            mod = action.require_module(template=name).to_dict()
+            mod = action.require_module(template=name, overwrite=overwrite).to_dict()
             del(mod['position'])
         for pos_key, val in curr_depth[key].items():
             print('Registering depth:', key, pos_key, '=', val)
@@ -157,7 +158,7 @@ def register_depth(project, action, depth=None, answer=False):
                 mod[pos_key][2] = val
             else:
                 mod[pos_key] = [np.nan, np.nan, float(val.magnitude)] * val.units
-        action.require_module(name=name, contents=mod)
+        action.require_module(name=name, contents=mod, overwrite=overwrite)
     return True
 
 
@@ -177,24 +178,20 @@ def _get_local_path(file_record, assert_exists=False, make=False):
     return local_path
 
 
-def generate_templates(action, templates_key, git_note=None):
+def generate_templates(action, templates_key, overwrite):
     '''
 
     :param action:
     :param templates:
-    :param git_note:
     :return:
     '''
     templates = PAR.TEMPLATES.get(templates_key)
     if templates is None:
         print('Warning: no templates matching "' + templates_key + '".')
         return
-    if git_note is not None:
-        action.require_module(name='software_version_control_git',
-                              contents=git_note)
     for template in templates:
         try:
-            action.require_module(template=template)
+            action.require_module(template=template, overwrite=overwrite)
             print('Adding module ' + template)
         except Exception as e:
             print(template)

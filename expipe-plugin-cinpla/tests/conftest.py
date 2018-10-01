@@ -10,7 +10,7 @@ expipe.ensure_testing()
 sys.path.append(expipe.config.config_dir)
 if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     raise IOError('No "expipe_params.py" found.')
-from expipe_params import (PAR.USER_PARAMS, PAR.TEMPLATES, PAR.UNIT_INFO, PAR.POSSIBLE_TAGS,
+from expipe_params import (PAR.TEMPLATES, PAR.UNIT_INFO, PAR.POSSIBLE_TAGS,
                            PAR.POSSIBLE_LOCATIONS, OBLIGATORY_TAGS)
 
 # TODO ADD ALL PAR.TEMPLATES
@@ -26,7 +26,7 @@ def pytest_namespace():
             "ACTION_ID": ACTION_ID,
             "MODULE_ID": MODULE_ID,
             "RAT_ID": RAT_ID,
-            "USER_PAR": PAR.USER_PARAMS,
+            "USERNAME": PAR.USERNAME,
             "PAR.POSSIBLE_TAGS": PAR.POSSIBLE_TAGS,
             "OBLIGATORY_TAGS": OBLIGATORY_TAGS}
 

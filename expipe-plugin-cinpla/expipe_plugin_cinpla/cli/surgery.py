@@ -1,5 +1,5 @@
 from expipe_plugin_cinpla.imports import *
-from expipe_plugin_cinpla.tools.action import generate_templates, get_git_info, query_yes_no
+from expipe_plugin_cinpla.tools.action import generate_templates, query_yes_no
 from expipe_plugin_cinpla.tools import config
 
 
@@ -73,16 +73,16 @@ def attach_to_cli(cli):
             raise KeyError(
                 str(e) +
                 '. Register entity with "expipe register-entity entity_id"')
-        entity_module = entity.get_module(name=PAR.TEMPLATES['entity'])
+        entity_module = entity[PAR.TEMPLATES['entity']]
         entity.tags.extend(['surgery', PAR.PROJECT_ID])
         entity.users.append(user)
         entity_val = entity_module.to_dict()
         entity_val['weight'] = weight
         action.require_module(
-            name=PAR.TEMPLATES['entity'], contents=entity_val)
+            name=PAR.TEMPLATES['entity'], contents=entity_val,
+            overwrite=overwrite)
 
-        generate_templates(action, 'surgery_' + procedure,
-                           git_note=get_git_info())
+        generate_templates(action, 'surgery_' + procedure, overwrite=overwrite)
         if date == 'now':
             date = datetime.now()
         else:
@@ -105,7 +105,8 @@ def attach_to_cli(cli):
         modules_dict = action.modules.to_dict()
         keys = list(set([pos[0] for pos in position]))
         modules = {
-            key: action.require_module(template=PAR.TEMPLATES[procedure][key]).to_dict()
+            key: action.require_module(template=PAR.TEMPLATES[procedure][key],
+                                       overwrite=overwrite).to_dict() # TODO
             for key in keys}
         for key, num, x, y, z, unit in position:
             mod = modules[key]
@@ -123,7 +124,8 @@ def attach_to_cli(cli):
             mod['angle'] = pq.Quantity(ang, unit)
         for key in keys:
             action.require_module(name=PAR.TEMPLATES[procedure][key],
-                                  contents=modules[key])
+                                  contents=modules[key],
+                                  overwrite=True) #TODO use module = val
 
     @cli.command('euthanasia',
                  short_help=('Register a entities euthanasia.'))
@@ -146,10 +148,9 @@ def attach_to_cli(cli):
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         entity.users.append(user)
-        entity.messages.extend([{'message': m,
-                                 'user': user,
-                                 'datetime': datetime.now()}
-                               for m in message])
+        for m in message:
+            entity.messages.create_message(
+                text=m, user=user, datetime= datetime.now())
 
     @cli.command('perfusion',
                  short_help=('Generate a perfusion action. ' +
@@ -170,11 +171,14 @@ def attach_to_cli(cli):
                   default=(None, None),
                   help='The weight of the animal.',
                   )
-    def generate_perfusion(entity_id, date, user, weight):
+    @click.option('--overwrite',
+                  is_flag=True,
+                  help='Overwrite files and expipe action.',
+                  )
+    def generate_perfusion(entity_id, date, user, weight, overwrite):
         project = expipe.require_project(PAR.PROJECT_ID)
         action = project.require_action(entity_id + '-perfusion')
-        generate_templates(action, 'perfusion',
-                           git_note=get_git_info())
+        generate_templates(action, 'perfusion', overwrite=overwrite)
         if date == 'now':
             date = datetime.now()
         else:
@@ -193,6 +197,7 @@ def attach_to_cli(cli):
         if weight != (None, None):
             entity_dict = action.require_module(name=PAR.TEMPLATES['entity']).to_dict()
             entity_dict['weight'] = pq.Quantity(weight[0], weight[1])
-            action.require_module(name=PAR.TEMPLATES['entity'], contents=entity_dict)
+            action.require_module(name=PAR.TEMPLATES['entity'],
+                                  contents=entity_dict, overwrite=overwrite)
         entity = project.require_entity(entity_id)
         entity.tags.extend(['perfused', 'euthanised'])

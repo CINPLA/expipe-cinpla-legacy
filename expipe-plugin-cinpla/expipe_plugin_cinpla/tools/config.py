@@ -3,10 +3,6 @@ from expipe_plugin_cinpla.imports import *
 
 settings_file_path = os.path.join(os.path.expanduser('~'), '.config', 'expipe',
                              'expipe-plugin-cinpla-config.yaml')
-if not os.path.exists(settings_file_path):
-    warnings.warn('No config file found, import errors will occur, please ' +
-                  'use "expipe env create <project-id> --config ' +
-                  '<path-to-config-file>" (ommit <>)')
 
 
 def deep_update(d, other):
@@ -131,7 +127,6 @@ def load_python_module(module_path):
 
 
 def load_settings():
-    assert os.path.exists(settings_file_path)
     with open(settings_file_path, "r") as f:
         settings = yaml.load(f)
     return settings
@@ -143,28 +138,11 @@ def give_attrs_val(obj, value, *attrs):
             setattr(obj, attr, value)
 
 
-def load_parameters():
-    settings = load_settings()
-    curr_settings = settings['current']
-    project_id = curr_settings['project_id']
-
-    project_params_file_path = os.path.join(
-        os.path.expanduser('~'), '.config', 'expipe',
-        '{}-project-params.yaml'.format(project_id))
-
-    if 'params' in curr_settings:
-        PAR = load_python_module(curr_settings['params'])
-    else:
+def set_empty_if_no_value(PAR):
+    if PAR is None:
         class Parameters:
             pass
         PAR = Parameters()
-        if os.path.exists(project_params_file_path):
-            with open(project_params_file_path, "r") as f:
-                project_parameters = yaml.load(f)
-        else:
-            project = expipe.get_project(project_id)
-            project_parameters = project.modules['settings'].to_dict()
-        PAR.__dict__.update(settings)
     give_attrs_val(
         PAR, list(),
         'POSSIBLE_TAGS',
@@ -177,8 +155,46 @@ def load_parameters():
         PAR, dict(),
         'UNIT_INFO',
         'TEMPLATES')
+    return PAR
 
-    PAR.PROJECT_ID = project_id
+
+def load_parameters():
+    try:
+        settings = load_settings()
+    except FileNotFoundError as e:
+        print ('WARNING:\n',
+            str(e) + '. Unable to load settings file use:\n"expipe env create ' +
+            'project ~/.config/expipe/your_settings_file.yaml"\n')
+        PAR = set_empty_if_no_value(None)
+        PAR.PROJECT_ID, PAR.USERNAME = None, None
+        return PAR
+    curr_settings = settings['current']
+    project = curr_settings['project']
+
+    project_params_file_path = os.path.join(
+        os.path.expanduser('~'), '.config', 'expipe',
+        '{}-project-params.yaml'.format(project))
+
+    if 'params' in curr_settings:
+        PAR = load_python_module(curr_settings['params'])
+    else:
+        class Parameters:
+            pass
+        PAR = Parameters()
+        if os.path.exists(project_params_file_path):
+            with open(project_params_file_path, "r") as f:
+                PAR.__dict__.update(yaml.load(f))
+        else:
+            try:
+                expipe_project = expipe.get_project(project)
+                PAR.__dict__.update(expipe_project.modules['settings'].to_dict())
+                print(
+                    'Loading project parameters from server, if this is slow' +
+                    ' use "expipe env sync-project-parameters"')
+            except:
+                pass
+    PAR = set_empty_if_no_value(PAR)
+    PAR.PROJECT_ID = project
     PAR.USERNAME = expipe.config.settings['username']
 
     return PAR

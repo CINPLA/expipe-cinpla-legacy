@@ -9,7 +9,7 @@ if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
     print('No config params file found, use "expipe' +
           'copy-to-config expipe_params.py"')
 else:
-    from expipe_params import (PAR.USER_PARAMS, PAR.TEMPLATES, PAR.UNIT_INFO, PAR.POSSIBLE_TAGS,
+    from expipe_params import (PAR.TEMPLATES, PAR.UNIT_INFO, PAR.POSSIBLE_TAGS,
                                PAR.POSSIBLE_LOCATIONS, OBLIGATORY_TAGS, PAR.TEMPLATES,
                                PAR.ANALYSIS_PARAMS)
 

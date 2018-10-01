@@ -24,6 +24,7 @@ def attach_to_cli(cli):
                   )
     @click.option('-l', '--location',
                   type=click.STRING,
+                  required=True,
                   callback=config.optional_choice,
                   envvar=PAR.POSSIBLE_LOCATIONS,
                   help='The location of the recording, i.e. "room1".'
@@ -112,8 +113,7 @@ def attach_to_cli(cli):
         action = project.require_action(action_id)
         if not no_modules:
             action_tools.generate_templates(action, 'axona',
-                                            overwrite,
-                                            git_note=action_tools.get_git_info())
+                                            overwrite=overwrite)
         action.datetime = axona_file._start_datetime
         action.tags = list(tag) + ['axona']
         print('Registering action id ' + action_id)
@@ -125,10 +125,6 @@ def attach_to_cli(cli):
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
-        location = location or PAR.USER_PARAMS.get('location')
-        location = location or []
-        if len(location) == 0:
-            raise ValueError('Please add location.')
         print('Registering location ' + location)
         action.location = location
         action.type = 'Recording'
@@ -138,8 +134,8 @@ def attach_to_cli(cli):
                            for m in message]
         if not no_modules:
             try:
-                correct = action_tools.register_depth(project, action,
-                                                      depth=depth, answer=yes)
+                correct = action_tools.register_depth(
+                    project, action, depth=depth, answer=yes, overwrite=overwrite)
             except (NameError, ValueError):
                 raise
             except Exception as e:
