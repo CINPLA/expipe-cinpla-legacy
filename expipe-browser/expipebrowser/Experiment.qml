@@ -262,9 +262,50 @@ Rectangle {
             }
 
             Dialog {
-                title: "Not implemented yet."
                 id: newMessageDialog
                 standardButtons: Dialog.Ok | Dialog.Cancel
+                Column {
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
+
+                    Label {
+                        text: "Author:"
+                    }
+
+                    TextField {
+                        id: authorField
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                    }
+
+                    Label {
+                        text: "Message:"
+                    }
+
+                    TextField {
+                        id: messageField
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                    }
+                }
+                onAccepted: {
+                    var message = {
+                        "message": messageField.text,
+                        "user": authorField.text,
+                        "datetime": (new Date()).toISOString()
+                    }
+                    Firebase.post("action_messages/" + currentProject + "/" + experimentData.__key,
+                    message,
+                    function (response) {
+                        console.log("Posted message", response)
+                    })
+                }
             }
 
             Repeater {
@@ -273,7 +314,7 @@ Rectangle {
                 DictionaryEditor {
                     property string key: model.key
                     x: 100
-                    keyString: model.key
+                    keyString: index
                     contents: model.contents
                     basePath: "action_messages/" + currentProject + "/" + experimentData.__key + "/" + model.key
                     onContentsChanged: {
