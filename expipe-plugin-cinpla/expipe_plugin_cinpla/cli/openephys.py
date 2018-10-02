@@ -135,7 +135,7 @@ def attach_to_cli(cli):
                 print(str(e))
         print('Generating action', action_id)
         action = project.require_action(action_id)
-
+        fr = action.require_filerecord()
         action.datetime = openephys_exp.datetime
         action.type = 'Recording'
         action.tags.extend(list(tag) + ['open-ephys'])
