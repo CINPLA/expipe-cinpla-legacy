@@ -116,7 +116,7 @@ def generate_spike_trains(exdir_path, openephys_rec, source='klusta'):
                 exdirio = neo.io.ExdirIO(exdir_path)
                 exdirio.write_block(blk)
         if len(kwikfiles) == 0:
-            rais IOError('.kwik file cannot be found in ' + openephys_directory)
+            raise IOError('.kwik file cannot be found in ' + openephys_directory)
     elif source == 'openephys':
         exdirio = neo.io.ExdirIO(exdir_path)
         for oe_group in openephys_rec.channel_groups:
