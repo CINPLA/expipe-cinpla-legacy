@@ -31,8 +31,6 @@ def convert(openephys_rec, exdir_path, session):
     exdir_file.attrs['session_duration'] = openephys_rec.duration
     acquisition = exdir_file.require_group("acquisition")
     general = exdir_file.require_group("general")
-    processing = exdir_file.require_group("processing")
-    subject = general.require_group("subject")
 
     target_folder = op.join(str(acquisition.directory), session)
     acquisition.attrs["openephys_session"] = session
@@ -109,12 +107,16 @@ def generate_spike_trains(exdir_path, openephys_rec, source='klusta'):
         openephys_directory = op.join(str(acquisition.directory), openephys_session, 'klusta')
         kwikfiles = [f for f in os.listdir(openephys_directory) if f.endswith('_klusta.kwik')]
         for kwikfile in kwikfiles:
-            kwikfile = op.join(openephys_directory, kwikfile[0])
+            kwikfile = op.join(openephys_directory, kwikfile)
             if op.exists(kwikfile):
                 kwikio = neo.io.KwikIO(filename=kwikfile,)
                 blk = kwikio.read_block(raw_data_units='uV')
-                exdirio = neo.io.ExdirIO(exdir_path)
-                exdirio.write_block(blk)
+                seg = blk.segments[0]
+                try:
+                    exdirio = neo.io.ExdirIO(exdir_path)
+                    exdirio.write_block(blk)
+                except Exception:
+                    print('WARNING: unable to convert\n', kwikfile)
         if len(kwikfiles) == 0:
             raise IOError('.kwik file cannot be found in ' + openephys_directory)
     elif source == 'openephys':
