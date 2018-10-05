@@ -1,13 +1,16 @@
 from expipe_plugin_cinpla.imports import *
 
 
-def ssh_execute(ssh, command):
-    stdin, stdout, stderr = ssh.exec_command(command)
+def ssh_execute(ssh, command, **kw):
+    stdin, stdout, stderr = ssh.exec_command(command, **kw)
     exit_status = stdout.channel.recv_exit_status()          # Blocking call
+    # print(stdout.readlines())
+    # print(stderr)
     if exit_status == 0:
         pass
     else:
-        raise IOError(stderr)
+        raise IOError(''.join(stdout.readlines()) + '\n' + ''.join(stderr.readlines()))
+    return ''.join(stdout.readlines()), ''.join(stderr.readlines())
 
 
 def untar(fname, prefix):
