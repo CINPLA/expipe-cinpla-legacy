@@ -81,7 +81,11 @@ def attach_to_cli(cli):
                   envvar=PAR.POSSIBLE_TAGS,
                   help='Add tags to entity.',
                   )
-    def generate_entity(entity_id, user, message, location, tag,
+    @click.option('--overwrite',
+                  is_flag=True,
+                  help='Overwrite existing module',
+                  )
+    def generate_entity(entity_id, user, message, location, tag, overwrite,
                          **kwargs):
         DTIME_FORMAT = expipe.core.datetime_format
         project = expipe.require_project(PAR.PROJECT_ID)
@@ -101,7 +105,8 @@ def attach_to_cli(cli):
         for m in message:
             action.create_message(text=m, user=user, datetime=datetime.now())
         entity_template_name = PAR.TEMPLATES.get('entity') or 'entity_entity'
-        entity_val = entity.require_module(template=entity_template_name).to_dict()
+        entity_val = entity.require_module(
+            template=entity_template_name, overwrite=overwrite).to_dict()
         for key, val in kwargs.items():
             if isinstance(val, (str, float, int)):
                 entity_val[key]['value'] = val
@@ -121,4 +126,4 @@ def attach_to_cli(cli):
                     not_reg_keys.append(key)
         if len(not_reg_keys) > 0:
             warnings.warn('No value registered for {}'.format(not_reg_keys))
-        entity.require_module(name=entity_template_name, contents=entity)
+        entity.require_module(name=entity_template_name, contents=entity_val, overwrite=overwrite)
