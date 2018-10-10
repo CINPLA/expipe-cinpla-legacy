@@ -8,7 +8,7 @@ def attach_to_cli(cli):
     @cli.command('adjust',
                  short_help='Parse info about drive depth adjustment')
     @click.argument('entity-id',  type=click.STRING)
-    @click.option('-d', '--date',
+    @click.option('--date',
                   type=click.STRING,
                   help=('The date of the surgery format: "dd.mm.yyyyTHH:MM" ' +
                         'or "now".'),
@@ -49,11 +49,20 @@ def attach_to_cli(cli):
             assert len(adjustment) != 0, 'Missing option "-a" / "--adjustment".'
             assert date is not None, 'Missing option "-d" / "--date".'
         DTIME_FORMAT = expipe.core.datetime_format
-        date = dt.now() if date is None else dt.strptime(date, '%d.%m.%YT%H:%M')
+        if date is None or date == 'now':
+            date = dt.now()
+        else:
+            dt.strptime(date, '%d.%m.%YT%H:%M')
 
         datestring = dt.strftime(date, DTIME_FORMAT)
         project = expipe.require_project(PAR.PROJECT_ID)
-        action = project.require_action(entity_id + '-adjustment')
+        try:
+            if init:
+                action = project.require_action(entity_id + '-adjustment')
+            else:
+                action = project.actions[entity_id + '-adjustment']
+        except KeyError as e:
+            raise KeyError(str(e) + '. Use --init')
         if index is None and not init:
             deltas = []
             for name in action.modules.keys():

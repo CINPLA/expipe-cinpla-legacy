@@ -70,14 +70,16 @@ def get_position_from_surgery(project, entity_id):
     index = 0
     surgery = project.actions[entity_id + '-surgery-implantation']
     sdict = surgery.modules.to_dict()
-    templates_used = {
+    available_modules = {
         key: mod for key, mod in PAR.TEMPLATES['implantation'].items()
         if mod in sdict}
+    if len(available_modules.keys()) == 0:
+        raise ValueError('Unable to retrieve position from surgery.')
     position = {key: {pos_key: sdict[mod][pos_key][2]
                         for pos_key in sdict[mod]
                         if pos_key.startswith('position_')
                         and pos_key.split('_')[-1].isnumeric()}
-                  for key, mod in templates_used.items()}
+                  for key, mod in available_modules.items()}
     for key, groups in position.items():
         for group, depth in groups.items():
             if not isinstance(depth, pq.Quantity):
