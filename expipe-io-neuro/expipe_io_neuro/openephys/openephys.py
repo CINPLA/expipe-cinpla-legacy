@@ -104,11 +104,15 @@ def generate_spike_trains(exdir_path, openephys_rec, source='klusta'):
         exdir_file = exdir.File(exdir_path)
         acquisition = exdir_file["acquisition"]
         openephys_session = acquisition.attrs["openephys_session"]
-        openephys_directory = op.join(str(acquisition.directory), openephys_session, 'klusta')
-        kwikfiles = [f for f in os.listdir(openephys_directory) if f.endswith('_klusta.kwik')]
-        for kwikfile in kwikfiles:
-            kwikfile = op.join(openephys_directory, kwikfile)
-            if op.exists(kwikfile):
+        klusta_directory = op.join(
+            str(acquisition.directory), openephys_session, 'klusta')
+        n = 0
+        for root, dirs, files in os.walk(klusta_directory):
+            for f in files:
+                if not f.endswith('_klusta.kwik'):
+                    continue
+                n += 1
+                kwikfile = op.join(klusta_directory, kwikfile)
                 kwikio = neo.io.KwikIO(filename=kwikfile,)
                 blk = kwikio.read_block(raw_data_units='uV')
                 seg = blk.segments[0]
@@ -117,8 +121,8 @@ def generate_spike_trains(exdir_path, openephys_rec, source='klusta'):
                     exdirio.write_block(blk)
                 except Exception:
                     print('WARNING: unable to convert\n', kwikfile)
-        if len(kwikfiles) == 0:
-            raise IOError('.kwik file cannot be found in ' + openephys_directory)
+        if n == 0:
+            raise IOError('.kwik file cannot be found in ' + klusta_directory)
     elif source == 'openephys':
         exdirio = neo.io.ExdirIO(exdir_path)
         for oe_group in openephys_rec.channel_groups:
