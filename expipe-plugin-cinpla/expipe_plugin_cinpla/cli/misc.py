@@ -35,12 +35,10 @@ def attach_to_cli(cli):
                   )
     def annotate(action_id, tag, message, user):
         project = expipe.require_project(PAR.PROJECT_ID)
-        action = project.require_action(action_id)
+        action = project.actions[action_id]
         user = user or PAR.USERNAME
-        user = user or []
-        if len(user) == 0:
+        if user is None:
             raise ValueError('Please add user name')
-
         users = list(set(action.users))
         if user not in users:
             users.append(user)

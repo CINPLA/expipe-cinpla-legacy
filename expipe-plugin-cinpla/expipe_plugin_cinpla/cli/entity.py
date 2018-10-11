@@ -89,7 +89,7 @@ def attach_to_cli(cli):
                          **kwargs):
         DTIME_FORMAT = expipe.core.datetime_format
         project = expipe.require_project(PAR.PROJECT_ID)
-        entity = project.require_entity(entity_id)
+        entity = project.create_entity(entity_id, overwrite=overwrite)
         kwargs['birthday'] = datetime.strftime(
             datetime.strptime(kwargs['birthday'], '%d.%m.%Y'), DTIME_FORMAT)
         entity.datetime = datetime.now()
@@ -97,28 +97,25 @@ def attach_to_cli(cli):
         entity.tags.extend(list(tag))
         entity.location = location
         user = user or PAR.USERNAME
-        user = user or []
-        if len(user) == 0:
+        if user is None:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         entity.users = [user]
         for m in message:
             action.create_message(text=m, user=user, datetime=datetime.now())
-        entity_template_name = PAR.TEMPLATES.get('entity') or 'entity_entity'
-        entity_val = entity.require_module(
-            template=entity_template_name, overwrite=overwrite).to_dict()
+        template = project.templates[PAR.TEMPLATES['entity']].to_dict()
         for key, val in kwargs.items():
             if isinstance(val, (str, float, int)):
-                entity_val[key]['value'] = val
+                template[key]['value'] = val
             elif isinstance(val, tuple):
                 if not None in val:
-                    entity_val[key] = pq.Quantity(val[0], val[1])
+                    template[key] = pq.Quantity(val[0], val[1])
             elif isinstance(val, type(None)):
                 pass
             else:
                 raise TypeError('Not recognized type ' + str(type(val)))
         not_reg_keys = []
-        for key, val in entity_val.items():
+        for key, val in template.items():
             if isinstance(val, dict):
                 if val.get('value') is None:
                     not_reg_keys.append(key)
@@ -126,4 +123,4 @@ def attach_to_cli(cli):
                     not_reg_keys.append(key)
         if len(not_reg_keys) > 0:
             warnings.warn('No value registered for {}'.format(not_reg_keys))
-        entity.require_module(name=entity_template_name, contents=entity_val, overwrite=overwrite)
+        entity.create_module(name=PAR.TEMPLATES['entity'], contents=template, overwrite=overwrite)

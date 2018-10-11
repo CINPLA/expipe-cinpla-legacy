@@ -58,7 +58,7 @@ def attach_to_cli(cli):
         project = expipe.require_project(PAR.PROJECT_ID)
         try:
             if init:
-                action = project.require_action(entity_id + '-adjustment')
+                action = project.create_action(entity_id + '-adjustment')
             else:
                 action = project.actions[entity_id + '-adjustment']
         except KeyError as e:
@@ -77,8 +77,8 @@ def attach_to_cli(cli):
                     project=project, entity_id=entity_id)
             index = 0
         else:
-            prev_depth = action.require_module(
-                name='{:03d}_adjustment'.format(index - 1)).to_dict()['depth']
+            prev_depth = action.modules[
+                '{:03d}_adjustment'.format(index - 1)].to_dict()['depth']
         name = '{:03d}_adjustment'.format(index)
         assert isinstance(prev_depth, dict), 'Unable to retrieve previous depth.'
         adjustment_dict = {key: dict() for key in prev_depth}
@@ -118,19 +118,17 @@ def attach_to_cli(cli):
                      for key, val in curr_depth.items()
                      for pos_key in sorted(val, key=lambda x: last_num(x)))
         )
-        template_name = PAR.TEMPLATES.get('adjustment') or 'protocol_depth_adjustment'
-        module = action.require_module(template=template_name)
-        content = module.to_dict()
-        content['depth'] = curr_depth
-        content['adjustment'] = adjustment
-        content['experimenter'] = user
-        content['date'] = datestring
-        action.require_module(name=name, contents=content)
+        template_name = PAR.TEMPLATES['adjustment']
+        template = project.templates[template_name].to_dict()
+        template['depth'] = curr_depth
+        template['adjustment'] = adjustment
+        template['experimenter'] = user
+        template['date'] = datestring
+        action.create_module(name=name, contents=template, overwrite=overwrite)
 
         action.type = 'Adjustment'
         action.entities = [entity_id]
         user = user or PAR.USERNAME
-        user = user or []
-        if len(user) == 0:
+        if user is None:
             raise ValueError('Please add user name')
-        action.users = [user]
+        action.users.append(user)

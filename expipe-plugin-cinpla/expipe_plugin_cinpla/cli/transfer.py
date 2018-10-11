@@ -76,7 +76,7 @@ def attach_to_cli(cli):
         if len(exclude) > 0 and len(include) > 0:
             raise IOError('You can only use exlude or include')
         project = expipe.require_project(PAR.PROJECT_ID)
-        action = project.require_action(action_id)
+        action = project.actions[action_id]
         fr = action.require_filerecord()
 
         host, user, pas, port = get_login(hostname=hostname,
@@ -216,7 +216,7 @@ def attach_to_cli(cli):
                   )
     def copy_action(action_id, to_local, from_local, overwrite, exclude, move):
         project = expipe.require_project(PAR.PROJECT_ID)
-        action = project.require_action(action_id)
+        action = project.actions[action_id]
         fr = action.require_filerecord()
         if to_local:
             source = fr.server_path

@@ -76,10 +76,6 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='Overwrite files and expipe action.',
                   )
-    @click.option('--hard',
-                  is_flag=True,
-                  help='Overwrite by deleting action.',
-                  )
     @click.option('--nchan',
                   type=click.INT,
                   default=32,
@@ -105,7 +101,7 @@ def attach_to_cli(cli):
                                   depth, overwrite, no_files, no_modules,
                                   entity_id, user, prb_path, session, nchan,
                                   location, spikes_source, message, no_move,
-                                  tag, hard):
+                                  tag):
         settings = config.load_settings()['current']
         openephys_path = os.path.abspath(openephys_path)
         openephys_dirname = openephys_path.split(os.sep)[-1]
@@ -128,13 +124,8 @@ def attach_to_cli(cli):
         if action_id is None:
             session_dtime = datetime.strftime(openephys_exp.datetime, '%d%m%y')
             action_id = entity_id + '-' + session_dtime + '-' + session
-        if overwrite and hard:
-            try:
-                project.delete_action(action_id)
-            except NameError as e:
-                print(str(e))
         print('Generating action', action_id)
-        action = project.require_action(action_id)
+        action = project.create_action(action_id, overwrite=overwrite)
         fr = action.require_filerecord()
         action.datetime = openephys_exp.datetime
         action.type = 'Recording'
@@ -163,11 +154,7 @@ def attach_to_cli(cli):
         for m in message:
             action.create_message(text=m, user=user, datetime=datetime.now())
         if not no_modules:
-            headstage = action.get_module(
-                name='hardware_intan_headstage').to_dict()
-            headstage['model']['value'] = 'RHD2132'
-            action.require_module(name='hardware_intan_headstage',
-                                  contents=headstage, overwrite=overwrite)
+            action.modules['hardware_intan_headstage']['model']['value'] = 'RHD2132'
 
             # TODO update to messages
             # for idx, m in enumerate(openephys_rec.messages):

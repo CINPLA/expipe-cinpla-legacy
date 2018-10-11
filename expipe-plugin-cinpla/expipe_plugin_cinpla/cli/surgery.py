@@ -27,10 +27,6 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='Overwrite modules or not.',
                   )
-    @click.option('--hard',
-                  is_flag=True,
-                  help='Overwrite by deleting action.',
-                  )
     @click.option('-u', '--user',
                   type=click.STRING,
                   help='The experimenter performing the surgery.',
@@ -58,29 +54,18 @@ def attach_to_cli(cli):
                   type=click.STRING,
                   help='Add message, use "text here" for sentences.',
                   )
-    def generate_surgery(entity_id, procedure, date, user, weight, hard,
+    def generate_surgery(entity_id, procedure, date, user, weight,
                          overwrite, position, angle, message, tag):
         # TODO tag sucject as active
         assert weight != (None, None), 'Missing argument -w / --weight.'
         weight = pq.Quantity(weight[0], weight[1])
         project = expipe.require_project(PAR.PROJECT_ID)
-        action = project.require_action(entity_id + '-surgery-' + procedure)
-        if overwrite and hard:
-            project.delete_action(entity_id + '-surgery-' + procedure)
-        try:
-            entity = project.get_entity(entity_id)
-        except KeyError as e:
-            raise KeyError(
-                str(e) +
-                '. Register entity with "expipe register-entity entity_id"')
-        entity_module = entity[PAR.TEMPLATES['entity']]
+        action = project.create_action(entity_id + '-surgery-' + procedure, overwrite=overwrite)
+        entity = project.entities[entity_id]
+        entity_module = entity.modules[PAR.TEMPLATES['entity']]
+        entity_module['surgery_weight'] = weight
         entity.tags.extend(['surgery', PAR.PROJECT_ID])
         entity.users.append(user)
-        entity_val = entity_module.to_dict()
-        entity_val['weight'] = weight
-        action.require_module(
-            name=PAR.TEMPLATES['entity'], contents=entity_val,
-            overwrite=overwrite)
 
         generate_templates(action, 'surgery_' + procedure, overwrite=overwrite)
         if date == 'now':
@@ -93,20 +78,16 @@ def attach_to_cli(cli):
         action.tags = [procedure] + list(tag)
         action.entities = [entity_id]
         user = user or PAR.USERNAME
-        user = user or []
-        if len(user) == 0:
+        if user is None:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
-        action.users = [user]
-        if overwrite:
-            action.messages = []
+        action.users.append(user)
         for m in message:
             action.create_message(text=m, user=user, datetime=datetime.now())
         modules_dict = action.modules.to_dict()
         keys = list(set([pos[0] for pos in position]))
         modules = {
-            key: action.require_module(template=PAR.TEMPLATES[procedure][key],
-                                       overwrite=overwrite).to_dict() # TODO
+            key: project.templates[PAR.TEMPLATES[procedure][key]].to_dict()
             for key in keys}
         for key, num, x, y, z, unit in position:
             mod = modules[key]
@@ -123,9 +104,7 @@ def attach_to_cli(cli):
                   '{}: angle={} {}'.format(key, ang, unit))
             mod['angle'] = pq.Quantity(ang, unit)
         for key in keys:
-            action.require_module(name=PAR.TEMPLATES[procedure][key],
-                                  contents=modules[key],
-                                  overwrite=True) #TODO use module = val
+            action.modules[PAR.TEMPLATES[procedure][key]] = modules[key]
 
     @cli.command('euthanasia',
                  short_help=('Register a entities euthanasia.'))
@@ -140,11 +119,10 @@ def attach_to_cli(cli):
                   help='Add message, use "text here" for sentences.',
                   )
     def generate_euthanasia(entity_id, user, message):
-        entity = project.require_entity(entity_id)
+        entity = project.entities[entity_id]
         entity.tags.append('euthanised')
         user = user or PAR.USERNAME
-        user = user or []
-        if len(user) == 0:
+        if user is None:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         entity.users.append(user)
@@ -177,7 +155,7 @@ def attach_to_cli(cli):
                   )
     def generate_perfusion(entity_id, date, user, weight, overwrite):
         project = expipe.require_project(PAR.PROJECT_ID)
-        action = project.require_action(entity_id + '-perfusion')
+        action = project.create_action(entity_id + '-perfusion', overwrite=overwrite)
         generate_templates(action, 'perfusion', overwrite=overwrite)
         if date == 'now':
             date = datetime.now()
@@ -189,15 +167,11 @@ def attach_to_cli(cli):
         action.tags = ['perfusion']
         action.entities = [entity_id]
         user = user or PAR.USERNAME
-        user = user or []
-        if len(user) == 0:
+        if user is None:
             raise ValueError('Please add user name')
         print('Registering user ' + user)
         action.users = [user]
         if weight != (None, None):
-            entity_dict = action.require_module(name=PAR.TEMPLATES['entity']).to_dict()
-            entity_dict['weight'] = pq.Quantity(weight[0], weight[1])
-            action.require_module(name=PAR.TEMPLATES['entity'],
-                                  contents=entity_dict, overwrite=overwrite)
-        entity = project.require_entity(entity_id)
+            action.modules[PAR.TEMPLATES['entity']]['weight'] = pq.Quantity(weight[0], weight[1])
+        entity = project.entities[entity_id]
         entity.tags.extend(['perfused', 'euthanised'])

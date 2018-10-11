@@ -89,7 +89,7 @@ def attach_to_cli(cli):
     def generate_axona_action(action_id, axona_filename, depth, user,
                               no_local, overwrite, no_files, no_modules,
                               entity_id, location, message, tag,
-                              get_inp, yes, hard, no_cut, cluster_group,
+                              get_inp, yes, no_cut, cluster_group,
                               set_noise):
         if not axona_filename.endswith('.set'):
             raise ValueError("Sorry, we need an Axona .set file not " +
@@ -105,12 +105,7 @@ def attach_to_cli(cli):
             basename, _ = os.path.splitext(axona_filename)
             session = basename[-2:]
             action_id = entity_id + '-' + session_dtime + '-' + session
-        if overwrite and hard:
-            try:
-                project.delete_action(action_id)
-            except NameError as e:
-                print(str(e))
-        action = project.require_action(action_id)
+        action = project.create_action(action_id, overwrite=overwrite)
         if not no_modules:
             action_tools.generate_templates(action, 'axona',
                                             overwrite=overwrite)

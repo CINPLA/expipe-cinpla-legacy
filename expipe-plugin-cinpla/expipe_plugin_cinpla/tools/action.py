@@ -101,7 +101,7 @@ def register_depth(project, action, depth=None, answer=False, overwrite=False):
         try:
             adjustments = project.actions[entity_id + '-adjustment']
             adjusts = {}
-            for adjust in adjustments.modules:
+            for adjust in adjustments.modules.values():
                 values = adjust.to_dict()
                 adjusts[datetime.strptime(values['date'], DTIME_FORMAT)] = adjust
 
@@ -150,9 +150,9 @@ def register_depth(project, action, depth=None, answer=False, overwrite=False):
         if key not in curr_depth: # module not used in surgery
             continue
         if surgery:
-            mod = surgery[name].to_dict()
+            mod = surgery.modules[name].to_dict()
         else:
-            mod = action.require_module(template=name, overwrite=overwrite).to_dict()
+            mod = project.templates[name].to_dict()
             del(mod['position'])
         for pos_key, val in curr_depth[key].items():
             print('Registering depth:', key, pos_key, '=', val)
@@ -160,7 +160,7 @@ def register_depth(project, action, depth=None, answer=False, overwrite=False):
                 mod[pos_key][2] = val
             else:
                 mod[pos_key] = [np.nan, np.nan, float(val.magnitude)] * val.units
-        action.require_module(name=name, contents=mod, overwrite=overwrite)
+        action.create_module(name=name, contents=mod, overwrite=overwrite)
     return True
 
 
@@ -193,7 +193,7 @@ def generate_templates(action, templates_key, overwrite):
         return
     for template in templates:
         try:
-            action.require_module(template=template, overwrite=overwrite)
+            action.create_module(template=template, overwrite=overwrite)
             print('Adding module ' + template)
         except Exception as e:
             print(template)

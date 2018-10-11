@@ -147,6 +147,7 @@ def set_empty_if_no_value(PAR):
         PAR, list(),
         'POSSIBLE_TAGS',
         'POSSIBLE_LOCATIONS',
+        'POSSIBLE_OPTO_PARADIGMS',
         'POSSIBLE_OPTO_TAGS',
         'POSSIBLE_BRAIN_AREAS',
         'POSSIBLE_LOCATIONS',
