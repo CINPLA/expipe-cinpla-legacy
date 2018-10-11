@@ -112,7 +112,7 @@ def generate_spike_trains(exdir_path, openephys_rec, source='klusta'):
                 if not f.endswith('_klusta.kwik'):
                     continue
                 n += 1
-                kwikfile = op.join(klusta_directory, kwikfile)
+                kwikfile = op.join(root, f)
                 kwikio = neo.io.KwikIO(filename=kwikfile,)
                 blk = kwikio.read_block(raw_data_units='uV')
                 seg = blk.segments[0]
