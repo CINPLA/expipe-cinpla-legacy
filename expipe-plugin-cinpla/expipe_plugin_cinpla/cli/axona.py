@@ -54,10 +54,6 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='Overwrite modules or not.',
                   )
-    @click.option('--hard',
-                  is_flag=True,
-                  help='Overwrite by deleting action.',
-                  )
     @click.option('-m', '--message',
                   multiple=True,
                   type=click.STRING,
@@ -123,10 +119,8 @@ def attach_to_cli(cli):
         print('Registering location ' + location)
         action.location = location
         action.type = 'Recording'
-        action.messages = [{'message': m,
-                            'user': user,
-                            'datetime': datetime.now()}
-                           for m in message]
+        for m in message:
+            action.create_message(text=m, user=user, datetime=datetime.now())
         if not no_modules:
             try:
                 correct = action_tools.register_depth(
