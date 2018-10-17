@@ -42,8 +42,12 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='No query for correct adjustment.',
                   )
+    @click.option('--overwrite',
+                  is_flag=True,
+                  help='Overwrite existing action',
+                  )
     def generate_adjustment(entity_id, date, adjustment, user, index, init,
-                            depth, yes):
+                            depth, yes, overwrite):
         if not init:
             assert len(depth) == 0, '"--depth" is only valid if "--init"'
             assert len(adjustment) != 0, 'Missing option "-a" / "--adjustment".'
@@ -58,7 +62,8 @@ def attach_to_cli(cli):
         project = expipe.require_project(PAR.PROJECT_ID)
         try:
             if init:
-                action = project.create_action(entity_id + '-adjustment')
+                action = project.create_action(
+                    entity_id + '-adjustment', overwrite=overwrite)
             else:
                 action = project.actions[entity_id + '-adjustment']
         except KeyError as e:

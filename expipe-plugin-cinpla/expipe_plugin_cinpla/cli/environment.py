@@ -123,7 +123,7 @@ def attach_to_cli(cli):
         project = project or get_project_from_current(settings)
         check_project_exists(settings, project)
         update = {k: v for k, v in kwargs.items() if v is not None}
-        settings.update({project: update})
+        settings[project].update(update)
         if_active_update_current(settings, project)
         with open(settings_file_path, "w") as f:
             yaml.dump(settings, f, default_flow_style=False)
@@ -163,6 +163,9 @@ def attach_to_cli(cli):
             os.path.expanduser('~'), '.config', 'expipe',
             '{}-project-params.yaml'.format(project))
         expipe_project = expipe.get_project(project)
-        project_settings = expipe_project.modules['settings'].to_dict()
+        try:
+            project_settings = expipe_project.modules['settings'].to_dict()
+        except KeyError:
+            project_settings = {}
         with open(project_params_file_path, "w") as f:
             yaml.dump(project_settings, f, default_flow_style=False)
