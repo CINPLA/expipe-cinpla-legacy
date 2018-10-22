@@ -33,6 +33,8 @@ def validate_cluster_group(ctx, param, cluster_group):
 
 
 def validate_depth(ctx, param, depth):
+    if depth == 'find':
+        return depth
     try:
         out = []
         for pos in depth:

@@ -28,8 +28,10 @@ def attach_to_cli(cli):
     @click.option('-d', '--depth',
                   multiple=True,
                   callback=config.validate_depth,
-                  help=('The depth given as <key num depth unit> e.g. ' +
-                        '<mecl 0 10 um> (omit <>).'),
+                  help=(
+                    'Alternative "find" to find from surgery or adjustment' +
+                    ' or given as <key num depth unit> e.g. ' +
+                    '<mecl 0 10 um> (omit <>).'),
                   )
     @click.option('-l', '--location',
                   type=click.STRING,
@@ -141,13 +143,15 @@ def attach_to_cli(cli):
         if not no_modules:
             if 'openephys' not in PAR.TEMPLATES:
                 raise ValueError('Could not find "openephys" in ' +
-                                 'expipe_params.py PAR.TEMPLATES: "' +
+                                 'PAR.TEMPLATES: available keys are:"' +
                                  '{}"'.format(PAR.TEMPLATES.keys()))
-            correct_depth = action_tools.register_depth(
-                project=project, action=action, depth=depth, overwrite=overwrite)
-            if not correct_depth:
-                print('Aborting registration!')
-                return
+            if depth is not None:
+                correct_depth = action_tools.register_depth(
+                    project=project, action=action, depth=depth,
+                    overwrite=overwrite)
+                if not correct_depth:
+                    print('Aborting registration!')
+                    return
             action_tools.generate_templates(action, 'openephys',
                                             overwrite=overwrite)
 

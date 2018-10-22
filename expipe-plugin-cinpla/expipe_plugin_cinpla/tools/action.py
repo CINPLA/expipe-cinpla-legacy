@@ -95,7 +95,7 @@ def register_depth(project, action, depth=None, answer=False, overwrite=False):
     mod_info = PAR.TEMPLATES['implantation']
     depth = depth or []
     adjustdate = None
-    if len(depth) == 0:
+    if depth == 'find':
         assert len(action.entities) == 1
         entity_id = action.entities[0]
         try:
