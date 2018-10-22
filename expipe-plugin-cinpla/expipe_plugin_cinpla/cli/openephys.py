@@ -153,8 +153,6 @@ def attach_to_cli(cli):
 
         for m in message:
             action.create_message(text=m, user=user, datetime=datetime.now())
-        if not no_modules:
-            action.modules['hardware_intan_headstage']['model']['value'] = 'RHD2132'
 
             # TODO update to messages
             # for idx, m in enumerate(openephys_rec.messages):
