@@ -6,6 +6,6 @@
 [subrepo]
 	remote = git@github.com:CINPLA/expipe-cli.git
 	branch = dev
-	commit = 71f1ebc78129ccf620edad0fce47e7fb1131a156
-	parent = 405eb855c6a24723dfc18e1270054e4192f421c7
+	commit = 9a80f38d5a585a70b12a5ac72bbcdf2c42b21a81
+	parent = 2dddfe53583efd01a4c47c5e9d89686319a5da94
 	cmdver = 0.3.1

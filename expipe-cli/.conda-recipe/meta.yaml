@@ -1,14 +1,15 @@
 package:
     name: expipe-cli
-    version: {{ environ.get("GIT_TAG", "0.0.0_custom")|replace("v", "")|replace("-", "_") }}
+    version: {{ environ.get("GIT_STRING", "0.0.0_custom")|replace("v", "")|replace("-", "_") }}
 source:
     git_url: ..
 build:
     script: python setup.py install
-    
+    noarch: python
+
 entry_points:
   - expipe = expipecli.main:expipe
-    
+
 requirements:
     build:
         - future
@@ -16,6 +17,7 @@ requirements:
         - future
         - python
         - expipe
+        - six
 test:
   script:
     expipe --help
