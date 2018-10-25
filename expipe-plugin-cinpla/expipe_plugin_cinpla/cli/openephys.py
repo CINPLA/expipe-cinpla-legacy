@@ -36,7 +36,6 @@ def attach_to_cli(cli):
     @click.option('-l', '--location',
                   type=click.STRING,
                   callback=config.optional_choice,
-                  required=True,
                   envvar=PAR.POSSIBLE_LOCATIONS,
                   help='The location of the recording, i.e. "room-1-ibv".'
                   )
@@ -53,10 +52,6 @@ def attach_to_cli(cli):
                   type=click.Choice(['klusta', 'openephys', 'none']),
                   default='none',
                   help='Generate spiketrains from "source". Default is none'
-                  )
-    @click.option('--no-local',
-                  is_flag=True,
-                  help='Store temporary on local drive.',
                   )
     @click.option('--no-files',
                   is_flag=True,
@@ -99,20 +94,19 @@ def attach_to_cli(cli):
                   is_flag=True,
                   help='Do not delete open ephys directory after copying.',
                   )
-    def generate_openephys_action(action_id, openephys_path, no_local,
+    def generate_openephys_action(action_id, openephys_path,
                                   depth, overwrite, no_files, no_modules,
                                   entity_id, user, prb_path, session, nchan,
                                   location, spikes_source, message, no_move,
                                   tag):
-        settings = config.load_settings()['current']
         openephys_path = os.path.abspath(openephys_path)
         openephys_dirname = openephys_path.split(os.sep)[-1]
-        project = expipe.require_project(PAR.PROJECT_ID)
-        prb_path = prb_path or settings.get('probe')
+        project = expipe_server.require_project(PAR.PROJECT_ID)
+        prb_path = prb_path or PAR.CONFIG['local'].get('probe')
         if prb_path is None:
             raise IOError('No probefile found, please provide one either ' +
                           'as an argument or with\n' +
-                          '"expipe env set --probe".')
+                          '"expipe set-local --probe <path/to/probe/file>".')
         openephys_file = pyopenephys.File(openephys_path, prb_path)
         openephys_exp = openephys_file.experiments[0]
         openephys_rec = openephys_exp.recordings[0]
@@ -127,24 +121,36 @@ def attach_to_cli(cli):
             session_dtime = datetime.strftime(openephys_exp.datetime, '%d%m%y')
             action_id = entity_id + '-' + session_dtime + '-' + session
         print('Generating action', action_id)
-        action = project.create_action(action_id, overwrite=overwrite)
-        fr = action.require_filerecord()
+        try:
+            action = project.create_action(action_id)
+        except NameError as e:
+            if overwrite:
+                project.delete_action(action_id)
+                action = project.create_action(action_id)
+            else:
+                raise NameError(str(e) + '. Use "overwrite"')
         action.datetime = openephys_exp.datetime
         action.type = 'Recording'
         action.tags.extend(list(tag) + ['open-ephys'])
         print('Registering entity id ' + entity_id)
         action.entities = [entity_id]
         user = user or PAR.USERNAME
+        if user is None:
+            raise click.ClickException('Missing option "-u" / "--user".')
         print('Registering user ' + user)
         action.users = [user]
+        location = location or PAR.LOCATION
+        if location is None:
+            raise click.ClickException('Missing option "-l" / "--location".')
         print('Registering location ' + location)
         action.location = location
 
+
         if not no_modules:
             if 'openephys' not in PAR.TEMPLATES:
-                raise ValueError('Could not find "openephys" in ' +
-                                 'PAR.TEMPLATES: available keys are:"' +
-                                 '{}"'.format(PAR.TEMPLATES.keys()))
+                raise ValueError(
+                    'Could not find "openephys" in PAR.TEMPLATES, ' +
+                    'optionally use "--no-modules"')
             if depth is not None:
                 correct_depth = action_tools.register_depth(
                     project=project, action=action, depth=depth,
@@ -152,8 +158,8 @@ def attach_to_cli(cli):
                 if not correct_depth:
                     print('Aborting registration!')
                     return
-            action_tools.generate_templates(action, 'openephys',
-                                            overwrite=overwrite)
+            action_tools.generate_templates(
+                action, 'openephys', overwrite=overwrite)
 
         for m in message:
             action.create_message(text=m, user=user, datetime=datetime.now())
@@ -165,26 +171,13 @@ def attach_to_cli(cli):
             #     action.create_message(text=m['message'], user=user, datetime=dtime)
 
         if not no_files:
-            fr = action.require_filerecord()
-            if not no_local:
-                exdir_path = action_tools._get_local_path(fr)
-            else:
-                exdir_path = fr.server_path
-            if os.path.exists(exdir_path):
-                if overwrite:
-                    shutil.rmtree(exdir_path)
-                else:
-                    raise FileExistsError('The exdir path to this action "' +
-                                          exdir_path + '" exists, use ' +
-                                          'overwrite flag')
-            os.makedirs(os.path.dirname(exdir_path), exist_ok=True)
+            exdir_path = action_tools._make_data_path(action, overwrite)
             shutil.copy(prb_path, openephys_path)
-            openephys.convert(openephys_rec,
-                              exdir_path=exdir_path,
-                              session=session)
+            openephys.convert(
+                openephys_rec, exdir_path=exdir_path, session=session)
             if spikes_source != 'none':
-                openephys.generate_spike_trains(exdir_path, openephys_rec,
-                                                source=spikes_source)
+                openephys.generate_spike_trains(
+                    exdir_path, openephys_rec, source=spikes_source)
             if not no_move:
                 if action_tools.query_yes_no(
                     'Delete raw data in {}? (yes/no)'.format(openephys_path),

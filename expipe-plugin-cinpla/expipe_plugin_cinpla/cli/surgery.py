@@ -59,7 +59,7 @@ def attach_to_cli(cli):
         # TODO tag sucject as active
         assert weight != (None, None), 'Missing argument -w / --weight.'
         weight = pq.Quantity(weight[0], weight[1])
-        project = expipe.require_project(PAR.PROJECT_ID)
+        project = expipe_server.require_project(PAR.PROJECT_ID)
         action = project.create_action(entity_id + '-surgery-' + procedure, overwrite=overwrite)
         entity = project.entities[entity_id]
         entity_module = entity.modules[PAR.TEMPLATES['entity']]
@@ -154,7 +154,7 @@ def attach_to_cli(cli):
                   help='Overwrite files and expipe action.',
                   )
     def generate_perfusion(entity_id, date, user, weight, overwrite):
-        project = expipe.require_project(PAR.PROJECT_ID)
+        project = expipe_server.require_project(PAR.PROJECT_ID)
         action = project.create_action(entity_id + '-perfusion', overwrite=overwrite)
         generate_templates(action, 'perfusion', overwrite=overwrite)
         if date == 'now':

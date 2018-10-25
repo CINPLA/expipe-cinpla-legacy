@@ -34,10 +34,6 @@ def attach_to_cli(cli):
                   help=('Desired action id for this action, if none' +
                         ', it is generated from axona-path.'),
                   )
-    @click.option('--no-local',
-                  is_flag=True,
-                  help='Store temporary on local drive.',
-                  )
     @click.option('--no-files',
                   is_flag=True,
                   help='Generate action without storing files.',
@@ -83,7 +79,7 @@ def attach_to_cli(cli):
                   help='Yes to depth registering query.',
                   )
     def generate_axona_action(action_id, axona_filename, depth, user,
-                              no_local, overwrite, no_files, no_modules,
+                              overwrite, no_files, no_modules,
                               entity_id, location, message, tag,
                               get_inp, yes, no_cut, cluster_group,
                               set_noise):
@@ -92,7 +88,7 @@ def attach_to_cli(cli):
                   "'{}'.".format(axona_filename))
         if len(cluster_group) == 0:
             cluster_group = None # TODO set proper default via callback
-        project = expipe.require_project(PAR.PROJECT_ID)
+        project = expipe_server.require_project(PAR.PROJECT_ID)
         entity_id = entity_id or axona_filename.split(os.sep)[-2]
         axona_file = pyxona.File(axona_filename)
         if action_id is None:
@@ -111,11 +107,13 @@ def attach_to_cli(cli):
         print('Registering entity id ' + entity_id)
         action.entities = [entity_id]
         user = user or PAR.USERNAME
-        user = user or []
-        if len(user) == 0:
-            raise ValueError('Please add user name')
+        if user is None:
+            raise click.ClickException('Missing option "-u" / "--user".')
         print('Registering user ' + user)
         action.users = [user]
+        location = location or PAR.LOCATION
+        if location is None:
+            raise click.ClickException('Missing option "-l" / "--location".')
         print('Registering location ' + location)
         action.location = location
         action.type = 'Recording'
@@ -134,21 +132,7 @@ def attach_to_cli(cli):
                 print('Aborting')
                 return
         if not no_files:
-            fr = action.require_filerecord()
-            if not no_local:
-                exdir_path = action_tools._get_local_path(fr, make=False)
-            else:
-                exdir_path = fr.server_path
-            if os.path.exists(exdir_path):
-                if overwrite:
-                    print('Deleting existing directory "' + exdir_path + '".')
-                    shutil.rmtree(exdir_path)
-                else:
-                    raise FileExistsError('The exdir path to this action "' +
-                                          exdir_path + '" exists, use ' +
-                                          'overwrite flag')
-            else:
-                os.makedirs(os.path.dirname(exdir_path))
+            exdir_path = action_tools._make_data_path(action, overwrite)
             axona.convert(axona_file, exdir_path)
             axona.generate_tracking(exdir_path, axona_file)
             axona.generate_analog_signals(exdir_path, axona_file)
@@ -171,7 +155,7 @@ def attach_to_cli(cli):
     #     """Generate an axona recording-action to database.
     #
     #     COMMAND: axona-filename"""
-    #     project = expipe.require_project(PAR.PROJECT_ID)
+    #     project = expipe_server.require_project(PAR.PROJECT_ID)
     #
     #
     #     for action in project.actions:

@@ -7,7 +7,6 @@ from . import misc
 from . import openephys as OE
 from . import entity
 from . import surgery
-from . import transfer
 
 
 class CinplaPlugin(IPlugin):
@@ -28,6 +27,5 @@ class CinplaPlugin(IPlugin):
         adjust.attach_to_cli(cli)
         surgery.attach_to_cli(register)
         entity.attach_to_cli(register)
-        transfer.attach_to_cli(cli)
         OE.attach_to_cli(register)
         AX.attach_to_cli(register)

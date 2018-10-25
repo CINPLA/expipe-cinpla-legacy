@@ -7,12 +7,6 @@ from click.testing import CliRunner
 
 expipe.ensure_testing()
 
-sys.path.append(expipe.config.config_dir)
-if not op.exists(op.join(expipe.config.config_dir, 'expipe_params.py')):
-    raise IOError('No "expipe_params.py" found.')
-from expipe_params import (PAR.TEMPLATES, PAR.UNIT_INFO, PAR.POSSIBLE_TAGS,
-                           PAR.POSSIBLE_LOCATIONS, OBLIGATORY_TAGS)
-
 # TODO ADD ALL PAR.TEMPLATES
 
 PROJECT_ID = PAR.PROJECT_ID
@@ -48,10 +42,10 @@ def run_command(command_list, inp=None):
 @pytest.fixture(scope='function')
 def teardown_setup_project():
     try:
-        expipe.delete_project(PROJECT_ID, remove_all_childs=True)
+        expipe_server.delete_project(PROJECT_ID, remove_all_childs=True)
     except NameError:
         pass
-    project = expipe.require_project(PROJECT_ID)
+    project = expipe_server.require_project(PROJECT_ID)
     action = project.require_action(ACTION_ID)
     yield project, action
 
@@ -59,10 +53,10 @@ def teardown_setup_project():
 @pytest.fixture(scope='module')
 def module_teardown_setup_project_setup():
     try:
-        expipe.delete_project(PROJECT_ID, remove_all_childs=True)
+        expipe_server.delete_project(PROJECT_ID, remove_all_childs=True)
     except NameError:
         pass
-    project = expipe.require_project(PROJECT_ID)
+    project = expipe_server.require_project(PROJECT_ID)
 
     from expipe_plugin_cinpla.main import CinplaPlugin
     CinplaPlugin().attach_to_cli(cli)
@@ -87,7 +81,7 @@ def module_teardown_setup_project_setup():
 
 @pytest.fixture
 def setup_project_action():
-    project = expipe.require_project(PROJECT_ID)
+    project = expipe_server.require_project(PROJECT_ID)
     try:
         project.delete_action(ACTION_ID)
     except NameError:

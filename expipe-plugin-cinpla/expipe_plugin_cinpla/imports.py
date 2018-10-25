@@ -1,6 +1,40 @@
 import click
 from expipecli.utils.misc import lazy_import
 
+@lazy_import
+def expipe():
+    import expipe
+    return expipe
+
+@lazy_import
+def warnings():
+    import warnings
+    def _warning(
+        message,
+        category = UserWarning,
+        filename = '',
+        lineno = -1):
+        print()
+        print('WARNING:', message)
+        print()
+
+    warnings.showwarning = _warning
+    return warnings
+
+@lazy_import
+def PAR():
+    from expipe_plugin_cinpla.tools.config import load_parameters
+    return load_parameters()
+
+@lazy_import
+def expipe_server():
+    config = PAR.CONFIG
+    if config['local_root'] is None:
+        print('Unable to locate expipe configurations.')
+        return None
+    assert config['local']['type'] == 'project'
+    server = expipe.load_file_system(root=config['local_root'].parent)
+    return server
 
 @lazy_import
 def pd():
@@ -149,51 +183,11 @@ def sys():
     return sys
 
 @lazy_import
-def expipe():
-    import expipe
-    return expipe
-
-@lazy_import
-def warnings():
-    import warnings
-    def _warning(
-        message,
-        category = UserWarning,
-        filename = '',
-        lineno = -1):
-        print()
-        print('WARNING:', message)
-        print()
-
-    warnings.showwarning = _warning
-    return warnings
-
-@lazy_import
-def PAR():
-    from expipe_plugin_cinpla.tools.config import load_parameters
-    return load_parameters()
-
-@lazy_import
-def yaml():
-    import yaml
-    return yaml
-
-@lazy_import
 def pprint():
     import pprint
     return pprint
 
 @lazy_import
-def imp():
-    import imp
-    return imp
-
-@lazy_import
 def collections():
     import collections
     return collections
-
-@lazy_import
-def plt():
-    import matplotlib.pyplot as plt
-    return plt

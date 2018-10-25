@@ -143,4 +143,5 @@ def load_parameters():
     PAR.PROJECT_ID = project_id
     PAR.USERNAME = config['user'].get('username')
     PAR.LOCATION = config['user'].get('location')
+    PAR.CONFIG = config
     return PAR

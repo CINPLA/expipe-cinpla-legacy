@@ -59,7 +59,7 @@ def attach_to_cli(cli):
             dt.strptime(date, '%d.%m.%YT%H:%M')
 
         datestring = dt.strftime(date, DTIME_FORMAT)
-        project = expipe.require_project(PAR.PROJECT_ID)
+        project = expipe_server.require_project(PAR.PROJECT_ID)
         try:
             if init:
                 action = project.create_action(

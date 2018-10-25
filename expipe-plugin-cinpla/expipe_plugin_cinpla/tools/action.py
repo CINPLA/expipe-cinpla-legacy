@@ -165,20 +165,20 @@ def register_depth(project, action, depth=None, answer=False, overwrite=False):
     return True
 
 
-def _get_local_path(file_record, assert_exists=False, make=False):
-    '''
-
-    :param file_record:
-    :return:
-    '''
-    folder_name = 'expipe_temp_storage'
-    local_path = file_record.local_path or os.path.join(os.path.expanduser('~'),
-                                                   folder_name, path)
-    if not os.path.exists(local_path) and not assert_exists and make:
-        os.makedirs(local_path)
-    elif not os.path.exists(local_path) and assert_exists:
-        raise IOError('Path "' + local_path + '" does not exist.')
-    return local_path
+def _make_data_path(action, overwrite):
+    root = str(PAR.CONFIG['local_root'])
+    action_path = action._backend.path
+    exdir_path = action_path / 'main.exdir'
+    if exdir_path.exists():
+        if overwrite:
+            shutil.rmtree(str(exdir_path))
+        else:
+            raise FileExistsError(
+                'The exdir path to this action "' + str(exdir_path) +
+                '" exists, optionally use "--overwrite"')
+    relpath = str(exdir_path).replace(root,  '')
+    action.data = [relpath]
+    return action_path / 'main'
 
 
 def generate_templates(action, templates_key, overwrite):
@@ -199,12 +199,3 @@ def generate_templates(action, templates_key, overwrite):
         except Exception as e:
             print(template)
             raise e
-
-
-def _get_probe_file(system, nchan, spikesorter='klusta'):
-    # TODO add naming convention for openeophys (oe) and intan (intan) - argument 'oe' or 'intan'
-    fname = 'tetrodes' + str(nchan) + 'ch-' + spikesorter + '-' + system + '.prb'
-    prb_path = os.path.join(expipe.config.config_dir, fname)
-    if not os.path.exists(prb_path):
-        prb_path = None
-    return prb_path
