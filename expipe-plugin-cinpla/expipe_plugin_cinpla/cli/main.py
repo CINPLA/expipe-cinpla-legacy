@@ -3,19 +3,11 @@ from expipecli.utils.plugin import IPlugin
 from expipe_plugin_cinpla.imports import *
 from . import adjust
 from . import axona as AX
-from . import environment
 from . import misc
 from . import openephys as OE
 from . import entity
 from . import surgery
 from . import transfer
-
-
-def reveal():
-    """
-    This imports all plugins when loading expipe-cli.
-    """
-    pass
 
 
 class CinplaPlugin(IPlugin):
@@ -37,6 +29,5 @@ class CinplaPlugin(IPlugin):
         surgery.attach_to_cli(register)
         entity.attach_to_cli(register)
         transfer.attach_to_cli(cli)
-        environment.attach_to_cli(env)
         OE.attach_to_cli(register)
         AX.attach_to_cli(register)

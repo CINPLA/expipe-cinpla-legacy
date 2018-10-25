@@ -1,10 +1,6 @@
 from expipe_plugin_cinpla.imports import *
 
 
-settings_file_path = os.path.join(os.path.expanduser('~'), '.config', 'expipe',
-                             'expipe-plugin-cinpla-config.yaml')
-
-
 def deep_update(d, other):
     for k, v in other.items():
         d_v = d.get(k)
@@ -112,35 +108,13 @@ def optional_choice(ctx, param, value):
                     return value[0]
 
 
-def load_python_module(module_path):
-    if not os.path.exists(module_path):
-        raise FileExistsError('Path "' + module_path + '" does not exist.')
-    directory, modname = os.path.split(module_path)
-    modname, _ = os.path.splitext(modname)
-    file, path, descr = imp.find_module(modname, [directory])
-    if file:
-        try:
-            mod = imp.load_module(modname, file, path, descr)  # noqa
-        except Exception as e:  # pragma: no cover
-            raise e
-        finally:
-            file.close()
-    return mod
-
-
-def load_settings():
-    with open(settings_file_path, "r") as f:
-        settings = yaml.load(f)
-    return settings
-
-
 def give_attrs_val(obj, value, *attrs):
     for attr in attrs:
         if not hasattr(obj, attr):
             setattr(obj, attr, value)
 
 
-def set_empty_if_no_value(PAR):
+def set_empty_if_no_value(PAR=None):
     if PAR is None:
         class Parameters:
             pass
@@ -149,55 +123,24 @@ def set_empty_if_no_value(PAR):
         PAR, list(),
         'POSSIBLE_TAGS',
         'POSSIBLE_LOCATIONS',
-        'POSSIBLE_OPTO_PARADIGMS',
-        'POSSIBLE_OPTO_TAGS',
-        'POSSIBLE_BRAIN_AREAS',
-        'POSSIBLE_LOCATIONS',
         'POSSIBLE_CELL_LINES')
     give_attrs_val(
         PAR, dict(),
-        'UNIT_INFO',
         'TEMPLATES')
     return PAR
 
 
 def load_parameters():
-    try:
-        settings = load_settings()
-    except FileNotFoundError as e:
-        print ('WARNING:\n',
-            str(e) + '. Unable to load settings file use:\n"expipe env create ' +
-            'project ~/.config/expipe/your_settings_file.yaml"\n')
+    from expipecli.main import load_config
+    config = load_config()
+    if (config['local_root'], config['user_root']) == (None, None):
+        warnings.warn('Unable to find "project-id", some commands will fail.')
         PAR = set_empty_if_no_value(None)
         PAR.PROJECT_ID, PAR.USERNAME = None, None
         return PAR
-    curr_settings = settings['current']
-    project = curr_settings['project']
-
-    project_params_file_path = os.path.join(
-        os.path.expanduser('~'), '.config', 'expipe',
-        '{}-project-params.yaml'.format(project))
-
-    if 'params' in curr_settings:
-        PAR = load_python_module(curr_settings['params'])
-    else:
-        class Parameters:
-            pass
-        PAR = Parameters()
-        if os.path.exists(project_params_file_path):
-            with open(project_params_file_path, "r") as f:
-                PAR.__dict__.update(yaml.load(f))
-        else:
-            try:
-                expipe_project = expipe.get_project(project)
-                PAR.__dict__.update(expipe_project.modules['settings'].to_dict())
-                print(
-                    'Loading project parameters from server, if this is slow' +
-                    ' use "expipe env sync-project-parameters"')
-            except:
-                pass
-    PAR = set_empty_if_no_value(PAR)
-    PAR.PROJECT_ID = project
-    PAR.USERNAME = expipe.config.settings['username']
-
+    project_id = config['local']['project_id']
+    PAR = set_empty_if_no_value()
+    PAR.PROJECT_ID = project_id
+    PAR.USERNAME = config['user'].get('username')
+    PAR.LOCATION = config['user'].get('location')
     return PAR

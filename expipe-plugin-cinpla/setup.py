@@ -19,9 +19,4 @@ setup(
     platforms=['Linux', "Windows"],
     description="Plugins for the CINPLA lab",
     long_description=long_description,
-    entry_points={
-        'console_scripts': [
-            'plugin-expipe-cinpla = expipe_plugin_cinpla.cli.main:reveal'
-        ],
-    },
 )
