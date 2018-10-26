@@ -101,7 +101,7 @@ def attach_to_cli(cli):
                                   tag):
         openephys_path = os.path.abspath(openephys_path)
         openephys_dirname = openephys_path.split(os.sep)[-1]
-        project = expipe_server.require_project(PAR.PROJECT_ID)
+        project = require_project()
         prb_path = prb_path or PAR.CONFIG['local'].get('probe')
         if prb_path is None:
             raise IOError('No probefile found, please provide one either ' +
@@ -171,7 +171,7 @@ def attach_to_cli(cli):
         if not no_files:
             exdir_path = action_tools._make_data_path(action, overwrite)
             shutil.copy(prb_path, openephys_path)
-            openephys.convert(
+            openephys.convert( # TODO why not main.exdir??
                 openephys_rec, exdir_path=exdir_path, session=session)
             if spikes_source != 'none':
                 openephys.generate_spike_trains(

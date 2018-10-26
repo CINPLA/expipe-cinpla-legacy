@@ -40,7 +40,7 @@ def attach_to_cli(cli):
                   help='The experimenter performing the annotation.',
                   )
     def annotate(action_id, tag, message, user):
-        project = expipe_server.require_project(PAR.PROJECT_ID)
+        project = require_project()
         action = project.actions[action_id]
         user = user or PAR.USERNAME
         if user is None:
@@ -69,7 +69,7 @@ def attach_to_cli(cli):
         ch.setLevel(logging.DEBUG)
         logger.addHandler(ch)
 
-        project = expipe_server.get_project(PAR.PROJECT_ID)
+        project = get_project()
         action = project.require_action(action_id)
         exdir_path = PAR.CONFIG['local_root'] / action.data[0]
         print('Spikesorting ', exdir_path)

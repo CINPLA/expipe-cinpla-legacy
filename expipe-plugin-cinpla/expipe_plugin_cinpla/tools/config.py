@@ -130,22 +130,22 @@ def set_empty_if_no_value(PAR=None):
     return PAR
 
 
-def load_parameters():
+def load_parameters(): # load global and merge
     from expipecli.main import load_config
     config = load_config()
-    if (config['local_root'], config['user_root']) == (None, None):
+    if (config['project_root'], config['project_root']) == (None, None):
         warnings.warn('Unable to find "project-id", some commands will fail.')
         PAR = set_empty_if_no_value(None)
         PAR.PROJECT_ID, PAR.USERNAME = None, None
         return PAR
-    project_id = config['local']['project_id']
+    project_id = config['local']['project']
     PAR = set_empty_if_no_value()
     PAR.PROJECT_ID = project_id
-    PAR.USERNAME = config['user'].get('username')
-    PAR.LOCATION = config['user'].get('location')
+    PAR.USERNAME = config['project'].get('username')
+    PAR.LOCATION = config['project'].get('location')
     PAR.CONFIG = config
     try:
-        project = expipe_server.get_project(project_id)
+        project = expipe.get_project(path=config['local_root'], name=project_id)
         PAR.__dict__.update(project.modules['settings'].to_dict())
     except KeyError:
         pass
