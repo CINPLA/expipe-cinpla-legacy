@@ -97,10 +97,16 @@ def attach_to_cli(cli):
             basename, _ = os.path.splitext(axona_filename)
             session = basename[-2:]
             action_id = entity_id + '-' + session_dtime + '-' + session
-        action = project.create_action(action_id, overwrite=overwrite)
+        try:
+            action = project.create_action(action_id)
+        except NameError as e:
+            if overwrite:
+                project.delete_action(action_id)
+                action = project.create_action(action_id)
+            else:
+                raise NameError(str(e) + '. Use "overwrite"')
         if not no_modules:
-            action_tools.generate_templates(action, 'axona',
-                                            overwrite=overwrite)
+            action_tools.generate_templates(action, 'axona')
         action.datetime = axona_file._start_datetime
         action.tags = list(tag) + ['axona']
         print('Registering action id ' + action_id)
@@ -122,7 +128,7 @@ def attach_to_cli(cli):
         if not no_modules:
             try:
                 correct = action_tools.register_depth(
-                    project, action, depth=depth, answer=yes, overwrite=overwrite)
+                    project, action, depth=depth, answer=yes)
             except (NameError, ValueError):
                 raise
             except Exception as e:

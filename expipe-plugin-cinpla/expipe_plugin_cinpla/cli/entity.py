@@ -89,7 +89,14 @@ def attach_to_cli(cli):
                          **kwargs):
         DTIME_FORMAT = expipe.core.datetime_format
         project = expipe_server.require_project(PAR.PROJECT_ID)
-        entity = project.create_entity(entity_id, overwrite=overwrite)
+        try:
+            entity = project.create_entity(entity_id)
+        except NameError as e:
+            if overwrite:
+                project.delete_entity(entity_id)
+                entity = project.create_entity(entity_id)
+            else:
+                raise NameError(str(e) + '. Use "overwrite"')
         kwargs['birthday'] = datetime.strftime(
             datetime.strptime(kwargs['birthday'], '%d.%m.%Y'), DTIME_FORMAT)
         entity.datetime = datetime.now()
@@ -102,7 +109,7 @@ def attach_to_cli(cli):
         print('Registering user ' + user)
         entity.users = [user]
         for m in message:
-            action.create_message(text=m, user=user, datetime=datetime.now())
+            entity.create_message(text=m, user=user, datetime=datetime.now())
         template = project.templates[PAR.TEMPLATES['entity']].to_dict()
         for key, val in kwargs.items():
             if isinstance(val, (str, float, int)):
@@ -123,4 +130,4 @@ def attach_to_cli(cli):
                     not_reg_keys.append(key)
         if len(not_reg_keys) > 0:
             warnings.warn('No value registered for {}'.format(not_reg_keys))
-        entity.create_module(name=PAR.TEMPLATES['entity'], contents=template, overwrite=overwrite)
+        entity.create_module(name=PAR.TEMPLATES['entity'], contents=template)

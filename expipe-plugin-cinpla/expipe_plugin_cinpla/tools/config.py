@@ -144,4 +144,9 @@ def load_parameters():
     PAR.USERNAME = config['user'].get('username')
     PAR.LOCATION = config['user'].get('location')
     PAR.CONFIG = config
+    try:
+        project = expipe_server.get_project(project_id)
+        PAR.__dict__.update(project.modules['settings'].to_dict())
+    except KeyError:
+        pass
     return PAR

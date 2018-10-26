@@ -28,7 +28,8 @@ def PAR():
 
 @lazy_import
 def expipe_server():
-    config = PAR.CONFIG
+    from expipecli.main import load_config
+    config = load_config()
     if config['local_root'] is None:
         print('Unable to locate expipe configurations.')
         return None

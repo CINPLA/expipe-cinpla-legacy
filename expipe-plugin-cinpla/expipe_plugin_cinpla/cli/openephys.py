@@ -151,15 +151,13 @@ def attach_to_cli(cli):
                 raise ValueError(
                     'Could not find "openephys" in PAR.TEMPLATES, ' +
                     'optionally use "--no-modules"')
-            if depth is not None:
+            if len(depth) > 0:
                 correct_depth = action_tools.register_depth(
-                    project=project, action=action, depth=depth,
-                    overwrite=overwrite)
+                    project=project, action=action, depth=depth)
                 if not correct_depth:
                     print('Aborting registration!')
                     return
-            action_tools.generate_templates(
-                action, 'openephys', overwrite=overwrite)
+            action_tools.generate_templates(action, 'openephys')
 
         for m in message:
             action.create_message(text=m, user=user, datetime=datetime.now())

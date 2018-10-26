@@ -91,7 +91,7 @@ def get_position_from_surgery(project, entity_id):
     return position
 
 
-def register_depth(project, action, depth=None, answer=False, overwrite=False):
+def register_depth(project, action, depth=None, answer=False):
     DTIME_FORMAT = expipe.core.datetime_format
     mod_info = PAR.TEMPLATES['implantation']
     depth = depth or []
@@ -161,7 +161,7 @@ def register_depth(project, action, depth=None, answer=False, overwrite=False):
                 mod[pos_key][2] = val
             else:
                 mod[pos_key] = [np.nan, np.nan, float(val.magnitude)] * val.units
-        action.create_module(name=name, contents=mod, overwrite=overwrite)
+        action.create_module(name=name, contents=mod)
     return True
 
 
@@ -181,7 +181,7 @@ def _make_data_path(action, overwrite):
     return action_path / 'main'
 
 
-def generate_templates(action, templates_key, overwrite):
+def generate_templates(action, templates_key):
     '''
 
     :param action:
@@ -194,7 +194,7 @@ def generate_templates(action, templates_key, overwrite):
         return
     for template in templates:
         try:
-            action.create_module(template=template, overwrite=overwrite)
+            action.create_module(template=template)
             print('Adding module ' + template)
         except Exception as e:
             print(template)

@@ -60,12 +60,19 @@ def attach_to_cli(cli):
 
         datestring = dt.strftime(date, DTIME_FORMAT)
         project = expipe_server.require_project(PAR.PROJECT_ID)
+        action_id = entity_id + '-adjustment'
         try:
             if init:
-                action = project.create_action(
-                    entity_id + '-adjustment', overwrite=overwrite)
+                try:
+                    action = project.create_action(action_id)
+                except NameError as e:
+                    if overwrite:
+                        project.delete_action(action_id)
+                        action = project.create_action(action_id)
+                    else:
+                        raise NameError(str(e) + '. Use "overwrite"')
             else:
-                action = project.actions[entity_id + '-adjustment']
+                action = project.actions[action_id]
         except KeyError as e:
             raise KeyError(str(e) + '. Use --init')
         if index is None and not init:
@@ -129,7 +136,7 @@ def attach_to_cli(cli):
         template['adjustment'] = adjustment
         template['experimenter'] = user
         template['date'] = datestring
-        action.create_module(name=name, contents=template, overwrite=overwrite)
+        action.create_module(name=name, contents=template)
 
         action.type = 'Adjustment'
         action.entities = [entity_id]

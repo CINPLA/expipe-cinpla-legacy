@@ -60,14 +60,22 @@ def attach_to_cli(cli):
         assert weight != (None, None), 'Missing argument -w / --weight.'
         weight = pq.Quantity(weight[0], weight[1])
         project = expipe_server.require_project(PAR.PROJECT_ID)
-        action = project.create_action(entity_id + '-surgery-' + procedure, overwrite=overwrite)
+        action_id = entity_id + '-surgery-' + procedure
+        try:
+            action = project.create_action(action_id)
+        except NameError as e:
+            if overwrite:
+                project.delete_action(action_id)
+                action = project.create_action(action_id)
+            else:
+                raise NameError(str(e) + '. Use "overwrite"')
         entity = project.entities[entity_id]
         entity_module = entity.modules[PAR.TEMPLATES['entity']]
         entity_module['surgery_weight'] = weight
         entity.tags.extend(['surgery', PAR.PROJECT_ID])
         entity.users.append(user)
 
-        generate_templates(action, 'surgery_' + procedure, overwrite=overwrite)
+        generate_templates(action, 'surgery_' + procedure)
         if date == 'now':
             date = datetime.now()
         else:
@@ -155,8 +163,16 @@ def attach_to_cli(cli):
                   )
     def generate_perfusion(entity_id, date, user, weight, overwrite):
         project = expipe_server.require_project(PAR.PROJECT_ID)
-        action = project.create_action(entity_id + '-perfusion', overwrite=overwrite)
-        generate_templates(action, 'perfusion', overwrite=overwrite)
+        action_id = entity_id + '-perfusion'
+        try:
+            action = project.create_action(action_id)
+        except NameError as e:
+            if overwrite:
+                project.delete_action(action_id)
+                action = project.create_action(action_id)
+            else:
+                raise NameError(str(e) + '. Use "overwrite"')
+        generate_templates(action, 'perfusion')
         if date == 'now':
             date = datetime.now()
         else:
