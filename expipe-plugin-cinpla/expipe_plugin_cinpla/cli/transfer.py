@@ -111,6 +111,8 @@ def attach_to_cli(cli):
                     for ex in action_tools.nwb_main_groups:
                         if ex not in include:
                             exclude_statement += '--exclude=' + ex + ' '
+                for ex in action_tools.tmp_phy_folders:
+                    exclude_statement += '--exclude=' + ex + ' '
                 ssh_execute(ssh, "tar" + exclude_statement + "-cf " +
                             server_data + '.tar ' + server_data)
                 scp_client.get(server_data + '.tar', local_data + '.tar',
