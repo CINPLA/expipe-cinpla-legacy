@@ -181,7 +181,14 @@ def _make_data_path(action, overwrite):
     return action_path / 'main'
 
 
-def generate_templates(action, templates_key):
+def _get_data_path(action):
+    root = str(PAR.CONFIG['local_root'])
+    action_path = action._backend.path
+    exdir_path = action_path / 'main.exdir'
+    return exdir_path
+
+
+def generate_templates(action, templates_key, overwrite=False):
     '''
 
     :param action:
@@ -196,6 +203,13 @@ def generate_templates(action, templates_key):
         try:
             action.create_module(template=template)
             print('Adding module ' + template)
+        except NameError as e:
+            if overwrite:
+                action.delete_module(template)
+                action.create_module(template=template)
+                print('Adding module ' + template)
+            else:
+                raise NameError(str(e) + '. Optionally use "--overwrite"')
         except Exception as e:
             print(template)
             raise e
