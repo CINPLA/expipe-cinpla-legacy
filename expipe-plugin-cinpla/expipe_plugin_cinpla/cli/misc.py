@@ -5,22 +5,6 @@ from expipe_plugin_cinpla.tools import config
 
 
 def attach_to_cli(cli):
-    @cli.command('set-local')
-    @click.option(
-        '--probe', type=click.Path(exists=True)
-    )
-    def set_local(**kw):
-        """Set local user info."""
-        from expipecli.main import yaml_dump
-        config = PAR.CONFIG
-        if config['local_root'] is None:
-            print('Unable to load local config, move into a project')
-            return
-        config['local'].update({k: v for k,v in kw.items() if v})
-        config['local_root'].mkdir(exist_ok=True)
-        yaml_dump(config['local_path'], config['local'])
-
-
     @cli.command('annotate', short_help='Parse info about recorded units')
     @click.argument('action-id', type=click.STRING)
     @click.option('-t', '--tag',
@@ -40,7 +24,7 @@ def attach_to_cli(cli):
                   help='The experimenter performing the annotation.',
                   )
     def annotate(action_id, tag, message, user):
-        project = require_project()
+        project = expipe.get_project(PAR.PROJECT_ROOT)
         action = project.actions[action_id]
         user = user or PAR.USERNAME
         if user is None:
@@ -69,9 +53,9 @@ def attach_to_cli(cli):
         ch.setLevel(logging.DEBUG)
         logger.addHandler(ch)
 
-        project = get_project()
+        project = expipe.get_project(PAR.PROJECT_ROOT)
         action = project.require_action(action_id)
-        exdir_path = PAR.CONFIG['local_root'] / action.data[0]
+        exdir_path = PAR.PROJECT_ROOT / action.data[0]
         print('Spikesorting ', exdir_path)
         model = NeoModel(exdir_path)
         channel_groups = model.channel_groups

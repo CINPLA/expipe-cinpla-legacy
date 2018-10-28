@@ -88,7 +88,7 @@ def attach_to_cli(cli):
     def generate_entity(entity_id, user, message, location, tag, overwrite,
                          **kwargs):
         DTIME_FORMAT = expipe.core.datetime_format
-        project = require_project()
+        project = expipe.get_project(PAR.PROJECT_ROOT)
         try:
             entity = project.create_entity(entity_id)
         except NameError as e:

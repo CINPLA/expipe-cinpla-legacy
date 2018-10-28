@@ -166,9 +166,10 @@ def register_depth(project, action, depth=None, answer=False):
 
 
 def _make_data_path(action, overwrite):
-    root = str(PAR.CONFIG['local_root'])
     action_path = action._backend.path
-    exdir_path = action_path / 'data' / 'main.exdir'
+    data_path = action_path / 'data'
+    data_path.mkdir(exist_ok=True)
+    exdir_path = data_path / 'main.exdir'
     if exdir_path.exists():
         if overwrite:
             shutil.rmtree(str(exdir_path))
@@ -176,13 +177,12 @@ def _make_data_path(action, overwrite):
             raise FileExistsError(
                 'The exdir path to this action "' + str(exdir_path) +
                 '" exists, optionally use "--overwrite"')
-    relpath = str(exdir_path).replace(root,  '')
+    relpath = str(exdir_path).replace(str(PAR.PROJECT_ROOT),  '')
     action.data = [relpath]
-    return action_path / 'data' / 'main' # TODO why not .exdir??
+    return exdir_path
 
 
 def _get_data_path(action):
-    root = str(PAR.CONFIG['local_root'])
     action_path = action._backend.path
     exdir_path = action_path / 'data' / 'main.exdir'
     return exdir_path

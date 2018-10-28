@@ -141,6 +141,7 @@ def load_parameters(): # load global and merge
     project_id = config['local']['project']
     PAR = set_empty_if_no_value()
     PAR.PROJECT_ID = project_id
+    PAR.PROJECT_ROOT = config['local_root']
     PAR.USERNAME = config['project'].get('username')
     PAR.LOCATION = config['project'].get('location')
     PAR.CONFIG = config

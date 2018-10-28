@@ -101,12 +101,12 @@ def attach_to_cli(cli):
                                   tag):
         openephys_path = os.path.abspath(openephys_path)
         openephys_dirname = openephys_path.split(os.sep)[-1]
-        project = require_project()
+        project = expipe.get_project(PAR.PROJECT_ROOT)
         prb_path = prb_path or PAR.CONFIG['local'].get('probe')
         if prb_path is None:
             raise IOError('No probefile found, please provide one either ' +
                           'as an argument or with\n' +
-                          '"expipe set-local --probe <path/to/probe/file>".')
+                          '"expipe config local -a probe <path/to/probe/file>".')
         openephys_file = pyopenephys.File(openephys_path, prb_path)
         openephys_exp = openephys_file.experiments[0]
         openephys_rec = openephys_exp.recordings[0]

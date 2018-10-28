@@ -59,7 +59,7 @@ def attach_to_cli(cli):
             dt.strptime(date, '%d.%m.%YT%H:%M')
 
         datestring = dt.strftime(date, DTIME_FORMAT)
-        project = require_project()
+        project = expipe.get_project(PAR.PROJECT_ROOT)
         action_id = entity_id + '-adjustment'
         try:
             if init:
