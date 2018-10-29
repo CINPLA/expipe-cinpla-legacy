@@ -32,6 +32,11 @@ def pd():
     return pd
 
 @lazy_import
+def pathlib():
+    import pathlib
+    return pathlib
+
+@lazy_import
 def sig_tools():
     import exana.misc.signal_tools as sig_tools
     return sig_tools
