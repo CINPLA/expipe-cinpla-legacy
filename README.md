@@ -1,4 +1,4 @@
-# expipe-dev
+# This repository is deprecated, use expipe-cinpla-requirements to aid installation
 
 ## Scope
 This is a development repository for all expipe related projects. It serves to simplify installation and development that goes across multiple projects.
